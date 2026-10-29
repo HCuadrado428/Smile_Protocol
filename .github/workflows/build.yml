@@ -2,30 +2,65 @@ name: Build
 
 on:
   push:
+    branches-ignore: [ci-logs]
   pull_request:
   workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Java 17
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: '17'
 
       - name: Gradle 8.8
-        uses: gradle/actions/setup-gradle@v4
+        uses: gradle/actions/setup-gradle@v5
         with:
           gradle-version: '8.8'
 
       - name: Compilar el mod
-        run: gradle build --no-daemon --stacktrace
+        shell: bash
+        run: |
+          set -o pipefail
+          gradle build --no-daemon --stacktrace 2>&1 | tee build.log
+
+      - name: Marcar errores
+        if: failure()
+        shell: bash
+        run: |
+          grep -nE "error:|What went wrong|Could not (resolve|find)|FAILED|Exception" build.log | head -40 | while IFS= read -r l; do echo "::error::${l//%/%25}"; done
+
+      # El log se guarda en la rama ci-logs para poder leerlo sin acceso a la API de Actions
+      - name: Guardar el log
+        if: always()
+        shell: bash
+        env:
+          TOKEN: ${{ github.token }}
+        run: |
+          [ -f build.log ] || exit 0
+          mkdir /tmp/logs && cd /tmp/logs
+          git init -q
+          git config user.name "ci"
+          git config user.email "ci@users.noreply.github.com"
+          git remote add origin "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          if git fetch -q --depth 1 origin ci-logs; then git checkout -q ci-logs; else git checkout -q --orphan ci-logs; fi
+          mkdir -p logs
+          cp "$GITHUB_WORKSPACE/build.log" "logs/${GITHUB_SHA}.log"
+          cp "$GITHUB_WORKSPACE/build.log" latest.log
+          git add -A
+          git commit -qm "log ${GITHUB_SHA}"
+          git push -q origin HEAD:ci-logs
 
       - name: Subir el jar
+        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: smileprotocol-jar
