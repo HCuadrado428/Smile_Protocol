@@ -116,7 +116,7 @@ def grain():
 
 # Fondos y barras -----------------------------------------------------------------------------------
 
-def smear(name, seed, w=128, h=40, color=(8, 6, 6), alpha=0.82):
+def smear(name, seed, w=128, h=40, color=(8, 6, 6), alpha=0.82, border=12):
     """Fondo de brochazo oscuro, con borde irregular y estrias del pincel."""
     r = R(seed)
     cv = Canvas(w, h, color, 0)
@@ -125,7 +125,7 @@ def smear(name, seed, w=128, h=40, color=(8, 6, 6), alpha=0.82):
     stri = 0.88 + 0.12 * np.sin(yy * 1.7 + fbm(h, w, r, base=3, octaves=2, periodic=False) * 6)
     cv.a = np.clip(m * stri * alpha, 0, 1)
     cv.c = cv.c + (fbm(h, w, r, base=4, octaves=3, periodic=False)[..., None] * 18)
-    return save(cv, name, nine=(w, h, 12))
+    return save(cv, name, nine=(w, h, border))
 
 
 def bar(name, seed, w, h, color, dry=False, empty=False):
@@ -324,7 +324,7 @@ def pips():
 
 def main():
     ROOT.mkdir(parents=True, exist_ok=True)
-    made = [vignette(), blood_vignette(), grain(), smear("smear", 20), smear("smear_small", 21, 64, 24),
+    made = [vignette(), blood_vignette(), grain(), smear("smear", 20), smear("smear_small", 21, 64, 24, border=8),
             bar("bar_blood", 30, 100, 8, (120, 8, 10)), bar("bar_empty", 31, 100, 8, (40, 14, 12), empty=True),
             bar("bar_light", 32, 64, 6, (196, 180, 104)), bar("bar_light_empty", 33, 64, 6, (40, 38, 30), empty=True),
             heart(), bulb(), slot(False), slot(True), tape(), note(), panel("panel", 0), panel("panel_alert", 1)]

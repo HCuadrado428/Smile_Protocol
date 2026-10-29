@@ -170,6 +170,13 @@ public final class ClientSelfTest {
             BlockPos p = be.getBlockPos();
             Vec3 eye = Vec3.atBottomCenterOf(p.relative(f, 3));
             float yaw = f.getOpposite().toYRot();
+            if (be instanceof HideBlockEntity hb && hb.modelName().equals("gurney")) {
+                // la camilla mide dos bloques: se mira desde un lado, a la altura del centro
+                Direction side = f.getClockWise();
+                if (!level.getBlockState(p.relative(side)).isAir()) side = side.getOpposite();
+                eye = Vec3.atBottomCenterOf(p.relative(side, 2)).add(Vec3.atLowerCornerOf(f.getNormal()).scale(0.5));
+                yaw = side.getOpposite().toYRot();
+            }
             ServerPlayer sp = server.getPlayerList().getPlayers().get(0);
             SPSessionManager.teleport(sp, level, eye, yaw, 12f);
         }));

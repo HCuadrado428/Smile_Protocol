@@ -142,10 +142,12 @@ public final class HudOverlay {
 
     /** Grano de pelicula: el mismo sprite desplazado al azar cada fotograma, muy tenue. */
     private static void renderGrain(GuiGraphics g, int w, int h) {
-        int size = Math.max(w, h) + 128;
-        int ox = -RNG.nextInt(128), oy = -RNG.nextInt(128);
-        RenderSystem.setShaderColor(1f, 1f, 1f, 0.045f);
-        g.blitSprite(GRAIN, ox, oy, size, size);
+        int t = 128;
+        int ox = -RNG.nextInt(t), oy = -RNG.nextInt(t);
+        RenderSystem.setShaderColor(1f, 1f, 1f, 0.035f);
+        for (int y = oy; y < h; y += t) {
+            for (int x = ox; x < w; x += t) g.blitSprite(GRAIN, x, y, t, t);
+        }
         RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
     }
 
@@ -234,7 +236,7 @@ public final class HudOverlay {
             }
         }
 
-        int cx = w / 2, y = h - 70;
+        int cx = w / 2, y = h - 100;
         if (!st.partial()) {
             float b = ClientHide.breath(pt);
             int bw = 120, bx = cx - bw / 2;
