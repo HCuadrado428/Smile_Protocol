@@ -55,6 +55,10 @@ public final class ClientSelfTest {
                 log("abriendo el mundo smoke");
                 mc.createWorldOpenFlows().openWorld("smoke", () -> log("FALLO: no se pudo abrir el mundo"));
             }
+            if (ticks % 40 == 0 && mc.screen != null) {
+                log("pantalla " + mc.screen.getClass().getName());
+                accept(mc.screen);
+            }
             if (ticks > 20 * 600) mc.stop();
             return;
         }
@@ -186,6 +190,36 @@ public final class ClientSelfTest {
 
     private static void grab(Minecraft mc, String name) {
         Screenshot.grab(mc.gameDirectory, name + ".png", mc.getMainRenderTarget(), c -> log("captura " + name));
+    }
+
+    /** Acepta las pantallas de confirmacion al abrir el mundo (copia de seguridad, avisos...). */
+    private static void accept(Object screen) {
+        for (Class<?> c = screen.getClass(); c != null && c != Object.class; c = c.getSuperclass()) {
+            for (java.lang.reflect.Field f : c.getDeclaredFields()) {
+                try {
+                    f.setAccessible(true);
+                    Object v = f.get(screen);
+                    if (v instanceof it.unimi.dsi.fastutil.booleans.BooleanConsumer bc) {
+                        log("acepto " + c.getSimpleName());
+                        bc.accept(true);
+                        return;
+                    }
+                    if (v != null && f.getType().isInterface()) {
+                        for (java.lang.reflect.Method m : f.getType().getMethods()) {
+                            if (m.getParameterCount() == 2 && m.getParameterTypes()[0] == boolean.class
+                                    && m.getParameterTypes()[1] == boolean.class) {
+                                log("continuo " + c.getSimpleName());
+                                m.setAccessible(true);
+                                m.invoke(v, false, false);
+                                return;
+                            }
+                        }
+                    }
+                } catch (ReflectiveOperationException | RuntimeException ignored) {
+                    // siguiente campo
+                }
+            }
+        }
     }
 
     private static void log(String s) {
