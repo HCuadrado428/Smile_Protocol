@@ -1,0 +1,138 @@
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.4.0/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+
+> Configure project :common
+Creating Minecraft artifacts without recompilation.
+
+> Configure project :fabric
+Fabric Loom: 1.16.3
+
+Cannot remap renderTargets because it does not exist in any of the targets [] or their parents.
+Cannot remap loadedShaders because it does not exist in any of the targets [] or their parents.
+Cannot remap renderSectionManager because it does not exist in any of the targets [] or their parents.
+Cannot remap chunkRenderer because it does not exist in any of the targets [] or their parents.
+Cannot remap sectionByPosition because it does not exist in any of the targets [] or their parents.
+Cannot remap lambda$reloadShaders$56 because it does not exist in any of the targets [net/minecraft/class_757]
+Cannot remap taskLists because it does not exist in any of the targets [] or their parents.
+Cannot remap renderLists because it does not exist in any of the targets [] or their parents.
+Cannot remap taskLists because it does not exist in any of the targets [] or their parents.
+
+> Configure project :neoforge
+Creating Minecraft artifacts without recompilation.
+
+> Task :common:createMinecraftArtifacts
+Loaded 93 artifacts from /home/runner/work/Smile_Protocol/Smile_Protocol/common/build/tmp/createMinecraftArtifacts/nfrt_artifact_manifest.properties
+[1m*** Started working on [4mdownloadJson[23;0m[23;0m
+ [1m[92m✓[23;0m Completed [4mdownloadJson[23;0m in 0.02s
+[1m*** Started working on [4mdownloadClient[23;0m[23;0m
+[1m*** Started working on [4mdownloadClientMappings[23;0m[23;0m
+[1m*** Started working on [4mdownloadServer[23;0m[23;0m
+ [1m[92m✓[23;0m Completed [4mdownloadClient[23;0m in 0.03s
+ [1m[92m✓[23;0m Completed [4mdownloadServer[23;0m in 0.03s
+ [1m[92m✓[23;0m Completed [4mdownloadClientMappings[23;0m in 0.03s
+[1m*** Started working on [4mstripClient[23;0m[23;0m
+ [1m[92m♻[23;0m Used cache of [4mstripClient[23;0m in 0.00s
+[1m*** Started working on [4mmergeMappings[23;0m[23;0m
+ [1m[92m♻[23;0m Used cache of [4mmergeMappings[23;0m in 0.00s
+[1m*** Started working on [4mextractServer[23;0m[23;0m
+ [1m[92m♻[23;0m Used cache of [4mextractServer[23;0m in 0.00s
+[1m*** Started working on [4mstripServer[23;0m[23;0m
+ [1m[92m♻[23;0m Used cache of [4mstripServer[23;0m in 0.00s
+[1m*** Started working on [4mmerge[23;0m[23;0m
+ [1m[92m♻[23;0m Used cache of [4mmerge[23;0m in 0.00s
+[1m*** Started working on [4mrename[23;0m[23;0m
+ [1m[92m♻[23;0m Used cache of [4mrename[23;0m in 0.00s
+Total runtime: 0.77s
+
+
+> Task :common:compileJava
+> Task :common:processResources
+> Task :common:classes
+> Task :common:jarJar NO-SOURCE
+> Task :common:jar
+> Task :common:sourcesJar
+> Task :common:assemble
+> Task :common:compileTestJava NO-SOURCE
+> Task :common:processTestResources NO-SOURCE
+> Task :common:testClasses UP-TO-DATE
+> Task :common:test NO-SOURCE
+> Task :common:check UP-TO-DATE
+> Task :common:build
+
+> Task :fabric:compileJava
+Note: /home/runner/work/Smile_Protocol/Smile_Protocol/fabric/src/main/java/com/smileprotocol/fabric/FabricPlatform.java uses or overrides a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+
+> Task :fabric:processResources
+> Task :fabric:classes
+> Task :fabric:jar
+> Task :fabric:processIncludeJars
+> Task :fabric:sourcesJar
+> Task :fabric:compileTestJava NO-SOURCE
+> Task :fabric:processTestResources NO-SOURCE
+> Task :fabric:testClasses UP-TO-DATE
+> Task :fabric:test NO-SOURCE
+> Task :fabric:validateAccessWidener NO-SOURCE
+> Task :fabric:check UP-TO-DATE
+
+> Task :neoforge:createMinecraftArtifacts
+Loaded 131 artifacts from /home/runner/work/Smile_Protocol/Smile_Protocol/neoforge/build/tmp/createMinecraftArtifacts/nfrt_artifact_manifest.properties
+[1m*** Started working on [4mdownloadJson[23;0m[23;0m
+ [1m[92m✓[23;0m Completed [4mdownloadJson[23;0m in 0.03s
+[1m*** Started working on [4mdownloadServer[23;0m[23;0m
+[1m*** Started working on [4mdownloadClientMappings[23;0m[23;0m
+[1m*** Started working on [4mdownloadClient[23;0m[23;0m
+ [1m[92m✓[23;0m Completed [4mdownloadClientMappings[23;0m in 0.07s
+ [1m[92m✓[23;0m Completed [4mdownloadServer[23;0m in 0.07s
+ [1m[92m✓[23;0m Completed [4mdownloadClient[23;0m in 0.07s
+[1m*** Started working on [4mstripClient[23;0m[23;0m
+ [1m[92m♻[23;0m Used cache of [4mstripClient[23;0m in 0.00s
+[1m*** Started working on [4mmergeMappings[23;0m[23;0m
+ [1m[92m♻[23;0m Used cache of [4mmergeMappings[23;0m in 0.00s
+[1m*** Started working on [4mextractServer[23;0m[23;0m
+ [1m[92m♻[23;0m Used cache of [4mextractServer[23;0m in 0.01s
+[1m*** Started working on [4mstripServer[23;0m[23;0m
+ [1m[92m♻[23;0m Used cache of [4mstripServer[23;0m in 0.00s
+[1m*** Started working on [4mmerge[23;0m[23;0m
+ [1m[92m♻[23;0m Used cache of [4mmerge[23;0m in 0.00s
+[1m*** Started working on [4mrename[23;0m[23;0m
+ [1m[92m♻[23;0m Used cache of [4mrename[23;0m in 0.00s
+[1m*** Started working on [4mbinaryPatch[23;0m[23;0m
+ [1m[92m♻[23;0m Used cache of [4mbinaryPatch[23;0m in 0.00s
+[1m*** Started working on [4mcopyUnpatchedClasses[23;0m[23;0m
+ [1m[92m♻[23;0m Used cache of [4mcopyUnpatchedClasses[23;0m in 0.00s
+[1m*** Started working on [4mapplyDevTransforms[23;0m[23;0m
+ [1m[92m♻[23;0m Used cache of [4mapplyDevTransforms[23;0m in 0.00s
+[1m*** Started working on [4mbinaryWithNeoForge[23;0m[23;0m
+ [1m[92m♻[23;0m Used cache of [4mbinaryWithNeoForge[23;0m in 0.01s
+Total runtime: 2.29s
+
+
+> Task :fabric:remapJar
+
+> Task :neoforge:compileJava
+Note: /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/registry/ModCreativeTabs.java uses or overrides a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+
+> Task :neoforge:processResources
+> Task :neoforge:classes
+> Task :neoforge:jarJar NO-SOURCE
+> Task :neoforge:jar
+> Task :neoforge:sourcesJar
+> Task :neoforge:assemble
+> Task :neoforge:compileTestJava NO-SOURCE
+> Task :neoforge:processTestResources NO-SOURCE
+> Task :neoforge:testClasses UP-TO-DATE
+> Task :neoforge:test NO-SOURCE
+> Task :neoforge:check UP-TO-DATE
+> Task :neoforge:build
+> Task :fabric:remapSourcesJar
+> Task :fabric:assemble
+> Task :fabric:build
+gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/__run-1793300662660.json
+
+[Incubating] Problems report is available at: file:///home/runner/work/Smile_Protocol/Smile_Protocol/build/reports/problems/problems-report.html
+
+BUILD SUCCESSFUL in 41s
+17 actionable tasks: 17 executed
+Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.4.0/userguide/configuration_cache_enabling.html
