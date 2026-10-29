@@ -556,6 +556,308 @@ class Floor:
         self.place_door(room, block, nbt)
 
 
+# Plantas asimetricas (particion BSP) ------------------------------------------------------------------
+#
+# Cada planta se parte al azar: los primeros cortes son pasillos (de 5, 4 y 3 de ancho) y los
+# siguientes, paredes entre salas. Asi cada planta tiene su propia red de pasillos, salas de tamanos
+# muy distintos y los ascensores en sitios diferentes. Coordenadas: X de 0 a W-1, Z de 0 a L-1.
+
+class Plan(Floor):
+    def __init__(self, name, theme, seed):
+        super().__init__(name, theme, seed)
+        r = self.rnd
+        self.W = r.randint(110, 150)
+        self.L = r.randint(120, 170)
+        self.corr = []          # rectangulos de pasillo (x0, z0, x1, z1, eje)
+        self.leaves = []        # rectangulos de sala
+        self.entry_x = self.exit_x = 0
+        self.doors = []
+
+    # Particion -------------------------------------------------------------------------------------
+    def split(self, x0, z0, x1, z1, depth, force=None):
+        r = self.rnd
+        w, h = x1 - x0 + 1, z1 - z0 + 1
+        minr = 9
+        corridor = depth <= 2 or (depth == 3 and r.random() < 0.35)
+        cw = (5, 4, 3, 3)[min(depth, 3)] if corridor else 1
+        gap = cw + 2 if corridor else 1
+        big = r.randint(14, 34)
+        can_v = w >= 2 * minr + gap
+        can_h = h >= 2 * minr + gap
+        # Salas de tamanos muy distintos: unas se quedan grandes, otras se parten
+        if not corridor and ((w <= big and h <= big and r.random() < 0.8) or w * h < 280):
+            can_v = can_h = False
+        if not can_v and not can_h:
+            self.leaves.append((x0, z0, x1, z1))
+            return
+        if force:
+            vertical = force == "v" and can_v or not can_h
+        elif can_v and can_h:
+            vertical = r.random() < w / (w + h)
+        else:
+            vertical = can_v
+        if vertical:
+            span = w - gap - 2 * minr
+            p = x0 + minr + int(span * r.uniform(0.15, 0.85))
+            if corridor:
+                self.corr.append((p + 1, z0, p + cw, z1, "z"))
+                self.split(x0, z0, p - 1, z1, depth + 1, "h" if depth == 0 else None)
+                self.split(p + cw + 2, z0, x1, z1, depth + 1, "h" if depth == 0 else None)
+            else:
+                self.split(x0, z0, p - 1, z1, depth + 1)
+                self.split(p + 1, z0, x1, z1, depth + 1)
+        else:
+            span = h - gap - 2 * minr
+            p = z0 + minr + int(span * r.uniform(0.15, 0.85))
+            if corridor:
+                self.corr.append((x0, p + 1, x1, p + cw, "x"))
+                self.split(x0, z0, x1, p - 1, depth + 1)
+                self.split(x0, p + cw + 2, x1, z1, depth + 1)
+            else:
+                self.split(x0, z0, x1, p - 1, depth + 1)
+                self.split(x0, p + 1, x1, z1, depth + 1)
+
+    def layout(self, kinds):
+        t, th = self.t, self.theme
+        W, L = self.W, self.L
+        # Todo macizo y luego se vacia (paredes exteriores en -1 y W/L)
+        for x in range(-1, W + 1):
+            for z in range(-1, L + 1):
+                t.set(x, 0, z, th["floor"][(x + z) % 2])
+                t.set(x, H + 1, z, th["ceiling"])
+                for y in range(1, H + 1):
+                    t.set(x, y, z, th["wall_low"] if y == 1 else th["wall"])
+        self.split(0, 0, W - 1, L - 1, 0, force="v")
+        for (x0, z0, x1, z1, _) in self.corr:
+            self.carve(x0, z0, x1, z1, th["corridor_floor"])
+        # Uniones: cada pasillo acaba contra la pared de su pasillo padre; se abre esa pared
+        for (x0, z0, x1, z1, axis) in list(self.corr):
+            if axis == "x":
+                for wx, ox in ((x0 - 1, x0 - 2), (x1 + 1, x1 + 2)):
+                    if self.corridor_at(ox, (z0 + z1) // 2):
+                        self.carve(wx, z0, wx, z1, th["corridor_floor"])
+            else:
+                for wz, oz in ((z0 - 1, z0 - 2), (z1 + 1, z1 + 2)):
+                    if self.corridor_at((x0 + x1) // 2, oz):
+                        self.carve(x0, wz, x1, wz, th["corridor_floor"])
+        for i, (x0, z0, x1, z1) in enumerate(self.leaves):
+            kind = self.rnd.choice(kinds)
+            area = (x1 - x0 + 1) * (z1 - z0 + 1)
+            if area > 300:
+                kind = self.rnd.choice(["storage", "machine", "lab", "ward"] if "storage" in kinds else kinds)
+            self.carve(x0, z0, x1, z1, th["room_floor"].get(kind, th["floor"]), corridor=False)
+            self.rooms.append({"id": i, "x0": x0, "z0": z0, "x1": x1, "z1": z1, "kind": kind,
+                               "doors": [], "door": None, "side": "s"})
+        self.connect_rooms()
+        self.place_cabins()
+
+    def corridor_at(self, x, z):
+        for (x0, z0, x1, z1, _) in self.corr:
+            if x0 <= x <= x1 and z0 <= z <= z1:
+                return True
+        return False
+
+    def room_at(self, x, z):
+        for r in self.rooms:
+            if r["x0"] <= x <= r["x1"] and r["z0"] <= z <= r["z1"]:
+                return r
+        return None
+
+    def connect_rooms(self):
+        """Una o dos puertas al pasillo; las salas interiores se abren a una vecina conectada."""
+        r = self.rnd
+        connected = set()
+        cands_by_room = {}
+        for room in self.rooms:
+            cands, neigh = [], []
+            x0, z0, x1, z1 = room["x0"], room["z0"], room["x1"], room["z1"]
+            for x in range(x0 + 1, x1):
+                for (wz, oz, f) in ((z0 - 1, z0 - 2, "north"), (z1 + 1, z1 + 2, "south")):
+                    if self.corridor_at(x, oz):
+                        cands.append((x, wz, f))
+                    else:
+                        o = self.room_at(x, oz)
+                        if o:
+                            neigh.append((x, wz, f, o["id"]))
+            for z in range(z0 + 1, z1):
+                for (wx, ox, f) in ((x0 - 1, x0 - 2, "west"), (x1 + 1, x1 + 2, "east")):
+                    if self.corridor_at(ox, z):
+                        cands.append((wx, z, f))
+                    else:
+                        o = self.room_at(ox, z)
+                        if o:
+                            neigh.append((wx, z, f, o["id"]))
+            cands_by_room[room["id"]] = (cands, neigh)
+            if cands:
+                r.shuffle(cands)
+                n = 2 if (x1 - x0) * (z1 - z0) > 180 and len(cands) > 6 else 1
+                picked = [cands[0]]
+                for c in cands[1:]:
+                    if len(picked) >= n:
+                        break
+                    if abs(c[0] - picked[0][0]) + abs(c[1] - picked[0][1]) > 6:
+                        picked.append(c)
+                for (x, z, f) in picked:
+                    self.add_door(room, x, z, f)
+                connected.add(room["id"])
+        # Salas interiores: puerta a una vecina ya conectada (como una suite)
+        for _ in range(len(self.rooms)):
+            changed = False
+            for room in self.rooms:
+                if room["id"] in connected:
+                    continue
+                _, neigh = cands_by_room[room["id"]]
+                opts = [n for n in neigh if n[3] in connected]
+                if opts:
+                    x, z, f, _ = r.choice(opts)
+                    self.add_door(room, x, z, f)
+                    connected.add(room["id"])
+                    changed = True
+            if not changed:
+                break
+        # Lo que quede aislado (raro) se descarta como sala: queda macizo
+        self.rooms = [room for room in self.rooms if room["id"] in connected]
+        for i, room in enumerate(self.rooms):
+            room["id"] = i
+            room["door"] = room["doors"][0][:2]
+            self.sign(room)
+
+    def add_door(self, room, x, z, f, block=None, nbt=None):
+        block = block or f"{MOD}:lab_door"
+        # f: lado de la sala donde esta la pared; la puerta mira hacia dentro de la sala
+        inside = {"north": "south", "south": "north", "west": "east", "east": "west"}[f]
+        self.t.clear(x, 1, z, x, 2, z)
+        self.t.set(x, 1, z, block, nbt=nbt, facing=inside, half="lower", hinge="left", open=False, powered=False)
+        self.t.set(x, 2, z, block, facing=inside, half="upper", hinge="left", open=False, powered=False)
+        room["doors"].append((x, z, f))
+        for dx in (-1, 0, 1):
+            for dz in (-1, 0, 1):
+                self.used.add((x + dx, z + dz))
+
+    def place_door(self, room, block, nbt=None):
+        for (x, z, f) in room["doors"]:
+            inside = {"north": "south", "south": "north", "west": "east", "east": "west"}[f]
+            self.t.set(x, 1, z, block, nbt=nbt, facing=inside, half="lower", hinge="left", open=False, powered=False)
+            self.t.set(x, 2, z, block, facing=inside, half="upper", hinge="left", open=False, powered=False)
+
+    def sign(self, room):
+        x, z, f = room["doors"][0]
+        # El cartel va en el lado de fuera, al lado de la puerta
+        out = {"north": (0, -1), "south": (0, 1), "west": (-1, 0), "east": (1, 0)}[f]
+        side = (1, 0) if f in ("north", "south") else (0, 1)
+        for s in (1, -1):
+            sx, sz = x + side[0] * s + out[0], z + side[1] * s + out[1]
+            wx, wz = x + side[0] * s, z + side[1] * s
+            if self.solid(wx, 3, wz) and not self.solid(sx, 3, sz):
+                label = LABELS.get(room["kind"], "SALA")
+                self.t.set(sx, 3, sz, "minecraft:birch_wall_sign", nbt=sign_nbt(f"{label} {room['id'] + 1:02d}"), facing=f)
+                return
+
+    def place_cabins(self):
+        t = self.t
+        south = [c for c in self.corr if c[4] == "z" and c[1] == 0]
+        north = [c for c in self.corr if c[4] == "z" and c[3] == self.L - 1]
+        e = self.rnd.choice(south)
+        self.entry_x = (e[0] + e[2]) // 2
+        # La salida, lo mas lejos posible en X de la llegada
+        north.sort(key=lambda c: -abs((c[0] + c[2]) // 2 - self.entry_x))
+        x = north[0]
+        self.exit_x = (x[0] + x[2]) // 2
+        cabin(t, self.entry_x, 0, -7, facing_south=True, doors_open=True)
+        t.marker(self.entry_x, 1, -4, "sp:entry 0")
+        cabin(t, self.exit_x, 0, self.L, facing_south=False, doors_open=False, exit_markers=True)
+        # Abrir la pared exterior delante de cada cabina (las puertas del ascensor la ocupan)
+        self.entry = (self.entry_x, 0)
+
+    def reception(self):
+        pass
+
+    def by_distance(self):
+        ex = self.entry_x
+        return sorted(self.rooms, key=lambda r: abs((r["x0"] + r["x1"]) / 2 - ex) + (r["z0"] + r["z1"]) / 2)
+
+    def lights(self):
+        for (x0, z0, x1, z1, axis) in self.corr:
+            if axis == "z":
+                x = (x0 + x1) // 2
+                for z in range(z0 + 3, z1, 7):
+                    self.light(x, z, self.pick_light())
+            else:
+                z = (z0 + z1) // 2
+                for x in range(x0 + 3, x1, 7):
+                    if not self.solid(x, H + 1, z) or self.t.get(x, H + 1, z) != f"{MOD}:fluorescent_light":
+                        self.light(x, z, self.pick_light())
+        for room in self.rooms:
+            w, h = room["x1"] - room["x0"], room["z1"] - room["z0"]
+            step = 8
+            for x in range(room["x0"] + w % step // 2 + 2, room["x1"], step):
+                for z in range(room["z0"] + h % step // 2 + 2, room["z1"], step):
+                    self.light(x, z, self.pick_light(room=True))
+            if w < 8 and h < 8:
+                self.light((room["x0"] + room["x1"]) // 2, (room["z0"] + room["z1"]) // 2, self.pick_light(room=True))
+        self.light(self.entry_x, 2, "flicker")
+        self.light(self.exit_x, self.L - 3, "circuit")
+
+    def corridor_dressing(self, lockers, debris, pipes):
+        self.corridor_cells = [c for c in self.corridor_cells if 3 < c[1] < self.L - 3]
+        cells = list(self.corridor_cells)
+        self.rnd.shuffle(cells)
+        k = 0
+        for (x, z) in cells:
+            if k >= lockers:
+                break
+            for f, (ox, oz) in (("south", (0, -1)), ("north", (0, 1)), ("east", (-1, 0)), ("west", (1, 0))):
+                if self.solid(x + ox, 2, z + oz) and self.free(x, z) and self.free(x - ox, z - oz) \
+                        and not self.near_door(x, z):
+                    if self.tall(f"{MOD}:locker", x, z, f):
+                        k += 1
+                        break
+        k = 0
+        for (x, z) in cells:
+            if k >= debris:
+                break
+            if self.free(x, z) and not self.near_door(x, z) and abs(x - self.entry_x) > 3:
+                self.put(x, z, self.rnd.choice(self.theme["debris"]))
+                k += 1
+        # Tuberias bajas cruzando pasillos (dive o agachado)
+        corr = [c for c in self.corr if c[2] - c[0] >= 2 and c[3] - c[1] >= 2]
+        self.rnd.shuffle(corr)
+        for (x0, z0, x1, z1, axis) in corr[:pipes]:
+            if axis == "x":
+                x = self.rnd.randint(x0 + 4, max(x0 + 4, x1 - 4))
+                rng = [(x, z) for z in range(z0, z1 + 1)]
+            else:
+                z = self.rnd.randint(z0 + 8, max(z0 + 8, z1 - 8))
+                rng = [(x, z) for x in range(x0, x1 + 1)]
+            for (x, z) in rng:
+                if (x, z) in self.used:
+                    continue
+                self.t.set(x, 2, z, self.theme["pipe"])
+                self.t.set(x, 3, z, "minecraft:iron_bars")
+                self.used.add((x, z))
+
+    def near_door(self, x, z):
+        for room in self.rooms:
+            for (dx, dz, _) in room["doors"]:
+                if abs(dx - x) <= 2 and abs(dz - z) <= 2:
+                    return True
+        return False
+
+    def mobs(self, n):
+        cells = [c for c in self.corridor_cells if c[1] > self.L // 4]
+        self.rnd.shuffle(cells)
+        for room in self.rooms:
+            cells.append(((room["x0"] + room["x1"]) // 2, (room["z0"] + room["z1"]) // 2))
+        k = 0
+        for (x, z) in cells:
+            if k >= n:
+                break
+            if self.free(x, z):
+                self.t.marker(x, 1, z, "sp:mob_spawn")
+                self.used.add((x, z))
+                k += 1
+
+
 def sign_nbt(*lines):
     msgs = [json.dumps({"text": l}) for l in lines] + [json.dumps({"text": ""})] * (4 - len(lines))
     text = Compound({"messages": List[String]([String(m) for m in msgs[:4]]), "color": String("black"),
@@ -702,12 +1004,8 @@ FLOORS = [
 
 
 def make_floor(name, theme_name, seed, kinds, apply, extra):
-    f = Floor(name, THEMES[theme_name], seed)
-    f.base()
-    f.corridors()
-    f.split_rooms(kinds)
-    f.cabins()
-    f.reception()
+    f = Plan(name, THEMES[theme_name], seed)
+    f.layout(kinds)
     for room in f.rooms:
         f.furnish(room)
     apply(f)
@@ -718,11 +1016,65 @@ def make_floor(name, theme_name, seed, kinds, apply, extra):
     return f
 
 
+
+def verify(path):
+    """Comprueba la planta: sin huecos al vacio y todo alcanzable desde la llegada (salida, fusibles, objetos)."""
+    from collections import deque
+    import nbtlib
+    t = nbtlib.load(path)
+    pal = [str(p["Name"]) for p in t["palette"]]
+    solid, marks = {}, {}
+    for b in t["blocks"]:
+        x, y, z = [int(v) for v in b["pos"]]
+        if "nbt" in b and "metadata" in b["nbt"]:
+            marks.setdefault(str(b["nbt"]["metadata"]).split()[0], []).append((x, z))
+            continue
+        solid[(x, y, z)] = pal[int(b["state"])]
+    floor = {(x, z) for (x, y, z) in solid if y == 0}
+
+    def ok(b):
+        return b is None or any(k in b for k in ("_door", "slab", "barrel", "gurney", "curtain", "iron_block", "iron_bars"))
+
+    def passable(x, z):
+        return (x, z) in floor and ok(solid.get((x, 1, z))) and ok(solid.get((x, 2, z)))
+
+    start = marks["sp:entry"][0]
+    seen, q = {start}, deque([start])
+    while q:
+        x, z = q.popleft()
+        for dx, dz in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+            n = (x + dx, z + dz)
+            if n not in seen and passable(*n):
+                seen.add(n)
+                q.append(n)
+    problems = []
+    e = marks["sp:exit_cabin"]
+    if ((e[0][0] + e[1][0]) // 2, (e[0][1] + e[1][1]) // 2) not in seen:
+        problems.append("salida inalcanzable")
+    for k in ("sp:fuse", "sp:item"):
+        lost = [c for c in marks.get(k, []) if c not in seen]
+        if lost:
+            problems.append(f"{len(lost)} {k} inalcanzables")
+    for (x, z) in floor:
+        if (x, 1, z) in solid:
+            continue
+        if (x, 5, z) not in solid:
+            problems.append(f"sin techo en {x},{z}")
+            break
+        for dx, dz in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+            n = (x + dx, z + dz)
+            if n not in floor and (n[0], 1, n[1]) not in solid and (n[0], 2, n[1]) not in solid:
+                problems.append(f"hueco al vacio en {n[0]},{n[1]}")
+                break
+    if problems:
+        raise SystemExit(f"{path.name}: " + "; ".join(problems[:5]))
+
 def main():
     pool = []
     for name, theme_name, seed, kinds, apply, extra, kind, diff, title in FLOORS:
         f = make_floor(name, theme_name, seed, kinds, apply, extra)
         size, nb, nm = f.t.save()
+        verify(ROOT / "structure/zones" / f"{name}.nbt")
         zone = {"template": f"{MOD}:zones/{name}", "kind": kind, "difficulty": diff, "entry_yaw": 0, "name": title}
         path = ROOT / "zone" / f"{name}.json"
         path.parent.mkdir(parents=True, exist_ok=True)
