@@ -1,0 +1,106 @@
+{
+  "variants": {
+    "variant=0": [
+      {
+        "model": "smileprotocol:block/blood_floor_0"
+      },
+      {
+        "model": "smileprotocol:block/blood_floor_0",
+        "y": 90
+      },
+      {
+        "model": "smileprotocol:block/blood_floor_0",
+        "y": 180
+      },
+      {
+        "model": "smileprotocol:block/blood_floor_0",
+        "y": 270
+      }
+    ],
+    "variant=1": [
+      {
+        "model": "smileprotocol:block/blood_floor_1"
+      },
+      {
+        "model": "smileprotocol:block/blood_floor_1",
+        "y": 90
+      },
+      {
+        "model": "smileprotocol:block/blood_floor_1",
+        "y": 180
+      },
+      {
+        "model": "smileprotocol:block/blood_floor_1",
+        "y": 270
+      }
+    ],
+    "variant=2": [
+      {
+        "model": "smileprotocol:block/blood_floor_2"
+      },
+      {
+        "model": "smileprotocol:block/blood_floor_2",
+        "y": 90
+      },
+      {
+        "model": "smileprotocol:block/blood_floor_2",
+        "y": 180
+      },
+      {
+        "model": "smileprotocol:block/blood_floor_2",
+        "y": 270
+      }
+    ],
+    "variant=3": [
+      {
+        "model": "smileprotocol:block/blood_floor_3"
+      },
+      {
+        "model": "smileprotocol:block/blood_floor_3",
+        "y": 90
+      },
+      {
+        "model": "smileprotocol:block/blood_floor_3",
+        "y": 180
+      },
+      {
+        "model": "smileprotocol:block/blood_floor_3",
+        "y": 270
+      }
+    ],
+    "variant=4": [
+      {
+        "model": "smileprotocol:block/blood_floor_4"
+      },
+      {
+        "model": "smileprotocol:block/blood_floor_4",
+        "y": 90
+      },
+      {
+        "model": "smileprotocol:block/blood_floor_4",
+        "y": 180
+      },
+      {
+        "model": "smileprotocol:block/blood_floor_4",
+        "y": 270
+      }
+    ],
+    "variant=5": [
+      {
+        "model": "smileprotocol:block/blood_floor_5"
+      },
+      {
+        "model": "smileprotocol:block/blood_floor_5",
+        "y": 90
+      },
+      {
+        "model": "smileprotocol:block/blood_floor_5",
+        "y": 180
+      },
+      {
+        "model": "smileprotocol:block/blood_floor_5",
+        "y": 270
+      }
+    ]
+  }
+}

@@ -120,9 +120,9 @@ public final class LobbyBuilder {
 
     /** Pared de hospital: zocalo gris, franja turquesa y blanco arriba. */
     private static BlockState wall(int y) {
-        if (y <= 2) return Blocks.LIGHT_GRAY_CONCRETE.defaultBlockState();
-        if (y == 3) return Blocks.CYAN_TERRACOTTA.defaultBlockState();
-        return Blocks.WHITE_CONCRETE.defaultBlockState();
+        if (y <= 2) return ModBlocks.building("lab_wall_tiles_white").defaultBlockState();
+        if (y == 3) return ModBlocks.building("lab_wall_tiles_teal").defaultBlockState();
+        return ModBlocks.building("lab_plaster").defaultBlockState();
     }
 
     private static BlockState stairs(Block b, Direction facing) {
@@ -169,24 +169,24 @@ public final class LobbyBuilder {
             fill(0, y, DEPTH - 1, WIDTH - 1, y, DEPTH - 1, w);
         }
         // Bloque de los ascensores (detras de la pared del fondo)
-        fill(0, 0, -7, WIDTH - 1, 8, -1, Blocks.GRAY_CONCRETE);
+        fill(0, 0, -7, WIDTH - 1, 8, -1, ModBlocks.building("lab_concrete_wall"));
         // Pared del fondo, de acero
-        fill(0, 1, 0, WIDTH - 1, 7, 0, Blocks.SMOOTH_STONE);
-        fill(1, 3, 0, WIDTH - 2, 3, 0, Blocks.CYAN_TERRACOTTA);
+        fill(0, 1, 0, WIDTH - 1, 7, 0, ModBlocks.building("lab_concrete_wall"));
+        fill(1, 3, 0, WIDTH - 2, 3, 0, ModBlocks.building("lab_hazard"));
         // Tejado
-        fill(-1, 9, -8, WIDTH, 9, DEPTH, Blocks.GRAY_CONCRETE);
+        fill(-1, 9, -8, WIDTH, 9, DEPTH, ModBlocks.building("lab_ceiling_concrete"));
     }
 
     private void floorAndCeiling() {
-        fill(0, 0, 0, WIDTH - 1, 0, DEPTH - 1, Blocks.LIGHT_GRAY_CONCRETE);
-        fill(1, 0, 1, WIDTH - 2, 0, DEPTH - 2, Blocks.WHITE_CONCRETE);
+        fill(0, 0, 0, WIDTH - 1, 0, DEPTH - 1, ModBlocks.building("lab_tile_floor_dark"));
+        fill(1, 0, 1, WIDTH - 2, 0, DEPTH - 2, ModBlocks.building("lab_tile_floor"));
         // Lineas de guia del suelo, como en los hospitales: hacia los ascensores
-        fill(SPAWN_X, 0, 3, SPAWN_X, 0, DEPTH - 2, Blocks.LIGHT_BLUE_CONCRETE);
-        fill(5, 0, 3, 35, 0, 3, Blocks.LIGHT_BLUE_CONCRETE);
+        fill(SPAWN_X, 0, 3, SPAWN_X, 0, DEPTH - 2, ModBlocks.building("lab_linoleum"));
+        fill(5, 0, 3, 35, 0, 3, ModBlocks.building("lab_linoleum"));
         // Franja de espera frente a los ascensores
-        fill(1, 0, 1, WIDTH - 2, 0, 1, Blocks.GRAY_CONCRETE);
+        fill(1, 0, 1, WIDTH - 2, 0, 1, ModBlocks.building("lab_hazard"));
 
-        fill(0, 8, 0, WIDTH - 1, 8, DEPTH - 1, Blocks.SMOOTH_STONE);
+        fill(0, 8, 0, WIDTH - 1, 8, DEPTH - 1, ModBlocks.building("lab_ceiling"));
         BlockState light = ModBlocks.FLUORESCENT_LIGHT.get().defaultBlockState();
         for (int x = 5; x <= 35; x += 5) {
             for (int z = 4; z <= 28; z += 6) {
@@ -205,9 +205,9 @@ public final class LobbyBuilder {
             fill(x, 2, z, x, 5, z, Blocks.LIGHT_GRAY_STAINED_GLASS);
         }
         // Puertas de entrada de cristal, cerradas
-        fill(17, 1, z, 17, 5, z, Blocks.IRON_BLOCK);
-        fill(23, 1, z, 23, 5, z, Blocks.IRON_BLOCK);
-        fill(18, 5, z, 22, 5, z, Blocks.IRON_BLOCK);
+        fill(17, 1, z, 17, 5, z, ModBlocks.building("lab_metal_wall"));
+        fill(23, 1, z, 23, 5, z, ModBlocks.building("lab_metal_wall"));
+        fill(18, 5, z, 22, 5, z, ModBlocks.building("lab_metal_wall"));
         fill(18, 1, z, 22, 4, z, Blocks.GLASS);
         fill(18, 1, z - 2, 22, 1, z - 1, Blocks.GRAY_CARPET);
         wallSign(20, 5, z - 1, Direction.NORTH, "SALIDA", "", "Cerrada por", "protocolo");
@@ -265,8 +265,8 @@ public final class LobbyBuilder {
         // Sillas del personal y archivadores
         set(9, 1, 24, stairs(Blocks.DARK_OAK_STAIRS, Direction.SOUTH));
         set(12, 1, 24, stairs(Blocks.DARK_OAK_STAIRS, Direction.SOUTH));
-        set(7, 1, 26, Blocks.BARREL);
-        set(13, 1, 26, Blocks.BARREL);
+        set(7, 1, 26, ModBlocks.building("lab_crate"));
+        set(13, 1, 26, ModBlocks.building("lab_crate"));
         set(10, 1, 26, Blocks.BOOKSHELF);
         hangingSign(10, 7, 22, 0, "RECEPCIÓN", "Información", "y admisión", "");
         // Cartel pegado al frente del mostrador
@@ -293,7 +293,7 @@ public final class LobbyBuilder {
     private void westWall() {
         // Taquillas
         for (int z = 6; z <= 12; z++) {
-            fill(1, 1, z, 1, 2, z, Blocks.IRON_BLOCK);
+            fill(1, 1, z, 1, 2, z, ModBlocks.building("lab_metal_wall"));
             BlockState door = Blocks.IRON_TRAPDOOR.defaultBlockState()
                     .setValue(TrapDoorBlock.FACING, Direction.EAST).setValue(TrapDoorBlock.OPEN, true);
             set(2, 1, z, door);
@@ -306,15 +306,15 @@ public final class LobbyBuilder {
         wallSign(2, 4, 19, Direction.EAST, "PROTOCOLO", "S.M.I.L.E.", "Mantenga la", "calma. Sonría.");
         // Maquinas expendedoras
         Block[][] machines = {
-                {Blocks.IRON_BLOCK, Blocks.LIGHT_BLUE_STAINED_GLASS},
+                {ModBlocks.building("lab_metal_wall"), Blocks.LIGHT_BLUE_STAINED_GLASS},
                 {Blocks.RED_CONCRETE, Blocks.WHITE_STAINED_GLASS},
-                {Blocks.IRON_BLOCK, Blocks.LIME_STAINED_GLASS},
+                {ModBlocks.building("lab_metal_wall"), Blocks.LIME_STAINED_GLASS},
         };
         for (int i = 0; i < machines.length; i++) {
             int z = 25 + i * 2;
             set(1, 1, z, machines[i][0]);
             set(1, 2, z, machines[i][1]);
-            set(1, 3, z, Blocks.IRON_BLOCK);
+            set(1, 3, z, ModBlocks.building("lab_metal_wall"));
         }
         set(2, 1, 31, Blocks.CAULDRON); // papelera
     }

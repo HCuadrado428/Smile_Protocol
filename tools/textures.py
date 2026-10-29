@@ -650,9 +650,57 @@ def preview(path):
     sheet.save(path)
 
 
+# Desgaste de terror: el ascensor lleva anos sin mantenimiento ----------------------------------------
+WEATHER = {
+    "block/elevator_frame.png": 0.8, "block/elevator_wall_panel.png": 1.0, "block/elevator_floor.png": 1.0,
+    "block/elevator_panel.png": 0.8, "block/elevator_button.png": 0.5, "block/elevator_door.png": 0.9,
+    "block/fluorescent_housing.png": 1.0, "block/fluorescent_light_off.png": 0.8, "block/fluorescent_light_on.png": 0.35,
+    "item/elevator_door.png": 0.6,
+}
+
+
+def weather(rel, amount, seed):
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    from texlib import Canvas, fbm, smoothstep, white, desaturate
+    path = ROOT / rel
+    im = np.asarray(Image.open(path).convert("RGBA"), dtype=np.float64)
+    h, w = im.shape[:2]
+    cv = Canvas(w, h)
+    cv.c = im[..., :3].copy()
+    cv.a = im[..., 3] / 255
+    r = np.random.default_rng(seed)
+    desaturate(cv, 0.25 * amount)
+    # mugre a manchas y oxido en motas
+    g = smoothstep(0.45, 1.0, fbm(h, w, r, base=max(2, w // 16), octaves=4, periodic=False))
+    cv.mix((44, 38, 30), g * 0.55 * amount)
+    rs = smoothstep(0.8, 0.97, fbm(h, w, r, base=max(5, w // 5), octaves=3, periodic=False))
+    cv.mix((104, 52, 26), rs * 0.6 * amount)
+    sp = (white(h, w, r) > 0.994) * amount
+    cv.mix((28, 24, 20), sp * 0.6)
+    # aranazos claros
+    for _ in range(int(w * h / 180 * amount)):
+        x, y = r.uniform(0, w), r.uniform(0, h)
+        a = r.uniform(0, np.pi)
+        for i in range(int(r.integers(2, 6))):
+            xx, yy = int(x + np.cos(a) * i), int(y + np.sin(a) * i)
+            if 0 <= xx < w and 0 <= yy < h:
+                cv.c[yy, xx] = cv.c[yy, xx] * 0.6 + np.array([200, 196, 186]) * 0.4
+    if "fluorescent_light" in rel:
+        # bichos muertos dentro de la tulipa
+        for _ in range(6):
+            x, y = int(r.integers(2, w - 2)), int(r.integers(2, h - 2))
+            cv.c[y, x] = (24, 20, 16)
+            cv.c[y, x + 1] = cv.c[y, x + 1] * 0.5
+    cv.c *= 1 - 0.12 * amount
+    out = np.dstack([np.clip(cv.c, 0, 255), im[..., 3]]).round().astype(np.uint8)
+    Image.fromarray(out, "RGBA").save(path)
+
+
 def main():
     for rel, fn in ALL.items():
         fn().save(rel)
+    for i, (rel, k) in enumerate(WEATHER.items()):
+        weather(rel, k, 900 + i)
     print("Texturas escritas en", ROOT)
     if len(sys.argv) > 1:
         preview(sys.argv[1])

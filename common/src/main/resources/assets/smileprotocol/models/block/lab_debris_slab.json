@@ -1,0 +1,8 @@
+{
+  "parent": "block/slab",
+  "textures": {
+    "bottom": "smileprotocol:block/lab_debris",
+    "top": "smileprotocol:block/lab_debris",
+    "side": "smileprotocol:block/lab_debris"
+  }
+}

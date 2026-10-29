@@ -5,6 +5,9 @@
     "minecraft:barrel",
     "minecraft:smooth_stone_slab",
     "minecraft:iron_block",
-    "smileprotocol:gurney"
+    "smileprotocol:gurney",
+    "smileprotocol:lab_crate",
+    "smileprotocol:lab_debris",
+    "smileprotocol:lab_pipes"
   ]
 }

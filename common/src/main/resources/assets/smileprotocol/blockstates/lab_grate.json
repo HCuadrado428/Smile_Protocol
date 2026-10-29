@@ -1,0 +1,36 @@
+{
+  "variants": {
+    "": [
+      {
+        "model": "smileprotocol:block/lab_grate"
+      },
+      {
+        "model": "smileprotocol:block/lab_grate",
+        "y": 90
+      },
+      {
+        "model": "smileprotocol:block/lab_grate",
+        "y": 180
+      },
+      {
+        "model": "smileprotocol:block/lab_grate",
+        "y": 270
+      },
+      {
+        "model": "smileprotocol:block/lab_grate_1"
+      },
+      {
+        "model": "smileprotocol:block/lab_grate_1",
+        "y": 90
+      },
+      {
+        "model": "smileprotocol:block/lab_grate_1",
+        "y": 180
+      },
+      {
+        "model": "smileprotocol:block/lab_grate_1",
+        "y": 270
+      }
+    ]
+  }
+}

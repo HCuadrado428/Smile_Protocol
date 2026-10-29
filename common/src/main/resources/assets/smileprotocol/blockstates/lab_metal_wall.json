@@ -1,0 +1,15 @@
+{
+  "variants": {
+    "": [
+      {
+        "model": "smileprotocol:block/lab_metal_wall"
+      },
+      {
+        "model": "smileprotocol:block/lab_metal_wall_1"
+      },
+      {
+        "model": "smileprotocol:block/lab_metal_wall_2"
+      }
+    ]
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "parent": "block/cube_bottom_top",
+  "textures": {
+    "side": "smileprotocol:block/lab_crate",
+    "top": "smileprotocol:block/lab_crate_top",
+    "bottom": "smileprotocol:block/lab_crate_top"
+  }
+}

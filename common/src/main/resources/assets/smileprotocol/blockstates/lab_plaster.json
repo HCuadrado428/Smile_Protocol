@@ -1,0 +1,18 @@
+{
+  "variants": {
+    "": [
+      {
+        "model": "smileprotocol:block/lab_plaster"
+      },
+      {
+        "model": "smileprotocol:block/lab_plaster_1"
+      },
+      {
+        "model": "smileprotocol:block/lab_plaster_2"
+      },
+      {
+        "model": "smileprotocol:block/lab_plaster_3"
+      }
+    ]
+  }
+}

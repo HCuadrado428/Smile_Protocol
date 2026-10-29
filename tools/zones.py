@@ -208,16 +208,16 @@ class Floor:
         t, th = self.t, self.theme
         for x in range(-OUT_X, OUT_X + 1):
             for z in range(SOUTH_Z, NORTH_Z + 1):
-                t.set(x, 0, z, th["floor"][(x + z) % 2])
+                t.set(x, 0, z, th["floor"])
                 t.set(x, H + 1, z, th["ceiling"])
                 for y in range(1, H + 1):
-                    t.set(x, y, z, th["wall_low"] if y == 1 else th["wall"])
+                    t.set(x, y, z, th["wall_low"] if y <= 2 else th["wall"])
         # Vestibulos de los ascensores
         # La fila de la cabina (z = 6 y z = NORTH_Z + 8) tambien es pared: el vestibulo es mas ancho que la cabina
         for z0, z1 in ((6, SOUTH_Z - 1), (NORTH_Z + 1, NORTH_Z + 8)):
             for x in range(-HALL_W - 1, HALL_W + 2):
                 for z in range(z0, z1 + 1):
-                    t.set(x, 0, z, th["hall_floor"][(x + z) % 2])
+                    t.set(x, 0, z, th["hall_floor"])
                     t.set(x, H + 1, z, th["ceiling"])
                     for y in range(1, H + 1):
                         t.set(x, y, z, th["wall"])
@@ -378,9 +378,9 @@ class Floor:
         elif kind == "storage":
             for x in range(x0 + 1, x1, 3):
                 for z in range(z0 + 1, z1):
-                    if r.random() < 0.75 and self.put(x, z, "minecraft:barrel", facing="up"):
+                    if r.random() < 0.75 and self.put(x, z, f"{MOD}:lab_crate"):
                         if r.random() < 0.6:
-                            self.t.set(x, 2, z, "minecraft:barrel", facing="up")
+                            self.t.set(x, 2, z, f"{MOD}:lab_crate")
             self.take(spots, 2, lambda x, z, f: self.tall(f"{MOD}:waste_container", x, z, f))
         elif kind == "morgue":
             for x in range(x0 + 1, x1, 2):
@@ -399,14 +399,14 @@ class Floor:
             for x in range(x0 + 1, x1, 2):
                 for z in range(z0 + 1, z1, 1):
                     if (z - z0) % 3 != 0 and self.free(x, z):
-                        self.t.fill(x, 1, z, x, 2, z, "minecraft:iron_block")
+                        self.t.fill(x, 1, z, x, 2, z, f"{MOD}:lab_server")
                         self.used.add((x, z))
             self.take(self.wall_spots(room), 1, lambda x, z, f: self.tall(f"{MOD}:locker", x, z, f))
         elif kind == "machine":
             for x in range(x0 + 2, x1 - 1, 4):
                 for z in range(z0 + 2, z1 - 1, 4):
                     if self.free(x, z):
-                        self.t.fill(x, 1, z, x, 2, z, "minecraft:iron_block")
+                        self.t.fill(x, 1, z, x, 2, z, f"{MOD}:lab_machine")
                         self.t.set(x, 3, z, "minecraft:chain", axis="y")
                         self.t.set(x, 4, z, "minecraft:chain", axis="y")
                         self.used.add((x, z))
@@ -416,6 +416,71 @@ class Floor:
                 z = (z0 + z1) // 2
                 self.put(x, z, "minecraft:spruce_slab", type="top")
             self.take(spots, 1, lambda x, z, f: self.tall(f"{MOD}:wardrobe", x, z, f))
+
+    def bloody(self, amount):
+        """Sangre en el suelo, huellas y manchas en las paredes y alguna pintada (texturas: tools/textures_lab.py)."""
+        t, r = self.t, self.rnd
+        walls = {self.theme["wall"], self.theme["wall_low"]}
+        marks = {m[0] for m in t.markers}
+        xs = [p[0] for p in t.blocks]
+        zs = [p[2] for p in t.blocks]
+        cells = [(x, z) for x in range(min(xs), max(xs) + 1) for z in range(min(zs), max(zs) + 1)
+                 if t.solid(x, 0, z) and not t.solid(x, 1, z) and not t.solid(x, 2, z)
+                 and (x, 1, z) not in marks and (x, 2, z) not in marks]
+        r.shuffle(cells)
+        area = len(cells)
+        n_floor = int(area / 140 * amount)
+        n_wall = int(area / 260 * amount)
+        n_write = max(3, int(area / 1500 * amount))
+        dirs = (("south", (0, -1)), ("north", (0, 1)), ("east", (-1, 0)), ("west", (1, 0)))
+
+        def wall_at(x, y, z):
+            return t.get(x, y, z) in walls
+
+        # Charcos y rastros en el suelo, mas cerca unos de otros (algo paso por aqui)
+        placed = 0
+        for (x, z) in cells:
+            if placed >= n_floor:
+                break
+            t.set(x, 1, z, f"{MOD}:blood_floor", variant=r.randrange(6))
+            placed += 1
+            if r.random() < 0.35:
+                dx, dz = r.choice(((1, 0), (-1, 0), (0, 1), (0, -1)))
+                if (x + dx, z + dz) in set(cells[:0]) or (t.solid(x + dx, 0, z + dz) and not t.solid(x + dx, 1, z + dz)
+                                                          and (x + dx, 1, z + dz) not in marks):
+                    t.set(x + dx, 1, z + dz, f"{MOD}:blood_floor", variant=r.randrange(6))
+        # Manchas en las paredes (manos, pasadas, aranazos, sonrisas)
+        placed = 0
+        r.shuffle(cells)
+        for (x, z) in cells:
+            if placed >= n_wall:
+                break
+            y = r.choice((1, 2, 2))
+            if t.solid(x, y, z) or (x, y, z) in marks:
+                continue
+            for f, (ox, oz) in dirs:
+                if wall_at(x + ox, y, z + oz):
+                    t.set(x, y, z, f"{MOD}:wall_decal", facing=f, variant=r.randrange(8))
+                    placed += 1
+                    break
+        # Pintadas de dos bloques de ancho a la altura de los ojos
+        placed = 0
+        r.shuffle(cells)
+        side = {"south": (1, 0), "north": (-1, 0), "east": (0, -1), "west": (0, 1)}
+        for (x, z) in cells:
+            if placed >= n_write:
+                break
+            y = 2
+            for f, (ox, oz) in dirs:
+                sx, sz = side[f]                     # hacia la derecha del que mira la pared
+                x2, z2 = x + sx, z + sz
+                if (wall_at(x + ox, y, z + oz) and wall_at(x2 + ox, y, z2 + oz) and not t.solid(x, y, z)
+                        and not t.solid(x2, y, z2) and (x2, y, z2) not in marks and (x, y, z) not in marks):
+                    v = r.randrange(8)
+                    t.set(x, y, z, f"{MOD}:wall_writing", facing=f, variant=v, right=False)
+                    t.set(x2, y, z2, f"{MOD}:wall_writing", facing=f, variant=v, right=True)
+                    placed += 1
+                    break
 
     def light(self, x, z, mode):
         if mode == "none":
@@ -623,10 +688,10 @@ class Plan(Floor):
         # Todo macizo y luego se vacia (paredes exteriores en -1 y W/L)
         for x in range(-1, W + 1):
             for z in range(-1, L + 1):
-                t.set(x, 0, z, th["floor"][(x + z) % 2])
+                t.set(x, 0, z, th["floor"])
                 t.set(x, H + 1, z, th["ceiling"])
                 for y in range(1, H + 1):
-                    t.set(x, y, z, th["wall_low"] if y == 1 else th["wall"])
+                    t.set(x, y, z, th["wall_low"] if y <= 2 else th["wall"])
         self.split(0, 0, W - 1, L - 1, 0, force="v")
         for (x0, z0, x1, z1, _) in self.corr:
             self.carve(x0, z0, x1, z1, th["corridor_floor"])
@@ -874,31 +939,38 @@ LABELS = {"lab": "LAB", "office": "DESPACHO", "storage": "ALMACEN", "morgue": "M
 # Temas ---------------------------------------------------------------------------------------------------
 
 def theme(**kw):
-    base = dict(floor=("polished_andesite", "andesite"), corridor_floor=("white_concrete", "light_gray_concrete"),
-                hall_floor=("smooth_quartz", "quartz_bricks"), wall="white_concrete", wall_low="light_gray_concrete",
-                ceiling="smooth_quartz", pipe="iron_block", debris=("barrel", "smooth_stone_slab", "spruce_slab"),
-                room_floor={})
-    base.update(kw)
+    def lab(n):
+        return f"{MOD}:{n}"
+    base = dict(floor=lab("lab_tile_floor"), corridor_floor=lab("lab_linoleum"), hall_floor=lab("lab_tile_floor_dark"),
+                wall=lab("lab_plaster"), wall_low=lab("lab_wall_tiles"), ceiling=lab("lab_ceiling"),
+                pipe=lab("lab_pipes"), debris=(lab("lab_crate"), lab("lab_debris"), lab("lab_debris")),
+                room_floor={}, blood=1.0)
+    for k, v in kw.items():
+        if isinstance(v, str):
+            v = lab(v)
+        elif k == "room_floor":
+            v = {kk: lab(vv) for kk, vv in v.items()}
+        base[k] = v
     return base
 
 
 THEMES = {
-    "start": theme(room_floor={"office": ("birch_planks", "stripped_birch_wood"), "lockers": ("smooth_stone", "stone")}),
-    "storage": theme(wall="light_gray_concrete", wall_low="gray_concrete", ceiling="polished_deepslate",
-                     corridor_floor=("polished_andesite", "smooth_stone"),
-                     room_floor={"storage": ("stone_bricks", "cracked_stone_bricks"), "machine": ("polished_deepslate", "deepslate_tiles")}),
-    "offices": theme(wall="white_terracotta", wall_low="light_gray_terracotta",
-                     room_floor={"office": ("birch_planks", "stripped_birch_wood"), "break": ("spruce_planks", "stripped_spruce_wood")}),
-    "morgue": theme(wall="light_blue_terracotta", wall_low="cyan_terracotta", corridor_floor=("white_concrete", "light_blue_concrete"),
-                    room_floor={"morgue": ("diorite", "polished_diorite"), "ward": ("white_concrete", "white_concrete")}),
-    "generators": theme(wall="gray_concrete", wall_low="yellow_terracotta", ceiling="polished_deepslate",
-                        corridor_floor=("polished_tuff", "tuff_bricks"),
-                        room_floor={"machine": ("polished_deepslate", "deepslate_tiles"), "server": ("polished_blackstone", "blackstone")}),
-    "greenhouse": theme(wall="green_terracotta", wall_low="mossy_stone_bricks", corridor_floor=("moss_block", "mossy_stone_bricks"),
-                        room_floor={"lab": ("mossy_cobblestone", "moss_block")}),
-    "final": theme(wall="white_concrete", wall_low="cyan_terracotta", ceiling="smooth_quartz",
-                   corridor_floor=("polished_deepslate", "deepslate_tiles"),
-                   room_floor={"lab": ("polished_deepslate", "deepslate_tiles")}),
+    "start": theme(room_floor={"office": "lab_wood_floor", "lockers": "lab_tile_floor_dark", "storage": "lab_concrete_floor"},
+                   blood=0.6),
+    "storage": theme(wall="lab_concrete_wall", wall_low="lab_concrete_wall", ceiling="lab_ceiling_concrete",
+                     corridor_floor="lab_concrete_floor", floor="lab_concrete_floor",
+                     room_floor={"machine": "lab_grate", "office": "lab_linoleum"}),
+    "offices": theme(wall="lab_plaster_blue", wall_low="lab_wall_tiles_white",
+                     room_floor={"office": "lab_wood_floor", "break": "lab_linoleum"}),
+    "morgue": theme(wall="lab_plaster_green", wall_low="lab_wall_tiles_teal", corridor_floor="lab_tile_floor_dark",
+                    room_floor={"morgue": "lab_morgue_floor", "ward": "lab_morgue_floor"}, blood=1.6),
+    "generators": theme(wall="lab_metal_wall", wall_low="lab_concrete_wall", ceiling="lab_ceiling_concrete",
+                        corridor_floor="lab_concrete_floor", floor="lab_concrete_floor",
+                        room_floor={"machine": "lab_grate", "server": "lab_tile_floor_dark"}),
+    "greenhouse": theme(wall="lab_plaster_green", wall_low="lab_wall_tiles", corridor_floor="lab_moss_floor",
+                        floor="lab_moss_floor", room_floor={"office": "lab_wood_floor"}),
+    "final": theme(wall="lab_wall_tiles_white", wall_low="lab_wall_tiles_teal", corridor_floor="lab_tile_floor_dark",
+                   room_floor={"lab": "lab_morgue_floor"}, blood=2.0),
 }
 
 
@@ -975,7 +1047,7 @@ def apply_final(f):
             if f.free(x, z):
                 f.t.set(x, 0, z, "minecraft:sea_lantern")
                 f.t.fill(x, 1, z, x, 3, z, "minecraft:light_blue_stained_glass")
-                f.t.set(x, 4, z, "minecraft:iron_block")
+                f.t.set(x, 4, z, f"{MOD}:lab_metal_wall")
                 f.used.add((x, z))
     for r in big:
         f.fusebox(r)
@@ -1013,6 +1085,7 @@ def make_floor(name, theme_name, seed, kinds, apply, extra):
     f.corridor_dressing(extra["lockers"], extra["debris"], extra["pipes"])
     f.fuse_spots(per_room=1)
     f.mobs(extra["mobs"])
+    f.bloody(f.theme["blood"] * (0.6 + 0.25 * extra.get("diff", 1)))
     return f
 
 
@@ -1033,7 +1106,9 @@ def verify(path):
     floor = {(x, z) for (x, y, z) in solid if y == 0}
 
     def ok(b):
-        return b is None or any(k in b for k in ("_door", "slab", "barrel", "gurney", "curtain", "iron_block", "iron_bars"))
+        return b is None or any(k in b for k in ("_door", "slab", "barrel", "gurney", "curtain", "iron_block", "iron_bars",
+                                                   "lab_crate", "lab_debris", "lab_pipes", "blood_floor", "wall_decal",
+                                                   "wall_writing"))
 
     def passable(x, z):
         return (x, z) in floor and ok(solid.get((x, 1, z))) and ok(solid.get((x, 2, z)))
@@ -1072,7 +1147,7 @@ def verify(path):
 def main():
     pool = []
     for name, theme_name, seed, kinds, apply, extra, kind, diff, title in FLOORS:
-        f = make_floor(name, theme_name, seed, kinds, apply, extra)
+        f = make_floor(name, theme_name, seed, kinds, apply, dict(extra, diff=diff))
         size, nb, nm = f.t.save()
         verify(ROOT / "structure/zones" / f"{name}.nbt")
         zone = {"template": f"{MOD}:zones/{name}", "kind": kind, "difficulty": diff, "entry_yaw": 0, "name": title}

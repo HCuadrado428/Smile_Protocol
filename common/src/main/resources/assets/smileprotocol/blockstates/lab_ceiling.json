@@ -1,0 +1,78 @@
+{
+  "variants": {
+    "": [
+      {
+        "model": "smileprotocol:block/lab_ceiling",
+        "weight": 6
+      },
+      {
+        "model": "smileprotocol:block/lab_ceiling",
+        "y": 90,
+        "weight": 6
+      },
+      {
+        "model": "smileprotocol:block/lab_ceiling",
+        "y": 180,
+        "weight": 6
+      },
+      {
+        "model": "smileprotocol:block/lab_ceiling",
+        "y": 270,
+        "weight": 6
+      },
+      {
+        "model": "smileprotocol:block/lab_ceiling_1",
+        "weight": 6
+      },
+      {
+        "model": "smileprotocol:block/lab_ceiling_1",
+        "y": 90,
+        "weight": 6
+      },
+      {
+        "model": "smileprotocol:block/lab_ceiling_1",
+        "y": 180,
+        "weight": 6
+      },
+      {
+        "model": "smileprotocol:block/lab_ceiling_1",
+        "y": 270,
+        "weight": 6
+      },
+      {
+        "model": "smileprotocol:block/lab_ceiling_2",
+        "weight": 6
+      },
+      {
+        "model": "smileprotocol:block/lab_ceiling_2",
+        "y": 90,
+        "weight": 6
+      },
+      {
+        "model": "smileprotocol:block/lab_ceiling_2",
+        "y": 180,
+        "weight": 6
+      },
+      {
+        "model": "smileprotocol:block/lab_ceiling_2",
+        "y": 270,
+        "weight": 6
+      },
+      {
+        "model": "smileprotocol:block/lab_ceiling_3"
+      },
+      {
+        "model": "smileprotocol:block/lab_ceiling_3",
+        "y": 90
+      },
+      {
+        "model": "smileprotocol:block/lab_ceiling_3",
+        "y": 180
+      },
+      {
+        "model": "smileprotocol:block/lab_ceiling_3",
+        "y": 270
+      }
+    ]
+  }
+}

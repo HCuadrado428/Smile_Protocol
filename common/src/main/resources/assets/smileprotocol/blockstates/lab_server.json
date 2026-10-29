@@ -1,0 +1,15 @@
+{
+  "variants": {
+    "": [
+      {
+        "model": "smileprotocol:block/lab_server"
+      },
+      {
+        "model": "smileprotocol:block/lab_server_1"
+      },
+      {
+        "model": "smileprotocol:block/lab_server_2"
+      }
+    ]
+  }
+}

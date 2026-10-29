@@ -5,189 +5,459 @@ puertas de laboratorio y de seguridad, taquilla, armario, contenedor, camilla, c
 valvula y caja de fusibles.
 
 Cada modelo se construye con cubos y materiales; el script reparte las caras en la textura
-(sin solapes), las pinta con el material y escribe el geo.json con la UV exacta de cada cara.
-Asi el modelo y la textura siempre encajan. Resolucion: 2 pixeles de textura por pixel de modelo.
+(sin solapes) y escribe el geo.json con la UV exacta de cada cara, asi modelo y textura siempre
+encajan. Los materiales se pintan en coordenadas del MUNDO (cada pixel sabe donde esta en el
+modelo), de modo que la mugre se acumula abajo, los chorretones bajan de arriba, el oxido y el
+ruido siguen de una cara a la otra y las manchas de sangre cruzan varias piezas.
+Resolucion: 2 pixeles de textura por pixel de modelo (32x por bloque).
 
-Las piezas que se mueven (hoja de puerta, rueda, tapa...) son simetricas en X: el renderer
-las gira desde codigo alrededor de su bisagra.
+Las piezas que se mueven (hoja de puerta, rueda, tapa...) usan los mismos pivotes que el
+renderer (client/SPGeoRenderer).
 
-    python3 tools/geo_models.py
+    python3 tools/geo_models.py [preview.png]
 """
 import json
 import math
 import random
+import sys
 from pathlib import Path
 
 import numpy as np
 from PIL import Image
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from texlib import stencil_text  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent / "common/src/main/resources/assets/smileprotocol"
 SCALE = 2  # pixeles de textura por unidad de modelo
 FACES = ("north", "south", "east", "west", "up", "down")
 
 
-# Materiales ---------------------------------------------------------------------------------------
+# Ruido 3D en coordenadas del modelo -------------------------------------------------------------------
 
-def _noise(h, w, rnd, amt):
-    return np.array([[rnd.uniform(-amt, amt) for _ in range(w)] for _ in range(h)])
+def _hash(ix, iy, iz, seed):
+    h = np.sin(ix * 127.1 + iy * 311.7 + iz * 74.7 + seed * 13.37) * 43758.5453
+    return h - np.floor(h)
 
 
-def solid(color, noise=6, grime=0.0, streak=0.0, brushed=False, bevel=True):
-    def paint(a, face, rnd):
-        h, w = a.shape[:2]
-        a[:, :, :3] = color
-        a[:, :, 3] = 255
-        a[:, :, :3] += _noise(h, w, rnd, noise)[..., None]
+def noise3(x, y, z, freq, seed):
+    x, y, z = x * freq, y * freq, z * freq
+    ix, iy, iz = np.floor(x), np.floor(y), np.floor(z)
+    fx, fy, fz = x - ix, y - iy, z - iz
+    fx, fy, fz = fx * fx * (3 - 2 * fx), fy * fy * (3 - 2 * fy), fz * fz * (3 - 2 * fz)
+    out = 0
+    for dx in (0, 1):
+        for dy in (0, 1):
+            for dz in (0, 1):
+                w = (fx if dx else 1 - fx) * (fy if dy else 1 - fy) * (fz if dz else 1 - fz)
+                out = out + w * _hash(ix + dx, iy + dy, iz + dz, seed)
+    return out
+
+
+def fbm3(x, y, z, freq, seed, octaves=4):
+    out, amp, tot = 0, 1.0, 0
+    for o in range(octaves):
+        out = out + noise3(x, y, z, freq * 2 ** o, seed + o * 17) * amp
+        tot += amp
+        amp *= 0.5
+    return out / tot
+
+
+def sstep(a, b, x):
+    t = np.clip((x - a) / (b - a + 1e-9), 0, 1)
+    return t * t * (3 - 2 * t)
+
+
+class Face:
+    """Region de textura de una cara: coordenadas del modelo de cada pixel y del borde de la cara."""
+
+    def __init__(self, cube, face, w, h, seed):
+        self.face, self.w, self.h, self.seed = face, w, h, seed
+        ox, oy, oz = cube["origin"]
+        sx, sy, sz = cube["size"]
+        u = (np.arange(w) + 0.5) / SCALE
+        v = (np.arange(h) + 0.5) / SCALE
+        U, V = np.meshgrid(u, v)
+        if face == "north":
+            X, Y, Z = ox + sx - U, oy + sy - V, np.full_like(U, oz)
+        elif face == "south":
+            X, Y, Z = ox + U, oy + sy - V, np.full_like(U, oz + sz)
+        elif face == "east":
+            X, Y, Z = np.full_like(U, ox + sx), oy + sy - V, oz + sz - U
+        elif face == "west":
+            X, Y, Z = np.full_like(U, ox), oy + sy - V, oz + U
+        elif face == "up":
+            X, Y, Z = ox + U, np.full_like(U, oy + sy), oz + V
+        else:
+            X, Y, Z = ox + U, np.full_like(U, oy), oz + sz - V
+        self.X, self.Y, self.Z = X, Y, Z
+        # distancia al borde de la cara (en pixeles de textura)
+        ii, jj = np.meshgrid(np.arange(w), np.arange(h))
+        self.edge = np.minimum(np.minimum(ii, w - 1 - ii), np.minimum(jj, h - 1 - jj))
+        self.U, self.V = U, V
+        self.rng = np.random.default_rng(seed)
+
+    def n(self, freq, octaves=4, salt=0):
+        return fbm3(self.X, self.Y, self.Z, freq, self.seed // 1000 * 1000 + salt, octaves)
+
+    def white(self):
+        return self.rng.random((self.h, self.w))
+
+    @property
+    def side(self):
+        return self.face not in ("up", "down")
+
+
+def mix(c, col, k):
+    k = np.asarray(k, dtype=float)
+    if k.ndim == 2:
+        k = k[..., None]
+    return c * (1 - k) + np.asarray(col, dtype=float) * k
+
+
+# Materiales -------------------------------------------------------------------------------------------
+# Un material es f(face) -> (rgb HxWx3, alfa HxW)
+
+def painted(color, under=(132, 130, 124), chip=0.25, grime=0.5, rust_amt=0.25, streak=0.3, scratch=6, gloss=0.0,
+            dent=0.0):
+    """Metal o madera pintados y gastados: desconchones con oxido, mugre abajo, chorretones y aranazos."""
+    def m(f):
+        c = np.zeros((f.h, f.w, 3)) + color
+        c *= (0.92 + 0.12 * f.n(0.35, 3, 1))[..., None]
+        c += (f.white()[..., None] - 0.5) * 7
+        if dent:
+            d = f.n(0.5, 2, 9)
+            c *= (1 + (d - 0.5) * dent)[..., None]
+        # desconchones: mas en los cantos y abajo
+        wear = f.n(0.6, 4, 2) + sstep(3, 0, f.edge) * 0.25 + sstep(6, 0, f.Y) * 0.15
+        chipm = wear > 1 - chip * 0.55
+        under_c = np.zeros_like(c) + under
+        under_c = mix(under_c, (112, 58, 30), sstep(0.45, 0.8, f.n(0.9, 3, 3)) * rust_amt * 2.2)
+        rim = (wear > 1 - chip * 0.55 - 0.04) & ~chipm
+        c = np.where(chipm[..., None], under_c, c)
+        c = np.where(rim[..., None], c * 0.8, c)
+        # oxido que sale de los desconchones y de los cantos bajos
+        r = sstep(0.55, 0.85, f.n(0.5, 4, 4) * 0.7 + sstep(4, 0, f.Y) * 0.3) * rust_amt
+        c = mix(c, (110, 56, 28), r * 0.8)
+        # mugre: abajo y en los cantos
+        g = sstep(0.4, 1.0, f.n(0.25, 3, 5) * 0.6 + sstep(10, 0, f.Y) * 0.35 + sstep(2, 0, f.edge) * 0.2) * grime
+        c = mix(c, (48, 40, 30), g * 0.75)
+        # chorretones de oxido/agua desde arriba (caras laterales)
+        if f.side and streak:
+            sx = f.X + f.Z
+            col = np.floor(sx * SCALE)
+            hsh = _hash(col, 0, 0, 7)
+            top = (f.Y.max() if f.Y.size else 0)
+            ln = 2 + hsh * 10
+            s = (hsh > 1 - streak * 0.5) & (top - f.Y < ln)
+            k = np.clip(1 - (top - f.Y) / ln, 0, 1) * 0.45
+            c = mix(c, (96, 58, 32), s * k)
+        if scratch:
+            sc = np.zeros((f.h, f.w))
+            for _ in range(int(scratch * f.w * f.h / 400) + 1):
+                x, y = f.rng.integers(f.w), f.rng.integers(f.h)
+                a = f.rng.uniform(0, math.pi)
+                for i in range(int(f.rng.integers(2, 7))):
+                    xx, yy = int(x + math.cos(a) * i), int(y + math.sin(a) * i)
+                    if 0 <= xx < f.w and 0 <= yy < f.h:
+                        sc[yy, xx] = 1
+            c = mix(c, np.minimum(np.asarray(color) * 1.35 + 20, 255), sc * 0.35)
+        if gloss:
+            c = c * (1 + gloss * sstep(2, 0, f.edge)[..., None] * (f.V < f.V.mean())[..., None])
+        # bisel: los cantos de arriba/izquierda cogen luz
+        c = np.where((f.edge == 0)[..., None], c * 0.82, c)
+        return c, np.ones((f.h, f.w))
+    return m
+
+
+def metal(color, brushed=True, tarnish=0.4, rust_amt=0.15, grime=0.4):
+    def m(f):
+        c = np.zeros((f.h, f.w, 3)) + color
         if brushed:
-            for y in range(0, h, 2):
-                a[y, :, :3] *= 0.96
-        if grime:
-            for _ in range(int(w * h * grime)):
-                x, y = rnd.randrange(w), rnd.randrange(h)
-                k = rnd.uniform(0.15, 0.45)
-                a[y, x, :3] = a[y, x, :3] * (1 - k) + np.array([45, 38, 30]) * k
-        if streak and face not in ("up", "down"):
-            for _ in range(max(1, int(w * streak))):
-                x = rnd.randrange(w)
-                y0 = rnd.randrange(max(1, h // 3))
-                ln = rnd.randint(2, max(3, h // 2))
-                for i in range(ln):
-                    if y0 + i < h:
-                        k = 0.35 * (1 - i / ln)
-                        a[y0 + i, x, :3] = a[y0 + i, x, :3] * (1 - k) + np.array([110, 64, 32]) * k
-        if bevel and h > 3 and w > 3:
-            a[0, :, :3] *= 1.15
-            a[:, 0, :3] *= 1.1
-            a[h - 1, :, :3] *= 0.75
-            a[:, w - 1, :3] *= 0.8
-    return paint
+            ax = f.X if f.face in ("up", "down", "north", "south") else f.Z
+            c *= (0.93 + 0.1 * noise3(ax * 0.2, f.Y * 6, ax * 0.1, 1.0, 3))[..., None]
+        c += (f.white()[..., None] - 0.5) * 6
+        t = sstep(0.4, 0.9, f.n(0.4, 4, 6)) * tarnish
+        c = mix(c, (88, 82, 70), t * 0.6)
+        r = sstep(0.6, 0.9, f.n(0.7, 4, 7) * 0.75 + sstep(3, 0, f.Y) * 0.25) * rust_amt
+        c = mix(c, (112, 58, 28), r)
+        g = sstep(0.45, 1, f.n(0.3, 3, 8) * 0.6 + sstep(6, 0, f.Y) * 0.4) * grime
+        c = mix(c, (44, 38, 30), g * 0.6)
+        # brillo en el canto superior
+        c = np.where((f.edge == 0)[..., None] & (f.V < 0.6)[..., None], c * 1.18, c)
+        c = np.where((f.edge == 0)[..., None] & (f.V >= 0.6)[..., None], c * 0.8, c)
+        return c, np.ones((f.h, f.w))
+    return m
 
 
-def stripes(c1=(222, 182, 32), c2=(30, 28, 26)):
-    def paint(a, face, rnd):
-        h, w = a.shape[:2]
-        for y in range(h):
-            for x in range(w):
-                a[y, x, :3] = c1 if ((x + y) // 3) % 2 == 0 else c2
-        a[:, :, 3] = 255
-        a[:, :, :3] += _noise(h, w, rnd, 8)[..., None]
-    return paint
+def rubber():
+    def m(f):
+        c = np.zeros((f.h, f.w, 3)) + (30, 29, 28)
+        c *= (0.85 + 0.3 * f.n(0.8, 2, 11))[..., None]
+        c = mix(c, (60, 52, 40), sstep(0.6, 1, f.n(0.5, 3, 12)) * 0.5)
+        return c, np.ones((f.h, f.w))
+    return m
 
 
-def wire_glass(base=(34, 46, 52), wire=(70, 84, 90)):
-    def paint(a, face, rnd):
-        h, w = a.shape[:2]
-        a[:, :, :3] = base
-        a[:, :, 3] = 255
-        for y in range(h):
-            for x in range(w):
-                if x % 4 == 0 or y % 4 == 0:
-                    a[y, x, :3] = wire
-                # reflejo diagonal
-                if 0 <= (x - y) - w // 4 <= 1:
-                    a[y, x, :3] = np.minimum(255, a[y, x, :3] + 40)
-    return paint
+def dark(color=(16, 15, 14)):
+    def m(f):
+        c = np.zeros((f.h, f.w, 3)) + color
+        c *= (0.8 + 0.4 * f.n(0.5, 2, 13))[..., None]
+        return c, np.ones((f.h, f.w))
+    return m
 
 
-def vents(base=(98, 112, 122)):
-    def paint(a, face, rnd):
-        solid(base, 5, 0.02)(a, face, rnd)
-        h, w = a.shape[:2]
-        if face in ("north", "south"):
-            for y in range(1, h - 1, 3):
-                a[y, 1:w - 1, :3] = (14, 14, 16)
-                if y + 1 < h:
-                    a[y + 1, 1:w - 1, :3] = np.minimum(255, np.array(base) * 1.2)
-    return paint
+def vents(base=(70, 82, 90)):
+    def m(f):
+        c, a = painted(base, chip=0.15, grime=0.6, rust_amt=0.3, scratch=0)(f)
+        slot = (np.floor(f.V * SCALE).astype(int) % 3) == 1
+        c = np.where(slot[..., None], np.array([10, 10, 11]), c)
+        under = (np.floor(f.V * SCALE).astype(int) % 3) == 2
+        c = np.where(under[..., None], c * 1.15, c)
+        return c, a
+    return m
 
 
-def biohazard():
-    def paint(a, face, rnd):
-        h, w = a.shape[:2]
-        a[:, :, :3] = (230, 200, 40)
-        a[:, :, 3] = 255
-        cx, cy = (w - 1) / 2, (h - 1) / 2
-        for y in range(h):
-            for x in range(w):
-                d = math.hypot(x - cx, y - cy)
-                ang = math.atan2(y - cy, x - cx)
-                if d < min(w, h) * 0.12:
-                    a[y, x, :3] = (20, 20, 20)
-                elif d < min(w, h) * 0.42 and math.cos(3 * ang) > 0.35:
-                    a[y, x, :3] = (20, 20, 20)
-        a[0, :, :3] = a[-1, :, :3] = (20, 20, 20)
-        a[:, 0, :3] = a[:, -1, :3] = (20, 20, 20)
-    return paint
+def wood(color=(96, 66, 42), varnish=0.3):
+    def m(f):
+        ax = f.Y if f.side else f.Z
+        grain = noise3(f.X * 0.6 + f.Z * 0.6, ax * 0.12, f.X * 0.2, 1.0, 21) * 0.6 + f.n(1.2, 2, 22) * 0.4
+        c = np.zeros((f.h, f.w, 3)) + color
+        c *= (0.84 + 0.28 * (0.5 + 0.5 * np.sin(grain * 22)))[..., None]
+        c += (f.white()[..., None] - 0.5) * 4
+        wear = sstep(0.55, 0.9, f.n(0.5, 3, 23) + sstep(3, 0, f.edge) * 0.2)
+        c = mix(c, np.asarray(color) * 1.35, wear * varnish)
+        g = sstep(0.4, 1, f.n(0.3, 3, 24) * 0.6 + sstep(8, 0, f.Y) * 0.4)
+        c = mix(c, (36, 26, 18), g * 0.6)
+        # moho verdoso en la parte baja
+        c = mix(c, (56, 66, 40), sstep(0.7, 1, f.n(0.6, 3, 25) * 0.6 + sstep(4, 0, f.Y) * 0.4) * 0.6)
+        c = np.where((f.edge == 0)[..., None], c * 0.78, c)
+        return c, np.ones((f.h, f.w))
+    return m
 
 
-def cloth(color=(150, 178, 160)):
-    def paint(a, face, rnd):
-        h, w = a.shape[:2]
-        for x in range(w):
-            k = 0.85 + 0.15 * math.cos(x / max(1, w) * math.pi * 2)
-            a[:, x, :3] = np.array(color) * k
-        a[:, :, 3] = 255
-        a[:, :, :3] += _noise(h, w, rnd, 5)[..., None]
-        for _ in range(w * h // 40):
-            x, y = rnd.randrange(w), rnd.randrange(h)
-            a[y, x, :3] *= 0.8
-    return paint
+def fabric(color, folds=True, dirt=0.5, torn=False, fade=0.25):
+    """Tela de cortina o sabana: pliegues, decoloracion, manchas y bajo deshilachado."""
+    def m(f):
+        c = np.zeros((f.h, f.w, 3)) + color
+        weave = ((np.floor(f.U * SCALE) + np.floor(f.V * SCALE)) % 2) * 0.05
+        c *= (0.95 + weave)[..., None]
+        if folds and f.side:
+            ax = f.X + f.Z
+            c *= (0.82 + 0.22 * np.sin(ax * 1.6 + 0.6 * np.sin(f.Y * 0.2)))[..., None]
+        c = mix(c, (190, 186, 160), sstep(0.5, 1, f.n(0.2, 3, 31)) * fade)
+        # cerco amarillento y mugre que sube desde abajo
+        c = mix(c, (120, 104, 62), sstep(0.55, 0.95, f.n(0.35, 4, 32) * 0.6 + sstep(8, 0, f.Y) * 0.4) * dirt)
+        c += (f.white()[..., None] - 0.5) * 6
+        a = np.ones((f.h, f.w))
+        if torn and f.side:
+            # bajo roto: dientes y agujeros
+            low = f.Y - f.Y.min() if f.Y.size else f.Y
+            jag = 1.2 + 2.5 * noise3(f.X * 1.5 + f.Z * 1.5, 0, 0, 1.0, 33)
+            a = np.where(low < jag, 0, a)
+            holes = (f.n(1.1, 2, 34) > 0.82) & (f.Y < 12)
+            a = np.where(holes, 0, a)
+            fray = (low < jag + 0.6) & (a > 0)
+            c = np.where(fray[..., None], c * 0.7, c)
+        return c, a
+    return m
 
 
 def mattress():
-    def paint(a, face, rnd):
-        h, w = a.shape[:2]
-        a[:, :, :3] = (200, 204, 200)
-        a[:, :, 3] = 255
-        a[:, :, :3] += _noise(h, w, rnd, 5)[..., None]
-        for y in range(0, h, 6):
-            a[y, :, :3] *= 0.85
-        if face == "up":
-            for _ in range(w * h // 18):
-                x = rnd.randint(w // 3, 2 * w // 3)
-                y = rnd.randint(h // 3, 2 * h // 3)
-                a[y, x, :3] = (112, 54, 46)
-    return paint
+    def m(f):
+        c = np.zeros((f.h, f.w, 3)) + (150, 152, 138)
+        if f.face == "up":
+            quilt = ((np.floor(f.X) % 5 == 0) | (np.floor(f.Z) % 5 == 0))
+            c = np.where(quilt[..., None], c * 0.82, c)
+        c *= (0.9 + 0.15 * f.n(0.3, 3, 41))[..., None]
+        # vinilo amarillento y cuarteado
+        c = mix(c, (150, 128, 76), sstep(0.45, 0.95, f.n(0.25, 4, 42)) * 0.6)
+        cr = (np.abs(f.n(0.9, 3, 43) - 0.5) < 0.025)
+        c = np.where(cr[..., None], c * 0.65, c)
+        c += (f.white()[..., None] - 0.5) * 6
+        return c, np.ones((f.h, f.w))
+    return m
 
 
-def lamp(color):
-    def paint(a, face, rnd):
-        a[:, :, :3] = color
-        a[:, :, 3] = 255
-        h, w = a.shape[:2]
-        a[: max(1, h // 2), : max(1, w // 2), :3] = np.minimum(255, np.array(color) + 70)
-    return paint
+def leather():
+    def m(f):
+        c = np.zeros((f.h, f.w, 3)) + (78, 50, 32)
+        c *= (0.8 + 0.35 * f.n(0.9, 3, 51))[..., None]
+        c = np.where((f.edge == 0)[..., None], c * 0.65, c)
+        c = mix(c, (120, 90, 60), sstep(0.7, 1, f.n(1.2, 2, 52)) * 0.5)
+        return c, np.ones((f.h, f.w))
+    return m
+
+
+def glass(tint=(36, 48, 50), wire=True, cracked=0.0, dirt=0.6):
+    def m(f):
+        c = np.zeros((f.h, f.w, 3)) + tint
+        c *= (0.75 + 0.5 * f.n(0.3, 3, 61))[..., None]
+        # reflejo diagonal
+        refl = np.abs(((f.U + f.V) * 0.7) % 6 - 1.5) < 0.6
+        c = np.where(refl[..., None], c * 1.45 + 12, c)
+        if wire:
+            g = ((np.floor(f.U * SCALE) % 5 == 0) | (np.floor(f.V * SCALE) % 5 == 0))
+            c = np.where(g[..., None], np.array([82, 88, 86]), c)
+        c = mix(c, (92, 86, 64), sstep(0.5, 1, f.n(0.3, 3, 62) * 0.6 + sstep(4, 0, f.edge) * 0.4) * dirt)
+        if cracked:
+            ang = np.arctan2(f.V - f.V.mean() - 1, f.U - f.U.mean() + 0.5)
+            spokes = (np.abs(np.sin(ang * 5 + 0.7)) < 0.08) & (f.n(0.8, 2, 63) < 0.4 + cracked)
+            rings = np.abs(np.hypot(f.V - f.V.mean() - 1, f.U - f.U.mean() + 0.5) % 2.2 - 1.1) < 0.12
+            c = np.where((spokes | (rings & (f.n(1.2, 2, 64) > 0.55)))[..., None], np.array([170, 178, 176]), c)
+        return c, np.ones((f.h, f.w))
+    return m
+
+
+def stripes(c1=(176, 144, 34), c2=(24, 22, 20)):
+    def m(f):
+        ax = f.X + f.Z + f.Y
+        band = (np.floor(ax / 2.0) % 2) == 0
+        c = np.where(band[..., None], np.array(c1, dtype=float), np.array(c2, dtype=float))
+        c *= (0.88 + 0.2 * f.n(0.5, 3, 71))[..., None]
+        chip = f.n(0.9, 3, 72) > 0.72
+        c = np.where(chip[..., None], np.array([84, 82, 78]), c)
+        c = mix(c, (40, 34, 24), sstep(0.5, 1, f.n(0.3, 3, 73)) * 0.5)
+        return c, np.ones((f.h, f.w))
+    return m
+
+
+def biohazard():
+    def m(f):
+        c = np.zeros((f.h, f.w, 3)) + (196, 160, 36)
+        cx, cy = f.U.mean(), f.V.mean()
+        r = np.hypot(f.U - cx, f.V - cy)
+        ang = np.arctan2(f.V - cy, f.U - cx)
+        sym = ((r > 0.6) & (r < 2.2) & (np.cos(3 * ang) > 0.25)) | (r < 0.45) | ((np.abs(r - 1.5) < 0.18))
+        c = np.where(sym[..., None], np.array([22, 20, 18]), c)
+        c = np.where((f.edge == 0)[..., None], np.array([22, 20, 18]), c)
+        c = mix(c, (90, 80, 40), sstep(0.55, 1, f.n(0.7, 3, 74)) * 0.6)
+        return c, np.ones((f.h, f.w))
+    return m
+
+
+def lamp(color, glow=True):
+    def m(f):
+        c = np.zeros((f.h, f.w, 3)) + color
+        cx, cy = f.U.mean(), f.V.mean()
+        r = np.hypot(f.U - cx, f.V - cy)
+        c *= (1.25 - 0.4 * np.clip(r / max(cx, 0.5), 0, 1))[..., None]
+        c = np.where((r < 0.4)[..., None], np.minimum(c * 1.4 + 30, 255), c)
+        return c, np.ones((f.h, f.w))
+    return m
+
+
+def label(text="", ink=(40, 36, 30)):
+    def m(f):
+        c = np.zeros((f.h, f.w, 3)) + (196, 186, 150)
+        c *= (0.88 + 0.15 * f.n(0.6, 3, 81))[..., None]
+        c = mix(c, (130, 100, 56), sstep(0.5, 1, f.n(0.5, 3, 82)) * 0.6)
+        if text and f.face in ("south", "north"):
+            from texlib import Canvas
+            cv = Canvas(f.w, f.h)
+            cv.c = c.copy()
+            tw = len(text) * 4 - 1
+            stencil_text(cv, max(0, (f.w - tw) // 2), max(0, (f.h - 5) // 2), text, ink, 0.9, f.rng)
+            c = cv.c
+        return c, np.ones((f.h, f.w))
+    return m
+
+
+def keypad():
+    def m(f):
+        c, a = metal((60, 62, 64), False)(f)
+        if f.face == "south":
+            for j in range(4):
+                for i in range(3):
+                    x0, y0 = 2 + i * 3, 4 + j * 3
+                    if y0 + 1 < f.h and x0 + 1 < f.w:
+                        c[y0:y0 + 2, x0:x0 + 2] = (120, 122, 118)
+            c[1:3, 2:9] = (30, 70, 40)
+        return c, a
+    return m
 
 
 MAT = {
-    "paint_white": solid((210, 214, 208), 5, 0.03, 0.08),
-    "paint_white_dark": solid((170, 174, 168), 5, 0.03),
-    "steel": solid((150, 156, 160), 6, 0.02, 0.05, brushed=True),
-    "steel_dark": solid((84, 92, 96), 6, 0.03, 0.12, brushed=True),
-    "chrome": solid((196, 200, 204), 4, 0.0, brushed=True),
-    "rubber": solid((34, 34, 36), 3),
-    "locker": solid((88, 104, 116), 6, 0.03, 0.1),
-    "locker_door": solid((104, 122, 136), 6, 0.03, 0.08),
-    "locker_inner": solid((44, 50, 56), 4, 0.02, bevel=False),
+    "paint_white": painted((176, 178, 168), chip=0.3, grime=0.6, rust_amt=0.3),
+    "paint_white_dark": painted((140, 142, 134), chip=0.3, grime=0.6),
+    "paint_green": painted((96, 116, 100), chip=0.35, grime=0.6, rust_amt=0.35),
+    "steel": metal((134, 138, 140)),
+    "steel_dark": painted((70, 76, 78), under=(110, 108, 102), chip=0.3, grime=0.6, rust_amt=0.45, dent=0.3),
+    "chrome": metal((178, 182, 184), tarnish=0.6, rust_amt=0.25),
+    "rubber": rubber(),
+    "locker": painted((76, 92, 104), chip=0.35, grime=0.65, rust_amt=0.5, dent=0.35),
+    "locker_door": painted((88, 106, 118), chip=0.35, grime=0.6, rust_amt=0.45, dent=0.4),
+    "locker_inner": dark((22, 22, 22)),
     "vents": vents(),
-    "wood": solid((112, 80, 52), 9, 0.03),
-    "wood_dark": solid((84, 58, 38), 8, 0.03),
-    "bin_green": solid((62, 104, 64), 7, 0.04, 0.1),
-    "bin_lid": solid((48, 84, 50), 6, 0.04),
+    "wood": wood(),
+    "wood_dark": wood((70, 46, 30)),
+    "bin_green": painted((54, 86, 54), chip=0.2, grime=0.7, rust_amt=0.1, streak=0.6),
+    "bin_lid": painted((44, 72, 44), chip=0.2, grime=0.6, rust_amt=0.1),
     "biohazard": biohazard(),
     "mattress": mattress(),
-    "sheet": cloth((214, 218, 212)),
-    "cloth": cloth(),
-    "wheel_red": solid((172, 34, 30), 6, 0.02),
-    "pipe_rust": solid((112, 92, 76), 9, 0.06, 0.4),
-    "amber": lamp((230, 150, 40)),
-    "lamp_green": lamp((60, 230, 110)),
-    "lamp_red": lamp((200, 36, 36)),
+    "sheet": fabric((176, 176, 166), folds=False, dirt=0.6, fade=0.0),
+    "sheet_torn": fabric((176, 176, 166), folds=True, dirt=0.7, torn=True, fade=0.0),
+    "cloth": fabric((104, 132, 118), torn=True),
+    "leather": leather(),
+    "wheel_red": painted((138, 28, 24), under=(90, 70, 60), chip=0.4, grime=0.4, rust_amt=0.5, streak=0.1),
+    "pipe_rust": painted((90, 84, 76), under=(100, 52, 26), chip=0.6, grime=0.6, rust_amt=0.9, streak=0.7),
+    "amber": lamp((220, 140, 36)),
+    "amber_dead": lamp((90, 60, 30)),
+    "lamp_green": lamp((60, 220, 100)),
+    "lamp_red": lamp((210, 30, 30)),
     "stripes": stripes(),
-    "glass": wire_glass(),
-    "black": solid((16, 16, 18), 2, bevel=False),
-    "label": solid((232, 228, 206), 3),
+    "glass": glass(),
+    "glass_cracked": glass(cracked=0.4),
+    "glass_blood": glass(tint=(30, 30, 32), wire=False, dirt=0.4),
+    "blood_bag": painted((96, 10, 12), under=(70, 8, 8), chip=0.0, grime=0.1, rust_amt=0, streak=0, scratch=0, gloss=0.4),
+    "black": dark(),
+    "label": label(),
+    "label_lab": label("LAB"),
+    "label_bio": label("BIO"),
+    "label_num": label("13"),
+    "label_danger": label("SP", (130, 20, 16)),
+    "keypad": keypad(),
 }
+
+
+# Sangre en el espacio del modelo -----------------------------------------------------------------------
+
+def blood_layer(f, splats):
+    """Manchas 3D: ('splat', centro, radio), ('drip', x, z, y0, largo), ('hand', centro, normal_eje)."""
+    k = np.zeros((f.h, f.w))
+    P = np.stack([f.X, f.Y, f.Z], -1)
+    for s in splats:
+        if s[0] == "splat":
+            _, cen, rad = s[:3]
+            d = np.linalg.norm(P - np.asarray(cen), axis=-1)
+            edge = rad * (0.75 + 0.5 * noise3(f.X, f.Y, f.Z, 0.9, 91))
+            k = np.maximum(k, sstep(edge + 0.3, edge - 0.4, d))
+            # gotitas alrededor
+            drops = (noise3(f.X, f.Y, f.Z, 2.5, 92) > 0.86) & (d < rad * 2.2)
+            k = np.maximum(k, drops.astype(float))
+        elif s[0] == "drip" and f.side:
+            _, x, z, y0, ln = s
+            d = np.hypot(f.X - x, f.Z - z)
+            w = 0.35 + 0.25 * (f.Y > y0 - 1)
+            ok = (f.Y <= y0) & (f.Y >= y0 - ln) & (d < w + 0.2)
+            k = np.maximum(k, ok.astype(float))
+        elif s[0] == "smear" and f.side:
+            _, cen, rad, ln = s
+            dx = f.X + f.Z - (cen[0] + cen[2])
+            dy = f.Y - cen[1]
+            ok = (np.abs(dx) < rad) & (dy < 0.5) & (dy > -ln * (0.5 + 0.5 * noise3(f.X + f.Z, 0, 0, 1.3, 93)))
+            near = np.abs(np.where(f.face in ("north", "south"), f.Z - cen[2], f.X - cen[0])) < 1.5
+            k = np.maximum(k, (ok & near).astype(float) * (noise3(f.X, f.Y, f.Z, 2.0, 94) > 0.25))
+    return k
+
+
+def apply_blood(c, k, f, age=0.5):
+    if not k.any():
+        return c
+    fresh = np.array([104, 8, 10]) * (1 - age) + np.array([64, 22, 16]) * age
+    col = np.zeros_like(c) + fresh
+    col *= (0.7 + 0.5 * noise3(f.X, f.Y, f.Z, 1.5, 95))[..., None]
+    return mix(c, col, np.clip(k, 0, 1) * 0.92)
 
 
 # Modelo ----------------------------------------------------------------------------------------------
@@ -196,21 +466,32 @@ class Geo:
     def __init__(self, name, seed=0):
         self.name = name
         self.bones = []
-        self.rnd = random.Random(seed)
+        self.seed = seed
+        self.splats = []
 
-    def bone(self, name, parent=None, pivot=(0, 0, 0)):
+    def bone(self, name, parent=None, pivot=(0, 0, 0), rotation=None):
         b = {"name": name, "pivot": list(pivot), "cubes": []}
         if parent:
             b["parent"] = parent
+        if rotation:
+            b["rotation"] = list(rotation)
         self.bones.append(b)
         return name
 
-    def cube(self, bone, origin, size, mat, skip=()):
+    def cube(self, bone, origin, size, mat, skip=(), rotation=None, pivot=None, blood=True, inflate=0):
         b = next(x for x in self.bones if x["name"] == bone)
-        b["cubes"].append({"origin": list(origin), "size": list(size), "mat": mat, "skip": set(skip)})
+        c = {"origin": list(origin), "size": list(size), "mat": mat, "skip": set(skip), "blood": blood}
+        if rotation:
+            c["rotation"] = list(rotation)
+            c["pivot"] = list(pivot or [origin[0] + size[0] / 2, origin[1] + size[1] / 2, origin[2] + size[2] / 2])
+        if inflate:
+            c["inflate"] = inflate
+        b["cubes"].append(c)
+
+    def blood(self, *splat):
+        self.splats.append(splat)
 
     def save(self):
-        # Caras a repartir: (bone, cubo, cara, ancho, alto) en unidades de modelo
         faces = []
         for b in self.bones:
             for c in b["cubes"]:
@@ -223,7 +504,6 @@ class Geo:
                         continue
                     w, h = dims[f]
                     faces.append((c, f, max(1, math.ceil(w)), max(1, math.ceil(h)), w, h))
-        # Estantes por altura
         faces.sort(key=lambda t: -t[3])
         W = 64
         while True:
@@ -236,32 +516,44 @@ class Geo:
                 if x + w > W:
                     x, y, row = 0, y + row, 0
                 c["uv"][f] = (x, y, rw, rh, w, h)
-                x += w + 0
+                x += w
                 row = max(row, h)
             Ht = y + row
             if ok and Ht <= W * 2:
                 break
             W *= 2
         TW, TH = W, max(16, 1 << math.ceil(math.log2(max(1, Ht))))
-        img = np.zeros((TH * SCALE, TW * SCALE, 4), dtype=np.float32)
-        for c, f, w, h, rw, rh in faces:
+        img = np.zeros((TH * SCALE, TW * SCALE, 4), dtype=np.float64)
+        for n, (c, f, w, h, rw, rh) in enumerate(faces):
             u, v, _, _, pw, ph = c["uv"][f]
-            reg = np.zeros((ph * SCALE, pw * SCALE, 4), dtype=np.float32)
-            MAT[c["mat"]](reg, f, self.rnd)
-            np.clip(reg, 0, 255, out=reg)
-            img[v * SCALE:(v + ph) * SCALE, u * SCALE:(u + pw) * SCALE] = reg
+            face = Face(c, f, pw * SCALE, ph * SCALE, self.seed * 1000 + n)
+            col, a = MAT[c["mat"]](face)
+            if c["blood"] and self.splats:
+                col = apply_blood(col, blood_layer(face, self.splats), face)
+            # oclusion: las caras de abajo y lo que queda cerca del suelo, mas oscuro
+            if f == "down":
+                col = col * 0.6
+            col = col * (0.82 + 0.18 * sstep(0, 6, face.Y))[..., None]
+            img[v * SCALE:(v + ph) * SCALE, u * SCALE:(u + pw) * SCALE, :3] = np.clip(col, 0, 255)
+            img[v * SCALE:(v + ph) * SCALE, u * SCALE:(u + pw) * SCALE, 3] = a * 255
 
         bones_out = []
         for b in self.bones:
             out = {"name": b["name"], "pivot": b["pivot"]}
             if "parent" in b:
                 out["parent"] = b["parent"]
+            if "rotation" in b:
+                out["rotation"] = b["rotation"]
             cubes = []
             for c in b["cubes"]:
-                uv = {}
-                for f, (u, v, rw, rh, _, _) in c["uv"].items():
-                    uv[f] = {"uv": [u, v], "uv_size": [rw, rh]}
-                cubes.append({"origin": c["origin"], "size": c["size"], "uv": uv})
+                uv = {f: {"uv": [u, v], "uv_size": [rw, rh]} for f, (u, v, rw, rh, _, _) in c["uv"].items()}
+                cc = {"origin": c["origin"], "size": c["size"], "uv": uv}
+                if "rotation" in c:
+                    cc["rotation"] = c["rotation"]
+                    cc["pivot"] = c["pivot"]
+                if "inflate" in c:
+                    cc["inflate"] = c["inflate"]
+                cubes.append(cc)
             if cubes:
                 out["cubes"] = cubes
             bones_out.append(out)
@@ -283,59 +575,89 @@ class Geo:
 
 
 # Modelos ---------------------------------------------------------------------------------------------
-# Coordenadas en pixeles: el bloque va de -8 a 8 en X y Z y de 0 a 16 en Y. El frente es +Z.
+# Coordenadas en pixeles: el bloque va de -8 a 8 en X y Z y de 0 a 16 en Y. El frente es +Z (sur).
 
 def lab_door(name, security):
     g = Geo(name, 3 if security else 2)
     g.bone("root")
     g.bone("leaf", "root")
-    body = "steel_dark" if security else "paint_white"
     z0, t = -8, 3
-    # Marco de la hoja y paneles
-    g.cube("leaf", (-8, 0, z0), (16, 32, t), body)
-    g.cube("leaf", (-7, 4, z0 - 0.2), (14, 1, t + 0.4), "paint_white_dark" if not security else "steel")
-    # Ventana con malla de alambre
     if security:
-        g.cube("leaf", (-3, 20, z0 - 0.1), (6, 7, t + 0.2), "glass")
+        # Hoja blindada: chapa con refuerzos, franjas, mirilla y cerradura
+        g.cube("leaf", (-8, 0, z0), (16, 32, t), "steel_dark")
+        for y in (8, 22):
+            g.cube("leaf", (-7, y, z0 - 0.4), (14, 1.5, t + 0.8), "steel")              # refuerzos
+        for x in (-7, 6):
+            g.cube("leaf", (x, 1, z0 - 0.3), (1, 30, t + 0.6), "steel")
+        g.cube("leaf", (-3, 24, z0 - 0.1), (6, 5, t + 0.2), "glass_cracked")
+        g.cube("leaf", (-3.5, 23.5, z0 - 0.25), (7, 0.5, t + 0.5), "steel")
+        g.cube("leaf", (-3.5, 29, z0 - 0.25), (7, 0.5, t + 0.5), "steel")
+        g.cube("leaf", (-6, 13, z0 - 0.9), (12, 1.5, t + 1.8), "chrome")                # barra antipanico
+        g.cube("leaf", (-6.5, 12.3, z0 - 0.6), (1, 3, t + 1.2), "steel")
+        g.cube("leaf", (5.5, 12.3, z0 - 0.6), (1, 3, t + 1.2), "steel")
+        g.cube("leaf", (-8, 0, z0 - 0.15), (16, 5, t + 0.3), "stripes")
+        g.cube("leaf", (-2, 17.5, z0 - 0.2), (4, 2.5, t + 0.4), "label_danger")
+        for x in (-6.5, 5.5):
+            for y in (2, 9.5, 20.5, 29.5):
+                g.cube("leaf", (x, y, z0 - 0.5), (1, 1, t + 1.0), "chrome")              # remaches
+        g.blood("smear", (5, 16, -4.5), 1.6, 9)
+        g.blood("splat", (-3, 6, -4.6), 1.4)
     else:
-        g.cube("leaf", (-5, 16, z0 - 0.1), (10, 12, t + 0.2), "glass")
-        g.cube("leaf", (-5.5, 15.5, z0 - 0.3), (11, 0.5, t + 0.6), "paint_white_dark")
-        g.cube("leaf", (-5.5, 28, z0 - 0.3), (11, 0.5, t + 0.6), "paint_white_dark")
-    # Barra o placa de empuje (simetrica)
-    if security:
-        g.cube("leaf", (-6, 13, z0 - 0.8), (12, 1.5, t + 1.6), "chrome")
-        g.cube("leaf", (-6.5, 12.5, z0 - 0.5), (1, 2.5, t + 1.0), "steel")
-        g.cube("leaf", (5.5, 12.5, z0 - 0.5), (1, 2.5, t + 1.0), "steel")
-    else:
-        g.cube("leaf", (-2.5, 13, z0 - 0.3), (5, 3, t + 0.6), "chrome")
-    # Placa de patada
-    g.cube("leaf", (-8, 0, z0 - 0.15), (16, 4, t + 0.3), "stripes" if security else "steel")
+        # Puerta de hospital: hoja pintada, ventanuco con malla, placa de empuje y zocalo
+        g.cube("leaf", (-8, 0, z0), (16, 32, t), "paint_white")
+        g.cube("leaf", (-7, 4, z0 - 0.2), (14, 1, t + 0.4), "paint_white_dark")
+        g.cube("leaf", (-5, 16, z0 - 0.1), (10, 12, t + 0.2), "glass_cracked")
+        for y in (15.5, 28):
+            g.cube("leaf", (-5.5, y, z0 - 0.3), (11, 0.5, t + 0.6), "paint_white_dark")
+        for x in (-5.5, 5):
+            g.cube("leaf", (x, 15.5, z0 - 0.3), (0.5, 13, t + 0.6), "paint_white_dark")
+        g.cube("leaf", (-2.5, 12, z0 - 0.3), (5, 3, t + 0.6), "chrome")
+        g.cube("leaf", (-8, 0, z0 - 0.15), (16, 4, t + 0.3), "steel")
+        g.cube("leaf", (-1.5, 29, z0 - 0.2), (3, 2, t + 0.4), "label_lab")
+        g.blood("smear", (2, 14, -4.6), 1.8, 10)
+        g.blood("splat", (-5, 2, -4.6), 1.6)
+        g.blood("drip", -4, -4.6, 22, 8)
     return g.save()
 
 
-def locker(name, body, door, wood=False):
-    g = Geo(name, 5)
+def locker(name, body, door, wood_=False):
+    g = Geo(name, 5 if not wood_ else 6)
     g.bone("root")
     g.bone("body", "root")
     g.bone("door", "root", (7, 0, 7))
     inner = "locker_inner"
-    g.cube("body", (-8, 0, -8), (16, 32, 1), body)                 # fondo
-    g.cube("body", (-8, 0, -7), (1, 32, 15), body)                 # lados
-    g.cube("body", (7, 0, -7), (1, 32, 15), body)
-    g.cube("body", (-7, 31, -7), (14, 1, 15), body)                # techo
-    g.cube("body", (-7, 0, -7), (14, 1, 15), body)                 # suelo
-    g.cube("body", (-7, 1, -7), (14, 30, 0.2), inner)              # interior oscuro
-    g.cube("body", (-7, 22, -6), (14, 0.5, 6), inner)              # balda
-    # Puerta (simetrica en X)
-    g.cube("door", (-7, 1, 7), (14, 30, 1), door)
-    if not wood:
-        g.cube("door", (-4.5, 20, 7.6), (9, 8, 0.6), "vents")
-        g.cube("door", (-4.5, 3, 7.6), (9, 5, 0.6), "vents")
-        g.cube("door", (-1.5, 27.5, 7.7), (3, 2, 0.5), "label")
+    g.cube("body", (-8, 0.5, -8), (16, 31, 1), body)                 # fondo
+    g.cube("body", (-8, 0.5, -7), (1, 31, 15), body)                 # lados
+    g.cube("body", (7, 0.5, -7), (1, 31, 15), body)
+    g.cube("body", (-8, 31.5, -8), (16, 0.5, 16), body)              # techo
+    g.cube("body", (-7, 0.5, -7), (14, 1, 15), body)                 # suelo
+    g.cube("body", (-7, 1.5, -7), (14, 30, 0.2), inner)              # interior oscuro
+    g.cube("body", (-7, 22, -6), (14, 0.5, 6), inner)                # balda
+    for x in (-7.5, 6.5):                                            # patas
+        for z in (-7.5, 6.5):
+            g.cube("body", (x, 0, z), (1, 0.5, 1), "black")
+    if not wood_:
+        g.cube("body", (-7, 1.5, -6.8), (1.2, 8, 1.2), inner)          # bulto colgado (bata)
+        g.cube("door", (-7, 1.5, 7), (14, 30, 1), door)
+        g.cube("door", (-4.5, 21, 7.6), (9, 7, 0.6), "vents")
+        g.cube("door", (-4.5, 4, 7.6), (9, 4, 0.6), "vents")
+        g.cube("door", (-2, 28.5, 7.7), (4, 2, 0.5), "label_num")
+        g.cube("door", (-1, 13, 8), (2, 4, 0.8), "chrome")             # tirador
+        g.cube("door", (-0.6, 11.6, 8.2), (1.2, 1.2, 0.6), "steel")    # candado roto
+        for y in (4, 26):
+            g.cube("door", (6.4, y, 7.8), (0.8, 2, 0.6), "steel")       # bisagras
+        g.blood("smear", (-1, 17, 8), 1.5, 9)
+        g.blood("drip", 3, 8.3, 30, 12)
     else:
-        g.cube("door", (-6, 3, 7.4), (12, 12, 0.6), "wood_dark")
-        g.cube("door", (-6, 17, 7.4), (12, 12, 0.6), "wood_dark")
-    g.cube("door", (-1, 13, 8), (2, 4, 0.8), "chrome")
+        g.cube("door", (-7, 1.5, 7), (14, 30, 1), "wood")
+        for y0 in (3, 17):
+            g.cube("door", (-6, y0, 7.6), (12, 12, 0.4), "wood_dark")                # cuarterones
+            g.cube("door", (-5, y0 + 1, 7.8), (10, 10, 0.4), "wood")
+        g.cube("door", (-1, 15.5, 8.1), (2, 1, 0.9), "chrome")
+        g.cube("body", (-8.5, 31.5, -8.5), (17, 1, 17), "wood_dark")               # cornisa
+        g.cube("body", (-8.3, 0, -8.3), (16.6, 1.5, 16.6), "wood_dark")            # zocalo
+        g.cube("door", (-6.5, 29.5, 7.6), (2.5, 1.5, 0.3), "label")
+        g.blood("splat", (-3, 6, 8.1), 1.3)
     return g.save()
 
 
@@ -349,31 +671,59 @@ def waste_container():
     g.cube("body", (-7, 1.5, -6), (1, 24.5, 12), "bin_green")
     g.cube("body", (6, 1.5, -6), (1, 24.5, 12), "bin_green")
     g.cube("body", (-6, 1.5, -6), (12, 1, 12), "locker_inner")
-    g.cube("body", (-7.5, 24, -7.5), (15, 1, 15), "bin_lid", skip=("up",))   # borde
+    g.cube("body", (-7.5, 24, -7.5), (15, 1, 15), "bin_lid", skip=("up",))
     g.cube("body", (-3, 12, 7), (6, 6, 0.4), "biohazard")
-    g.cube("body", (-7.5, 6, -7.5), (15, 1, 15), "steel_dark", skip=("up", "down"))  # refuerzo
-    for x, z in ((-6, -6), (4, -6), (-6, 4), (4, 4)):
+    g.cube("body", (-3, 19, 7), (6, 2, 0.4), "label_bio")
+    g.cube("body", (-7.5, 6, -7.5), (15, 1, 15), "steel_dark", skip=("up", "down"))
+    for x, z in ((-6.5, -6.5), (4.5, -6.5), (-6.5, 4.5), (4.5, 4.5)):
         g.cube("body", (x, 0, z), (2, 1.5, 2), "rubber")
+    g.cube("body", (-2, 0.5, 7), (4, 1, 1.5), "steel")              # pedal
     g.cube("lid", (-7.5, 25, -7.5), (15, 1.5, 15), "bin_lid")
-    g.cube("lid", (-3, 26.5, 5), (6, 1, 1.5), "black")             # asa
+    g.cube("lid", (-3, 26.5, 5), (6, 1, 1.5), "black")
+    # algo asoma por debajo de la tapa y gotea
+    g.cube("body", (-1, 24.5, 6.8), (3, 1, 1.2), "sheet", blood=True)
+    g.blood("drip", 0.5, 7.4, 25, 14)
+    g.blood("drip", -0.5, 7.4, 25, 9)
+    g.blood("splat", (0.5, 1, 9), 2.0)
     return g.save()
 
 
 def gurney():
     g = Geo("gurney", 8)
     g.bone("root")
-    g.cube("root", (-7.5, 9, -7.5), (15, 1, 15), "steel")              # bandeja
-    g.cube("root", (-7, 10, -7), (14, 2, 14), "mattress")
-    g.cube("root", (-6.5, 12, 3), (13, 1.5, 4), "sheet")               # almohada
-    g.cube("root", (-7.2, 11.8, -7.2), (14.4, 0.6, 9), "sheet")        # sabana
-    for x in (-7.5, 6.5):                                              # barandillas
-        g.cube("root", (x, 13, -6), (1, 1, 12), "chrome")
-        g.cube("root", (x, 10, -6), (1, 3, 1), "chrome")
-        g.cube("root", (x, 10, 5), (1, 3, 1), "chrome")
-    for x, z in ((-7, -7), (6, -7), (-7, 6), (6, 6)):                  # patas y ruedas
-        g.cube("root", (x, 1.5, z), (1, 7.5, 1), "chrome")
-        g.cube("root", (x - 0.5, 0, z - 0.5), (2, 1.5, 2), "rubber")
-    g.cube("root", (-7, 4, -0.5), (14, 1, 1), "steel")                 # travesano
+    # bastidor y patas con ruedas
+    g.cube("root", (-7.5, 8.5, -7.5), (15, 1, 15), "steel")
+    for x, z in ((-7, -7), (6, -7), (-7, 6), (6, 6)):
+        g.cube("root", (x, 1.8, z), (1, 6.7, 1), "chrome")
+        g.cube("root", (x - 0.25, 1.2, z - 0.25), (1.5, 0.6, 1.5), "steel")
+        g.cube("root", (x - 0.2, 0, z - 0.6), (1.4, 1.6, 2.2), "rubber")
+    g.cube("root", (-7, 3.5, -0.5), (14, 1, 1), "steel")
+    g.cube("root", (-0.5, 3.5, -7), (1, 1, 14), "steel")
+    # colchon con cabecero levantado
+    g.cube("root", (-7, 9.5, -7), (14, 2, 10), "mattress")
+    g.cube("root", (-7, 9.5, 3), (14, 2, 4.2), "mattress", rotation=(-25, 0, 0), pivot=(0, 10.5, 3))
+    # sabana arrugada que cuelga por un lado
+    g.cube("root", (-7.3, 11.4, -7.2), (14.6, 0.5, 9.5), "sheet")
+    g.cube("root", (-7.6, 6.5, -6), (0.4, 5.4, 8), "sheet_torn")
+    # correas de sujecion con hebilla
+    for z in (-4.5, 0.5):
+        g.cube("root", (-7.4, 11.5, z), (14.8, 0.7, 1.6), "leather", blood=False)
+        g.cube("root", (5.2, 11.6, z + 0.1), (1.2, 0.9, 1.4), "chrome", blood=False)
+    # barandillas abatibles
+    for x in (-8, 7.2):
+        g.cube("root", (x, 13.5, -6), (0.8, 0.8, 10), "chrome")
+        for z in (-6, 3.2):
+            g.cube("root", (x, 9.5, z), (0.8, 4, 0.8), "chrome")
+    # gotero con bolsa de sangre
+    g.cube("root", (6.4, 9.5, 6.4), (0.6, 18, 0.6), "chrome")
+    g.cube("root", (3, 27, 6.4), (4, 0.5, 0.5), "chrome")
+    g.cube("root", (3, 22, 5.9), (2.2, 4.5, 1.4), "blood_bag", blood=False)
+    g.cube("root", (3.9, 15, 6.4), (0.3, 7, 0.3), "blood_bag", blood=False)
+    # la mancha: empapa el colchon, la sabana y gotea al suelo
+    g.blood("splat", (-1, 12, -2), 4.5)
+    g.blood("splat", (2, 11.5, 2.5), 2.2)
+    g.blood("drip", -7.4, -1, 11.5, 7)
+    g.blood("drip", -7.4, -3, 11, 5)
     return g.save()
 
 
@@ -382,11 +732,17 @@ def curtain():
     g.bone("root")
     g.bone("cloth", "root", (0, 31, 0))
     g.cube("root", (-8, 31, -0.5), (16, 1, 1), "chrome")
-    for i in range(8):
-        z = -1.2 if i % 2 == 0 else 0.2
-        g.cube("cloth", (-8 + 2 * i, 1, z), (2, 30, 1), "cloth")
-    for i in range(4):
-        g.cube("root", (-7 + 4 * i, 30, -0.7), (1, 1.5, 1.4), "steel")  # anillas
+    # pliegues: tiras de ancho y fondo distintos (la tela ondula)
+    xs = [-8, -6.5, -4.6, -3, -1.2, 0.6, 2.4, 4, 5.8, 8]
+    for i in range(len(xs) - 1):
+        z = [-1.2, 0.1, -0.6, 0.5, -1.0, 0.2, -0.8, 0.4, -0.3][i]
+        g.cube("cloth", (xs[i], 0.6, z), (xs[i + 1] - xs[i], 30.4, 0.9), "cloth")
+    for i in range(5):
+        g.cube("root", (-7.3 + 3.6 * i, 30, -0.7), (0.8, 1.5, 1.4), "steel")
+    g.blood("splat", (2, 18, 0.5), 2.6)
+    g.blood("drip", 1.5, 0.9, 16, 9)
+    g.blood("drip", 3.2, 0.9, 17, 6)
+    g.blood("smear", (-4, 9, 0.9), 1.2, 6)
     return g.save()
 
 
@@ -396,11 +752,13 @@ def valve():
     g.bone("wheel", "root", (0, 8, -2))
     g.cube("root", (-5, 3, -8), (10, 10, 2), "pipe_rust")
     for x, y in ((-4, 4), (3, 4), (-4, 11), (3, 11)):
-        g.cube("root", (x, y, -6.2), (1, 1, 0.4), "chrome")              # tornillos
+        g.cube("root", (x, y, -6.2), (1, 1, 0.4), "chrome")
     g.cube("root", (-1.5, 6.5, -6), (3, 3, 4.5), "steel")
-    g.cube("root", (-8, 6, -8), (3, 4, 3), "pipe_rust")                  # tuberia a la pared
+    g.cube("root", (-8, 6, -8), (3, 4, 3), "pipe_rust")
     g.cube("root", (5, 6, -8), (3, 4, 3), "pipe_rust")
-    # Rueda
+    g.cube("root", (-8.2, 5.6, -8), (1, 4.8, 3.4), "steel_dark")
+    g.cube("root", (7.2, 5.6, -8), (1, 4.8, 3.4), "steel_dark")
+    g.cube("root", (-2.5, 13.5, -7.8), (5, 2, 0.4), "label_danger")
     g.cube("wheel", (-5, 12, -2.5), (10, 1.5, 1.5), "wheel_red")
     g.cube("wheel", (-5, 2.5, -2.5), (10, 1.5, 1.5), "wheel_red")
     g.cube("wheel", (-6, 3, -2.5), (1.5, 10, 1.5), "wheel_red")
@@ -415,13 +773,17 @@ def fuse_box():
     g = Geo("fuse_box", 11)
     g.bone("root")
     g.cube("root", (-6.5, 1, -8), (13, 14, 4), "steel_dark")
-    g.cube("root", (-5.5, 2, -4.1), (11, 9.5, 0.2), "black")            # hueco interior
+    g.cube("root", (-5.5, 2, -4.1), (11, 9.5, 0.2), "black")
     g.cube("root", (-5.5, 12.3, -4.2), (11, 1.8, 0.3), "stripes")
-    g.cube("root", (-6.8, 0.8, -8), (0.6, 14.4, 4.3), "steel")          # bisagras/canto
+    g.cube("root", (-6.8, 0.8, -8), (0.6, 14.4, 4.3), "steel")
     g.cube("root", (6.2, 0.8, -8), (0.6, 14.4, 4.3), "steel")
+    # cables que salen por arriba y una etiqueta
+    for x in (-4, -2.5, 3):
+        g.cube("root", (x, 15, -7), (0.8, 1, 0.8), "black")
+    g.cube("root", (-5.6, 12.4, -4.5), (3, 1.6, 0.3), "label")
     for i in range(4):
         x = -4.6 + i * 2.6
-        g.cube("root", (x, 3, -4.4), (1.6, 0.8, 0.5), "chrome")         # contactos
+        g.cube("root", (x, 3, -4.4), (1.6, 0.8, 0.5), "chrome")
         g.cube("root", (x, 9.4, -4.4), (1.6, 0.8, 0.5), "chrome")
         b = g.bone(f"fuse{i}", "root")
         g.cube(b, (x, 3.8, -4.6), (1.6, 5.6, 1.2), "amber")
@@ -431,83 +793,26 @@ def fuse_box():
     g.cube("lamp_on", (3.5, 12.4, -4.6), (1.6, 1.6, 0.8), "lamp_green")
     g.bone("lamp_off", "root")
     g.cube("lamp_off", (3.5, 12.4, -4.6), (1.6, 1.6, 0.8), "lamp_red")
+    g.blood("smear", (-1, 9, -4.2), 1.3, 7)
     return g.save()
 
 
-# Iconos de objeto (16x16) ------------------------------------------------------------------------------
-
-def icon(name, draw):
-    a = np.zeros((16, 16, 4), dtype=np.float32)
-    draw(a)
-    (ROOT / "textures/item").mkdir(parents=True, exist_ok=True)
-    Image.fromarray(np.clip(a, 0, 255).astype(np.uint8), "RGBA").save(ROOT / "textures/item" / f"{name}.png")
-
-
-def box_icon(body, front_detail):
-    def d(a):
-        a[1:15, 4:12] = (*body, 255)
-        a[1:15, 4] = (*[int(c * 1.2) for c in body], 255)
-        a[1:15, 11] = (*[int(c * 0.7) for c in body], 255)
-        front_detail(a)
-    return d
+MODELS = (("lab_door", lambda: lab_door("lab_door", False)),
+          ("security_door", lambda: lab_door("security_door", True)),
+          ("locker", lambda: locker("locker", "locker", "locker_door")),
+          ("wardrobe", lambda: locker("wardrobe", "wood", "wood", wood_=True)),
+          ("waste_container", waste_container),
+          ("gurney", gurney), ("curtain", curtain), ("valve", valve), ("fuse_box", fuse_box))
 
 
 def main():
-    for name, fn in (("lab_door", lambda: lab_door("lab_door", False)),
-                     ("security_door", lambda: lab_door("security_door", True)),
-                     ("locker", lambda: locker("locker", "locker", "locker_door")),
-                     ("wardrobe", lambda: locker("wardrobe", "wood", "wood", wood=True)),
-                     ("waste_container", waste_container),
-                     ("gurney", gurney), ("curtain", curtain), ("valve", valve), ("fuse_box", fuse_box)):
+    for name, fn in MODELS:
         tw, th, nf = fn()
         print(f"{name:16} textura {tw * SCALE}x{th * SCALE}  caras={nf}")
-
-    def vents_d(a):
-        for y in (3, 5, 7):
-            a[y, 6:10] = (14, 14, 16, 255)
-        a[9:11, 7:9] = (200, 200, 200, 255)
-    icon("locker", box_icon((104, 122, 136), vents_d))
-    icon("wardrobe", box_icon((112, 80, 52), lambda a: a.__setitem__((slice(8, 10), slice(7, 9)), (200, 180, 90, 255))))
-
-    def bin_d(a):
-        a[2:4, 3:13] = (48, 84, 50, 255)
-        a[7:11, 6:10] = (230, 200, 40, 255)
-        a[8:10, 7:9] = (20, 20, 20, 255)
-    icon("waste_container", box_icon((62, 104, 64), bin_d))
-
-    def gurney_d(a):
-        a[6:8, 1:15] = (200, 204, 200, 255)
-        a[8, 1:15] = (150, 156, 160, 255)
-        for x in (2, 13):
-            a[9:13, x] = (190, 194, 198, 255)
-            a[13, x - 1:x + 2] = (34, 34, 36, 255)
-    icon("gurney", gurney_d)
-
-    def curtain_d(a):
-        a[1, 1:15] = (190, 194, 198, 255)
-        for x in range(1, 15):
-            k = 0.85 + 0.15 * math.cos(x * 1.4)
-            a[2:15, x] = (int(150 * k), int(178 * k), int(160 * k), 255)
-    icon("curtain", curtain_d)
-
-    def valve_d(a):
-        for y in range(16):
-            for x in range(16):
-                d = math.hypot(x - 7.5, y - 7.5)
-                if 5 <= d <= 6.8:
-                    a[y, x] = (172, 34, 30, 255)
-        a[7:9, 2:14] = (150, 30, 26, 255)
-        a[2:14, 7:9] = (150, 30, 26, 255)
-        a[6:10, 6:10] = (196, 200, 204, 255)
-    icon("valve", valve_d)
-
-    def fuse_d(a):
-        a[2:14, 3:13] = (84, 92, 96, 255)
-        a[4:12, 4:12] = (16, 16, 18, 255)
-        for x in (5, 8, 10):
-            a[5:11, x] = (230, 150, 40, 255)
-        a[3, 10:12] = (60, 230, 110, 255)
-    icon("fuse_box", fuse_d)
+    if len(sys.argv) > 1:
+        from texlib import sheet
+        ims = [Image.open(ROOT / "textures/block" / f"{n}.png") for n, _ in MODELS]
+        sheet(ims, 3, 2, labels=[n for n, _ in MODELS], bg=(60, 60, 64)).save(sys.argv[1])
 
 
 if __name__ == "__main__":

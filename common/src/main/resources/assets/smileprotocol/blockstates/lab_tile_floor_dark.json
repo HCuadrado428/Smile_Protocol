@@ -1,0 +1,66 @@
+{
+  "variants": {
+    "": [
+      {
+        "model": "smileprotocol:block/lab_tile_floor_dark"
+      },
+      {
+        "model": "smileprotocol:block/lab_tile_floor_dark",
+        "y": 90
+      },
+      {
+        "model": "smileprotocol:block/lab_tile_floor_dark",
+        "y": 180
+      },
+      {
+        "model": "smileprotocol:block/lab_tile_floor_dark",
+        "y": 270
+      },
+      {
+        "model": "smileprotocol:block/lab_tile_floor_dark_1"
+      },
+      {
+        "model": "smileprotocol:block/lab_tile_floor_dark_1",
+        "y": 90
+      },
+      {
+        "model": "smileprotocol:block/lab_tile_floor_dark_1",
+        "y": 180
+      },
+      {
+        "model": "smileprotocol:block/lab_tile_floor_dark_1",
+        "y": 270
+      },
+      {
+        "model": "smileprotocol:block/lab_tile_floor_dark_2"
+      },
+      {
+        "model": "smileprotocol:block/lab_tile_floor_dark_2",
+        "y": 90
+      },
+      {
+        "model": "smileprotocol:block/lab_tile_floor_dark_2",
+        "y": 180
+      },
+      {
+        "model": "smileprotocol:block/lab_tile_floor_dark_2",
+        "y": 270
+      },
+      {
+        "model": "smileprotocol:block/lab_tile_floor_dark_3"
+      },
+      {
+        "model": "smileprotocol:block/lab_tile_floor_dark_3",
+        "y": 90
+      },
+      {
+        "model": "smileprotocol:block/lab_tile_floor_dark_3",
+        "y": 180
+      },
+      {
+        "model": "smileprotocol:block/lab_tile_floor_dark_3",
+        "y": 270
+      }
+    ]
+  }
+}

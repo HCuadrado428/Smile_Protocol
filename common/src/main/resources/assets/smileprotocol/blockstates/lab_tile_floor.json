@@ -1,0 +1,66 @@
+{
+  "variants": {
+    "": [
+      {
+        "model": "smileprotocol:block/lab_tile_floor"
+      },
+      {
+        "model": "smileprotocol:block/lab_tile_floor",
+        "y": 90
+      },
+      {
+        "model": "smileprotocol:block/lab_tile_floor",
+        "y": 180
+      },
+      {
+        "model": "smileprotocol:block/lab_tile_floor",
+        "y": 270
+      },
+      {
+        "model": "smileprotocol:block/lab_tile_floor_1"
+      },
+      {
+        "model": "smileprotocol:block/lab_tile_floor_1",
+        "y": 90
+      },
+      {
+        "model": "smileprotocol:block/lab_tile_floor_1",
+        "y": 180
+      },
+      {
+        "model": "smileprotocol:block/lab_tile_floor_1",
+        "y": 270
+      },
+      {
+        "model": "smileprotocol:block/lab_tile_floor_2"
+      },
+      {
+        "model": "smileprotocol:block/lab_tile_floor_2",
+        "y": 90
+      },
+      {
+        "model": "smileprotocol:block/lab_tile_floor_2",
+        "y": 180
+      },
+      {
+        "model": "smileprotocol:block/lab_tile_floor_2",
+        "y": 270
+      },
+      {
+        "model": "smileprotocol:block/lab_tile_floor_3"
+      },
+      {
+        "model": "smileprotocol:block/lab_tile_floor_3",
+        "y": 90
+      },
+      {
+        "model": "smileprotocol:block/lab_tile_floor_3",
+        "y": 180
+      },
+      {
+        "model": "smileprotocol:block/lab_tile_floor_3",
+        "y": 270
+      }
+    ]
+  }
+}

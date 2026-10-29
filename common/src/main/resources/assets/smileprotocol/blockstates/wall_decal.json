@@ -1,0 +1,124 @@
+{
+  "variants": {
+    "facing=south,variant=0": {
+      "model": "smileprotocol:block/wall_decal_0"
+    },
+    "facing=west,variant=0": {
+      "model": "smileprotocol:block/wall_decal_0",
+      "y": 90
+    },
+    "facing=north,variant=0": {
+      "model": "smileprotocol:block/wall_decal_0",
+      "y": 180
+    },
+    "facing=east,variant=0": {
+      "model": "smileprotocol:block/wall_decal_0",
+      "y": 270
+    },
+    "facing=south,variant=1": {
+      "model": "smileprotocol:block/wall_decal_1"
+    },
+    "facing=west,variant=1": {
+      "model": "smileprotocol:block/wall_decal_1",
+      "y": 90
+    },
+    "facing=north,variant=1": {
+      "model": "smileprotocol:block/wall_decal_1",
+      "y": 180
+    },
+    "facing=east,variant=1": {
+      "model": "smileprotocol:block/wall_decal_1",
+      "y": 270
+    },
+    "facing=south,variant=2": {
+      "model": "smileprotocol:block/wall_decal_2"
+    },
+    "facing=west,variant=2": {
+      "model": "smileprotocol:block/wall_decal_2",
+      "y": 90
+    },
+    "facing=north,variant=2": {
+      "model": "smileprotocol:block/wall_decal_2",
+      "y": 180
+    },
+    "facing=east,variant=2": {
+      "model": "smileprotocol:block/wall_decal_2",
+      "y": 270
+    },
+    "facing=south,variant=3": {
+      "model": "smileprotocol:block/wall_decal_3"
+    },
+    "facing=west,variant=3": {
+      "model": "smileprotocol:block/wall_decal_3",
+      "y": 90
+    },
+    "facing=north,variant=3": {
+      "model": "smileprotocol:block/wall_decal_3",
+      "y": 180
+    },
+    "facing=east,variant=3": {
+      "model": "smileprotocol:block/wall_decal_3",
+      "y": 270
+    },
+    "facing=south,variant=4": {
+      "model": "smileprotocol:block/wall_decal_4"
+    },
+    "facing=west,variant=4": {
+      "model": "smileprotocol:block/wall_decal_4",
+      "y": 90
+    },
+    "facing=north,variant=4": {
+      "model": "smileprotocol:block/wall_decal_4",
+      "y": 180
+    },
+    "facing=east,variant=4": {
+      "model": "smileprotocol:block/wall_decal_4",
+      "y": 270
+    },
+    "facing=south,variant=5": {
+      "model": "smileprotocol:block/wall_decal_5"
+    },
+    "facing=west,variant=5": {
+      "model": "smileprotocol:block/wall_decal_5",
+      "y": 90
+    },
+    "facing=north,variant=5": {
+      "model": "smileprotocol:block/wall_decal_5",
+      "y": 180
+    },
+    "facing=east,variant=5": {
+      "model": "smileprotocol:block/wall_decal_5",
+      "y": 270
+    },
+    "facing=south,variant=6": {
+      "model": "smileprotocol:block/wall_decal_6"
+    },
+    "facing=west,variant=6": {
+      "model": "smileprotocol:block/wall_decal_6",
+      "y": 90
+    },
+    "facing=north,variant=6": {
+      "model": "smileprotocol:block/wall_decal_6",
+      "y": 180
+    },
+    "facing=east,variant=6": {
+      "model": "smileprotocol:block/wall_decal_6",
+      "y": 270
+    },
+    "facing=south,variant=7": {
+      "model": "smileprotocol:block/wall_decal_7"
+    },
+    "facing=west,variant=7": {
+      "model": "smileprotocol:block/wall_decal_7",
+      "y": 90
+    },
+    "facing=north,variant=7": {
+      "model": "smileprotocol:block/wall_decal_7",
+      "y": 180
+    },
+    "facing=east,variant=7": {
+      "model": "smileprotocol:block/wall_decal_7",
+      "y": 270
+    }
+  }
+}

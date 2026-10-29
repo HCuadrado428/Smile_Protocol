@@ -1,0 +1,12 @@
+{
+  "variants": {
+    "": [
+      {
+        "model": "smileprotocol:block/lab_machine"
+      },
+      {
+        "model": "smileprotocol:block/lab_machine_1"
+      }
+    ]
+  }
+}

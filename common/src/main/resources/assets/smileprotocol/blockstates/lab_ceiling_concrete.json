@@ -1,0 +1,36 @@
+{
+  "variants": {
+    "": [
+      {
+        "model": "smileprotocol:block/lab_ceiling_concrete"
+      },
+      {
+        "model": "smileprotocol:block/lab_ceiling_concrete",
+        "y": 90
+      },
+      {
+        "model": "smileprotocol:block/lab_ceiling_concrete",
+        "y": 180
+      },
+      {
+        "model": "smileprotocol:block/lab_ceiling_concrete",
+        "y": 270
+      },
+      {
+        "model": "smileprotocol:block/lab_ceiling_concrete_1"
+      },
+      {
+        "model": "smileprotocol:block/lab_ceiling_concrete_1",
+        "y": 90
+      },
+      {
+        "model": "smileprotocol:block/lab_ceiling_concrete_1",
+        "y": 180
+      },
+      {
+        "model": "smileprotocol:block/lab_ceiling_concrete_1",
+        "y": 270
+      }
+    ]
+  }
+}

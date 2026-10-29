@@ -48,6 +48,14 @@ public final class ModItems {
     public static final Supplier<Item> VALVE_WHEEL = item("valve_wheel", () -> new Item(one()));
     public static final Supplier<Item> FLASHLIGHT = item("flashlight", () -> new Item(one()));
 
+    static {
+        for (String n : ModBlocks.BUILDING_NAMES) block(n, ModBlocks.BUILDING.get(n));
+        block("lab_debris", ModBlocks.LAB_DEBRIS);
+        block("blood_floor", ModBlocks.BLOOD_FLOOR);
+        block("wall_decal", ModBlocks.WALL_DECAL);
+        block("wall_writing", ModBlocks.WALL_WRITING);
+    }
+
     private ModItems() {}
 
     private static Item.Properties one() {

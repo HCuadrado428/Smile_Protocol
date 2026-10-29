@@ -47,7 +47,8 @@ public final class SmileProtocolFabricClient implements ClientModInitializer {
         BlockRenderLayerMap.INSTANCE.putBlock(ModBlocks.ELEVATOR_BUTTON.get(), RenderType.cutout());
         BlockRenderLayerMap.INSTANCE.putBlocks(RenderType.cutout(), ModBlocks.LAB_DOOR.get(), ModBlocks.SECURITY_DOOR.get(),
                 ModBlocks.VALVE.get(), ModBlocks.GURNEY.get(), ModBlocks.CURTAIN.get(), ModBlocks.FUSE_BOX.get(),
-                ModBlocks.LOCKER.get(), ModBlocks.WARDROBE.get(), ModBlocks.WASTE_CONTAINER.get());
+                ModBlocks.LOCKER.get(), ModBlocks.WARDROBE.get(), ModBlocks.WASTE_CONTAINER.get(),
+                ModBlocks.BLOOD_FLOOR.get(), ModBlocks.WALL_DECAL.get(), ModBlocks.WALL_WRITING.get());
     }
 
     private static <T extends CustomPacketPayload> void registerReceiver(SPNetwork.Def<T> def) {

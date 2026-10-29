@@ -1,0 +1,18 @@
+{
+  "variants": {
+    "": [
+      {
+        "model": "smileprotocol:block/lab_wall_tiles"
+      },
+      {
+        "model": "smileprotocol:block/lab_wall_tiles_1"
+      },
+      {
+        "model": "smileprotocol:block/lab_wall_tiles_2"
+      },
+      {
+        "model": "smileprotocol:block/lab_wall_tiles_3"
+      }
+    ]
+  }
+}
