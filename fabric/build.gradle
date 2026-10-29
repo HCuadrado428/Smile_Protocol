@@ -1,0 +1,62 @@
+plugins {
+    id 'fabric-loom'
+}
+
+configurations {
+    commonJava { canBeResolved = true }
+    commonResources { canBeResolved = true }
+}
+
+dependencies {
+    minecraft "com.mojang:minecraft:${minecraft_version}"
+    mappings loom.officialMojangMappings()
+    modImplementation "net.fabricmc:fabric-loader:${fabric_loader_version}"
+    modImplementation "net.fabricmc.fabric-api:fabric-api:${fabric_api_version}"
+
+    modImplementation "software.bernie.geckolib:geckolib-fabric-${minecraft_version}:${geckolib_version}"
+    modImplementation "foundry.veil:veil-fabric-${minecraft_version}:${veil_version}"
+    compileOnly "de.maxhenkel.voicechat:voicechat-api:${voicechat_api_version}"
+
+    compileOnly project(':common')
+    commonJava project(path: ':common', configuration: 'commonJava')
+    commonResources project(path: ':common', configuration: 'commonResources')
+}
+
+loom {
+    mixin {
+        defaultRefmapName = "${mod_id}.refmap.json"
+    }
+    runs {
+        client {
+            client()
+            configName = 'Fabric Client'
+            ideConfigGenerated(true)
+            runDir('runs/client')
+        }
+        server {
+            server()
+            configName = 'Fabric Server'
+            ideConfigGenerated(true)
+            runDir('runs/server')
+        }
+    }
+}
+
+tasks.named('compileJava', JavaCompile).configure {
+    dependsOn configurations.commonJava
+    source(configurations.commonJava)
+}
+
+processResources {
+    dependsOn configurations.commonResources
+    from(configurations.commonResources)
+    inputs.properties modProps
+    filesMatching(['fabric.mod.json', 'pack.mcmeta']) {
+        expand modProps
+    }
+}
+
+sourcesJar {
+    dependsOn configurations.commonJava
+    from(configurations.commonJava)
+}

@@ -1,0 +1,28 @@
+// Codigo comun: compila contra Minecraft "vanilla" (NeoForm, mappings de Mojang) sin loader.
+plugins {
+    id 'net.neoforged.moddev'
+}
+
+neoForge {
+    neoFormVersion = neo_form_version
+}
+
+dependencies {
+    compileOnly 'net.fabricmc:sponge-mixin:0.15.4+mixin.0.8.7'
+    compileOnly 'io.github.llamalad7:mixinextras-common:0.4.1'
+    annotationProcessor 'io.github.llamalad7:mixinextras-common:0.4.1'
+
+    compileOnly "software.bernie.geckolib:geckolib-common-${minecraft_version}:${geckolib_version}"
+    compileOnly "foundry.veil:veil-common-${minecraft_version}:${veil_version}"
+    compileOnly "de.maxhenkel.voicechat:voicechat-api:${voicechat_api_version}"
+}
+
+// Los loaders compilan estas fuentes y recursos dentro de su jar
+configurations {
+    commonJava { canBeResolved = false; canBeConsumed = true }
+    commonResources { canBeResolved = false; canBeConsumed = true }
+}
+artifacts {
+    commonJava sourceSets.main.java.sourceDirectories.singleFile
+    commonResources sourceSets.main.resources.sourceDirectories.singleFile
+}

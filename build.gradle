@@ -1,146 +1,61 @@
 plugins {
-    id 'eclipse'
-    id 'idea'
-    id 'maven-publish'
-    id 'net.minecraftforge.gradle' version '[6.0.24,6.2)'
+    id 'fabric-loom' version '1.10-SNAPSHOT' apply false
+    id 'net.neoforged.moddev' version '2.0.80' apply false
 }
 
-version = mod_version
-group = mod_group_id
+subprojects {
+    apply plugin: 'java'
 
-base {
-    archivesName = mod_id
-}
+    group = mod_group
+    version = mod_version
 
-java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+    base {
+        archivesName = "${mod_id}-${project.name}-${minecraft_version}"
+    }
 
-println "Java: ${System.getProperty 'java.version'}, JVM: ${System.getProperty 'java.vm.version'} (${System.getProperty 'java.vendor'}), Arch: ${System.getProperty 'os.arch'}"
+    java {
+        toolchain.languageVersion = JavaLanguageVersion.of(java_version as int)
+        withSourcesJar()
+    }
 
-minecraft {
-    mappings channel: mapping_channel, version: mapping_version
-    copyIdeResources = true
-
-    runs {
-        configureEach {
-            workingDirectory project.file('run')
-            property 'forge.logging.markers', 'REGISTRIES'
-            property 'forge.logging.console.level', 'debug'
-            mods {
-                "${mod_id}" {
-                    source sourceSets.main
-                }
-            }
+    repositories {
+        mavenCentral()
+        maven { name = 'Fabric'; url = 'https://maven.fabricmc.net/' }
+        maven { name = 'NeoForged'; url = 'https://maven.neoforged.net/releases' }
+        maven {
+            name = 'GeckoLib'
+            url = 'https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/'
+            content { includeGroupByRegex('software\\.bernie.*'); includeGroup('com.eliotlash.mclib') }
         }
-
-        client {
-            property 'forge.enabledGameTestNamespaces', mod_id
-        }
-
-        server {
-            property 'forge.enabledGameTestNamespaces', mod_id
-            args '--nogui'
-        }
-
-        gameTestServer {
-            property 'forge.enabledGameTestNamespaces', mod_id
-        }
-
-        data {
-            workingDirectory project.file('run-data')
-            args '--mod', mod_id, '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
+        // Veil y sus librerias (molang-compiler...)
+        maven { name = 'BlameJared'; url = 'https://maven.blamejared.com/' }
+        maven {
+            name = 'henkelmax'
+            url = 'https://maven.maxhenkel.de/repository/public'
+            content { includeGroup('de.maxhenkel.voicechat') }
         }
     }
-}
 
-sourceSets.main.resources { srcDir 'src/generated/resources' }
-
-repositories {
-    maven {
-        name = 'GeckoLib'
-        url = 'https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/'
-        content {
-            includeGroupByRegex('software\\.bernie.*')
-            includeGroup('com.eliotlash.mclib')
-        }
+    tasks.withType(JavaCompile).configureEach {
+        options.encoding = 'UTF-8'
+        options.release = java_version as int
     }
-    maven {
-        name = 'BlameJared (Veil)'
-        url = 'https://maven.blamejared.com/'
-        content {
-            includeGroupByRegex('foundry\\.veil.*')
-        }
-    }
-    maven {
-        name = 'KosmX (PlayerAnimator)'
-        url = 'https://maven.kosmx.dev/'
-        content {
-            includeGroupByRegex('dev\\.kosmx.*')
-        }
-    }
-    maven {
-        name = 'henkelmax (Simple Voice Chat)'
-        url = 'https://maven.maxhenkel.de/repository/public'
-        content {
-            includeGroup('de.maxhenkel.voicechat')
-        }
-    }
-}
 
-dependencies {
-    minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
-
-    // Obligatorias (README seccion 2)
-    implementation fg.deobf("software.bernie.geckolib:geckolib-forge-${minecraft_version}:${geckolib_version}")
-    // Veil empaqueta sus librerias (molang-compiler...) dentro del jar (jar-in-jar),
-    // asi que no hace falta resolverlas por Maven
-    implementation fg.deobf("foundry.veil:Veil-forge-${minecraft_version}:${veil_version}") {
-        transitive = false
-    }
-    implementation fg.deobf("dev.kosmx.player-anim:player-animation-lib-forge:${player_anim_version}")
-
-    // Opcional: Simple Voice Chat se usa solo a traves de su API (soft dependency)
-    compileOnly "de.maxhenkel.voicechat:voicechat-api:${voicechat_api_version}"
-}
-
-tasks.named('processResources', ProcessResources).configure {
-    var replaceProperties = [
-            minecraft_version      : minecraft_version,
-            minecraft_version_range: minecraft_version_range,
-            forge_version          : forge_version,
-            forge_version_range    : forge_version_range,
-            loader_version_range   : loader_version_range,
-            mod_id                 : mod_id,
-            mod_name               : mod_name,
-            mod_license            : mod_license,
-            mod_version            : mod_version,
-            mod_authors            : mod_authors,
-            mod_description        : mod_description,
-            geckolib_version       : geckolib_version,
-            veil_version           : veil_version,
-            player_anim_version    : player_anim_version,
+    // Variables que se sustituyen en fabric.mod.json, neoforge.mods.toml y pack.mcmeta
+    ext.modProps = [
+            mod_id                       : mod_id,
+            mod_name                     : mod_name,
+            mod_version                  : mod_version,
+            mod_authors                  : mod_authors,
+            mod_license                  : mod_license,
+            mod_description              : mod_description,
+            minecraft_version            : minecraft_version,
+            minecraft_version_range      : minecraft_version_range,
+            neoforge_version             : neoforge_version,
+            neoforge_loader_version_range: neoforge_loader_version_range,
+            fabric_loader_version        : fabric_loader_version,
+            geckolib_version             : geckolib_version,
+            veil_version                 : veil_version,
+            java_version                 : java_version,
     ]
-    inputs.properties replaceProperties
-
-    filesMatching(['META-INF/mods.toml', 'pack.mcmeta']) {
-        expand replaceProperties + [project: project]
-    }
-}
-
-tasks.named('jar', Jar).configure {
-    manifest {
-        attributes([
-                'Specification-Title'     : mod_id,
-                'Specification-Vendor'    : mod_authors,
-                'Specification-Version'   : '1',
-                'Implementation-Title'    : project.name,
-                'Implementation-Version'  : project.jar.archiveVersion,
-                'Implementation-Vendor'   : mod_authors,
-                'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
-        ])
-    }
-    finalizedBy 'reobfJar'
-}
-
-tasks.withType(JavaCompile).configureEach {
-    options.encoding = 'UTF-8'
 }

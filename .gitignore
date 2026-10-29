@@ -24,3 +24,8 @@ logs/
 # Sistema
 .DS_Store
 Thumbs.db
+
+# Multiloader
+runs/
+*/runs/
+*/build/

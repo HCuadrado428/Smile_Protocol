@@ -1,0 +1,58 @@
+plugins {
+    id 'net.neoforged.moddev'
+}
+
+configurations {
+    commonJava { canBeResolved = true }
+    commonResources { canBeResolved = true }
+}
+
+neoForge {
+    version = neoforge_version
+    runs {
+        configureEach {
+            systemProperty 'neoforge.enabledGameTestNamespaces', mod_id
+            gameDirectory = project.file("runs/${name}")
+        }
+        client {
+            client()
+        }
+        server {
+            server()
+        }
+    }
+    mods {
+        "${mod_id}" {
+            sourceSet sourceSets.main
+        }
+    }
+}
+
+dependencies {
+    implementation "software.bernie.geckolib:geckolib-neoforge-${minecraft_version}:${geckolib_version}"
+    implementation "foundry.veil:veil-neoforge-${minecraft_version}:${veil_version}"
+    compileOnly "de.maxhenkel.voicechat:voicechat-api:${voicechat_api_version}"
+
+    compileOnly project(':common')
+    commonJava project(path: ':common', configuration: 'commonJava')
+    commonResources project(path: ':common', configuration: 'commonResources')
+}
+
+tasks.named('compileJava', JavaCompile).configure {
+    dependsOn configurations.commonJava
+    source(configurations.commonJava)
+}
+
+processResources {
+    dependsOn configurations.commonResources
+    from(configurations.commonResources)
+    inputs.properties modProps
+    filesMatching(['META-INF/neoforge.mods.toml', 'pack.mcmeta']) {
+        expand modProps
+    }
+}
+
+sourcesJar {
+    dependsOn configurations.commonJava
+    from(configurations.commonJava)
+}
