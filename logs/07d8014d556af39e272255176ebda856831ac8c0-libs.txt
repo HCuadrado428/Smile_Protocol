@@ -1,0 +1,390 @@
+=== player-animation-lib-fabric-2.0.4*.jar -> /home/runner/.gradle/caches/modules-2/files-2.1/dev.kosmx.player-anim/player-animation-lib-fabric/2.0.4+1.21.1/2985c208766cde078a39c22b5ad989b74b7bc490/player-animation-lib-fabric-2.0.4+1.21.1.jar
+--- dev.kosmx.playerAnim.api.layered.PlayerAnimationFrame
+Compiled from "PlayerAnimationFrame.java"
+public abstract class dev.kosmx.playerAnim.api.layered.PlayerAnimationFrame implements dev.kosmx.playerAnim.api.layered.IAnimation {
+  protected dev.kosmx.playerAnim.api.layered.PlayerAnimationFrame$PlayerPart head;
+  protected dev.kosmx.playerAnim.api.layered.PlayerAnimationFrame$PlayerPart body;
+  protected dev.kosmx.playerAnim.api.layered.PlayerAnimationFrame$PlayerPart rightArm;
+  protected dev.kosmx.playerAnim.api.layered.PlayerAnimationFrame$PlayerPart leftArm;
+  protected dev.kosmx.playerAnim.api.layered.PlayerAnimationFrame$PlayerPart rightLeg;
+  protected dev.kosmx.playerAnim.api.layered.PlayerAnimationFrame$PlayerPart leftLeg;
+  protected dev.kosmx.playerAnim.api.layered.PlayerAnimationFrame$PlayerPart rightItem;
+  protected dev.kosmx.playerAnim.api.layered.PlayerAnimationFrame$PlayerPart leftItem;
+  java.util.HashMap<java.lang.String, dev.kosmx.playerAnim.api.layered.PlayerAnimationFrame$PlayerPart> parts;
+  public dev.kosmx.playerAnim.api.layered.PlayerAnimationFrame();
+  public void tick();
+  public boolean isActive();
+  public void resetPose();
+  public dev.kosmx.playerAnim.core.util.Vec3f get3DTransform(java.lang.String, dev.kosmx.playerAnim.api.TransformType, float, dev.kosmx.playerAnim.core.util.Vec3f);
+}
+--- dev.kosmx.playerAnim.api.layered.PlayerAnimationFrame$PlayerPart
+Compiled from "PlayerAnimationFrame.java"
+public class dev.kosmx.playerAnim.api.layered.PlayerAnimationFrame$PlayerPart {
+  public dev.kosmx.playerAnim.core.util.Vec3f pos;
+  public dev.kosmx.playerAnim.core.util.Vec3f scale;
+  public dev.kosmx.playerAnim.core.util.Vec3f rot;
+  public dev.kosmx.playerAnim.core.util.Pair<java.lang.Float, java.lang.Float> bend;
+  public dev.kosmx.playerAnim.api.layered.PlayerAnimationFrame$PlayerPart();
+  protected void setNull();
+}
+--- dev.kosmx.playerAnim.api.layered.IAnimation
+Compiled from "IAnimation.java"
+public interface dev.kosmx.playerAnim.api.layered.IAnimation {
+  public default void tick();
+  public abstract boolean isActive();
+  public abstract dev.kosmx.playerAnim.core.util.Vec3f get3DTransform(java.lang.String, dev.kosmx.playerAnim.api.TransformType, float, dev.kosmx.playerAnim.core.util.Vec3f);
+  public abstract void setupAnim(float);
+  public default dev.kosmx.playerAnim.api.firstPerson.FirstPersonMode getFirstPersonMode(float);
+  public default dev.kosmx.playerAnim.api.firstPerson.FirstPersonConfiguration getFirstPersonConfiguration(float);
+}
+--- dev.kosmx.playerAnim.api.layered.ModifierLayer
+Compiled from "ModifierLayer.java"
+public class dev.kosmx.playerAnim.api.layered.ModifierLayer<T extends dev.kosmx.playerAnim.api.layered.IAnimation> implements dev.kosmx.playerAnim.api.layered.IAnimation {
+  private final java.util.List<dev.kosmx.playerAnim.api.layered.modifier.AbstractModifier> modifiers;
+  T animation;
+  public dev.kosmx.playerAnim.api.layered.ModifierLayer(T, dev.kosmx.playerAnim.api.layered.modifier.AbstractModifier...);
+  public dev.kosmx.playerAnim.api.layered.ModifierLayer();
+  public void tick();
+  public void addModifier(dev.kosmx.playerAnim.api.layered.modifier.AbstractModifier, int);
+  public void addModifierBefore(dev.kosmx.playerAnim.api.layered.modifier.AbstractModifier);
+  public void addModifierLast(dev.kosmx.playerAnim.api.layered.modifier.AbstractModifier);
+  public void removeModifier(int);
+  public void setAnimation(T);
+  public void replaceAnimationWithFade(dev.kosmx.playerAnim.api.layered.modifier.AbstractFadeModifier, T);
+  public void replaceAnimationWithFade(dev.kosmx.playerAnim.api.layered.modifier.AbstractFadeModifier, T, boolean);
+  public int size();
+  protected void linkModifiers();
+  public boolean isActive();
+  public dev.kosmx.playerAnim.core.util.Vec3f get3DTransform(java.lang.String, dev.kosmx.playerAnim.api.TransformType, float, dev.kosmx.playerAnim.core.util.Vec3f);
+  public void setupAnim(float);
+  public dev.kosmx.playerAnim.api.firstPerson.FirstPersonMode getFirstPersonMode(float);
+  public dev.kosmx.playerAnim.api.firstPerson.FirstPersonConfiguration getFirstPersonConfiguration(float);
+  private dev.kosmx.playerAnim.api.layered.modifier.AbstractModifier getFirstPersonModifierOrDefault();
+  public T getAnimation();
+}
+--- dev.kosmx.playerAnim.api.layered.AnimationStack
+Compiled from "AnimationStack.java"
+public class dev.kosmx.playerAnim.api.layered.AnimationStack implements dev.kosmx.playerAnim.api.layered.IAnimation {
+  private final java.util.ArrayList<dev.kosmx.playerAnim.core.util.Pair<java.lang.Integer, dev.kosmx.playerAnim.api.layered.IAnimation>> layers;
+  public dev.kosmx.playerAnim.api.layered.AnimationStack();
+  public boolean isActive();
+  public void tick();
+  public dev.kosmx.playerAnim.core.util.Vec3f get3DTransform(java.lang.String, dev.kosmx.playerAnim.api.TransformType, float, dev.kosmx.playerAnim.core.util.Vec3f);
+  public void setupAnim(float);
+  public void addAnimLayer(int, dev.kosmx.playerAnim.api.layered.IAnimation);
+  public boolean removeLayer(dev.kosmx.playerAnim.api.layered.IAnimation);
+  public boolean removeLayer(int);
+  public dev.kosmx.playerAnim.api.firstPerson.FirstPersonMode getFirstPersonMode(float);
+  public dev.kosmx.playerAnim.api.firstPerson.FirstPersonConfiguration getFirstPersonConfiguration(float);
+  private static boolean lambda$removeLayer$1(int, dev.kosmx.playerAnim.core.util.Pair);
+  private static boolean lambda$removeLayer$0(dev.kosmx.playerAnim.api.layered.IAnimation, dev.kosmx.playerAnim.core.util.Pair);
+}
+--- dev.kosmx.playerAnim.minecraftApi.PlayerAnimationAccess
+Compiled from "PlayerAnimationAccess.java"
+public final class dev.kosmx.playerAnim.minecraftApi.PlayerAnimationAccess {
+  public static final dev.kosmx.playerAnim.core.impl.event.Event<dev.kosmx.playerAnim.minecraftApi.PlayerAnimationAccess$AnimationRegister> REGISTER_ANIMATION_EVENT;
+  public dev.kosmx.playerAnim.minecraftApi.PlayerAnimationAccess();
+  public static dev.kosmx.playerAnim.api.layered.AnimationStack getPlayerAnimLayer(net.minecraft.class_742) throws java.lang.IllegalArgumentException;
+  public static dev.kosmx.playerAnim.minecraftApi.PlayerAnimationAccess$PlayerAssociatedAnimationData getPlayerAssociatedData(net.minecraft.class_742);
+  private static dev.kosmx.playerAnim.minecraftApi.PlayerAnimationAccess$AnimationRegister lambda$static$1(java.lang.Iterable);
+  private static void lambda$static$0(java.lang.Iterable, net.minecraft.class_742, dev.kosmx.playerAnim.api.layered.AnimationStack);
+  static {};
+}
+--- dev.kosmx.playerAnim.minecraftApi.PlayerAnimationFactory
+Compiled from "PlayerAnimationFactory.java"
+public interface dev.kosmx.playerAnim.minecraftApi.PlayerAnimationFactory {
+  public static final dev.kosmx.playerAnim.minecraftApi.PlayerAnimationFactory$FactoryHolder ANIMATION_DATA_FACTORY;
+  public abstract dev.kosmx.playerAnim.api.layered.IAnimation invoke(net.minecraft.class_742);
+  static {};
+}
+--- dev.kosmx.playerAnim.api.TransformType
+Compiled from "TransformType.java"
+public final class dev.kosmx.playerAnim.api.TransformType extends java.lang.Enum<dev.kosmx.playerAnim.api.TransformType> {
+  public static final dev.kosmx.playerAnim.api.TransformType POSITION;
+  public static final dev.kosmx.playerAnim.api.TransformType ROTATION;
+  public static final dev.kosmx.playerAnim.api.TransformType BEND;
+  public static final dev.kosmx.playerAnim.api.TransformType SCALE;
+  private static final dev.kosmx.playerAnim.api.TransformType[] $VALUES;
+  public static dev.kosmx.playerAnim.api.TransformType[] values();
+  public static dev.kosmx.playerAnim.api.TransformType valueOf(java.lang.String);
+  private dev.kosmx.playerAnim.api.TransformType();
+  private static dev.kosmx.playerAnim.api.TransformType[] $values();
+  static {};
+}
+--- dev.kosmx.playerAnim.core.util.Vec3f
+Compiled from "Vec3f.java"
+public class dev.kosmx.playerAnim.core.util.Vec3f extends dev.kosmx.playerAnim.core.util.Vector3<java.lang.Float> {
+  public static final dev.kosmx.playerAnim.core.util.Vec3f ZERO;
+  public dev.kosmx.playerAnim.core.util.Vec3f(float, float, float);
+  public double squaredDistanceTo(dev.kosmx.playerAnim.core.util.Vec3d);
+  public dev.kosmx.playerAnim.core.util.Vec3f scale(float);
+  public dev.kosmx.playerAnim.core.util.Vec3f add(dev.kosmx.playerAnim.core.util.Vec3f);
+  public float dotProduct(dev.kosmx.playerAnim.core.util.Vec3f);
+  public dev.kosmx.playerAnim.core.util.Vec3f crossProduct(dev.kosmx.playerAnim.core.util.Vec3f);
+  public dev.kosmx.playerAnim.core.util.Vec3f subtract(dev.kosmx.playerAnim.core.util.Vec3f);
+  public double distanceTo(dev.kosmx.playerAnim.core.util.Vec3d);
+  static {};
+}
+--- dev.kosmx.playerAnim.api.firstPerson.FirstPersonMode
+Compiled from "FirstPersonMode.java"
+public final class dev.kosmx.playerAnim.api.firstPerson.FirstPersonMode extends java.lang.Enum<dev.kosmx.playerAnim.api.firstPerson.FirstPersonMode> {
+  public static final dev.kosmx.playerAnim.api.firstPerson.FirstPersonMode NONE;
+  public static final dev.kosmx.playerAnim.api.firstPerson.FirstPersonMode VANILLA;
+  public static final dev.kosmx.playerAnim.api.firstPerson.FirstPersonMode THIRD_PERSON_MODEL;
+  public static final dev.kosmx.playerAnim.api.firstPerson.FirstPersonMode DISABLED;
+  private final boolean enabled;
+  private static final java.lang.ThreadLocal<java.lang.Boolean> firstPersonPass;
+  private static final dev.kosmx.playerAnim.api.firstPerson.FirstPersonMode[] $VALUES;
+  public static dev.kosmx.playerAnim.api.firstPerson.FirstPersonMode[] values();
+  public static dev.kosmx.playerAnim.api.firstPerson.FirstPersonMode valueOf(java.lang.String);
+  private dev.kosmx.playerAnim.api.firstPerson.FirstPersonMode(boolean);
+  public static boolean isFirstPersonPass();
+  public static void setFirstPersonPass(boolean);
+  public boolean isEnabled();
+  private static java.lang.Boolean lambda$static$0();
+  private static dev.kosmx.playerAnim.api.firstPerson.FirstPersonMode[] $values();
+  static {};
+}
+--- dev.kosmx.playerAnim.api.firstPerson.FirstPersonConfiguration
+Compiled from "FirstPersonConfiguration.java"
+public class dev.kosmx.playerAnim.api.firstPerson.FirstPersonConfiguration {
+  boolean showRightArm;
+  boolean showLeftArm;
+  boolean showRightItem;
+  boolean showLeftItem;
+  public boolean isShowRightArm();
+  public boolean isShowLeftArm();
+  public boolean isShowRightItem();
+  public boolean isShowLeftItem();
+  public dev.kosmx.playerAnim.api.firstPerson.FirstPersonConfiguration setShowRightArm(boolean);
+  public dev.kosmx.playerAnim.api.firstPerson.FirstPersonConfiguration setShowLeftArm(boolean);
+  public dev.kosmx.playerAnim.api.firstPerson.FirstPersonConfiguration setShowRightItem(boolean);
+  public dev.kosmx.playerAnim.api.firstPerson.FirstPersonConfiguration setShowLeftItem(boolean);
+  public boolean equals(java.lang.Object);
+  protected boolean canEqual(java.lang.Object);
+  public int hashCode();
+  public java.lang.String toString();
+  public dev.kosmx.playerAnim.api.firstPerson.FirstPersonConfiguration();
+  public dev.kosmx.playerAnim.api.firstPerson.FirstPersonConfiguration(boolean, boolean, boolean, boolean);
+}
+--- dev.kosmx.playerAnim.api.layered.modifier.AbstractFadeModifier
+Compiled from "AbstractFadeModifier.java"
+public abstract class dev.kosmx.playerAnim.api.layered.modifier.AbstractFadeModifier extends dev.kosmx.playerAnim.api.layered.modifier.AbstractModifier {
+  protected int time;
+  protected int length;
+  protected dev.kosmx.playerAnim.api.layered.IAnimation beginAnimation;
+  protected dev.kosmx.playerAnim.api.layered.modifier.AbstractFadeModifier(int);
+  public boolean isActive();
+  public boolean canRemove();
+  public void setupAnim(float);
+  public void tick();
+  public dev.kosmx.playerAnim.core.util.Vec3f get3DTransform(java.lang.String, dev.kosmx.playerAnim.api.TransformType, float, dev.kosmx.playerAnim.core.util.Vec3f);
+  protected float calculateProgress(float);
+  protected abstract float getAlpha(java.lang.String, dev.kosmx.playerAnim.api.TransformType, float);
+  public static dev.kosmx.playerAnim.api.layered.modifier.AbstractFadeModifier standardFadeIn(int, dev.kosmx.playerAnim.core.util.Ease);
+  public static dev.kosmx.playerAnim.api.layered.modifier.AbstractFadeModifier functionalFadeIn(int, dev.kosmx.playerAnim.api.layered.modifier.AbstractFadeModifier$EasingFunction);
+  public void setBeginAnimation(dev.kosmx.playerAnim.api.layered.IAnimation);
+}
+--- dev.kosmx.playerAnim.core.util.Ease
+Compiled from "Ease.java"
+public final class dev.kosmx.playerAnim.core.util.Ease extends java.lang.Enum<dev.kosmx.playerAnim.core.util.Ease> {
+  public static final dev.kosmx.playerAnim.core.util.Ease LINEAR;
+  public static final dev.kosmx.playerAnim.core.util.Ease CONSTANT;
+  public static final dev.kosmx.playerAnim.core.util.Ease INSINE;
+  public static final dev.kosmx.playerAnim.core.util.Ease OUTSINE;
+  public static final dev.kosmx.playerAnim.core.util.Ease INOUTSINE;
+  public static final dev.kosmx.playerAnim.core.util.Ease INCUBIC;
+  public static final dev.kosmx.playerAnim.core.util.Ease OUTCUBIC;
+  public static final dev.kosmx.playerAnim.core.util.Ease INOUTCUBIC;
+  public static final dev.kosmx.playerAnim.core.util.Ease INQUAD;
+  public static final dev.kosmx.playerAnim.core.util.Ease OUTQUAD;
+  public static final dev.kosmx.playerAnim.core.util.Ease INOUTQUAD;
+  public static final dev.kosmx.playerAnim.core.util.Ease INQUART;
+  public static final dev.kosmx.playerAnim.core.util.Ease OUTQUART;
+  public static final dev.kosmx.playerAnim.core.util.Ease INOUTQUART;
+  public static final dev.kosmx.playerAnim.core.util.Ease INQUINT;
+  public static final dev.kosmx.playerAnim.core.util.Ease OUTQUINT;
+  public static final dev.kosmx.playerAnim.core.util.Ease INOUTQUINT;
+  public static final dev.kosmx.playerAnim.core.util.Ease INEXPO;
+  public static final dev.kosmx.playerAnim.core.util.Ease OUTEXPO;
+  public static final dev.kosmx.playerAnim.core.util.Ease INOUTEXPO;
+  public static final dev.kosmx.playerAnim.core.util.Ease INCIRC;
+  public static final dev.kosmx.playerAnim.core.util.Ease OUTCIRC;
+  public static final dev.kosmx.playerAnim.core.util.Ease INOUTCIRC;
+  public static final dev.kosmx.playerAnim.core.util.Ease INBACK;
+  public static final dev.kosmx.playerAnim.core.util.Ease OUTBACK;
+  public static final dev.kosmx.playerAnim.core.util.Ease INOUTBACK;
+  public static final dev.kosmx.playerAnim.core.util.Ease INELASTIC;
+  public static final dev.kosmx.playerAnim.core.util.Ease OUTELASTIC;
+  public static final dev.kosmx.playerAnim.core.util.Ease INOUTELASTIC;
+  public static final dev.kosmx.playerAnim.core.util.Ease INBOUNCE;
+  public static final dev.kosmx.playerAnim.core.util.Ease OUTBOUNCE;
+  public static final dev.kosmx.playerAnim.core.util.Ease INOUTBOUNCE;
+  public static final dev.kosmx.playerAnim.core.util.Ease CATMULLROM;
+  public static final dev.kosmx.playerAnim.core.util.Ease STEP;
+  final byte id;
+  private final java.util.function.Function<java.lang.Float, java.util.function.Function<java.lang.Float, java.lang.Float>> impl;
+  private static final dev.kosmx.playerAnim.core.util.Ease[] $VALUES;
+  public static dev.kosmx.playerAnim.core.util.Ease[] values();
+  public static dev.kosmx.playerAnim.core.util.Ease valueOf(java.lang.String);
+  private dev.kosmx.playerAnim.core.util.Ease(byte, java.util.function.Function<java.lang.Float, java.util.function.Function<java.lang.Float, java.lang.Float>>);
+  private dev.kosmx.playerAnim.core.util.Ease(int, java.util.function.Function<java.lang.Float, java.util.function.Function<java.lang.Float, java.lang.Float>>);
+  public float invoke(float);
+  public float invoke(float, java.lang.Float);
+  public static dev.kosmx.playerAnim.core.util.Ease getEase(byte);
+  public static java.util.function.Function<java.lang.Float, java.lang.Float> easeIn(java.util.function.Function<java.lang.Float, java.lang.Float>);
+  public static java.util.function.Function<java.lang.Float, java.lang.Float> easeOut(java.util.function.Function<java.lang.Float, java.lang.Float>);
+  public static java.util.function.Function<java.lang.Float, java.lang.Float> easeInOut(java.util.function.Function<java.lang.Float, java.lang.Float>);
+  public byte getId();
+  private static java.lang.Float lambda$easeInOut$37(java.util.function.Function, java.lang.Float);
+  private static java.lang.Float lambda$easeOut$36(java.util.function.Function, java.lang.Float);
+  private static java.util.function.Function lambda$static$35(java.lang.Float);
+  private static java.util.function.Function lambda$static$34(java.lang.Float);
+  private static java.util.function.Function lambda$static$33(java.lang.Float);
+  private static java.util.function.Function lambda$static$32(java.lang.Float);
+  private static java.util.function.Function lambda$static$31(java.lang.Float);
+  private static java.util.function.Function lambda$static$30(java.lang.Float);
+  private static java.util.function.Function lambda$static$29(java.lang.Float);
+  private static java.util.function.Function lambda$static$28(java.lang.Float);
+  private static java.util.function.Function lambda$static$27(java.lang.Float);
+  private static java.util.function.Function lambda$static$26(java.lang.Float);
+  private static java.util.function.Function lambda$static$25(java.lang.Float);
+  private static java.util.function.Function lambda$static$24(java.lang.Float);
+  private static java.util.function.Function lambda$static$23(java.lang.Float);
+  private static java.util.function.Function lambda$static$22(java.lang.Float);
+  private static java.util.function.Function lambda$static$21(java.lang.Float);
+  private static java.util.function.Function lambda$static$20(java.lang.Float);
+  private static java.util.function.Function lambda$static$19(java.lang.Float);
+  private static java.util.function.Function lambda$static$18(java.lang.Float);
+  private static java.util.function.Function lambda$static$17(java.lang.Float);
+  private static java.util.function.Function lambda$static$16(java.lang.Float);
+  private static java.util.function.Function lambda$static$15(java.lang.Float);
+  private static java.util.function.Function lambda$static$14(java.lang.Float);
+  private static java.util.function.Function lambda$static$13(java.lang.Float);
+  private static java.util.function.Function lambda$static$12(java.lang.Float);
+  private static java.util.function.Function lambda$static$11(java.lang.Float);
+  private static java.util.function.Function lambda$static$10(java.lang.Float);
+  private static java.util.function.Function lambda$static$9(java.lang.Float);
+  private static java.util.function.Function lambda$static$8(java.lang.Float);
+  private static java.util.function.Function lambda$static$7(java.lang.Float);
+  private static java.util.function.Function lambda$static$6(java.lang.Float);
+  private static java.util.function.Function lambda$static$5(java.lang.Float);
+  private static java.util.function.Function lambda$static$4(java.lang.Float);
+  private static java.util.function.Function lambda$static$3(java.lang.Float);
+  private static java.lang.Float lambda$static$2(java.lang.Float);
+  private static java.util.function.Function lambda$static$1(java.lang.Float);
+  private static java.lang.Float lambda$static$0(java.lang.Float);
+  private static dev.kosmx.playerAnim.core.util.Ease[] $values();
+  static {};
+}
+=== player-animation-lib-forge-2.0.4*.jar -> /home/runner/.gradle/caches/modules-2/files-2.1/dev.kosmx.player-anim/player-animation-lib-forge/2.0.4+1.21.1/5be8ddcc78532b9a5520c718edc6c971cd0057c/player-animation-lib-forge-2.0.4+1.21.1.jar
+architectury_inject_playerAnimator_common_dfd904282b214c0dbfcb1af10059f1f2_ab57f2790826365c0c1efa35ab50c2ec0633ee9aee38ea237cb7583590064e87playeranimationlib2041211devjar/PlatformMethods
+dev/kosmx/playerAnim/api/AnimUtils
+dev/kosmx/playerAnim/api/IPlayable
+dev/kosmx/playerAnim/api/IPlayer
+dev/kosmx/playerAnim/api/TransformType
+dev/kosmx/playerAnim/api/firstPerson/FirstPersonConfiguration
+dev/kosmx/playerAnim/api/firstPerson/FirstPersonMode
+dev/kosmx/playerAnim/api/layered/AnimationContainer
+dev/kosmx/playerAnim/api/layered/AnimationStack
+dev/kosmx/playerAnim/api/layered/IActualAnimation
+dev/kosmx/playerAnim/api/layered/IAnimation
+dev/kosmx/playerAnim/api/layered/KeyframeAnimationPlayer
+dev/kosmx/playerAnim/api/layered/ModifierLayer
+dev/kosmx/playerAnim/api/layered/PlayerAnimationFrame
+dev/kosmx/playerAnim/api/layered/modifier/AbstractFadeModifier
+dev/kosmx/playerAnim/api/layered/modifier/AbstractModifier
+dev/kosmx/playerAnim/api/layered/modifier/AdjustmentModifier
+dev/kosmx/playerAnim/api/layered/modifier/FirstPersonModifier
+dev/kosmx/playerAnim/api/layered/modifier/MirrorModifier
+dev/kosmx/playerAnim/api/layered/modifier/SpeedModifier
+dev/kosmx/playerAnim/core/data/AnimationBinary
+dev/kosmx/playerAnim/core/data/AnimationFormat
+dev/kosmx/playerAnim/core/data/KeyframeAnimation
+dev/kosmx/playerAnim/core/data/gson/AnimationJson
+dev/kosmx/playerAnim/core/data/gson/AnimationSerializing
+dev/kosmx/playerAnim/core/data/gson/GeckoLibSerializer
+dev/kosmx/playerAnim/core/data/opennbs/NBS
+dev/kosmx/playerAnim/core/data/opennbs/NBSFileUtils
+dev/kosmx/playerAnim/core/data/opennbs/SoundPlayer
+dev/kosmx/playerAnim/core/data/opennbs/format/CustomInstrument
+dev/kosmx/playerAnim/core/data/opennbs/format/Header
+dev/kosmx/playerAnim/core/data/opennbs/format/Layer
+dev/kosmx/playerAnim/core/data/opennbs/network/NBSPacket
+dev/kosmx/playerAnim/core/data/quarktool/InverseEase
+dev/kosmx/playerAnim/core/data/quarktool/Move
+dev/kosmx/playerAnim/core/data/quarktool/PartMap
+dev/kosmx/playerAnim/core/data/quarktool/Pause
+dev/kosmx/playerAnim/core/data/quarktool/Pauseable
+dev/kosmx/playerAnim/core/data/quarktool/Playable
+dev/kosmx/playerAnim/core/data/quarktool/QuarkParsingError
+dev/kosmx/playerAnim/core/data/quarktool/QuarkReader
+dev/kosmx/playerAnim/core/data/quarktool/Repeat
+dev/kosmx/playerAnim/core/data/quarktool/Reset
+dev/kosmx/playerAnim/core/data/quarktool/Section
+dev/kosmx/playerAnim/core/data/quarktool/Yoyo
+dev/kosmx/playerAnim/core/impl/AnimationProcessor
+dev/kosmx/playerAnim/core/impl/event/Event
+dev/kosmx/playerAnim/core/impl/event/EventResult
+dev/kosmx/playerAnim/core/util/Ease
+dev/kosmx/playerAnim/core/util/Easing
+dev/kosmx/playerAnim/core/util/MathHelper
+dev/kosmx/playerAnim/core/util/NetworkHelper
+dev/kosmx/playerAnim/core/util/Pair
+dev/kosmx/playerAnim/core/util/SetableSupplier
+dev/kosmx/playerAnim/core/util/UUIDMap
+dev/kosmx/playerAnim/core/util/Vec3d
+dev/kosmx/playerAnim/core/util/Vec3f
+dev/kosmx/playerAnim/core/util/Vector3
+dev/kosmx/playerAnim/forge/ForgeClientEvent
+dev/kosmx/playerAnim/impl/Helper
+dev/kosmx/playerAnim/impl/IAnimatedPlayer
+dev/kosmx/playerAnim/impl/IMutableModel
+dev/kosmx/playerAnim/impl/IPlayerModel
+dev/kosmx/playerAnim/impl/IUpperPartHelper
+dev/kosmx/playerAnim/impl/animation/AnimationApplier
+dev/kosmx/playerAnim/impl/animation/BendHelper
+dev/kosmx/playerAnim/impl/animation/IBendHelper
+dev/kosmx/playerAnim/impl/compat/skinLayers/SkinLayersTransformer
+dev/kosmx/playerAnim/impl/mixin/MixinConfig
+dev/kosmx/playerAnim/impl/neoforge/HelperImpl
+dev/kosmx/playerAnim/minecraftApi/PlayerAnimationAccess
+dev/kosmx/playerAnim/minecraftApi/PlayerAnimationFactory
+dev/kosmx/playerAnim/minecraftApi/PlayerAnimationRegistry
+dev/kosmx/playerAnim/minecraftApi/codec/AbstractGsonCodec
+dev/kosmx/playerAnim/minecraftApi/codec/AnimationCodec
+dev/kosmx/playerAnim/minecraftApi/codec/AnimationCodecs
+dev/kosmx/playerAnim/minecraftApi/codec/AnimationDecoder
+dev/kosmx/playerAnim/minecraftApi/codec/AnimationEncoder
+dev/kosmx/playerAnim/minecraftApi/codec/EmotecraftGsonCodec
+dev/kosmx/playerAnim/minecraftApi/codec/LegacyGeckoJsonCodec
+dev/kosmx/playerAnim/minecraftApi/layers/LeftHandedHelperModifier
+dev/kosmx/playerAnim/mixin/ArmorFeatureRendererMixin
+dev/kosmx/playerAnim/mixin/BipedEntityModelMixin
+dev/kosmx/playerAnim/mixin/CapeLayerMixin
+dev/kosmx/playerAnim/mixin/ElytraLayerMixin
+dev/kosmx/playerAnim/mixin/FeatureRendererMixin
+dev/kosmx/playerAnim/mixin/HeldItemMixin
+dev/kosmx/playerAnim/mixin/LivingEntityRenderRedirect_bendOnly
+dev/kosmx/playerAnim/mixin/ModelPartMixin
+dev/kosmx/playerAnim/mixin/PlayerEntityMixin
+dev/kosmx/playerAnim/mixin/PlayerModelAccessor
+dev/kosmx/playerAnim/mixin/PlayerModelMixin
+dev/kosmx/playerAnim/mixin/PlayerRendererMixin
+dev/kosmx/playerAnim/mixin/firstPerson/CameraAccessor
+dev/kosmx/playerAnim/mixin/firstPerson/EntityRenderDispatcherMixin
+dev/kosmx/playerAnim/mixin/firstPerson/ItemInHandRendererMixin
+dev/kosmx/playerAnim/mixin/firstPerson/LevelRendererMixin
+dev/kosmx/playerAnim/mixin/firstPerson/LivingEntityRendererMixin
+=== player-animation-lib-2.0.4*.jar -> /home/runner/.gradle/caches/modules-2/files-2.1/dev.kosmx.player-anim/player-animation-lib/2.0.4+1.21.1/d68e75709d067e862790b7227f15845d78aeefea/player-animation-lib-2.0.4+1.21.1.jar
+--- dev.kosmx.playerAnim.minecraftApi.PlayerAnimationAccess
+Compiled from "PlayerAnimationAccess.java"
+public final class dev.kosmx.playerAnim.minecraftApi.PlayerAnimationAccess {
+  public static final dev.kosmx.playerAnim.core.impl.event.Event<dev.kosmx.playerAnim.minecraftApi.PlayerAnimationAccess$AnimationRegister> REGISTER_ANIMATION_EVENT;
+  public dev.kosmx.playerAnim.minecraftApi.PlayerAnimationAccess();
+  public static dev.kosmx.playerAnim.api.layered.AnimationStack getPlayerAnimLayer(net.minecraft.class_742) throws java.lang.IllegalArgumentException;
+  public static dev.kosmx.playerAnim.minecraftApi.PlayerAnimationAccess$PlayerAssociatedAnimationData getPlayerAssociatedData(net.minecraft.class_742);
+  private static dev.kosmx.playerAnim.minecraftApi.PlayerAnimationAccess$AnimationRegister lambda$static$1(java.lang.Iterable);
+  private static void lambda$static$0(java.lang.Iterable, net.minecraft.class_742, dev.kosmx.playerAnim.api.layered.AnimationStack);
+  static {};
+}
