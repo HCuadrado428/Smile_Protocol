@@ -1,0 +1,44 @@
+package com.smileprotocol.fabric.client;
+
+import com.smileprotocol.client.ClientController;
+import com.smileprotocol.client.ElevatorBoardRenderer;
+import com.smileprotocol.client.ElevatorDoorRenderer;
+import com.smileprotocol.client.HudOverlay;
+import com.smileprotocol.network.SPNetwork;
+import com.smileprotocol.registry.ModBlockEntities;
+import com.smileprotocol.registry.ModBlocks;
+import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+
+/** Punto de entrada de cliente en Fabric. */
+public final class SmileProtocolFabricClient implements ClientModInitializer {
+
+    @Override
+    public void onInitializeClient() {
+        ClientController.init();
+        for (SPNetwork.Def<?> def : SPNetwork.DEFINITIONS) {
+            if (def.toClient()) registerReceiver(def);
+        }
+
+        ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> ClientController.onJoin());
+        ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> ClientController.onLeave());
+        ClientTickEvents.END_CLIENT_TICK.register(ClientController::tick);
+        HudRenderCallback.EVENT.register((graphics, delta) ->
+                HudOverlay.INSTANCE.render(graphics, delta.getGameTimeDeltaPartialTick(true)));
+
+        BlockEntityRenderers.register(ModBlockEntities.ELEVATOR_BOARD.get(), ElevatorBoardRenderer::new);
+        BlockEntityRenderers.register(ModBlockEntities.ELEVATOR_DOOR.get(), ElevatorDoorRenderer::new);
+        BlockRenderLayerMap.INSTANCE.putBlock(ModBlocks.ELEVATOR_BUTTON.get(), RenderType.cutout());
+    }
+
+    private static <T extends CustomPacketPayload> void registerReceiver(SPNetwork.Def<T> def) {
+        ClientPlayNetworking.registerGlobalReceiver(def.type(), (payload, ctx) -> SPNetwork.handleClient(payload));
+    }
+}

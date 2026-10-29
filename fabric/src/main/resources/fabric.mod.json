@@ -8,8 +8,10 @@
   "license": "${mod_license}",
   "environment": "*",
   "entrypoints": {
-    "main": ["com.smileprotocol.fabric.SmileProtocolFabric"]
+    "main": ["com.smileprotocol.fabric.SmileProtocolFabric"],
+    "client": ["com.smileprotocol.fabric.client.SmileProtocolFabricClient"]
   },
+  "mixins": ["smileprotocol.mixins.json", "smileprotocol.fabric.mixins.json"],
   "depends": {
     "fabricloader": ">=${fabric_loader_version}",
     "fabric-api": "*",

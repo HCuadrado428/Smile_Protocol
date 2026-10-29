@@ -1,5 +1,10 @@
 package com.smileprotocol;
 
+import com.smileprotocol.config.SPConfig;
+import com.smileprotocol.registry.ModBlockEntities;
+import com.smileprotocol.registry.ModBlocks;
+import com.smileprotocol.registry.ModCreativeTabs;
+import com.smileprotocol.registry.ModItems;
 import net.minecraft.resources.ResourceLocation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,8 +23,14 @@ public final class SmileProtocol {
 
     private SmileProtocol() {}
 
+    /** Configuracion y registros. Los bloques van antes que los items y las entidades de bloque. */
     public static void init() {
-        LOGGER.info("Smile Protocol: iniciando");
+        SPConfig.load();
+        ModBlocks.init();
+        ModItems.init();
+        ModBlockEntities.init();
+        ModCreativeTabs.init();
+        LOGGER.info("Smile Protocol: iniciado");
     }
 
     /** Identificador del mod: {@code smileprotocol:<path>}. */

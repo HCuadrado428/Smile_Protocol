@@ -12,7 +12,7 @@ from pathlib import Path
 import numpy as np
 from PIL import Image
 
-ROOT = Path(__file__).resolve().parent.parent / "src/main/resources/assets/smileprotocol/textures"
+ROOT = Path(__file__).resolve().parent.parent / "common/src/main/resources/assets/smileprotocol/textures"
 
 
 # Utilidades ----------------------------------------------------------------------

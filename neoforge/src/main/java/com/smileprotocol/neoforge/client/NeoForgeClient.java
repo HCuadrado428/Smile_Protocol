@@ -1,0 +1,80 @@
+package com.smileprotocol.neoforge.client;
+
+import com.smileprotocol.SmileProtocol;
+import com.smileprotocol.client.ClientController;
+import com.smileprotocol.client.ClientIsolation;
+import com.smileprotocol.client.ClientState;
+import com.smileprotocol.client.ElevatorBoardRenderer;
+import com.smileprotocol.client.ElevatorDoorRenderer;
+import com.smileprotocol.client.HudOverlay;
+import com.smileprotocol.registry.ModBlockEntities;
+import net.minecraft.client.Minecraft;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
+import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
+import net.neoforged.neoforge.client.event.EntityRenderersEvent;
+import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
+import net.neoforged.neoforge.client.event.RenderGuiLayerEvent;
+import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
+
+import java.util.Set;
+
+/** Cliente en NeoForge: HUD, renderers y eventos hacia el codigo comun. */
+public final class NeoForgeClient {
+
+    /** Capas vanilla que siguen visibles dentro de la partida (README 8.1). */
+    private static final Set<ResourceLocation> VANILLA_ALLOWED = Set.of(
+            VanillaGuiLayers.CHAT, VanillaGuiLayers.SUBTITLE_OVERLAY, VanillaGuiLayers.TITLE,
+            VanillaGuiLayers.TAB_LIST, VanillaGuiLayers.CAMERA_OVERLAYS);
+
+    private NeoForgeClient() {}
+
+    @EventBusSubscriber(modid = SmileProtocol.MODID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
+    public static final class ModEvents {
+        @SubscribeEvent
+        public static void onSetup(FMLClientSetupEvent event) {
+            ClientController.init();
+        }
+
+        @SubscribeEvent
+        public static void onRegisterLayers(RegisterGuiLayersEvent event) {
+            event.registerAboveAll(SmileProtocol.id("hud"), (graphics, delta) ->
+                    HudOverlay.INSTANCE.render(graphics, delta.getGameTimeDeltaPartialTick(true)));
+        }
+
+        @SubscribeEvent
+        public static void onRegisterRenderers(EntityRenderersEvent.RegisterRenderers event) {
+            event.registerBlockEntityRenderer(ModBlockEntities.ELEVATOR_BOARD.get(), ElevatorBoardRenderer::new);
+            event.registerBlockEntityRenderer(ModBlockEntities.ELEVATOR_DOOR.get(), ElevatorDoorRenderer::new);
+        }
+    }
+
+    @EventBusSubscriber(modid = SmileProtocol.MODID, bus = EventBusSubscriber.Bus.GAME, value = Dist.CLIENT)
+    public static final class GameEvents {
+        @SubscribeEvent
+        public static void onTick(ClientTickEvent.Post event) {
+            ClientController.tick(Minecraft.getInstance());
+        }
+
+        @SubscribeEvent
+        public static void onLoggingIn(ClientPlayerNetworkEvent.LoggingIn event) {
+            ClientController.onJoin();
+        }
+
+        @SubscribeEvent
+        public static void onLoggingOut(ClientPlayerNetworkEvent.LoggingOut event) {
+            ClientController.onLeave();
+        }
+
+        @SubscribeEvent
+        public static void onRenderLayer(RenderGuiLayerEvent.Pre event) {
+            if (ClientState.inSmileProtocol() && !ClientIsolation.isHudLayerAllowed(event.getName(), VANILLA_ALLOWED)) {
+                event.setCanceled(true);
+            }
+        }
+    }
+}

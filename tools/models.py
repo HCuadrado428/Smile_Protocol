@@ -8,7 +8,7 @@ tablas de botin de los bloques del lobby. Las texturas las genera tools/textures
 import json
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent.parent / "src/main/resources"
+ROOT = Path(__file__).resolve().parent.parent / "common/src/main/resources"
 ASSETS = ROOT / "assets/smileprotocol"
 DATA = ROOT / "data/smileprotocol"
 MOD = "smileprotocol"
@@ -16,7 +16,7 @@ MOD = "smileprotocol"
 # Rotacion Y del blockstate para un modelo hecho mirando al sur
 FACING_Y = {"south": 0, "west": 90, "north": 180, "east": 270}
 # Cara emisiva (Forge): se ve a plena luz aunque este a oscuras
-GLOW = {"block_light": 15, "sky_light": 15, "ambient_occlusion": False}
+GLOW = {"block_light": 15, "sky_light": 15, "ambient_occlusion": False}  # NeoForge: neoforge_data
 DIRS = ("north", "south", "east", "west", "up", "down")
 
 
@@ -114,7 +114,7 @@ def main():
                 "down": {"texture": "#side", "uv": [2, 0, 14, 1.5]},
             }},
             {"from": [2, 2, 1.55], "to": [14, 14, 1.55], "shade": False, "faces": {
-                "south": {"texture": "#glow", "uv": [0, 0, 16, 16], "forge_data": GLOW},
+                "south": {"texture": "#glow", "uv": [0, 0, 16, 16], "neoforge_data": GLOW},
             }},
         ],
     })
@@ -126,7 +126,7 @@ def main():
         "parent": "block/block",
         "textures": {"front": tex("elevator_screen"), "side": tex("elevator_panel"), "particle": tex("elevator_panel")},
         "elements": [{"from": [0, 2, 0], "to": [16, 14, 2], "faces": {
-            "south": {"texture": "#front", "uv": [0, 2, 16, 14], "forge_data": GLOW},
+            "south": {"texture": "#front", "uv": [0, 2, 16, 14], "neoforge_data": GLOW},
             "north": {"texture": "#side", "uv": [0, 2, 16, 14]},
             "east": {"texture": "#side", "uv": [0, 2, 2, 14]},
             "west": {"texture": "#side", "uv": [0, 2, 2, 14]},
@@ -143,7 +143,7 @@ def main():
         "ambientocclusion": False,
         "textures": {"all": tex("fluorescent_light_on"), "particle": tex("fluorescent_light_on")},
         "elements": [{"from": [0, 0, 0], "to": [16, 16, 16], "faces": {
-            d: {"texture": "#all", "cullface": d, "forge_data": GLOW} for d in DIRS}}],
+            d: {"texture": "#all", "cullface": d, "neoforge_data": GLOW} for d in DIRS}}],
     })
     block_model("fluorescent_light_off", {"parent": "block/cube_all", "textures": {"all": tex("fluorescent_light_off")}})
     write(ASSETS / "blockstates/fluorescent_light.json", {"variants": {
@@ -152,7 +152,7 @@ def main():
     item_from_block("fluorescent_light", "fluorescent_light_on")
 
     # El fluorescente se puede romper y se recupera
-    write(DATA / "loot_tables/blocks/fluorescent_light.json", {
+    write(DATA / "loot_table/blocks/fluorescent_light.json", {
         "type": "minecraft:block",
         "pools": [{"rolls": 1, "entries": [{"type": "minecraft:item", "name": f"{MOD}:fluorescent_light"}],
                    "conditions": [{"condition": "minecraft:survives_explosion"}]}],
