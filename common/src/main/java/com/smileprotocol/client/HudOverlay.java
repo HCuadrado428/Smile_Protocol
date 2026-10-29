@@ -295,7 +295,9 @@ public final class HudOverlay {
         if (alpha <= 0.02f) return;
         int a = (int) (alpha * 255) << 24;
         float b = com.smileprotocol.client.light.Flashlight.battery(id);
-        int pw = 86, ph = 18, px = 8, py = h - 36 - 8 - ph - 3;
+        String pctText = Math.round(b * 100) + "%";
+        Component labelText = Component.translatable(on ? "smileprotocol.hud.flashlight" : "smileprotocol.hud.flashlight_off");
+        int pw = 6 + 24 + 6 + font.width(labelText) + 10 + font.width(pctText) + 7, ph = 18, px = 8, py = h - 36 - 8 - ph - 3;
         RenderSystem.setShaderColor(1f, 1f, 1f, alpha);
         g.blitSprite(b < 0.15f ? PANEL_ALERT : PANEL, px, py, pw, ph);
         RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
