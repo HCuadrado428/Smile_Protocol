@@ -184,7 +184,7 @@ def lab_storage():
     with_cabins(t, 0, 0, 0, 40)
     opening(t, 0, 1, 6, 3, 3)
     opening(t, 0, 1, 40, 3, 3)
-    ceiling_lights(t, -12, 10, 12, 36, 6, 7, rnd)
+    ceiling_lights(t, -12, 10, 12, 36, 7, 6, rnd)
     for x in (-12, -7, 7, 12):
         for z in range(11, 36):
             if z % 9 == 0:
@@ -223,7 +223,7 @@ def lab_offices():
             if rnd.random() < 0.5:
                 t.set(wx + 9 * side, 1, z0 + 2, "barrel", facing="up")
             light(t, wx + 6 * side, 6, z0 + 4, lit=rnd.random() > 0.25, flickers=rnd.random() < 0.3)
-    ceiling_lights(t, 0, 10, 0, 34, 0, 6, rnd, broken=0.2, flicker=0.3)
+    ceiling_lights(t, 0, 10, 0, 34, 6, 6, rnd, broken=0.2, flicker=0.3)
     for x, z in ((-9, 12), (9, 20), (-9, 28), (9, 34), (0, 22)):
         t.marker(x, 1, z, "sp:mob_spawn")
     for x, z in ((-13, 9), (13, 17), (-13, 25), (13, 33)):
@@ -238,7 +238,7 @@ def lab_morgue():
     with_cabins(t, 0, 0, 0, 36)
     opening(t, 0, 1, 6, 3, 3)
     opening(t, 0, 1, 36, 3, 3)
-    ceiling_lights(t, -8, 11, 8, 32, 8, 7, rnd, broken=0.25, flicker=0.35)
+    ceiling_lights(t, -8, 11, 8, 32, 6, 7, rnd, broken=0.25, flicker=0.35)
     # Camaras frigorificas en las paredes
     for z in range(9, 34, 2):
         for y in (1, 2, 3):
@@ -264,7 +264,7 @@ def lab_generators():
     with_cabins(t, 0, 0, 0, 44)
     opening(t, 0, 1, 6, 3, 3)
     opening(t, 0, 1, 44, 3, 3)
-    ceiling_lights(t, -14, 10, 14, 40, 7, 9, rnd, broken=0.3, flicker=0.3)
+    ceiling_lights(t, -14, 10, 14, 40, 9, 7, rnd, broken=0.3, flicker=0.3)
     # Generadores
     for x in (-10, 10):
         for z in (14, 26, 36):

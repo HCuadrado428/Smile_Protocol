@@ -177,6 +177,9 @@ public final class RunManager {
         if (groups.isEmpty()) {
             return new StartResult(null, Component.translatable("smileprotocol.elevator.need_players", cfg.min_group_size));
         }
+        if (!force && type == RunType.MINI && activeMiniRuns(server) >= cfg.max_mini_runs) {
+            return new StartResult(null, Component.translatable("smileprotocol.run.no_space", 1, 0));
+        }
         if (!force && groups.size() > freeGroupSlots(server)) {
             return new StartResult(null, Component.translatable("smileprotocol.run.no_space", groups.size(), freeGroupSlots(server)));
         }
