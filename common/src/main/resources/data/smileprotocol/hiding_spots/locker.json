@@ -1,0 +1,13 @@
+{
+  "capacity": 1,
+  "enterTime": 16,
+  "exitTime": 14,
+  "noiseOnEnter": 6,
+  "viewCone": 70,
+  "breathDrain": 0.12,
+  "searchPriority": 1.5,
+  "canBeLocked": false,
+  "overlay": "slits",
+  "animationId": "locker",
+  "soundSet": "locker"
+}

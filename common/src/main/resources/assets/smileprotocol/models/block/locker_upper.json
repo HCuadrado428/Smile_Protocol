@@ -1,0 +1,44 @@
+{
+  "parent": "block/block",
+  "textures": {
+    "front": "smileprotocol:block/locker_upper",
+    "side": "smileprotocol:block/locker_side",
+    "top": "smileprotocol:block/locker_top",
+    "particle": "smileprotocol:block/locker_side"
+  },
+  "elements": [
+    {
+      "from": [
+        0,
+        0,
+        0
+      ],
+      "to": [
+        16,
+        16,
+        16
+      ],
+      "faces": {
+        "south": {
+          "texture": "#front"
+        },
+        "north": {
+          "texture": "#side",
+          "cullface": "north"
+        },
+        "east": {
+          "texture": "#side",
+          "cullface": "east"
+        },
+        "west": {
+          "texture": "#side",
+          "cullface": "west"
+        },
+        "up": {
+          "texture": "#top",
+          "cullface": "up"
+        }
+      }
+    }
+  ]
+}

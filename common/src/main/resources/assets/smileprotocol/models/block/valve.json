@@ -1,0 +1,79 @@
+{
+  "parent": "block/block",
+  "render_type": "minecraft:cutout",
+  "textures": {
+    "base": "smileprotocol:block/valve_base",
+    "pipe": "smileprotocol:block/fuse_box_side",
+    "particle": "smileprotocol:block/valve_base"
+  },
+  "elements": [
+    {
+      "from": [
+        3,
+        3,
+        0
+      ],
+      "to": [
+        13,
+        13,
+        2
+      ],
+      "faces": {
+        "south": {
+          "texture": "#base",
+          "uv": [
+            2,
+            2,
+            14,
+            14
+          ]
+        },
+        "north": {
+          "texture": "#base",
+          "cullface": "north"
+        },
+        "east": {
+          "texture": "#pipe"
+        },
+        "west": {
+          "texture": "#pipe"
+        },
+        "up": {
+          "texture": "#pipe"
+        },
+        "down": {
+          "texture": "#pipe"
+        }
+      }
+    },
+    {
+      "from": [
+        6.5,
+        6.5,
+        2
+      ],
+      "to": [
+        9.5,
+        9.5,
+        7
+      ],
+      "faces": {
+        "south": {
+          "texture": "#pipe"
+        },
+        "east": {
+          "texture": "#pipe"
+        },
+        "west": {
+          "texture": "#pipe"
+        },
+        "up": {
+          "texture": "#pipe"
+        },
+        "down": {
+          "texture": "#pipe"
+        }
+      }
+    }
+  ]
+}

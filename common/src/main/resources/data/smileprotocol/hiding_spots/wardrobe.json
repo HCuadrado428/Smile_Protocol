@@ -1,0 +1,13 @@
+{
+  "capacity": 2,
+  "enterTime": 20,
+  "exitTime": 16,
+  "noiseOnEnter": 8,
+  "viewCone": 80,
+  "breathDrain": 0.12,
+  "searchPriority": 1.2,
+  "canBeLocked": false,
+  "overlay": "crack",
+  "animationId": "wardrobe",
+  "soundSet": "wardrobe"
+}

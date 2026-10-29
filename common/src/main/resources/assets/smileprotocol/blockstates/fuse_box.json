@@ -1,0 +1,154 @@
+{
+  "variants": {
+    "facing=south,filled=0,powered=false": {
+      "model": "smileprotocol:block/fuse_box_0_off"
+    },
+    "facing=south,filled=0,powered=true": {
+      "model": "smileprotocol:block/fuse_box_0_on"
+    },
+    "facing=south,filled=1,powered=false": {
+      "model": "smileprotocol:block/fuse_box_1_off"
+    },
+    "facing=south,filled=1,powered=true": {
+      "model": "smileprotocol:block/fuse_box_1_on"
+    },
+    "facing=south,filled=2,powered=false": {
+      "model": "smileprotocol:block/fuse_box_2_off"
+    },
+    "facing=south,filled=2,powered=true": {
+      "model": "smileprotocol:block/fuse_box_2_on"
+    },
+    "facing=south,filled=3,powered=false": {
+      "model": "smileprotocol:block/fuse_box_3_off"
+    },
+    "facing=south,filled=3,powered=true": {
+      "model": "smileprotocol:block/fuse_box_3_on"
+    },
+    "facing=south,filled=4,powered=false": {
+      "model": "smileprotocol:block/fuse_box_4_off"
+    },
+    "facing=south,filled=4,powered=true": {
+      "model": "smileprotocol:block/fuse_box_4_on"
+    },
+    "facing=west,filled=0,powered=false": {
+      "model": "smileprotocol:block/fuse_box_0_off",
+      "y": 90
+    },
+    "facing=west,filled=0,powered=true": {
+      "model": "smileprotocol:block/fuse_box_0_on",
+      "y": 90
+    },
+    "facing=west,filled=1,powered=false": {
+      "model": "smileprotocol:block/fuse_box_1_off",
+      "y": 90
+    },
+    "facing=west,filled=1,powered=true": {
+      "model": "smileprotocol:block/fuse_box_1_on",
+      "y": 90
+    },
+    "facing=west,filled=2,powered=false": {
+      "model": "smileprotocol:block/fuse_box_2_off",
+      "y": 90
+    },
+    "facing=west,filled=2,powered=true": {
+      "model": "smileprotocol:block/fuse_box_2_on",
+      "y": 90
+    },
+    "facing=west,filled=3,powered=false": {
+      "model": "smileprotocol:block/fuse_box_3_off",
+      "y": 90
+    },
+    "facing=west,filled=3,powered=true": {
+      "model": "smileprotocol:block/fuse_box_3_on",
+      "y": 90
+    },
+    "facing=west,filled=4,powered=false": {
+      "model": "smileprotocol:block/fuse_box_4_off",
+      "y": 90
+    },
+    "facing=west,filled=4,powered=true": {
+      "model": "smileprotocol:block/fuse_box_4_on",
+      "y": 90
+    },
+    "facing=north,filled=0,powered=false": {
+      "model": "smileprotocol:block/fuse_box_0_off",
+      "y": 180
+    },
+    "facing=north,filled=0,powered=true": {
+      "model": "smileprotocol:block/fuse_box_0_on",
+      "y": 180
+    },
+    "facing=north,filled=1,powered=false": {
+      "model": "smileprotocol:block/fuse_box_1_off",
+      "y": 180
+    },
+    "facing=north,filled=1,powered=true": {
+      "model": "smileprotocol:block/fuse_box_1_on",
+      "y": 180
+    },
+    "facing=north,filled=2,powered=false": {
+      "model": "smileprotocol:block/fuse_box_2_off",
+      "y": 180
+    },
+    "facing=north,filled=2,powered=true": {
+      "model": "smileprotocol:block/fuse_box_2_on",
+      "y": 180
+    },
+    "facing=north,filled=3,powered=false": {
+      "model": "smileprotocol:block/fuse_box_3_off",
+      "y": 180
+    },
+    "facing=north,filled=3,powered=true": {
+      "model": "smileprotocol:block/fuse_box_3_on",
+      "y": 180
+    },
+    "facing=north,filled=4,powered=false": {
+      "model": "smileprotocol:block/fuse_box_4_off",
+      "y": 180
+    },
+    "facing=north,filled=4,powered=true": {
+      "model": "smileprotocol:block/fuse_box_4_on",
+      "y": 180
+    },
+    "facing=east,filled=0,powered=false": {
+      "model": "smileprotocol:block/fuse_box_0_off",
+      "y": 270
+    },
+    "facing=east,filled=0,powered=true": {
+      "model": "smileprotocol:block/fuse_box_0_on",
+      "y": 270
+    },
+    "facing=east,filled=1,powered=false": {
+      "model": "smileprotocol:block/fuse_box_1_off",
+      "y": 270
+    },
+    "facing=east,filled=1,powered=true": {
+      "model": "smileprotocol:block/fuse_box_1_on",
+      "y": 270
+    },
+    "facing=east,filled=2,powered=false": {
+      "model": "smileprotocol:block/fuse_box_2_off",
+      "y": 270
+    },
+    "facing=east,filled=2,powered=true": {
+      "model": "smileprotocol:block/fuse_box_2_on",
+      "y": 270
+    },
+    "facing=east,filled=3,powered=false": {
+      "model": "smileprotocol:block/fuse_box_3_off",
+      "y": 270
+    },
+    "facing=east,filled=3,powered=true": {
+      "model": "smileprotocol:block/fuse_box_3_on",
+      "y": 270
+    },
+    "facing=east,filled=4,powered=false": {
+      "model": "smileprotocol:block/fuse_box_4_off",
+      "y": 270
+    },
+    "facing=east,filled=4,powered=true": {
+      "model": "smileprotocol:block/fuse_box_4_on",
+      "y": 270
+    }
+  }
+}

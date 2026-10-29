@@ -1,0 +1,13 @@
+{
+  "capacity": 1,
+  "enterTime": 8,
+  "exitTime": 8,
+  "noiseOnEnter": 2,
+  "viewCone": 140,
+  "breathDrain": 0,
+  "searchPriority": 0.6,
+  "partial": true,
+  "overlay": "cloth",
+  "animationId": "curtain",
+  "soundSet": "curtain"
+}

@@ -1,0 +1,44 @@
+{
+  "parent": "block/block",
+  "textures": {
+    "front": "smileprotocol:block/wardrobe_upper",
+    "side": "smileprotocol:block/wardrobe_side",
+    "top": "smileprotocol:block/wardrobe_top",
+    "particle": "smileprotocol:block/wardrobe_side"
+  },
+  "elements": [
+    {
+      "from": [
+        0,
+        0,
+        0
+      ],
+      "to": [
+        16,
+        16,
+        16
+      ],
+      "faces": {
+        "south": {
+          "texture": "#front"
+        },
+        "north": {
+          "texture": "#side",
+          "cullface": "north"
+        },
+        "east": {
+          "texture": "#side",
+          "cullface": "east"
+        },
+        "west": {
+          "texture": "#side",
+          "cullface": "west"
+        },
+        "up": {
+          "texture": "#top",
+          "cullface": "up"
+        }
+      }
+    }
+  ]
+}

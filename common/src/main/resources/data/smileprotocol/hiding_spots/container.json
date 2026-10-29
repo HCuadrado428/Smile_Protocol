@@ -1,0 +1,12 @@
+{
+  "capacity": 1,
+  "enterTime": 18,
+  "exitTime": 16,
+  "noiseOnEnter": 3,
+  "viewCone": 60,
+  "breathDrain": 0.1,
+  "searchPriority": 1.0,
+  "overlay": "crack",
+  "animationId": "container",
+  "soundSet": "container"
+}

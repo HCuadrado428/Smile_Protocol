@@ -1,0 +1,13 @@
+{
+  "capacity": 1,
+  "enterTime": 14,
+  "exitTime": 16,
+  "noiseOnEnter": 3,
+  "viewCone": 120,
+  "breathDrain": 0.14,
+  "searchPriority": 0.8,
+  "low": true,
+  "overlay": "low",
+  "animationId": "gurney",
+  "soundSet": "gurney"
+}

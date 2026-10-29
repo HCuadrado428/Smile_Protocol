@@ -40,7 +40,11 @@ public final class SmileProtocolFabricClient implements ClientModInitializer {
 
         BlockEntityRenderers.register(ModBlockEntities.ELEVATOR_BOARD.get(), ElevatorBoardRenderer::new);
         BlockEntityRenderers.register(ModBlockEntities.ELEVATOR_DOOR.get(), ElevatorDoorRenderer::new);
+        BlockEntityRenderers.register(ModBlockEntities.VALVE.get(), com.smileprotocol.client.ValveRenderer::new);
         BlockRenderLayerMap.INSTANCE.putBlock(ModBlocks.ELEVATOR_BUTTON.get(), RenderType.cutout());
+        BlockRenderLayerMap.INSTANCE.putBlocks(RenderType.cutout(), ModBlocks.LAB_DOOR.get(), ModBlocks.SECURITY_DOOR.get(),
+                ModBlocks.VALVE.get(), ModBlocks.GURNEY.get(), ModBlocks.CURTAIN.get(), ModBlocks.FUSE_BOX.get(),
+                ModBlocks.LOCKER.get(), ModBlocks.WARDROBE.get(), ModBlocks.WASTE_CONTAINER.get());
     }
 
     private static <T extends CustomPacketPayload> void registerReceiver(SPNetwork.Def<T> def) {
