@@ -196,7 +196,7 @@ public final class Payloads {
     }
 
     /** S -> C: estado del escondite del jugador (README 15.4). */
-    public record SyncHide(boolean hidden, String type, String overlay, float breath, boolean holding, float yaw,
+    public record SyncHide(boolean hidden, String hideType, String overlay, float breath, boolean holding, float yaw,
                            float cone, boolean partial) implements CustomPacketPayload {
         public static final Type<SyncHide> TYPE = typeOf("sync_hide");
         public static final StreamCodec<ByteBuf, SyncHide> CODEC = new StreamCodec<>() {
@@ -209,7 +209,7 @@ public final class Payloads {
             @Override
             public void encode(ByteBuf b, SyncHide p) {
                 b.writeBoolean(p.hidden());
-                ByteBufCodecs.STRING_UTF8.encode(b, p.type());
+                ByteBufCodecs.STRING_UTF8.encode(b, p.hideType());
                 ByteBufCodecs.STRING_UTF8.encode(b, p.overlay());
                 b.writeFloat(p.breath());
                 b.writeBoolean(p.holding());
