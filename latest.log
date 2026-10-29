@@ -25,16 +25,16 @@ Creating Minecraft artifacts without recompilation.
 Loaded 93 artifacts from /home/runner/work/Smile_Protocol/Smile_Protocol/common/build/tmp/createMinecraftArtifacts/nfrt_artifact_manifest.properties
 [1m*** Started working on [4mdownloadJson[23;0m[23;0m
  [1m[92m✓[23;0m Completed [4mdownloadJson[23;0m in 0.02s
-[1m*** Started working on [4mdownloadClientMappings[23;0m[23;0m
-[1m*** Started working on [4mdownloadClient[23;0m[23;0m
 [1m*** Started working on [4mdownloadServer[23;0m[23;0m
+[1m*** Started working on [4mdownloadClient[23;0m[23;0m
+[1m*** Started working on [4mdownloadClientMappings[23;0m[23;0m
+ [1m[92m✓[23;0m Completed [4mdownloadClient[23;0m in 0.02s
  [1m[92m✓[23;0m Completed [4mdownloadClientMappings[23;0m in 0.03s
  [1m[92m✓[23;0m Completed [4mdownloadServer[23;0m in 0.03s
- [1m[92m✓[23;0m Completed [4mdownloadClient[23;0m in 0.03s
-[1m*** Started working on [4mmergeMappings[23;0m[23;0m
- [1m[92m♻[23;0m Used cache of [4mmergeMappings[23;0m in 0.00s
 [1m*** Started working on [4mstripClient[23;0m[23;0m
  [1m[92m♻[23;0m Used cache of [4mstripClient[23;0m in 0.00s
+[1m*** Started working on [4mmergeMappings[23;0m[23;0m
+ [1m[92m♻[23;0m Used cache of [4mmergeMappings[23;0m in 0.00s
 [1m*** Started working on [4mextractServer[23;0m[23;0m
  [1m[92m♻[23;0m Used cache of [4mextractServer[23;0m in 0.00s
 [1m*** Started working on [4mstripServer[23;0m[23;0m
@@ -43,132 +43,466 @@ Loaded 93 artifacts from /home/runner/work/Smile_Protocol/Smile_Protocol/common/
  [1m[92m♻[23;0m Used cache of [4mmerge[23;0m in 0.00s
 [1m*** Started working on [4mrename[23;0m[23;0m
  [1m[92m♻[23;0m Used cache of [4mrename[23;0m in 0.00s
-Total runtime: 0.61s
+Total runtime: 0.72s
 
 
 > Task :common:compileJava
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/network/Payloads.java:30: error: method type in record SyncState cannot be applied to given types;
-        public static final Type<SyncState> TYPE = type("sync_state");
-                                                   ^
-  required: no arguments
-  found:    String
-  reason: actual and formal argument lists differ in length
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/network/Payloads.java:49: error: method type in record SelectSlot cannot be applied to given types;
-        public static final Type<SelectSlot> TYPE = type("select_slot");
-                                                    ^
-  required: no arguments
-  found:    String
-  reason: actual and formal argument lists differ in length
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/network/Payloads.java:58: error: method type in record Handshake cannot be applied to given types;
-        public static final Type<Handshake> TYPE = type("handshake");
-                                                   ^
-  required: no arguments
-  found:    String
-  reason: actual and formal argument lists differ in length
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/network/Payloads.java:68: error: method type in record SyncReady cannot be applied to given types;
-        public static final Type<SyncReady> TYPE = type("sync_ready");
-                                                   ^
-  required: no arguments
-  found:    String
-  reason: actual and formal argument lists differ in length
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/network/Payloads.java:97: error: method type in record SyncBoards cannot be applied to given types;
-        public static final Type<SyncBoards> TYPE = type("sync_boards");
-                                                    ^
-  required: no arguments
-  found:    String
-  reason: actual and formal argument lists differ in length
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/network/Payloads.java:106: error: method type in record ScreenFade cannot be applied to given types;
-        public static final Type<ScreenFade> TYPE = type("screen_fade");
-                                                    ^
-  required: no arguments
-  found:    String
-  reason: actual and formal argument lists differ in length
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/network/Payloads.java:118: error: method type in record DebugData cannot be applied to given types;
-        public static final Type<DebugData> TYPE = type("debug_data");
-                                                   ^
-  required: no arguments
-  found:    String
-  reason: actual and formal argument lists differ in length
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/registry/ModBlockEntities.java:18: error: BlockEntitySupplier has private access in BlockEntityType
-            () -> BlockEntityType.Builder.of(ElevatorBoardBlockEntity::new, ModBlocks.ELEVATOR_BOARD.get()).build(null));
-                                             ^
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/registry/ModBlockEntities.java:22: error: BlockEntitySupplier has private access in BlockEntityType
-            () -> BlockEntityType.Builder.of(ElevatorDoorBlockEntity::new, ModBlocks.ELEVATOR_DOOR.get()).build(null));
-                                             ^
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/registry/ModBlockEntities.java:26: error: BlockEntitySupplier has private access in BlockEntityType
-            () -> BlockEntityType.Builder.of(FluorescentLightBlockEntity::new, ModBlocks.FLUORESCENT_LIGHT.get()).build(null));
-                                             ^
-10 errors
+> Task :common:processResources
+> Task :common:classes
+> Task :common:jarJar NO-SOURCE
+> Task :common:jar
+> Task :common:sourcesJar
+> Task :common:assemble
+> Task :common:compileTestJava NO-SOURCE
+> Task :common:processTestResources NO-SOURCE
+> Task :common:testClasses UP-TO-DATE
+> Task :common:test NO-SOURCE
+> Task :common:check UP-TO-DATE
+> Task :common:build
 
-> Task :common:compileJava FAILED
-gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/__run-1793297398822.json
+> Task :fabric:compileJava
+/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/player/SPPlayerData.java:16: error: package javax.annotation does not exist
+import javax.annotation.Nullable;
+                       ^
+/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/network/SPNetwork.java:12: error: package javax.annotation does not exist
+import javax.annotation.Nullable;
+                       ^
+/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/ServerRef.java:7: error: package javax.annotation does not exist
+import javax.annotation.Nullable;
+                       ^
+/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/event/SPEvents.java:30: error: package javax.annotation does not exist
+import javax.annotation.Nullable;
+                       ^
+/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/lobby/LobbyProtection.java:18: error: package javax.annotation does not exist
+import javax.annotation.Nullable;
+                       ^
+/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/lobby/LobbyData.java:13: error: package javax.annotation does not exist
+import javax.annotation.Nullable;
+                       ^
+/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/lobby/ElevatorDef.java:11: error: package javax.annotation does not exist
+import javax.annotation.Nullable;
+                       ^
+/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/lobby/LobbyManager.java:29: error: package javax.annotation does not exist
+import javax.annotation.Nullable;
+                       ^
+/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/block/ElevatorBoardBlock.java:20: error: package javax.annotation does not exist
+import javax.annotation.Nullable;
+                       ^
+/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/block/FluorescentLightBlock.java:12: error: package javax.annotation does not exist
+import javax.annotation.Nullable;
+                       ^
+/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/block/ElevatorDoorBlock.java:33: error: package javax.annotation does not exist
+import javax.annotation.Nullable;
+                       ^
+/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/client/ClientState.java:8: error: package javax.annotation does not exist
+import javax.annotation.Nullable;
+                       ^
+/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/session/SPSessionManager.java:24: error: package javax.annotation does not exist
+import javax.annotation.Nullable;
+                       ^
+/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/session/TestRoom.java:17: error: package javax.annotation does not exist
+import javax.annotation.Nullable;
+                       ^
+/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/player/SPPlayerData.java:32: error: cannot find symbol
+    @Nullable private UUID groupId;
+     ^
+  symbol:   class Nullable
+  location: class SPPlayerData
+/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/player/SPPlayerData.java:40: error: cannot find symbol
+    @Nullable private ResourceKey<Level> savedDimension;
+     ^
+  symbol:   class Nullable
+  location: class SPPlayerData
+/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/player/SPPlayerData.java:59: error: cannot find symbol
+    @Nullable public UUID getGroupId() { return groupId; }
+     ^
+  symbol:   class Nullable
+  location: class SPPlayerData
+/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/player/SPPlayerData.java:60: error: cannot find symbol
+    public void setGroupId(@Nullable UUID groupId) { this.groupId = groupId; }
+                            ^
+  symbol:   class Nullable
+  location: class SPPlayerData
+/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/player/SPPlayerData.java:88: error: cannot find symbol
+    @Nullable public ResourceKey<Level> getSavedDimension() { return savedDimension; }
+     ^
+  symbol:   class Nullable
+  location: class SPPlayerData
+/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/network/SPNetwork.java:30: error: cannot find symbol
+                                                       @Nullable BiConsumer<T, ServerPlayer> serverHandler) {}
+                                                        ^
+  symbol:   class Nullable
+  location: class Def<T>
+  where T is a type-variable:
+    T extends CustomPacketPayload declared in record Def
+/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/ServerRef.java:15: error: cannot find symbol
+    @Nullable private static MinecraftServer server;
+     ^
+  symbol:   class Nullable
+  location: class ServerRef
+/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/ServerRef.java:19: error: cannot find symbol
+    public static void set(@Nullable MinecraftServer s) {
+                            ^
+  symbol:   class Nullable
+  location: class ServerRef
+/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/ServerRef.java:23: error: cannot find symbol
+    @Nullable
+     ^
+  symbol:   class Nullable
+  location: class ServerRef
+/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/event/SPEvents.java:114: error: cannot find symbol
+    @Nullable
+     ^
+  symbol:   class Nullable
+  location: class SPEvents
+/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/event/SPEvents.java:159: error: cannot find symbol
+    public static boolean cancelCommand(CommandSourceStack source, @Nullable String root) {
+                                                                    ^
+  symbol:   class Nullable
+  location: class SPEvents
+/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/lobby/LobbyProtection.java:29: error: cannot find symbol
+    @Nullable
+     ^
+  symbol:   class Nullable
+  location: class LobbyProtection
+/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/lobby/LobbyData.java:30: error: cannot find symbol
+    @Nullable private BlockPos spawn;
+     ^
+  symbol:   class Nullable
+  location: class LobbyData
+/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/lobby/LobbyData.java:32: error: cannot find symbol
+    @Nullable private BoundingBox region;
+     ^
+  symbol:   class Nullable
+  location: class LobbyData
+/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/lobby/ElevatorDef.java:20: error: cannot find symbol
+                          List<BlockPos> doors, @Nullable BlockPos button, @Nullable BlockPos board,
+                                                 ^
+  symbol:   class Nullable
+  location: class ElevatorDef
+/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/lobby/ElevatorDef.java:20: error: cannot find symbol
+                          List<BlockPos> doors, @Nullable BlockPos button, @Nullable BlockPos board,
+                                                                            ^
+  symbol:   class Nullable
+  location: class ElevatorDef
+/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/lobby/LobbyData.java:42: error: cannot find symbol
+    @Nullable public BlockPos getSpawn() { return spawn; }
+     ^
+  symbol:   class Nullable
+  location: class LobbyData
+/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/lobby/LobbyData.java:46: error: cannot find symbol
+    @Nullable public BoundingBox getRegion() { return region; }
+     ^
+  symbol:   class Nullable
+  location: class LobbyData
+/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/lobby/LobbyData.java:47: error: cannot find symbol
+    public void setRegion(@Nullable BoundingBox box) { region = box; setDirty(); }
+                           ^
+  symbol:   class Nullable
+  location: class LobbyData
+/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/lobby/LobbyData.java:59: error: cannot find symbol
+    @Nullable public ElevatorDef getElevator(String id) { return elevators.get(id); }
+     ^
+  symbol:   class Nullable
+  location: class LobbyData
+/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/lobby/LobbyManager.java:343: error: cannot find symbol
+    @Nullable
+     ^
+  symbol:   class Nullable
+  location: class LobbyManager
+/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/lobby/LobbyManager.java:61: error: cannot find symbol
+        @Nullable Boolean doorsOpen;
+         ^
+  symbol:   class Nullable
+  location: class Runtime
+/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/block/ElevatorBoardBlock.java:77: error: cannot find symbol
+    @Nullable
+     ^
+  symbol:   class Nullable
+  location: class ElevatorBoardBlock
+/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/block/FluorescentLightBlock.java:79: error: cannot find symbol
+    @Nullable
+     ^
+  symbol:   class Nullable
+  location: class FluorescentLightBlock
+/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/block/FluorescentLightBlock.java:85: error: cannot find symbol
+    @Nullable
+     ^
+  symbol:   class Nullable
+  location: class FluorescentLightBlock
+/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/block/ElevatorDoorBlock.java:93: error: cannot find symbol
+    @Nullable
+     ^
+  symbol:   class Nullable
+  location: class ElevatorDoorBlock
+/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/block/ElevatorDoorBlock.java:99: error: cannot find symbol
+    @Nullable
+     ^
+  symbol:   class Nullable
+  location: class ElevatorDoorBlock
+/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/block/ElevatorDoorBlock.java:106: error: cannot find symbol
+    @Nullable
+     ^
+  symbol:   class Nullable
+  location: class ElevatorDoorBlock
+/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/block/ElevatorDoorBlock.java:118: error: cannot find symbol
+    public void setPlacedBy(Level level, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack stack) {
+                                                                          ^
+  symbol:   class Nullable
+  location: class ElevatorDoorBlock
+/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/client/ClientState.java:21: error: cannot find symbol
+    @Nullable public static Payloads.SyncReady ready;
+     ^
+  symbol:   class Nullable
+  location: class ClientState
+/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/client/ClientState.java:62: error: cannot find symbol
+    @Nullable
+     ^
+  symbol:   class Nullable
+  location: class ClientState
+/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/session/SPSessionManager.java:55: error: cannot find symbol
+    public static void enter(ServerPlayer player, ServerLevel target, Vec3 pos, float yaw, @Nullable UUID groupId) {
+                                                                                            ^
+  symbol:   class Nullable
+  location: class SPSessionManager
+/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/session/TestRoom.java:33: error: cannot find symbol
+    @Nullable
+     ^
+  symbol:   class Nullable
+  location: class TestRoom
+Note: /home/runner/work/Smile_Protocol/Smile_Protocol/fabric/src/main/java/com/smileprotocol/fabric/FabricPlatform.java uses or overrides a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+47 errors
+
+> Task :fabric:compileJava FAILED
+gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/__run-1793297501701.json
 
 [Incubating] Problems report is available at: file:///home/runner/work/Smile_Protocol/Smile_Protocol/build/reports/problems/problems-report.html
 
 FAILURE: Build failed with an exception.
 
 * What went wrong:
-Execution failed for task ':common:compileJava'.
+Execution failed for task ':fabric:compileJava'.
 > Compilation failed; see the compiler output below.
-  /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/network/Payloads.java:30: error: method type in record SyncState cannot be applied to given types;
-          public static final Type<SyncState> TYPE = type("sync_state");
-                                                     ^
-    required: no arguments
-    found:    String
-    reason: actual and formal argument lists differ in length
-  /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/network/Payloads.java:49: error: method type in record SelectSlot cannot be applied to given types;
-          public static final Type<SelectSlot> TYPE = type("select_slot");
-                                                      ^
-    required: no arguments
-    found:    String
-    reason: actual and formal argument lists differ in length
-  /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/network/Payloads.java:58: error: method type in record Handshake cannot be applied to given types;
-          public static final Type<Handshake> TYPE = type("handshake");
-                                                     ^
-    required: no arguments
-    found:    String
-    reason: actual and formal argument lists differ in length
-  /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/network/Payloads.java:68: error: method type in record SyncReady cannot be applied to given types;
-          public static final Type<SyncReady> TYPE = type("sync_ready");
-                                                     ^
-    required: no arguments
-    found:    String
-    reason: actual and formal argument lists differ in length
-  /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/network/Payloads.java:97: error: method type in record SyncBoards cannot be applied to given types;
-          public static final Type<SyncBoards> TYPE = type("sync_boards");
-                                                      ^
-    required: no arguments
-    found:    String
-    reason: actual and formal argument lists differ in length
-  /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/network/Payloads.java:106: error: method type in record ScreenFade cannot be applied to given types;
-          public static final Type<ScreenFade> TYPE = type("screen_fade");
-                                                      ^
-    required: no arguments
-    found:    String
-    reason: actual and formal argument lists differ in length
-  /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/network/Payloads.java:118: error: method type in record DebugData cannot be applied to given types;
-          public static final Type<DebugData> TYPE = type("debug_data");
-                                                     ^
-    required: no arguments
-    found:    String
-    reason: actual and formal argument lists differ in length
-  /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/registry/ModBlockEntities.java:18: error: BlockEntitySupplier has private access in BlockEntityType
-              () -> BlockEntityType.Builder.of(ElevatorBoardBlockEntity::new, ModBlocks.ELEVATOR_BOARD.get()).build(null));
-                                               ^
-  /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/registry/ModBlockEntities.java:22: error: BlockEntitySupplier has private access in BlockEntityType
-              () -> BlockEntityType.Builder.of(ElevatorDoorBlockEntity::new, ModBlocks.ELEVATOR_DOOR.get()).build(null));
-                                               ^
-  /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/registry/ModBlockEntities.java:26: error: BlockEntitySupplier has private access in BlockEntityType
-              () -> BlockEntityType.Builder.of(FluorescentLightBlockEntity::new, ModBlocks.FLUORESCENT_LIGHT.get()).build(null));
-                                               ^
-  10 errors
+  Note: /home/runner/work/Smile_Protocol/Smile_Protocol/fabric/src/main/java/com/smileprotocol/fabric/FabricPlatform.java uses or overrides a deprecated API.
+  Note: Recompile with -Xlint:deprecation for details.
+  /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/player/SPPlayerData.java:32: error: cannot find symbol
+      @Nullable private UUID groupId;
+       ^
+    symbol:   class Nullable
+    location: class SPPlayerData
+  /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/player/SPPlayerData.java:40: error: cannot find symbol
+      @Nullable private ResourceKey<Level> savedDimension;
+       ^
+    symbol:   class Nullable
+    location: class SPPlayerData
+  /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/player/SPPlayerData.java:59: error: cannot find symbol
+      @Nullable public UUID getGroupId() { return groupId; }
+       ^
+    symbol:   class Nullable
+    location: class SPPlayerData
+  /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/player/SPPlayerData.java:60: error: cannot find symbol
+      public void setGroupId(@Nullable UUID groupId) { this.groupId = groupId; }
+                              ^
+    symbol:   class Nullable
+    location: class SPPlayerData
+  /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/player/SPPlayerData.java:88: error: cannot find symbol
+      @Nullable public ResourceKey<Level> getSavedDimension() { return savedDimension; }
+       ^
+    symbol:   class Nullable
+    location: class SPPlayerData
+  /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/network/SPNetwork.java:30: error: cannot find symbol
+                                                         @Nullable BiConsumer<T, ServerPlayer> serverHandler) {}
+                                                          ^
+    symbol:   class Nullable
+    location: class Def<T>
+    where T is a type-variable:
+      T extends CustomPacketPayload declared in record Def
+  /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/ServerRef.java:15: error: cannot find symbol
+      @Nullable private static MinecraftServer server;
+       ^
+    symbol:   class Nullable
+    location: class ServerRef
+  /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/ServerRef.java:19: error: cannot find symbol
+      public static void set(@Nullable MinecraftServer s) {
+                              ^
+    symbol:   class Nullable
+    location: class ServerRef
+  /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/ServerRef.java:23: error: cannot find symbol
+      @Nullable
+       ^
+    symbol:   class Nullable
+    location: class ServerRef
+  /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/event/SPEvents.java:114: error: cannot find symbol
+      @Nullable
+       ^
+    symbol:   class Nullable
+    location: class SPEvents
+  /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/event/SPEvents.java:159: error: cannot find symbol
+      public static boolean cancelCommand(CommandSourceStack source, @Nullable String root) {
+                                                                      ^
+    symbol:   class Nullable
+    location: class SPEvents
+  /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/lobby/LobbyProtection.java:29: error: cannot find symbol
+      @Nullable
+       ^
+    symbol:   class Nullable
+    location: class LobbyProtection
+  /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/lobby/LobbyData.java:30: error: cannot find symbol
+      @Nullable private BlockPos spawn;
+       ^
+    symbol:   class Nullable
+    location: class LobbyData
+  /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/lobby/LobbyData.java:32: error: cannot find symbol
+      @Nullable private BoundingBox region;
+       ^
+    symbol:   class Nullable
+    location: class LobbyData
+  /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/lobby/ElevatorDef.java:20: error: cannot find symbol
+                            List<BlockPos> doors, @Nullable BlockPos button, @Nullable BlockPos board,
+                                                   ^
+    symbol:   class Nullable
+    location: class ElevatorDef
+  /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/lobby/ElevatorDef.java:20: error: cannot find symbol
+                            List<BlockPos> doors, @Nullable BlockPos button, @Nullable BlockPos board,
+                                                                              ^
+    symbol:   class Nullable
+    location: class ElevatorDef
+  /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/lobby/LobbyData.java:42: error: cannot find symbol
+      @Nullable public BlockPos getSpawn() { return spawn; }
+       ^
+    symbol:   class Nullable
+    location: class LobbyData
+  /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/lobby/LobbyData.java:46: error: cannot find symbol
+      @Nullable public BoundingBox getRegion() { return region; }
+       ^
+    symbol:   class Nullable
+    location: class LobbyData
+  /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/lobby/LobbyData.java:47: error: cannot find symbol
+      public void setRegion(@Nullable BoundingBox box) { region = box; setDirty(); }
+                             ^
+    symbol:   class Nullable
+    location: class LobbyData
+  /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/lobby/LobbyData.java:59: error: cannot find symbol
+      @Nullable public ElevatorDef getElevator(String id) { return elevators.get(id); }
+       ^
+    symbol:   class Nullable
+    location: class LobbyData
+  /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/lobby/LobbyManager.java:343: error: cannot find symbol
+      @Nullable
+       ^
+    symbol:   class Nullable
+    location: class LobbyManager
+  /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/lobby/LobbyManager.java:61: error: cannot find symbol
+          @Nullable Boolean doorsOpen;
+           ^
+    symbol:   class Nullable
+    location: class Runtime
+  /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/block/ElevatorBoardBlock.java:77: error: cannot find symbol
+      @Nullable
+       ^
+    symbol:   class Nullable
+    location: class ElevatorBoardBlock
+  /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/block/FluorescentLightBlock.java:79: error: cannot find symbol
+      @Nullable
+       ^
+    symbol:   class Nullable
+    location: class FluorescentLightBlock
+  /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/block/FluorescentLightBlock.java:85: error: cannot find symbol
+      @Nullable
+       ^
+    symbol:   class Nullable
+    location: class FluorescentLightBlock
+  /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/block/ElevatorDoorBlock.java:93: error: cannot find symbol
+      @Nullable
+       ^
+    symbol:   class Nullable
+    location: class ElevatorDoorBlock
+  /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/block/ElevatorDoorBlock.java:99: error: cannot find symbol
+      @Nullable
+       ^
+    symbol:   class Nullable
+    location: class ElevatorDoorBlock
+  /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/block/ElevatorDoorBlock.java:106: error: cannot find symbol
+      @Nullable
+       ^
+    symbol:   class Nullable
+    location: class ElevatorDoorBlock
+  /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/block/ElevatorDoorBlock.java:118: error: cannot find symbol
+      public void setPlacedBy(Level level, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack stack) {
+                                                                            ^
+    symbol:   class Nullable
+    location: class ElevatorDoorBlock
+  /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/client/ClientState.java:21: error: cannot find symbol
+      @Nullable public static Payloads.SyncReady ready;
+       ^
+    symbol:   class Nullable
+    location: class ClientState
+  /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/client/ClientState.java:62: error: cannot find symbol
+      @Nullable
+       ^
+    symbol:   class Nullable
+    location: class ClientState
+  /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/session/SPSessionManager.java:55: error: cannot find symbol
+      public static void enter(ServerPlayer player, ServerLevel target, Vec3 pos, float yaw, @Nullable UUID groupId) {
+                                                                                              ^
+    symbol:   class Nullable
+    location: class SPSessionManager
+  /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/session/TestRoom.java:33: error: cannot find symbol
+      @Nullable
+       ^
+    symbol:   class Nullable
+    location: class TestRoom
+  /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/player/SPPlayerData.java:16: error: package javax.annotation does not exist
+  import javax.annotation.Nullable;
+                         ^
+  /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/network/SPNetwork.java:12: error: package javax.annotation does not exist
+  import javax.annotation.Nullable;
+                         ^
+  /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/ServerRef.java:7: error: package javax.annotation does not exist
+  import javax.annotation.Nullable;
+                         ^
+  /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/event/SPEvents.java:30: error: package javax.annotation does not exist
+  import javax.annotation.Nullable;
+                         ^
+  /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/lobby/LobbyProtection.java:18: error: package javax.annotation does not exist
+  import javax.annotation.Nullable;
+                         ^
+  /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/lobby/LobbyData.java:13: error: package javax.annotation does not exist
+  import javax.annotation.Nullable;
+                         ^
+  /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/lobby/ElevatorDef.java:11: error: package javax.annotation does not exist
+  import javax.annotation.Nullable;
+                         ^
+  /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/lobby/LobbyManager.java:29: error: package javax.annotation does not exist
+  import javax.annotation.Nullable;
+                         ^
+  /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/block/ElevatorBoardBlock.java:20: error: package javax.annotation does not exist
+  import javax.annotation.Nullable;
+                         ^
+  /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/block/FluorescentLightBlock.java:12: error: package javax.annotation does not exist
+  import javax.annotation.Nullable;
+                         ^
+  /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/block/ElevatorDoorBlock.java:33: error: package javax.annotation does not exist
+  import javax.annotation.Nullable;
+                         ^
+  /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/client/ClientState.java:8: error: package javax.annotation does not exist
+  import javax.annotation.Nullable;
+                         ^
+  /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/session/SPSessionManager.java:24: error: package javax.annotation does not exist
+  import javax.annotation.Nullable;
+                         ^
+  /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/session/TestRoom.java:17: error: package javax.annotation does not exist
+  import javax.annotation.Nullable;
+                         ^
+  47 errors
 
 * Try:
 > Check your code and dependencies to fix the compilation error(s)
 > Run with --scan to get full insights from a Build Scan (powered by Develocity).
 
 * Exception is:
-org.gradle.api.tasks.TaskExecutionException: Execution failed for task ':common:compileJava'.
+org.gradle.api.tasks.TaskExecutionException: Execution failed for task ':fabric:compileJava'.
 	at org.gradle.api.internal.tasks.execution.ExecuteActionsTaskExecuter.lambda$executeIfValid$1(ExecuteActionsTaskExecuter.java:135)
 	at org.gradle.internal.Try$Failure.ifSuccessfulOrElse(Try.java:288)
 	at org.gradle.api.internal.tasks.execution.ExecuteActionsTaskExecuter.executeIfValid(ExecuteActionsTaskExecuter.java:133)
@@ -203,58 +537,218 @@ org.gradle.api.tasks.TaskExecutionException: Execution failed for task ':common:
 	at org.gradle.internal.concurrent.ExecutorPolicy$CatchAndRecordFailures.onExecute(ExecutorPolicy.java:64)
 	at org.gradle.internal.concurrent.AbstractManagedExecutor$1.run(AbstractManagedExecutor.java:47)
 Caused by: org.gradle.api.internal.tasks.compile.CompilationFailedException: Compilation failed; see the compiler output below.
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/network/Payloads.java:30: error: method type in record SyncState cannot be applied to given types;
-        public static final Type<SyncState> TYPE = type("sync_state");
-                                                   ^
-  required: no arguments
-  found:    String
-  reason: actual and formal argument lists differ in length
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/network/Payloads.java:49: error: method type in record SelectSlot cannot be applied to given types;
-        public static final Type<SelectSlot> TYPE = type("select_slot");
-                                                    ^
-  required: no arguments
-  found:    String
-  reason: actual and formal argument lists differ in length
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/network/Payloads.java:58: error: method type in record Handshake cannot be applied to given types;
-        public static final Type<Handshake> TYPE = type("handshake");
-                                                   ^
-  required: no arguments
-  found:    String
-  reason: actual and formal argument lists differ in length
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/network/Payloads.java:68: error: method type in record SyncReady cannot be applied to given types;
-        public static final Type<SyncReady> TYPE = type("sync_ready");
-                                                   ^
-  required: no arguments
-  found:    String
-  reason: actual and formal argument lists differ in length
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/network/Payloads.java:97: error: method type in record SyncBoards cannot be applied to given types;
-        public static final Type<SyncBoards> TYPE = type("sync_boards");
-                                                    ^
-  required: no arguments
-  found:    String
-  reason: actual and formal argument lists differ in length
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/network/Payloads.java:106: error: method type in record ScreenFade cannot be applied to given types;
-        public static final Type<ScreenFade> TYPE = type("screen_fade");
-                                                    ^
-  required: no arguments
-  found:    String
-  reason: actual and formal argument lists differ in length
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/network/Payloads.java:118: error: method type in record DebugData cannot be applied to given types;
-        public static final Type<DebugData> TYPE = type("debug_data");
-                                                   ^
-  required: no arguments
-  found:    String
-  reason: actual and formal argument lists differ in length
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/registry/ModBlockEntities.java:18: error: BlockEntitySupplier has private access in BlockEntityType
-            () -> BlockEntityType.Builder.of(ElevatorBoardBlockEntity::new, ModBlocks.ELEVATOR_BOARD.get()).build(null));
-                                             ^
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/registry/ModBlockEntities.java:22: error: BlockEntitySupplier has private access in BlockEntityType
-            () -> BlockEntityType.Builder.of(ElevatorDoorBlockEntity::new, ModBlocks.ELEVATOR_DOOR.get()).build(null));
-                                             ^
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/registry/ModBlockEntities.java:26: error: BlockEntitySupplier has private access in BlockEntityType
-            () -> BlockEntityType.Builder.of(FluorescentLightBlockEntity::new, ModBlocks.FLUORESCENT_LIGHT.get()).build(null));
-                                             ^
-10 errors
+/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/player/SPPlayerData.java:16: error: package javax.annotation does not exist
+import javax.annotation.Nullable;
+                       ^
+/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/network/SPNetwork.java:12: error: package javax.annotation does not exist
+import javax.annotation.Nullable;
+                       ^
+/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/ServerRef.java:7: error: package javax.annotation does not exist
+import javax.annotation.Nullable;
+                       ^
+/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/event/SPEvents.java:30: error: package javax.annotation does not exist
+import javax.annotation.Nullable;
+                       ^
+/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/lobby/LobbyProtection.java:18: error: package javax.annotation does not exist
+import javax.annotation.Nullable;
+                       ^
+/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/lobby/LobbyData.java:13: error: package javax.annotation does not exist
+import javax.annotation.Nullable;
+                       ^
+/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/lobby/ElevatorDef.java:11: error: package javax.annotation does not exist
+import javax.annotation.Nullable;
+                       ^
+/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/lobby/LobbyManager.java:29: error: package javax.annotation does not exist
+import javax.annotation.Nullable;
+                       ^
+/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/block/ElevatorBoardBlock.java:20: error: package javax.annotation does not exist
+import javax.annotation.Nullable;
+                       ^
+/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/block/FluorescentLightBlock.java:12: error: package javax.annotation does not exist
+import javax.annotation.Nullable;
+                       ^
+/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/block/ElevatorDoorBlock.java:33: error: package javax.annotation does not exist
+import javax.annotation.Nullable;
+                       ^
+/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/client/ClientState.java:8: error: package javax.annotation does not exist
+import javax.annotation.Nullable;
+                       ^
+/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/session/SPSessionManager.java:24: error: package javax.annotation does not exist
+import javax.annotation.Nullable;
+                       ^
+/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/session/TestRoom.java:17: error: package javax.annotation does not exist
+import javax.annotation.Nullable;
+                       ^
+/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/player/SPPlayerData.java:32: error: cannot find symbol
+    @Nullable private UUID groupId;
+     ^
+  symbol:   class Nullable
+  location: class SPPlayerData
+/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/player/SPPlayerData.java:40: error: cannot find symbol
+    @Nullable private ResourceKey<Level> savedDimension;
+     ^
+  symbol:   class Nullable
+  location: class SPPlayerData
+/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/player/SPPlayerData.java:59: error: cannot find symbol
+    @Nullable public UUID getGroupId() { return groupId; }
+     ^
+  symbol:   class Nullable
+  location: class SPPlayerData
+/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/player/SPPlayerData.java:60: error: cannot find symbol
+    public void setGroupId(@Nullable UUID groupId) { this.groupId = groupId; }
+                            ^
+  symbol:   class Nullable
+  location: class SPPlayerData
+/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/player/SPPlayerData.java:88: error: cannot find symbol
+    @Nullable public ResourceKey<Level> getSavedDimension() { return savedDimension; }
+     ^
+  symbol:   class Nullable
+  location: class SPPlayerData
+/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/network/SPNetwork.java:30: error: cannot find symbol
+                                                       @Nullable BiConsumer<T, ServerPlayer> serverHandler) {}
+                                                        ^
+  symbol:   class Nullable
+  location: class Def<T>
+  where T is a type-variable:
+    T extends CustomPacketPayload declared in record Def
+/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/ServerRef.java:15: error: cannot find symbol
+    @Nullable private static MinecraftServer server;
+     ^
+  symbol:   class Nullable
+  location: class ServerRef
+/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/ServerRef.java:19: error: cannot find symbol
+    public static void set(@Nullable MinecraftServer s) {
+                            ^
+  symbol:   class Nullable
+  location: class ServerRef
+/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/ServerRef.java:23: error: cannot find symbol
+    @Nullable
+     ^
+  symbol:   class Nullable
+  location: class ServerRef
+/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/event/SPEvents.java:114: error: cannot find symbol
+    @Nullable
+     ^
+  symbol:   class Nullable
+  location: class SPEvents
+/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/event/SPEvents.java:159: error: cannot find symbol
+    public static boolean cancelCommand(CommandSourceStack source, @Nullable String root) {
+                                                                    ^
+  symbol:   class Nullable
+  location: class SPEvents
+/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/lobby/LobbyProtection.java:29: error: cannot find symbol
+    @Nullable
+     ^
+  symbol:   class Nullable
+  location: class LobbyProtection
+/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/lobby/LobbyData.java:30: error: cannot find symbol
+    @Nullable private BlockPos spawn;
+     ^
+  symbol:   class Nullable
+  location: class LobbyData
+/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/lobby/LobbyData.java:32: error: cannot find symbol
+    @Nullable private BoundingBox region;
+     ^
+  symbol:   class Nullable
+  location: class LobbyData
+/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/lobby/ElevatorDef.java:20: error: cannot find symbol
+                          List<BlockPos> doors, @Nullable BlockPos button, @Nullable BlockPos board,
+                                                 ^
+  symbol:   class Nullable
+  location: class ElevatorDef
+/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/lobby/ElevatorDef.java:20: error: cannot find symbol
+                          List<BlockPos> doors, @Nullable BlockPos button, @Nullable BlockPos board,
+                                                                            ^
+  symbol:   class Nullable
+  location: class ElevatorDef
+/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/lobby/LobbyData.java:42: error: cannot find symbol
+    @Nullable public BlockPos getSpawn() { return spawn; }
+     ^
+  symbol:   class Nullable
+  location: class LobbyData
+/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/lobby/LobbyData.java:46: error: cannot find symbol
+    @Nullable public BoundingBox getRegion() { return region; }
+     ^
+  symbol:   class Nullable
+  location: class LobbyData
+/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/lobby/LobbyData.java:47: error: cannot find symbol
+    public void setRegion(@Nullable BoundingBox box) { region = box; setDirty(); }
+                           ^
+  symbol:   class Nullable
+  location: class LobbyData
+/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/lobby/LobbyData.java:59: error: cannot find symbol
+    @Nullable public ElevatorDef getElevator(String id) { return elevators.get(id); }
+     ^
+  symbol:   class Nullable
+  location: class LobbyData
+/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/lobby/LobbyManager.java:343: error: cannot find symbol
+    @Nullable
+     ^
+  symbol:   class Nullable
+  location: class LobbyManager
+/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/lobby/LobbyManager.java:61: error: cannot find symbol
+        @Nullable Boolean doorsOpen;
+         ^
+  symbol:   class Nullable
+  location: class Runtime
+/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/block/ElevatorBoardBlock.java:77: error: cannot find symbol
+    @Nullable
+     ^
+  symbol:   class Nullable
+  location: class ElevatorBoardBlock
+/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/block/FluorescentLightBlock.java:79: error: cannot find symbol
+    @Nullable
+     ^
+  symbol:   class Nullable
+  location: class FluorescentLightBlock
+/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/block/FluorescentLightBlock.java:85: error: cannot find symbol
+    @Nullable
+     ^
+  symbol:   class Nullable
+  location: class FluorescentLightBlock
+/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/block/ElevatorDoorBlock.java:93: error: cannot find symbol
+    @Nullable
+     ^
+  symbol:   class Nullable
+  location: class ElevatorDoorBlock
+/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/block/ElevatorDoorBlock.java:99: error: cannot find symbol
+    @Nullable
+     ^
+  symbol:   class Nullable
+  location: class ElevatorDoorBlock
+/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/block/ElevatorDoorBlock.java:106: error: cannot find symbol
+    @Nullable
+     ^
+  symbol:   class Nullable
+  location: class ElevatorDoorBlock
+/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/block/ElevatorDoorBlock.java:118: error: cannot find symbol
+    public void setPlacedBy(Level level, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack stack) {
+                                                                          ^
+  symbol:   class Nullable
+  location: class ElevatorDoorBlock
+/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/client/ClientState.java:21: error: cannot find symbol
+    @Nullable public static Payloads.SyncReady ready;
+     ^
+  symbol:   class Nullable
+  location: class ClientState
+/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/client/ClientState.java:62: error: cannot find symbol
+    @Nullable
+     ^
+  symbol:   class Nullable
+  location: class ClientState
+/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/session/SPSessionManager.java:55: error: cannot find symbol
+    public static void enter(ServerPlayer player, ServerLevel target, Vec3 pos, float yaw, @Nullable UUID groupId) {
+                                                                                            ^
+  symbol:   class Nullable
+  location: class SPSessionManager
+/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/session/TestRoom.java:33: error: cannot find symbol
+    @Nullable
+     ^
+  symbol:   class Nullable
+  location: class TestRoom
+Note: /home/runner/work/Smile_Protocol/Smile_Protocol/fabric/src/main/java/com/smileprotocol/fabric/FabricPlatform.java uses or overrides a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+47 errors
 	at org.gradle.api.internal.tasks.compile.JdkJavaCompiler.execute(JdkJavaCompiler.java:89)
 	at org.gradle.api.internal.tasks.compile.JdkJavaCompiler.execute(JdkJavaCompiler.java:50)
 	at org.gradle.api.internal.tasks.compile.NormalizingJavaCompiler.delegateAndHandleErrors(NormalizingJavaCompiler.java:98)
@@ -389,5 +883,5 @@ Caused by: org.gradle.api.internal.tasks.compile.CompilationFailedException: Com
 	... 30 more
 
 
-BUILD FAILED in 27s
-2 actionable tasks: 2 executed
+BUILD FAILED in 25s
+6 actionable tasks: 6 executed
