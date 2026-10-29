@@ -1,4 +1,4 @@
-# Cómo probar lo implementado (fases 1 a 6)
+# Cómo probar lo implementado (fases 1 a 10)
 
 ## Preparar el entorno
 
@@ -55,6 +55,62 @@ La configuración está en `config/smileprotocol.json`.
 3. `/smileprotocol leave` (o `/spadmin test leave`): vuelves al lobby con el inventario, el modo y la vida de antes.
 4. **Crash simulado.** Desconéctate dentro de la sala, cierra el servidor y vuelve a entrar. Sigues en la partida y, al salir, recuperas el inventario.
 
+## Movimiento (fase 7)
+
+Dentro de una partida:
+- **Correr** con Ctrl hace más ruido que andar, y **agachado** casi no hace.
+- **Dive**: corriendo, pulsa **Shift**. Te deslizas tumbado unos metros y cabes por debajo de las tuberías caídas de los pasillos transversales. Tiene 3 s de espera.
+- **Vault**: corriendo o andando hacia un obstáculo de 1 bloque (barriles, losas, escombros), pulsa **Espacio** y lo saltas apoyando la mano.
+- **Mirar atrás**: mantén **C**. Gira la cámara, no la dirección en que corres.
+- **Asomarse**: mantén **Q** (izquierda) o **E** (derecha), de pie o agachado. La cámara se desplaza y se inclina, sin atravesar paredes.
+- **Soltar** el objeto de la mano: **G**.
+
+Las teclas se cambian en `config/smileprotocol.json` (`key_look_back`, `key_lean_left`, `key_lean_right`, `key_drop`). No chocan con las de Minecraft.
+
+Con `/spadmin debug on` se ven los ruidos como anillos de partículas. `/spadmin noise test <radio>` hace un ruido de prueba.
+
+## Animaciones (fase 8)
+
+Con **PlayerAnimator** instalado, los demás jugadores te ven:
+- inclinarte al asomarte y girar el torso al mirar atrás;
+- echarte hacia delante al correr y estirar los brazos en el dive;
+- apoyar la mano en el vault;
+- girar la válvula, meter el fusible, empujar la puerta, recoger del suelo o pasar la tarjeta.
+
+Sin PlayerAnimator todo funciona igual; solo faltan estas animaciones.
+
+## Interacción, fusibles, puertas y válvulas (fase 9)
+
+Todo se usa **mirándolo y manteniendo el clic derecho**. Abajo del punto de mira sale qué vas a hacer, y una barra mientras lo mantienes. Si te mueves, se cancela.
+- **Objetos del suelo** (fusibles, llaves, tarjetas, rueda): se recogen en 0,3 s. Con los 4 huecos llenos no se puede.
+- **Caja de fusibles**: «Insertar fusible (1/2)». El piloto pasa de rojo a verde cuando el circuito está completo. Los fusibles se ven dentro de la caja. Los fundidos no dan corriente, y también se pueden sacar fusibles. Cuantos menos jugadores, menos fusibles hacen falta.
+- **Puertas**:
+  - normales: agachado se abren despacio y sin ruido;
+  - con llave: llave roja o azul;
+  - con tarjeta: nivel 1, 2 o 3;
+  - eléctricas: se abren solas con su circuito;
+  - hidráulicas: se abren al girar sus válvulas;
+  - atascadas: hacen falta 2 jugadores a la vez.
+- **Válvulas**: se tardan 3 s en girar y hacen ruido. En `lab_generators` van en orden (1 y luego 2) y a una le falta la rueda, que está en el suelo de otra sala. En `lab_greenhouse` hay dos que hay que girar a la vez.
+
+Para construir, mirando el bloque:
+- `/spadmin door set <tipo> [parámetro]`
+- `/spadmin lock set <llave> [consume]`
+- `/spadmin circuit set <circuito> [fusibles]`
+- `/spadmin valve set <grupo> [orden] [coop]`
+
+Para probar sin buscar: `/spadmin give fuse|key red|keycard 2|wheel`.
+
+## Escondites (fase 10)
+
+Taquillas, armarios (caben 2), contenedores, camillas (se entra tumbado) y cortinas (ocultación parcial).
+1. Mantén clic derecho mirándolo: se abre, entras y se cierra.
+2. Dentro eres invisible, no te puedes mover y la vista está limitada. Se ven rendijas según el tipo.
+3. **Shift** aguanta la respiración, mientras dure la barra de aliento. Si se agota, exhalas y haces ruido.
+4. **Clic derecho** para salir.
+
+Con `/spadmin hide set <tipo>` conviertes el bloque que miras en escondite.
+
 ## Depuración
 
 - `/spadmin debug on`: muestra el panel de estado (sesión, mods, lobby y ascensores). Solo lo ven los operadores.
@@ -64,17 +120,22 @@ La configuración está en `config/smileprotocol.json`.
 
 Al bajar un ascensor se crea una **partida** (`R1`, `R2`...) con uno o varios **grupos** (`R1.1`, `R1.2`...). Cada grupo juega en su propio hueco de la dimensión, a 4096 bloques de los demás.
 
-**Zonas provisionales.** Hasta que se diseñe el mapa (fase 21) hay 7 zonas de prueba:
-- el pasillo inicial `start_corridor`;
-- cinco intermedias: `lab_storage`, `lab_offices`, `lab_morgue`, `lab_generators` y `lab_greenhouse`;
-- la sala final `final_room`.
+**Plantas provisionales.** Hasta que se diseñe el mapa (fase 21) hay 7 **plantas** de laboratorio. Cada ascensor te baja a una planta entera; al llegar sale el rótulo «PLANTA -N» con su nombre:
+- el vestíbulo de llegada da a un pasillo principal;
+- hay tres pasillos transversales y dos perimetrales;
+- a ambos lados hay unas 45 salas (laboratorios, despachos, almacenes, morgue, vestuarios, servidores…), cada una con su puerta y su cartel;
+- al fondo está el vestíbulo del ascensor de salida.
 
-Cada partida elige **3 intermedias** al azar (con dificultad creciente y distintas de la partida anterior de ese ascensor).
+Las plantas son `start_corridor`, `lab_storage`, `lab_offices`, `lab_morgue`, `lab_generators`, `lab_greenhouse` y `final_room`. Cada partida elige **3 intermedias** al azar.
 
 **Qué comprobar:**
 1. **Mini ascensor.** Bajad 2 jugadores por `mini1`. Aparecéis en la cabina del pasillo y el chat dice «Grupo R1.1 · 2 jugadores». La pantalla del ascensor pasa a «En curso, pasillo».
 2. **Varias a la vez.** A la vez, otros 2 bajan por `mini2`. Cada grupo está en su propia copia (no os veis). `/smileprotocol runs` lista las dos partidas.
-3. **Avanzar de zona.** Los ascensores de zona llegan en la fase 16; de momento se avanza con `/smileprotocol zone R1.1 next`. El grupo aparece en la cabina de la zona siguiente, que ya estaba precargada. La anterior se vacía poco a poco. La pantalla del lobby pasa a «En curso, zona 1».
+3. **Ascensor de salida.**
+   - Sus puertas están cerradas hasta que el circuito **exit** de la planta tiene corriente: hay que encontrar los fusibles y meterlos en sus cajas.
+   - Con corriente, las puertas se abren y se encienden las luces del circuito. Entra en la cabina: empieza la cuenta atrás de 15 s y sale cuando estáis todos.
+   - Al bajar se cura a todos. El que estaba herido o fuera de la cabina pierde sus objetos.
+   - También se puede avanzar con `/smileprotocol zone R1.1 next`.
 4. **Terminar.** Un `next` más allá de la sala final marca el grupo como **completado**. Salen los resultados en el chat (zona, tiempo y supervivientes) y a los 10 s volvéis al lobby. El ascensor vuelve a «Libre».
 5. **Eliminación.** Si todos los del grupo salen (`/smileprotocol leave` o morir), el grupo queda eliminado y la partida termina igual.
 6. **Desconexión.** Desconéctate dentro y vuelve a entrar antes de 120 s: vuelves con tu grupo, y si el grupo ha cambiado de zona apareces en la actual. Si no queda nadie conectado durante 120 s, el grupo queda eliminado.
