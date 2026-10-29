@@ -19,7 +19,7 @@ import java.util.List;
  * ({@code Slots}), cuantas hacen falta tras escalar por el tamano del grupo ({@code Required}),
  * los fusibles puestos y, si exige uno concreto, de que tipo ({@code Accepts}).
  */
-public class FuseBoxBlockEntity extends SyncedBlockEntity {
+public class FuseBoxBlockEntity extends AnimatedBlockEntity {
 
     public static final String BLOWN = "blown";
 
@@ -31,6 +31,11 @@ public class FuseBoxBlockEntity extends SyncedBlockEntity {
 
     public FuseBoxBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlockEntities.FUSE_BOX.get(), pos, state);
+    }
+
+    @Override
+    protected boolean targetOpen() {
+        return false;
     }
 
     public String circuit() { return circuit; }

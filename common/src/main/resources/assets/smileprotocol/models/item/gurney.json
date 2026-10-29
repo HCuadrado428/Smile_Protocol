@@ -1,3 +1,6 @@
 {
-  "parent": "smileprotocol:block/gurney"
+  "parent": "item/generated",
+  "textures": {
+    "layer0": "smileprotocol:item/gurney"
+  }
 }

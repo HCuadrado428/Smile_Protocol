@@ -8,6 +8,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 
 import com.smileprotocol.blockentity.FuseBoxBlockEntity;
+import com.smileprotocol.blockentity.HideBlockEntity;
 import com.smileprotocol.blockentity.LabDoorBlockEntity;
 import com.smileprotocol.blockentity.ValveBlockEntity;
 
@@ -40,6 +41,11 @@ public final class ModBlockEntities {
     public static final Supplier<BlockEntityType<ValveBlockEntity>> VALVE = Services.PLATFORM.register(
             BuiltInRegistries.BLOCK_ENTITY_TYPE, "valve",
             () -> Services.PLATFORM.blockEntityType(ValveBlockEntity::new, ModBlocks.VALVE.get()));
+
+    public static final Supplier<BlockEntityType<HideBlockEntity>> HIDE = Services.PLATFORM.register(
+            BuiltInRegistries.BLOCK_ENTITY_TYPE, "hide",
+            () -> Services.PLATFORM.blockEntityType(HideBlockEntity::new, ModBlocks.LOCKER.get(), ModBlocks.WARDROBE.get(),
+                    ModBlocks.WASTE_CONTAINER.get(), ModBlocks.GURNEY.get(), ModBlocks.CURTAIN.get()));
 
     private ModBlockEntities() {}
 

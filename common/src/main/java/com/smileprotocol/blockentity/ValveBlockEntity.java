@@ -10,7 +10,7 @@ import net.minecraft.world.level.block.state.BlockState;
  * Valvula (README 14.4): su grupo, su orden dentro del grupo (0 = cualquiera) y si hay que
  * girarla a la vez que las demas del grupo ({@code Coop}).
  */
-public class ValveBlockEntity extends SyncedBlockEntity {
+public class ValveBlockEntity extends AnimatedBlockEntity {
 
     private String group = "";
     private int order;
@@ -20,6 +20,17 @@ public class ValveBlockEntity extends SyncedBlockEntity {
 
     public ValveBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlockEntities.VALVE.get(), pos, state);
+    }
+
+    @Override
+    protected boolean targetOpen() {
+        BlockState st = getBlockState();
+        return st.hasProperty(com.smileprotocol.block.ValveBlock.TURNED) && st.getValue(com.smileprotocol.block.ValveBlock.TURNED);
+    }
+
+    @Override
+    protected float speed() {
+        return 1f / 20f;
     }
 
     public String group() { return group; }

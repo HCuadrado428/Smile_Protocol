@@ -1,64 +1,52 @@
 {
   "variants": {
-    "facing=south,half=lower,open=false": {
-      "model": "smileprotocol:block/curtain"
-    },
-    "facing=south,half=lower,open=true": {
-      "model": "smileprotocol:block/curtain"
-    },
-    "facing=south,half=upper,open=false": {
-      "model": "smileprotocol:block/curtain"
-    },
-    "facing=south,half=upper,open=true": {
-      "model": "smileprotocol:block/curtain"
-    },
-    "facing=west,half=lower,open=false": {
-      "model": "smileprotocol:block/curtain",
-      "y": 90
-    },
-    "facing=west,half=lower,open=true": {
-      "model": "smileprotocol:block/curtain",
-      "y": 90
-    },
-    "facing=west,half=upper,open=false": {
-      "model": "smileprotocol:block/curtain",
-      "y": 90
-    },
-    "facing=west,half=upper,open=true": {
-      "model": "smileprotocol:block/curtain",
-      "y": 90
-    },
     "facing=north,half=lower,open=false": {
-      "model": "smileprotocol:block/curtain",
-      "y": 180
+      "model": "smileprotocol:block/curtain_particle"
     },
     "facing=north,half=lower,open=true": {
-      "model": "smileprotocol:block/curtain",
-      "y": 180
+      "model": "smileprotocol:block/curtain_particle"
     },
     "facing=north,half=upper,open=false": {
-      "model": "smileprotocol:block/curtain",
-      "y": 180
+      "model": "smileprotocol:block/curtain_particle"
     },
     "facing=north,half=upper,open=true": {
-      "model": "smileprotocol:block/curtain",
-      "y": 180
+      "model": "smileprotocol:block/curtain_particle"
+    },
+    "facing=south,half=lower,open=false": {
+      "model": "smileprotocol:block/curtain_particle"
+    },
+    "facing=south,half=lower,open=true": {
+      "model": "smileprotocol:block/curtain_particle"
+    },
+    "facing=south,half=upper,open=false": {
+      "model": "smileprotocol:block/curtain_particle"
+    },
+    "facing=south,half=upper,open=true": {
+      "model": "smileprotocol:block/curtain_particle"
     },
     "facing=east,half=lower,open=false": {
-      "model": "smileprotocol:block/curtain",
-      "y": 270
+      "model": "smileprotocol:block/curtain_particle"
     },
     "facing=east,half=lower,open=true": {
-      "model": "smileprotocol:block/curtain",
-      "y": 270
+      "model": "smileprotocol:block/curtain_particle"
     },
     "facing=east,half=upper,open=false": {
-      "model": "smileprotocol:block/curtain",
-      "y": 270
+      "model": "smileprotocol:block/curtain_particle"
     },
     "facing=east,half=upper,open=true": {
-      "model": "smileprotocol:block/curtain",
-      "y": 270
+      "model": "smileprotocol:block/curtain_particle"
+    },
+    "facing=west,half=lower,open=false": {
+      "model": "smileprotocol:block/curtain_particle"
+    },
+    "facing=west,half=lower,open=true": {
+      "model": "smileprotocol:block/curtain_particle"
+    },
+    "facing=west,half=upper,open=false": {
+      "model": "smileprotocol:block/curtain_particle"
+    },
+    "facing=west,half=upper,open=true": {
+      "model": "smileprotocol:block/curtain_particle"
     }
   }
 }

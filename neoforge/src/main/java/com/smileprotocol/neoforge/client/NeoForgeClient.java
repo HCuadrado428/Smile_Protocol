@@ -55,7 +55,10 @@ public final class NeoForgeClient {
         public static void onRegisterRenderers(EntityRenderersEvent.RegisterRenderers event) {
             event.registerBlockEntityRenderer(ModBlockEntities.ELEVATOR_BOARD.get(), ElevatorBoardRenderer::new);
             event.registerBlockEntityRenderer(ModBlockEntities.ELEVATOR_DOOR.get(), ElevatorDoorRenderer::new);
-            event.registerBlockEntityRenderer(ModBlockEntities.VALVE.get(), com.smileprotocol.client.ValveRenderer::new);
+            event.registerBlockEntityRenderer(ModBlockEntities.VALVE.get(), com.smileprotocol.client.SPGeoRenderer::new);
+            event.registerBlockEntityRenderer(ModBlockEntities.FUSE_BOX.get(), com.smileprotocol.client.SPGeoRenderer::new);
+            event.registerBlockEntityRenderer(ModBlockEntities.LAB_DOOR.get(), com.smileprotocol.client.SPGeoRenderer::new);
+            event.registerBlockEntityRenderer(ModBlockEntities.HIDE.get(), com.smileprotocol.client.SPGeoRenderer::new);
         }
     }
 

@@ -333,19 +333,14 @@ def items():
 
 
 def main():
-    fuse_box()
+    # Los bloques son modelos GeckoLib (tools/geo_models.py); aqui solo quedan los objetos
+    global BLOCK
+    real = BLOCK
+    BLOCK = Path("/tmp/smileprotocol_unused_textures")
     door("lab_door", 61, (206, 210, 204), window=True, stripes=False)
     door("security_door", 63, (96, 104, 108), window=True, stripes=True)
     valve()
-    cabinet("locker", 71, (84, 96, 104), (104, 118, 128), (180, 182, 180), vents=True)
-    cabinet("locker", 71, (84, 96, 104), (104, 118, 128), (180, 182, 180), vents=True, opened=True)
-    cabinet("wardrobe", 73, (92, 66, 44), (120, 88, 58), (196, 170, 90), vents=False)
-    cabinet("wardrobe", 73, (92, 66, 44), (120, 88, 58), (196, 170, 90), vents=False, opened=True)
-    cabinet("waste_container", 75, (60, 92, 60), (72, 112, 70), (40, 40, 40), vents=False,
-            label=(11, 6, (210, 50, 40)))
-    cabinet("waste_container", 75, (60, 92, 60), (72, 112, 70), (40, 40, 40), vents=False, opened=True)
-    gurney()
-    curtain()
+    BLOCK = real
     items()
     print("Texturas de mecanismos generadas")
 

@@ -143,4 +143,16 @@ public class FuseBoxBlock extends HorizontalDirectionalBlock implements EntityBl
         }
         CircuitManager.onFusesChanged(level, pos, box.circuit());
     }
+
+    @Nullable
+    @Override
+    public <T extends BlockEntity> net.minecraft.world.level.block.entity.BlockEntityTicker<T> getTicker(Level level, BlockState state,
+            net.minecraft.world.level.block.entity.BlockEntityType<T> type) {
+        if (!level.isClientSide) return null;
+        return (lvl, pos, st, be) -> {
+            if (be instanceof com.smileprotocol.blockentity.AnimatedBlockEntity a) {
+                com.smileprotocol.blockentity.AnimatedBlockEntity.clientTick(lvl, pos, st, a);
+            }
+        };
+    }
 }

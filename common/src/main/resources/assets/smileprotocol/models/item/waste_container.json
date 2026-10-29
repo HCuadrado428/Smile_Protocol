@@ -1,3 +1,6 @@
 {
-  "parent": "smileprotocol:block/waste_container_upper"
+  "parent": "item/generated",
+  "textures": {
+    "layer0": "smileprotocol:item/waste_container"
+  }
 }

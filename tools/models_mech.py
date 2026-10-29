@@ -245,16 +245,29 @@ def items():
         item_flat(n)
 
 
+def geckolib(name, props):
+    """Bloque dibujado por GeckoLib: el blockstate solo aporta las particulas."""
+    model(f"{name}_particle", {"textures": {"particle": tex(name)}})
+    import itertools
+    keys = list(props)
+    variants = {}
+    for combo in itertools.product(*[props[k] for k in keys]):
+        variants[",".join(f"{k}={v}" for k, v in zip(keys, combo))] = v(f"{name}_particle")
+    blockstate(name, variants)
+    item_flat(name)
+
+
 def main():
-    fuse_box()
-    door("lab_door")
-    door("security_door")
-    valve()
-    tall_hide("locker")
-    tall_hide("wardrobe")
-    tall_hide("waste_container")
-    gurney()
-    curtain()
+    F = ["north", "south", "east", "west"]
+    B = ["false", "true"]
+    geckolib("fuse_box", {"facing": F, "filled": [str(i) for i in range(5)], "powered": B})
+    for d in ("lab_door", "security_door"):
+        geckolib(d, {"facing": F, "half": ["lower", "upper"], "hinge": ["left", "right"], "open": B, "powered": B})
+    geckolib("valve", {"facing": F, "turned": B, "turning": B, "wheel": B})
+    for h in ("locker", "wardrobe", "waste_container", "gurney", "curtain"):
+        geckolib(h, {"facing": F, "half": ["lower", "upper"], "open": B})
+    write(ASSETS / "models/item/valve_wheel.json", {
+        "parent": "item/generated", "textures": {"layer0": f"{MOD}:item/valve_wheel"}})
     data()
     items()
     print("Modelos de mecanismos generados")

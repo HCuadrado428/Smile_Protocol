@@ -170,4 +170,16 @@ public class ValveBlock extends HorizontalDirectionalBlock implements EntityBloc
         NoiseSystem.emit(level, Vec3.atCenterOf(pos), 16, NoiseType.VALVE, player);
         if (!group.isEmpty()) ValveGroups.resetGroup(level, pos, group);
     }
+
+    @Nullable
+    @Override
+    public <T extends BlockEntity> net.minecraft.world.level.block.entity.BlockEntityTicker<T> getTicker(Level level, BlockState state,
+            net.minecraft.world.level.block.entity.BlockEntityType<T> type) {
+        if (!level.isClientSide) return null;
+        return (lvl, pos, st, be) -> {
+            if (be instanceof com.smileprotocol.blockentity.AnimatedBlockEntity a) {
+                com.smileprotocol.blockentity.AnimatedBlockEntity.clientTick(lvl, pos, st, a);
+            }
+        };
+    }
 }

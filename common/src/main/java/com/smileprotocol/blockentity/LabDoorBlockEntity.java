@@ -17,7 +17,7 @@ import java.util.Locale;
  * nivel de tarjeta, circuito o grupo de valvulas), si la llave se gasta y si ya se ha abierto.
  * Va en la mitad de abajo.
  */
-public class LabDoorBlockEntity extends SyncedBlockEntity implements CircuitListener {
+public class LabDoorBlockEntity extends AnimatedBlockEntity implements CircuitListener {
 
     private DoorType type = DoorType.NORMAL;
     private String param = "";
@@ -26,6 +26,17 @@ public class LabDoorBlockEntity extends SyncedBlockEntity implements CircuitList
 
     public LabDoorBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlockEntities.LAB_DOOR.get(), pos, state);
+    }
+
+    @Override
+    protected boolean targetOpen() {
+        BlockState st = getBlockState();
+        return st.hasProperty(LabDoorBlock.OPEN) && st.getValue(LabDoorBlock.OPEN);
+    }
+
+    public boolean hingeRight() {
+        BlockState st = getBlockState();
+        return st.hasProperty(LabDoorBlock.HINGE) && st.getValue(LabDoorBlock.HINGE) == net.minecraft.world.level.block.state.properties.DoorHingeSide.RIGHT;
     }
 
     public DoorType type() { return type; }

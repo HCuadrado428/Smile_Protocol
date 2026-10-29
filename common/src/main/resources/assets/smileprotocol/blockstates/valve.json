@@ -1,124 +1,100 @@
 {
   "variants": {
-    "facing=south,turned=false,turning=false,wheel=false": {
-      "model": "smileprotocol:block/valve"
-    },
-    "facing=south,turned=false,turning=false,wheel=true": {
-      "model": "smileprotocol:block/valve"
-    },
-    "facing=south,turned=false,turning=true,wheel=false": {
-      "model": "smileprotocol:block/valve"
-    },
-    "facing=south,turned=false,turning=true,wheel=true": {
-      "model": "smileprotocol:block/valve"
-    },
-    "facing=south,turned=true,turning=false,wheel=false": {
-      "model": "smileprotocol:block/valve"
-    },
-    "facing=south,turned=true,turning=false,wheel=true": {
-      "model": "smileprotocol:block/valve"
-    },
-    "facing=south,turned=true,turning=true,wheel=false": {
-      "model": "smileprotocol:block/valve"
-    },
-    "facing=south,turned=true,turning=true,wheel=true": {
-      "model": "smileprotocol:block/valve"
-    },
-    "facing=west,turned=false,turning=false,wheel=false": {
-      "model": "smileprotocol:block/valve",
-      "y": 90
-    },
-    "facing=west,turned=false,turning=false,wheel=true": {
-      "model": "smileprotocol:block/valve",
-      "y": 90
-    },
-    "facing=west,turned=false,turning=true,wheel=false": {
-      "model": "smileprotocol:block/valve",
-      "y": 90
-    },
-    "facing=west,turned=false,turning=true,wheel=true": {
-      "model": "smileprotocol:block/valve",
-      "y": 90
-    },
-    "facing=west,turned=true,turning=false,wheel=false": {
-      "model": "smileprotocol:block/valve",
-      "y": 90
-    },
-    "facing=west,turned=true,turning=false,wheel=true": {
-      "model": "smileprotocol:block/valve",
-      "y": 90
-    },
-    "facing=west,turned=true,turning=true,wheel=false": {
-      "model": "smileprotocol:block/valve",
-      "y": 90
-    },
-    "facing=west,turned=true,turning=true,wheel=true": {
-      "model": "smileprotocol:block/valve",
-      "y": 90
-    },
     "facing=north,turned=false,turning=false,wheel=false": {
-      "model": "smileprotocol:block/valve",
-      "y": 180
+      "model": "smileprotocol:block/valve_particle"
     },
     "facing=north,turned=false,turning=false,wheel=true": {
-      "model": "smileprotocol:block/valve",
-      "y": 180
+      "model": "smileprotocol:block/valve_particle"
     },
     "facing=north,turned=false,turning=true,wheel=false": {
-      "model": "smileprotocol:block/valve",
-      "y": 180
+      "model": "smileprotocol:block/valve_particle"
     },
     "facing=north,turned=false,turning=true,wheel=true": {
-      "model": "smileprotocol:block/valve",
-      "y": 180
+      "model": "smileprotocol:block/valve_particle"
     },
     "facing=north,turned=true,turning=false,wheel=false": {
-      "model": "smileprotocol:block/valve",
-      "y": 180
+      "model": "smileprotocol:block/valve_particle"
     },
     "facing=north,turned=true,turning=false,wheel=true": {
-      "model": "smileprotocol:block/valve",
-      "y": 180
+      "model": "smileprotocol:block/valve_particle"
     },
     "facing=north,turned=true,turning=true,wheel=false": {
-      "model": "smileprotocol:block/valve",
-      "y": 180
+      "model": "smileprotocol:block/valve_particle"
     },
     "facing=north,turned=true,turning=true,wheel=true": {
-      "model": "smileprotocol:block/valve",
-      "y": 180
+      "model": "smileprotocol:block/valve_particle"
+    },
+    "facing=south,turned=false,turning=false,wheel=false": {
+      "model": "smileprotocol:block/valve_particle"
+    },
+    "facing=south,turned=false,turning=false,wheel=true": {
+      "model": "smileprotocol:block/valve_particle"
+    },
+    "facing=south,turned=false,turning=true,wheel=false": {
+      "model": "smileprotocol:block/valve_particle"
+    },
+    "facing=south,turned=false,turning=true,wheel=true": {
+      "model": "smileprotocol:block/valve_particle"
+    },
+    "facing=south,turned=true,turning=false,wheel=false": {
+      "model": "smileprotocol:block/valve_particle"
+    },
+    "facing=south,turned=true,turning=false,wheel=true": {
+      "model": "smileprotocol:block/valve_particle"
+    },
+    "facing=south,turned=true,turning=true,wheel=false": {
+      "model": "smileprotocol:block/valve_particle"
+    },
+    "facing=south,turned=true,turning=true,wheel=true": {
+      "model": "smileprotocol:block/valve_particle"
     },
     "facing=east,turned=false,turning=false,wheel=false": {
-      "model": "smileprotocol:block/valve",
-      "y": 270
+      "model": "smileprotocol:block/valve_particle"
     },
     "facing=east,turned=false,turning=false,wheel=true": {
-      "model": "smileprotocol:block/valve",
-      "y": 270
+      "model": "smileprotocol:block/valve_particle"
     },
     "facing=east,turned=false,turning=true,wheel=false": {
-      "model": "smileprotocol:block/valve",
-      "y": 270
+      "model": "smileprotocol:block/valve_particle"
     },
     "facing=east,turned=false,turning=true,wheel=true": {
-      "model": "smileprotocol:block/valve",
-      "y": 270
+      "model": "smileprotocol:block/valve_particle"
     },
     "facing=east,turned=true,turning=false,wheel=false": {
-      "model": "smileprotocol:block/valve",
-      "y": 270
+      "model": "smileprotocol:block/valve_particle"
     },
     "facing=east,turned=true,turning=false,wheel=true": {
-      "model": "smileprotocol:block/valve",
-      "y": 270
+      "model": "smileprotocol:block/valve_particle"
     },
     "facing=east,turned=true,turning=true,wheel=false": {
-      "model": "smileprotocol:block/valve",
-      "y": 270
+      "model": "smileprotocol:block/valve_particle"
     },
     "facing=east,turned=true,turning=true,wheel=true": {
-      "model": "smileprotocol:block/valve",
-      "y": 270
+      "model": "smileprotocol:block/valve_particle"
+    },
+    "facing=west,turned=false,turning=false,wheel=false": {
+      "model": "smileprotocol:block/valve_particle"
+    },
+    "facing=west,turned=false,turning=false,wheel=true": {
+      "model": "smileprotocol:block/valve_particle"
+    },
+    "facing=west,turned=false,turning=true,wheel=false": {
+      "model": "smileprotocol:block/valve_particle"
+    },
+    "facing=west,turned=false,turning=true,wheel=true": {
+      "model": "smileprotocol:block/valve_particle"
+    },
+    "facing=west,turned=true,turning=false,wheel=false": {
+      "model": "smileprotocol:block/valve_particle"
+    },
+    "facing=west,turned=true,turning=false,wheel=true": {
+      "model": "smileprotocol:block/valve_particle"
+    },
+    "facing=west,turned=true,turning=true,wheel=false": {
+      "model": "smileprotocol:block/valve_particle"
+    },
+    "facing=west,turned=true,turning=true,wheel=true": {
+      "model": "smileprotocol:block/valve_particle"
     }
   }
 }

@@ -25,6 +25,7 @@ import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.HorizontalDirectionalBlock;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -43,7 +44,7 @@ import java.util.Locale;
  * dos bloques. El jugador entra con interaccion mantenida y queda anclado dentro; la forma es
  * hueca para que quepa sin asfixiarse.
  */
-public class HideBlock extends HorizontalDirectionalBlock implements SPInteractable {
+public class HideBlock extends HorizontalDirectionalBlock implements SPInteractable, net.minecraft.world.level.block.EntityBlock {
 
     public enum Kind { ENCLOSED, LOW, CURTAIN }
 
@@ -184,11 +185,29 @@ public class HideBlock extends HorizontalDirectionalBlock implements SPInteracta
         HideManager.enter(player, pos, HideTypes.get(level.getServer(), typeId), this);
     }
 
+    @Nullable
+    @Override
+    public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
+        return state.getValue(HALF) == DoubleBlockHalf.LOWER ? new com.smileprotocol.blockentity.HideBlockEntity(pos, state) : null;
+    }
+
     public Kind kind() {
         return kind;
     }
 
     public static String kindName(Kind k) {
         return k.name().toLowerCase(Locale.ROOT);
+    }
+
+    @Nullable
+    @Override
+    public <T extends BlockEntity> net.minecraft.world.level.block.entity.BlockEntityTicker<T> getTicker(Level level, BlockState state,
+            net.minecraft.world.level.block.entity.BlockEntityType<T> type) {
+        if (!level.isClientSide) return null;
+        return (lvl, pos, st, be) -> {
+            if (be instanceof com.smileprotocol.blockentity.AnimatedBlockEntity a) {
+                com.smileprotocol.blockentity.AnimatedBlockEntity.clientTick(lvl, pos, st, a);
+            }
+        };
     }
 }
