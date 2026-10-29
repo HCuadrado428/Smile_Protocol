@@ -4,6 +4,8 @@ import com.smileprotocol.SmileProtocol;
 import com.smileprotocol.config.SPConfig;
 import com.smileprotocol.debug.SPDebug;
 import com.smileprotocol.dimension.SPDimension;
+import com.smileprotocol.instance.InstanceManager;
+import com.smileprotocol.run.RunManager;
 import com.smileprotocol.lobby.LobbyData;
 import com.smileprotocol.network.Payloads;
 import com.smileprotocol.network.SPNetwork;
@@ -85,6 +87,7 @@ public final class SPSessionManager {
     public static void leave(ServerPlayer player, Destination dest) {
         SPPlayerData data = SPPlayerData.of(player);
         boolean wasIn = data.inSP();
+        if (wasIn) RunManager.onPlayerLeft(player, data.getGroupId());
 
         data.setInSP(false);
         data.setGroupId(null);
@@ -168,9 +171,18 @@ public final class SPSessionManager {
             // Estado guardado sin partida: algo se interrumpio. Devolver el inventario.
             leave(player, Destination.LOBBY);
         } else if (data.inSP()) {
-            // Sigue en una partida. La reincorporacion al grupo llega en la fase 6.
-            applyMaxHealth(player);
-            player.sendSystemMessage(Component.translatable("smileprotocol.session.rejoined"));
+            // Sigue en una partida: vuelve con su grupo si la partida sigue (README 6.3, 6.7)
+            boolean testRoom = InstanceManager.slotAt(player.blockPosition()) == 0;
+            if (RunManager.onRejoin(player)) {
+                applyMaxHealth(player);
+            } else if (testRoom) {
+                applyMaxHealth(player);
+                player.sendSystemMessage(Component.translatable("smileprotocol.session.rejoined"));
+            } else {
+                SmileProtocol.LOGGER.info("Sacando a {}: su partida ya no existe", player.getGameProfile().getName());
+                player.sendSystemMessage(Component.translatable("smileprotocol.run.gone"));
+                leave(player, Destination.LOBBY);
+            }
         }
         sync(player);
     }

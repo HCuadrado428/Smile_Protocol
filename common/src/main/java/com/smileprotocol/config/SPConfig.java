@@ -63,6 +63,25 @@ public final class SPConfig {
         public int descent_countdown = 5;
         public double required_ready_ratio = 1.0;
 
+        // Partidas, grupos e instancias (README 6.3, 6.5, 6.7, 6.8)
+        public int max_groups = 12;
+        public String group_mode = "RANDOM";
+        public int instance_spacing = 4096;
+        public int zone_spacing = 512;
+        public int instance_y = 64;
+        public int intermediate_zones = 3;
+        public boolean avoid_repeat_last = true;
+        public boolean per_group_zones = false;
+        public String start_zone = "smileprotocol:start_corridor";
+        public String final_zone = "smileprotocol:final_room";
+        public int zone_clear_blocks_per_tick = 32768;
+        public int mini_return_delay = 10;
+        public int disconnect_grace = 120;
+        public boolean replayable = true;
+        public int max_plays_per_player = 0;
+        public int lobby_reset_delay = 30;
+        public boolean auto_newrun = true;
+
         // Ambientacion (README 21.1)
         public int max_dynamic_lights = 64;
 
@@ -78,6 +97,19 @@ public final class SPConfig {
             descent_countdown = Math.max(0, descent_countdown);
             required_ready_ratio = Math.min(1.0, Math.max(0.1, required_ready_ratio));
             max_dynamic_lights = Math.max(0, max_dynamic_lights);
+            max_groups = Math.max(1, max_groups);
+            if (group_mode == null) group_mode = "RANDOM";
+            instance_spacing = Math.max(1024, instance_spacing);
+            zone_spacing = Math.max(64, Math.min(instance_spacing / 2, zone_spacing));
+            instance_y = Math.max(-32, Math.min(200, instance_y));
+            intermediate_zones = Math.max(0, intermediate_zones);
+            if (start_zone == null) start_zone = "";
+            if (final_zone == null) final_zone = "";
+            zone_clear_blocks_per_tick = Math.max(1024, zone_clear_blocks_per_tick);
+            mini_return_delay = Math.max(0, mini_return_delay);
+            disconnect_grace = Math.max(0, disconnect_grace);
+            max_plays_per_player = Math.max(0, max_plays_per_player);
+            lobby_reset_delay = Math.max(0, lobby_reset_delay);
             if (player_commands == null) player_commands = new ArrayList<>();
             if (allowed_mods == null) allowed_mods = new ArrayList<>();
             if (allowed_mod_prefixes == null) allowed_mod_prefixes = new ArrayList<>();

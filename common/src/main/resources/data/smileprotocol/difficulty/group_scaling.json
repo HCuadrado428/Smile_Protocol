@@ -1,0 +1,31 @@
+{
+  "_comment": "README 6.3: multiplicadores por tamano de grupo (base 4). Ajustar en pruebas.",
+  "min_fuses": 1,
+  "sizes": {
+    "2": {
+      "fuses": 0.5,
+      "mobs": 0.6,
+      "qte_time": 1.4
+    },
+    "3": {
+      "fuses": 0.75,
+      "mobs": 0.8,
+      "qte_time": 1.2
+    },
+    "4": {
+      "fuses": 1.0,
+      "mobs": 1.0,
+      "qte_time": 1.0
+    },
+    "5": {
+      "fuses": 1.0,
+      "mobs": 1.15,
+      "qte_time": 1.0
+    },
+    "6": {
+      "fuses": 1.25,
+      "mobs": 1.3,
+      "qte_time": 1.0
+    }
+  }
+}

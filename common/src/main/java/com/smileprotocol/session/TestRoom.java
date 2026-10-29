@@ -68,8 +68,8 @@ public final class TestRoom {
         if (level.getBlockEntity(signPos) instanceof SignBlockEntity sign) {
             SignText text = sign.getFrontText()
                     .setMessage(0, Component.literal("SALA DE PRUEBAS"))
-                    .setMessage(1, Component.literal("Partida provisional"))
-                    .setMessage(2, Component.literal("(fase 6)"))
+                    .setMessage(1, Component.literal("Solo para pruebas"))
+                    .setMessage(2, Component.literal("(/spadmin test)"))
                     .setMessage(3, Component.literal("/smileprotocol leave"));
             sign.setText(text, true);
             sign.setWaxed(true);

@@ -11,7 +11,11 @@ import com.smileprotocol.network.SPNetwork;
 import com.smileprotocol.network.Payloads;
 import com.smileprotocol.player.SPPlayerData;
 import com.smileprotocol.session.SPSessionManager;
-import com.smileprotocol.session.TestRoom;
+import com.smileprotocol.run.Group;
+import com.smileprotocol.run.GroupManager;
+import com.smileprotocol.run.Run;
+import com.smileprotocol.run.RunManager;
+import com.smileprotocol.run.RunType;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -40,8 +44,8 @@ import java.util.UUID;
  * Ascensores del lobby (README 6.2): cuenta quien esta en cada cabina, gestiona el «listo»,
  * la cuenta atras, las puertas, las pantallas y el contador del HUD.
  * <p>
- * Provisional hasta la fase 6: al bajar, el grupo va a la sala de pruebas
- * ({@link TestRoom}) en vez de a una instancia real con su {@code Run}.
+ * Al bajar se crea una partida ({@link RunManager#start}); el ascensor queda «En curso» hasta
+ * que esa partida se cierra.
  */
 public final class LobbyManager {
 
@@ -59,6 +63,8 @@ public final class LobbyManager {
         int descentTimer;
         final List<UUID> members = new ArrayList<>();
         @Nullable Boolean doorsOpen;
+        boolean waitingSpace;
+        boolean forced;
         int shownReady;
         int shownTotal;
     }
@@ -103,6 +109,10 @@ public final class LobbyManager {
     private static void update(MinecraftServer server, LobbyData data, ElevatorDef def, Runtime rt, Set<UUID> hud) {
         ServerLevel overworld = server.overworld();
         List<ServerPlayer> occupants = occupants(server, def);
+        // Tras un reinicio el estado en memoria se pierde, pero la partida sigue guardada
+        if ((rt.state == State.IDLE || rt.state == State.COUNTDOWN) && RunManager.activeRunFor(server, def.id()) != null) {
+            rt.state = State.RUNNING;
+        }
 
         switch (rt.state) {
             case IDLE, COUNTDOWN -> {
@@ -125,15 +135,7 @@ public final class LobbyManager {
             }
             case RUNNING -> {
                 setDoors(overworld, def, rt, false);
-                boolean anyInGame = false;
-                for (UUID id : rt.members) {
-                    ServerPlayer p = server.getPlayerList().getPlayer(id);
-                    if (p != null && SPPlayerData.inSP(p)) {
-                        anyInGame = true;
-                        break;
-                    }
-                }
-                if (!anyInGame) {
+                if (RunManager.activeRunFor(server, def.id()) == null) {
                     SPDebug.log("ascensor " + def.id() + " libre (partida terminada)");
                     rt.members.clear();
                     rt.ready.clear();
@@ -203,7 +205,7 @@ public final class LobbyManager {
     private static void updateMega(MinecraftServer server, LobbyData data, ElevatorDef def, Runtime rt,
                                    List<ServerPlayer> occupants) {
         List<ServerPlayer> ready = new ArrayList<>();
-        for (ServerPlayer p : occupants) if (ModCheck.isOk(p)) ready.add(p);
+        for (ServerPlayer p : occupants) if (ModCheck.isOk(p) && RunManager.canPlayMegaAgain(p)) ready.add(p);
         int total = lobbyEligibleCount(server, data);
 
         rt.inside = ids(occupants);
@@ -214,7 +216,10 @@ public final class LobbyManager {
 
         int min = SPConfig.get().min_group_size;
         int needed = (int) Math.ceil(total * SPConfig.get().required_ready_ratio);
-        boolean go = ready.size() >= min && ready.size() >= needed;
+        // Si el mega necesita mas huecos de los libres, espera (README 6.3)
+        int groupsNeeded = GroupManager.groupSizes(ready.size(), min).size();
+        rt.waitingSpace = groupsNeeded > RunManager.freeGroupSlots(server);
+        boolean go = ready.size() >= min && ready.size() >= needed && !rt.waitingSpace;
         if (go) tickCountdown(def, rt, ready);
         else cancelCountdown(rt, occupants);
     }
@@ -266,20 +271,30 @@ public final class LobbyManager {
     }
 
     private static void descend(MinecraftServer server, ElevatorDef def, Runtime rt) {
-        ServerLevel instances = TestRoom.level(server);
-        if (instances == null) {
-            SPDebug.log("ascensor " + def.id() + ": no existe la dimension de instancias");
+        List<ServerPlayer> group = new ArrayList<>();
+        for (UUID id : rt.members) {
+            ServerPlayer p = server.getPlayerList().getPlayer(id);
+            if (p != null && !SPPlayerData.inSP(p)) group.add(p);
+        }
+        RunType type = def.type() == ElevatorType.MEGA ? RunType.MEGA : RunType.MINI;
+        RunManager.StartResult result = RunManager.start(server, type, def.id(), group, rt.forced);
+        rt.forced = false;
+        if (!result.ok()) {
+            SPDebug.log("ascensor " + def.id() + ": no se pudo bajar: " + result.message().getString());
+            for (ServerPlayer p : group) {
+                p.displayClientMessage(result.message().copy().withStyle(ChatFormatting.RED), false);
+                SPNetwork.sendTo(p, new Payloads.ScreenFade(0, 0, 10));
+            }
             rt.state = State.IDLE;
             rt.members.clear();
             return;
         }
-        TestRoom.ensureBuilt(instances);
-        // Provisional (fase 6): un grupo por bajada, todos a la sala de pruebas
-        UUID group = UUID.randomUUID();
-        for (UUID id : rt.members) {
-            ServerPlayer p = server.getPlayerList().getPlayer(id);
-            if (p == null || SPPlayerData.inSP(p)) continue;
-            SPSessionManager.enter(p, instances, TestRoom.spawnPos(), 180f, group);
+        // Quien no ha entrado en ningun grupo se queda en el lobby
+        for (ServerPlayer p : group) {
+            if (!SPPlayerData.inSP(p)) {
+                p.displayClientMessage(Component.translatable("smileprotocol.run.left_out").withStyle(ChatFormatting.GOLD), false);
+                SPNetwork.sendTo(p, new Payloads.ScreenFade(0, 0, 10));
+            }
         }
         server.overworld().playSound(null, def.exit(), SoundEvents.PISTON_CONTRACT, SoundSource.BLOCKS, 1f, 0.5f);
         rt.state = State.RUNNING;
@@ -298,6 +313,7 @@ public final class LobbyManager {
         List<ServerPlayer> group = new ArrayList<>();
         for (ServerPlayer p : occupants(server, def)) if (force || ModCheck.isOk(p)) group.add(p);
         if (group.isEmpty()) return Component.translatable("smileprotocol.elevator.empty", def.name());
+        rt.forced = force;
         startDescent(def, rt, group);
         return Component.translatable("smileprotocol.elevator.started", def.name(), group.size());
     }
@@ -361,20 +377,15 @@ public final class LobbyManager {
     }
 
     private static boolean isClosed(LobbyData data, ElevatorDef def, Runtime rt) {
-        if (def.type() == ElevatorType.MEGA) return data.getMode() == LobbyMode.FREE;
-        if (data.getMode() == LobbyMode.EVENT) return true;
-        return rt.state == State.IDLE && rt.inside.isEmpty() && runningMinis(data) >= SPConfig.get().max_mini_runs;
-    }
-
-    /** Partidas mini en marcha (README 6.3, {@code max_mini_runs}). */
-    private static int runningMinis(LobbyData data) {
-        int n = 0;
-        for (ElevatorDef def : data.getElevators()) {
-            if (def.type() != ElevatorType.MINI) continue;
-            State s = runtime(def.id()).state;
-            if (s == State.DESCENDING || s == State.RUNNING) n++;
+        MinecraftServer server = com.smileprotocol.ServerRef.get();
+        if (def.type() == ElevatorType.MEGA) {
+            if (data.getMode() == LobbyMode.FREE) return true;
+            return server != null && RunManager.megaStatus(server) != RunManager.MegaStatus.OPEN;
         }
-        return n;
+        if (data.getMode() == LobbyMode.EVENT) return true;
+        if (server == null || rt.state != State.IDLE || !rt.inside.isEmpty()) return false;
+        // Sin hueco: tope de partidas mini o de grupos (README 6.3)
+        return RunManager.activeMiniRuns(server) >= SPConfig.get().max_mini_runs || RunManager.freeGroupSlots(server) < 1;
     }
 
     /** Jugadores dentro de la cabina que cuentan (no creativo, no espectador, no en partida). */
@@ -429,6 +440,8 @@ public final class LobbyManager {
             status = Component.translatable("smileprotocol.elevator.countdown", countdown);
         } else if (def.type() == ElevatorType.MINI && rt.shownTotal < min) {
             status = Component.translatable("smileprotocol.elevator.need_players", min);
+        } else if (def.type() == ElevatorType.MEGA && rt.waitingSpace) {
+            status = Component.translatable("smileprotocol.elevator.waiting_space");
         } else if (def.type() == ElevatorType.MEGA && rt.shownReady < min) {
             status = Component.translatable("smileprotocol.elevator.need_players", min);
         } else if (def.type() == ElevatorType.MEGA) {
@@ -453,11 +466,22 @@ public final class LobbyManager {
                 color = 0xFFB020;
             }
             case RUNNING -> {
-                status = Component.translatable("smileprotocol.board.running");
+                status = runningStatus(def);
                 color = 0xE04040;
             }
             default -> {
-                if (isClosed(data, def, rt)) {
+                MinecraftServer server = com.smileprotocol.ServerRef.get();
+                RunManager.MegaStatus mega = server == null ? RunManager.MegaStatus.OPEN : RunManager.megaStatus(server);
+                if (def.type() == ElevatorType.MEGA && data.getMode() == LobbyMode.EVENT && mega == RunManager.MegaStatus.RESETTING) {
+                    status = Component.translatable("smileprotocol.board.resetting", RunManager.megaReopenSeconds(server));
+                    color = 0xFFB020;
+                } else if (def.type() == ElevatorType.MEGA && data.getMode() == LobbyMode.EVENT && mega == RunManager.MegaStatus.RUNNING) {
+                    status = Component.translatable("smileprotocol.board.running");
+                    color = 0xE04040;
+                } else if (def.type() == ElevatorType.MEGA && rt.waitingSpace && !isClosed(data, def, rt)) {
+                    status = Component.translatable("smileprotocol.board.waiting_space");
+                    color = 0xFFB020;
+                } else if (isClosed(data, def, rt)) {
                     status = Component.translatable("smileprotocol.board.closed");
                     color = 0x9A9A9A;
                 } else if (rt.shownTotal == 0) {
@@ -470,6 +494,22 @@ public final class LobbyManager {
             }
         }
         return new Payloads.Board(def.board(), Component.literal(def.name()), status, color);
+    }
+
+    /** «En curso, zona N» (mini: la zona de su grupo; mega: la mas avanzada). */
+    private static Component runningStatus(ElevatorDef def) {
+        MinecraftServer server = com.smileprotocol.ServerRef.get();
+        Run run = server == null ? null : RunManager.activeRunFor(server, def.id());
+        if (run == null) return Component.translatable("smileprotocol.board.running");
+        int zone = 0;
+        boolean anyPlaying = false;
+        for (Group g : run.groups()) {
+            if (!g.state().isDone()) anyPlaying = true;
+            zone = Math.max(zone, g.zoneIndex());
+        }
+        if (!anyPlaying) return Component.translatable("smileprotocol.board.finishing");
+        if (zone == 0) return Component.translatable("smileprotocol.board.running_start");
+        return Component.translatable("smileprotocol.board.running_zone", zone);
     }
 
     private static Payloads.SyncBoards boardsPacket(MinecraftServer server) {
@@ -509,8 +549,9 @@ public final class LobbyManager {
         List<String> l = new ArrayList<>();
         for (ElevatorDef def : LobbyData.get(server).getElevators()) {
             Runtime rt = runtime(def.id());
+            Run run = RunManager.activeRunFor(server, def.id());
             l.add(" " + def.id() + " [" + def.type() + "] " + rt.state + " dentro=" + rt.inside.size()
-                    + " listos=" + rt.ready.size() + (rt.members.isEmpty() ? "" : " grupo=" + rt.members.size()));
+                    + " listos=" + rt.ready.size() + (run == null ? "" : " partida=" + run.id()));
         }
         return l;
     }

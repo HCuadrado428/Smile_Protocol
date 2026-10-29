@@ -1,6 +1,8 @@
 package com.smileprotocol.command;
 
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
+import com.mojang.brigadier.arguments.LongArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
@@ -15,6 +17,9 @@ import com.smileprotocol.lobby.LobbyData;
 import com.smileprotocol.lobby.LobbyManager;
 import com.smileprotocol.lobby.LobbyMode;
 import com.smileprotocol.player.SPPlayerData;
+import com.smileprotocol.run.Group;
+import com.smileprotocol.run.Run;
+import com.smileprotocol.run.RunManager;
 import com.smileprotocol.session.SPSessionManager;
 import com.smileprotocol.session.TestRoom;
 import net.minecraft.ChatFormatting;
@@ -30,6 +35,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 
+import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -56,6 +62,13 @@ public final class SPCommands {
             SharedSuggestionProvider.suggest(LobbyData.get(ctx.getSource().getServer()).getElevators()
                     .stream().map(ElevatorDef::id), b);
 
+    private static final SuggestionProvider<CommandSourceStack> RUNS = (ctx, b) ->
+            SharedSuggestionProvider.suggest(RunManager.openRuns(ctx.getSource().getServer()).stream().map(Run::id), b);
+
+    private static final SuggestionProvider<CommandSourceStack> GROUPS = (ctx, b) ->
+            SharedSuggestionProvider.suggest(RunManager.openRuns(ctx.getSource().getServer()).stream()
+                    .flatMap(r -> r.groups().stream()).map(Group::label), b);
+
     private SPCommands() {}
 
     /** Lo llama cada loader al registrar los comandos. */
@@ -77,6 +90,11 @@ public final class SPCommands {
     private static int spLobby(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         ServerPlayer player = ctx.getSource().getPlayerOrException();
         if (SPPlayerData.inSP(player)) {
+            // Los eliminados y los que han terminado si pueden (README 5.1)
+            if (RunManager.canReturnToLobby(player)) {
+                SPSessionManager.leave(player, SPSessionManager.Destination.LOBBY);
+                return 1;
+            }
             ctx.getSource().sendFailure(Component.translatable("smileprotocol.command.lobby.in_game"));
             return 0;
         }
@@ -121,11 +139,37 @@ public final class SPCommands {
 
         root.then(Commands.literal("setlobby").executes(SPCommands::setLobby));
 
-        root.then(stub("runs", "F06"));
-        root.then(stub("newrun", "F06"));
-        root.then(stub("groups", "F06"));
+        root.then(Commands.literal("runs")
+                .executes(SPCommands::listRuns)
+                .then(Commands.literal("list").executes(SPCommands::listRuns))
+                .then(Commands.literal("end")
+                        .then(Commands.argument("run", StringArgumentType.word()).suggests(RUNS)
+                                .executes(SPCommands::endRun))));
+
+        root.then(Commands.literal("newrun")
+                .executes(c -> newRun(c, null))
+                .then(Commands.argument("seed", LongArgumentType.longArg())
+                        .executes(c -> newRun(c, LongArgumentType.getLong(c, "seed")))));
+
+        root.then(Commands.literal("groups")
+                .executes(SPCommands::listGroups)
+                .then(Commands.literal("list").executes(SPCommands::listGroups))
+                .then(Commands.literal("set")
+                        .then(Commands.argument("group", IntegerArgumentType.integer(1, 64))
+                                .then(Commands.argument("players", EntityArgument.players())
+                                        .executes(SPCommands::setGroup))))
+                .then(Commands.literal("move")
+                        .then(Commands.argument("player", EntityArgument.player())
+                                .then(Commands.argument("group", IntegerArgumentType.integer(1, 64))
+                                        .executes(SPCommands::moveGroup))))
+                .then(Commands.literal("clear").executes(SPCommands::clearGroups)));
+
         root.then(stub("skipcinematic", "F16"));
-        root.then(stub("zone", "F16"));
+        root.then(Commands.literal("zone")
+                .then(Commands.argument("group", StringArgumentType.string()).suggests(GROUPS)
+                        .then(Commands.literal("next").executes(c -> zone(c, -1)))
+                        .then(Commands.argument("index", IntegerArgumentType.integer(0, 64))
+                                .executes(c -> zone(c, IntegerArgumentType.getInteger(c, "index"))))));
         root.then(stub("mission", "F14"));
         root.then(stub("spawn", "F11"));
 
@@ -190,6 +234,115 @@ public final class SPCommands {
         LobbyData.get(player.server).setSpawn(pos, player.getYRot());
         player.server.overworld().setDefaultSpawnPos(pos, player.getYRot());
         ctx.getSource().sendSuccess(() -> Component.translatable("smileprotocol.command.setlobby.done", pos.toShortString()), true);
+        return 1;
+    }
+
+    private static int listRuns(CommandContext<CommandSourceStack> ctx) {
+        MinecraftServer server = ctx.getSource().getServer();
+        List<Run> runs = RunManager.openRuns(server);
+        CommandSourceStack s = ctx.getSource();
+        s.sendSuccess(() -> Component.translatable("smileprotocol.command.runs.header", runs.size(),
+                RunManager.activeGroups(server), SPConfig.get().max_groups,
+                Component.translatable("smileprotocol.mega." + RunManager.megaStatus(server).name().toLowerCase())), false);
+        long now = server.overworld().getGameTime();
+        for (Run r : runs) {
+            long secs = (now - r.startTime()) / 20;
+            s.sendSuccess(() -> Component.literal(" " + r.id() + " · " + r.type() + " · " + r.elevatorId() + " · " + r.state()
+                    + " · " + String.format("%d:%02d", secs / 60, secs % 60) + " · semilla " + r.seed())
+                    .withStyle(ChatFormatting.YELLOW), false);
+            for (Group g : r.groups()) {
+                StringBuilder names = new StringBuilder();
+                g.members().forEach((id, st) -> names.append(names.isEmpty() ? "" : ", ").append(g.name(id))
+                        .append(st == com.smileprotocol.run.MemberStatus.ACTIVE ? "" : " (fuera)"));
+                s.sendSuccess(() -> Component.literal("   " + g.label() + " · " + g.stateLabel() + " · hueco " + g.slot()
+                        + " · " + names), false);
+            }
+        }
+        return runs.size();
+    }
+
+    private static int endRun(CommandContext<CommandSourceStack> ctx) {
+        Component result = RunManager.endRun(ctx.getSource().getServer(), StringArgumentType.getString(ctx, "run"));
+        ctx.getSource().sendSuccess(() -> result, true);
+        return 1;
+    }
+
+    private static int newRun(CommandContext<CommandSourceStack> ctx, @Nullable Long seed) {
+        Component result = RunManager.newRun(ctx.getSource().getServer(), seed);
+        ctx.getSource().sendSuccess(() -> result, true);
+        LobbyManager.onModeChanged(ctx.getSource().getServer());
+        return 1;
+    }
+
+    private static int listGroups(CommandContext<CommandSourceStack> ctx) {
+        MinecraftServer server = ctx.getSource().getServer();
+        List<List<UUID>> fixed = RunManager.fixedGroups(server);
+        CommandSourceStack s = ctx.getSource();
+        if (fixed.isEmpty()) {
+            s.sendSuccess(() -> Component.translatable("smileprotocol.command.groups.none"), false);
+        } else {
+            for (int i = 0; i < fixed.size(); i++) {
+                int n = i + 1;
+                StringBuilder names = new StringBuilder();
+                for (UUID id : fixed.get(i)) {
+                    ServerPlayer p = server.getPlayerList().getPlayer(id);
+                    names.append(names.isEmpty() ? "" : ", ").append(p != null ? p.getGameProfile().getName() : id.toString().substring(0, 8));
+                }
+                s.sendSuccess(() -> Component.translatable("smileprotocol.command.groups.line", n, names.toString()), false);
+            }
+        }
+        // Reparto que saldria ahora con los del lobby
+        List<Integer> sizes = com.smileprotocol.run.GroupManager.groupSizes(lobbyPlayers(server), SPConfig.get().min_group_size);
+        s.sendSuccess(() -> Component.translatable("smileprotocol.command.groups.preview", lobbyPlayers(server),
+                sizes.isEmpty() ? "-" : sizes.toString()), false);
+        return fixed.size();
+    }
+
+    private static int lobbyPlayers(MinecraftServer server) {
+        int n = 0;
+        for (ServerPlayer p : server.overworld().players()) if (LobbyManager.canPlay(p)) n++;
+        return n;
+    }
+
+    private static int setGroup(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        int n = IntegerArgumentType.getInteger(ctx, "group");
+        Collection<ServerPlayer> players = EntityArgument.getPlayers(ctx, "players");
+        List<UUID> ids = players.stream().map(ServerPlayer::getUUID).toList();
+        RunManager.setFixedGroup(ctx.getSource().getServer(), n, ids);
+        ctx.getSource().sendSuccess(() -> Component.translatable("smileprotocol.command.groups.set", n, ids.size()), true);
+        if (ids.size() < SPConfig.get().min_group_size) {
+            ctx.getSource().sendSuccess(() -> Component.translatable("smileprotocol.command.groups.small",
+                    SPConfig.get().min_group_size).withStyle(ChatFormatting.GOLD), false);
+        }
+        return 1;
+    }
+
+    private static int moveGroup(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        int n = IntegerArgumentType.getInteger(ctx, "group");
+        ServerPlayer p = EntityArgument.getPlayer(ctx, "player");
+        RunManager.moveToFixedGroup(ctx.getSource().getServer(), p.getUUID(), n);
+        ctx.getSource().sendSuccess(() -> Component.translatable("smileprotocol.command.groups.moved",
+                p.getGameProfile().getName(), n), true);
+        return 1;
+    }
+
+    private static int clearGroups(CommandContext<CommandSourceStack> ctx) {
+        RunManager.clearFixedGroups(ctx.getSource().getServer());
+        ctx.getSource().sendSuccess(() -> Component.translatable("smileprotocol.command.groups.cleared"), true);
+        return 1;
+    }
+
+    private static int zone(CommandContext<CommandSourceStack> ctx, int index) {
+        MinecraftServer server = ctx.getSource().getServer();
+        String label = StringArgumentType.getString(ctx, "group");
+        Group g = RunManager.groupByLabel(server, label);
+        if (g == null) {
+            ctx.getSource().sendFailure(Component.translatable("smileprotocol.run.unknown_group", label));
+            return 0;
+        }
+        int target = index < 0 ? g.zoneIndex() + 1 : index;
+        Component result = RunManager.setZone(server, g, target);
+        ctx.getSource().sendSuccess(() -> result, true);
         return 1;
     }
 

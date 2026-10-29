@@ -6,7 +6,9 @@ import com.smileprotocol.compat.ModIsolation;
 import com.smileprotocol.config.SPConfig;
 import com.smileprotocol.debug.SPDebug;
 import com.smileprotocol.dimension.SPDimension;
+import com.smileprotocol.instance.InstanceManager;
 import com.smileprotocol.lobby.LobbyData;
+import com.smileprotocol.run.RunManager;
 import com.smileprotocol.lobby.LobbyManager;
 import com.smileprotocol.lobby.LobbyProtection;
 import com.smileprotocol.player.SPPlayerData;
@@ -40,13 +42,18 @@ public final class SPEvents {
 
     // Ciclo de vida -------------------------------------------------------------------
 
+    /** Primer tick del servidor ya pendiente (los niveles ya existen). */
+    private static boolean firstTick = true;
+
     public static void onServerStarting(MinecraftServer server) {
         ServerRef.set(server);
         SPConfig.load();
+        firstTick = true;
     }
 
     public static void onServerStopped(MinecraftServer server) {
         ServerRef.set(null);
+        firstTick = true;
     }
 
     public static void onLogin(ServerPlayer player) {
@@ -92,6 +99,11 @@ public final class SPEvents {
             if (SPPlayerData.inSP(p)) SPSessionManager.feed(p);
             if (p.tickCount % 20 == 0) ModCheck.tickSecond(p);
         }
+        if (firstTick) {
+            firstTick = false;
+            InstanceManager.onServerStarted(server);
+        }
+        RunManager.tick(server);
         LobbyManager.tick(server);
         if (server.getTickCount() % 20 == 0) SPDebug.tick(server);
     }

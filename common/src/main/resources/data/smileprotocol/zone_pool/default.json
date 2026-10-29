@@ -1,0 +1,9 @@
+{
+  "zones": [
+    "smileprotocol:lab_storage",
+    "smileprotocol:lab_offices",
+    "smileprotocol:lab_morgue",
+    "smileprotocol:lab_generators",
+    "smileprotocol:lab_greenhouse"
+  ]
+}

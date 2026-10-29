@@ -1,0 +1,6 @@
+{
+  "template": "smileprotocol:zones/lab_storage",
+  "kind": "intermediate",
+  "difficulty": 1,
+  "entry_yaw": 0
+}

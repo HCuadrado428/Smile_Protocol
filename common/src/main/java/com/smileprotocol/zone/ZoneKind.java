@@ -1,0 +1,11 @@
+package com.smileprotocol.zone;
+
+/** Papel de una zona en la secuencia (README 6.5). */
+public enum ZoneKind {
+    /** Pasillo inicial (fijo). */
+    START,
+    /** Zona intermedia: cambia entre partidas. */
+    INTERMEDIATE,
+    /** Sala final de criogenizacion y experimentos (fija). */
+    FINAL
+}

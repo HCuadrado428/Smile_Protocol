@@ -68,12 +68,12 @@ public final class SPDebug {
         l.add("§cSmile Protocol §7(debug)");
         l.add("inSP: " + d.inSP() + "  guardado: " + d.hasSaved());
         l.add("dimension: " + p.level().dimension().location() + (SPDimension.isSP(p.level()) ? " §a(instancias)" : ""));
-        l.add("grupo: " + (d.getGroupId() == null ? "-" : d.getGroupId().toString().substring(0, 8)));
         l.add("hueco activo: " + (d.getSPInventory().getSelected() + 1));
         l.add("mods: " + ModCheck.describe(p));
         LobbyData lobby = LobbyData.get(server);
         l.add("lobby: modo " + lobby.getMode() + (lobby.inRegion(p.position()) ? " §a(dentro)" : ""));
         l.addAll(LobbyManager.debugLines(server));
+        l.addAll(com.smileprotocol.run.RunManager.debugLines(server, p));
         return l;
     }
 
