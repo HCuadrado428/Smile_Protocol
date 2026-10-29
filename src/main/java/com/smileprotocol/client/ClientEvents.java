@@ -44,6 +44,7 @@ public final class ClientEvents {
     @SubscribeEvent
     public static void onLoggingOut(ClientPlayerNetworkEvent.LoggingOut event) {
         ClientState.reset();
+        com.smileprotocol.client.light.DynamicLights.clear();
     }
 
     // HUD (README 8.1) -------------------------------------------------------------

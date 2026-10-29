@@ -1,5 +1,11 @@
 package com.smileprotocol.block;
 
+import com.smileprotocol.blockentity.ElevatorDoorBlockEntity;
+import com.smileprotocol.registry.ModBlockEntities;
+import net.minecraft.world.level.block.EntityBlock;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityTicker;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.entity.LivingEntity;
@@ -27,12 +33,11 @@ import javax.annotation.Nullable;
 
 /**
  * Hoja de puerta de ascensor (dos bloques de alto). La abre y cierra el servidor segun el
- * estado del ascensor (README 6.2): abierta no tiene colision ni se ve.
- * <p>
- * Provisional: la animacion de las puertas deslizandose (GeckoLib) llega con la ambientacion.
+ * estado del ascensor (README 6.2): abierta no tiene colision. La hoja se desliza animada
+ * con GeckoLib ({@link ElevatorDoorBlockEntity}).
  * {@code FACING} es hacia donde mira la cara exterior (hacia el lobby).
  */
-public class ElevatorDoorBlock extends Block {
+public class ElevatorDoorBlock extends Block implements EntityBlock {
 
     public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
     public static final EnumProperty<DoubleBlockHalf> HALF = BlockStateProperties.DOUBLE_BLOCK_HALF;
@@ -70,10 +75,24 @@ public class ElevatorDoorBlock extends Block {
         return s.getValue(OPEN) ? Shapes.empty() : closedShape(s);
     }
 
+    /** La hoja la dibuja GeckoLib desde la mitad inferior; la superior no se dibuja. */
     @Override
     @SuppressWarnings("deprecation")
     public RenderShape getRenderShape(BlockState s) {
-        return s.getValue(OPEN) ? RenderShape.INVISIBLE : RenderShape.MODEL;
+        return s.getValue(HALF) == DoubleBlockHalf.LOWER ? RenderShape.ENTITYBLOCK_ANIMATED : RenderShape.INVISIBLE;
+    }
+
+    @Nullable
+    @Override
+    public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
+        return state.getValue(HALF) == DoubleBlockHalf.LOWER ? new ElevatorDoorBlockEntity(pos, state) : null;
+    }
+
+    @Nullable
+    @Override
+    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
+        if (!level.isClientSide || type != ModBlockEntities.ELEVATOR_DOOR.get()) return null;
+        return (lvl, pos, st, be) -> ElevatorDoorBlockEntity.clientTick(lvl, pos, st, (ElevatorDoorBlockEntity) be);
     }
 
     @Nullable

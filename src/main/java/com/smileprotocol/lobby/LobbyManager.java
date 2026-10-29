@@ -3,6 +3,7 @@ package com.smileprotocol.lobby;
 import com.smileprotocol.block.ElevatorBoardBlock;
 import com.smileprotocol.block.ElevatorButtonBlock;
 import com.smileprotocol.block.ElevatorDoorBlock;
+import com.smileprotocol.blockentity.ElevatorDoorBlockEntity;
 import com.smileprotocol.compat.ModCheck;
 import com.smileprotocol.config.SPConfig;
 import com.smileprotocol.debug.SPDebug;
@@ -559,6 +560,9 @@ public final class LobbyManager {
         } else {
             exit = new BlockPos(cabin.getCenter().getX(), cabin.minY(), cabin.maxZ() + 2);
         }
+
+        // Recorrido de cada hoja: telescopico si hay mas de dos (GeckoLib)
+        ElevatorDoorBlockEntity.assignSlides(level, doors);
 
         ElevatorDef def = new ElevatorDef(id, type, name, cabin, List.copyOf(doors), button, board, exit);
         LobbyData data = LobbyData.get(level.getServer());

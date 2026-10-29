@@ -29,10 +29,10 @@ public class ElevatorButtonBlock extends Block {
 
     public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
 
-    private static final VoxelShape SOUTH = Block.box(4, 3, 0, 12, 13, 2);
-    private static final VoxelShape NORTH = Block.box(4, 3, 14, 12, 13, 16);
-    private static final VoxelShape EAST = Block.box(0, 3, 4, 2, 13, 12);
-    private static final VoxelShape WEST = Block.box(14, 3, 4, 16, 13, 12);
+    private static final VoxelShape SOUTH = Block.box(2, 2, 0, 14, 14, 2);
+    private static final VoxelShape NORTH = Block.box(2, 2, 14, 14, 14, 16);
+    private static final VoxelShape EAST = Block.box(0, 2, 2, 2, 14, 14);
+    private static final VoxelShape WEST = Block.box(14, 2, 2, 16, 14, 14);
 
     public ElevatorButtonBlock(Properties props) {
         super(props);

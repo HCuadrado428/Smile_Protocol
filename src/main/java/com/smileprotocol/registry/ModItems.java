@@ -24,6 +24,9 @@ public final class ModItems {
     public static final RegistryObject<Item> ELEVATOR_BUTTON = block("elevator_button", ModBlocks.ELEVATOR_BUTTON);
     public static final RegistryObject<Item> ELEVATOR_BOARD = block("elevator_board", ModBlocks.ELEVATOR_BOARD);
     public static final RegistryObject<Item> FLUORESCENT_LIGHT = block("fluorescent_light", ModBlocks.FLUORESCENT_LIGHT);
+    public static final RegistryObject<Item> ELEVATOR_FRAME = block("elevator_frame", ModBlocks.ELEVATOR_FRAME);
+    public static final RegistryObject<Item> ELEVATOR_WALL_PANEL = block("elevator_wall_panel", ModBlocks.ELEVATOR_WALL_PANEL);
+    public static final RegistryObject<Item> ELEVATOR_FLOOR = block("elevator_floor", ModBlocks.ELEVATOR_FLOOR);
 
     private ModItems() {}
 

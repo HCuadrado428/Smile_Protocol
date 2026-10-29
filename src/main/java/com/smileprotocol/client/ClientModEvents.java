@@ -22,5 +22,6 @@ public final class ClientModEvents {
     @SubscribeEvent
     public static void onRegisterRenderers(EntityRenderersEvent.RegisterRenderers event) {
         event.registerBlockEntityRenderer(ModBlockEntities.ELEVATOR_BOARD.get(), ElevatorBoardRenderer::new);
+        event.registerBlockEntityRenderer(ModBlockEntities.ELEVATOR_DOOR.get(), ElevatorDoorRenderer::new);
     }
 }

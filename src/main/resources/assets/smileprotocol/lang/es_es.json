@@ -4,23 +4,20 @@
   "block.smileprotocol.elevator_button": "Botón de ascensor",
   "block.smileprotocol.elevator_board": "Pantalla de ascensor",
   "block.smileprotocol.fluorescent_light": "Fluorescente",
-
+  "block.smileprotocol.elevator_frame": "Marco de ascensor",
+  "block.smileprotocol.elevator_wall_panel": "Panel de cabina",
+  "block.smileprotocol.elevator_floor": "Suelo de chapa estriada",
   "commands.smileprotocol.not_implemented": "Este comando todavía no está implementado (fase %s).",
-
   "smileprotocol.session.rejoined": "Has vuelto a la partida.",
-
   "smileprotocol.modcheck.pending": "Tu cliente todavía no ha enviado su lista de mods. Espera unos segundos.",
   "smileprotocol.modcheck.timeout": "Tu cliente no ha enviado su lista de mods. Reconéctate con el modpack del evento.",
   "smileprotocol.modcheck.disallowed": "No puedes jugar con estos mods: %s. Usa el modpack del evento.",
   "smileprotocol.modcheck.missing": "Te faltan mods obligatorios del evento: %s.",
-
   "smileprotocol.isolation.command_blocked": "Ese comando no se puede usar dentro de la partida.",
-
   "smileprotocol.mode.free": "libre",
   "smileprotocol.mode.event": "evento",
   "smileprotocol.mode.announce.free": "Los ascensores pequeños están abiertos: entrad en grupo cuando queráis.",
   "smileprotocol.mode.announce.event": "Empieza el evento: todos al ascensor de servicio.",
-
   "smileprotocol.elevator.closed": "Este ascensor está cerrado.",
   "smileprotocol.elevator.full": "La cabina está llena.",
   "smileprotocol.elevator.afk": "Te han sacado del ascensor por no estar listo.",
@@ -40,18 +37,14 @@
   "smileprotocol.elevator.need_players": "Se necesitan al menos %s jugadores",
   "smileprotocol.elevator.waiting_all": "Esperando a todo el lobby",
   "smileprotocol.elevator.press_ready": "Pulsa el botón cuando estés listo",
-
   "smileprotocol.board.countdown": "Bajando en %s",
   "smileprotocol.board.closing": "Cerrando puertas",
   "smileprotocol.board.running": "En curso",
   "smileprotocol.board.closed": "Cerrado",
   "smileprotocol.board.free": "Libre",
   "smileprotocol.board.ready": "%s/%s listos",
-
   "smileprotocol.hud.ready": "%s/%s listos",
-
   "smileprotocol.lobby.built": "Lobby construido. Aparición en %s, %s ascensores registrados.",
-
   "smileprotocol.command.lobby.in_game": "No puedes usar /sp lobby dentro de una partida.",
   "smileprotocol.command.lobby.cooldown": "Espera %s s para volver a usarlo.",
   "smileprotocol.command.lobby.sent": "%s jugadores enviados al lobby.",

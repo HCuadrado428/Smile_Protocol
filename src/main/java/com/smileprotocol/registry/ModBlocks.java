@@ -42,5 +42,18 @@ public final class ModBlocks {
                     .strength(0.5f).sound(SoundType.GLASS)
                     .lightLevel(s -> s.getValue(FluorescentLightBlock.LIT) ? 15 : 0)));
 
+    // Acabados de las cabinas: marco, panel de pared y suelo de chapa estriada
+    public static final RegistryObject<Block> ELEVATOR_FRAME = BLOCKS.register("elevator_frame",
+            () -> new Block(BlockBehaviour.Properties.of().mapColor(MapColor.METAL)
+                    .strength(-1.0f, 3600000.0f).sound(SoundType.METAL)));
+
+    public static final RegistryObject<Block> ELEVATOR_WALL_PANEL = BLOCKS.register("elevator_wall_panel",
+            () -> new Block(BlockBehaviour.Properties.of().mapColor(MapColor.METAL)
+                    .strength(-1.0f, 3600000.0f).sound(SoundType.METAL)));
+
+    public static final RegistryObject<Block> ELEVATOR_FLOOR = BLOCKS.register("elevator_floor",
+            () -> new Block(BlockBehaviour.Properties.of().mapColor(MapColor.METAL)
+                    .strength(-1.0f, 3600000.0f).sound(SoundType.NETHERITE_BLOCK)));
+
     private ModBlocks() {}
 }

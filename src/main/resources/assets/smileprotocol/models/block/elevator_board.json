@@ -1,8 +1,8 @@
 {
   "parent": "block/block",
   "textures": {
-    "side": "smileprotocol:block/elevator_panel",
     "front": "smileprotocol:block/elevator_screen",
+    "side": "smileprotocol:block/elevator_panel",
     "particle": "smileprotocol:block/elevator_panel"
   },
   "elements": [
@@ -18,23 +18,64 @@
         2
       ],
       "faces": {
-        "north": {
-          "texture": "#side"
-        },
         "south": {
-          "texture": "#front"
+          "texture": "#front",
+          "uv": [
+            0,
+            2,
+            16,
+            14
+          ],
+          "forge_data": {
+            "block_light": 15,
+            "sky_light": 15,
+            "ambient_occlusion": false
+          }
+        },
+        "north": {
+          "texture": "#side",
+          "uv": [
+            0,
+            2,
+            16,
+            14
+          ]
         },
         "east": {
-          "texture": "#side"
+          "texture": "#side",
+          "uv": [
+            0,
+            2,
+            2,
+            14
+          ]
         },
         "west": {
-          "texture": "#side"
+          "texture": "#side",
+          "uv": [
+            0,
+            2,
+            2,
+            14
+          ]
         },
         "up": {
-          "texture": "#side"
+          "texture": "#side",
+          "uv": [
+            0,
+            0,
+            16,
+            2
+          ]
         },
         "down": {
-          "texture": "#side"
+          "texture": "#side",
+          "uv": [
+            0,
+            0,
+            16,
+            2
+          ]
         }
       }
     }

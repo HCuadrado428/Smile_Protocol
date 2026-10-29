@@ -1,6 +1,14 @@
 package com.smileprotocol.block;
 
+import com.smileprotocol.blockentity.FluorescentLightBlockEntity;
+import com.smileprotocol.registry.ModBlockEntities;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.EntityBlock;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityTicker;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import javax.annotation.Nullable;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.Block;
@@ -13,8 +21,10 @@ import net.minecraft.world.level.block.state.properties.BooleanProperty;
  * Fluorescente de techo. Con {@code FLICKERS} parpadea de vez en cuando (README 5.2:
  * «algun fluorescente que parpadea»). Mas adelante los ligados a un circuito se apagaran y
  * encenderan con los fusibles (README 14.1).
+ * <p>
+ * En el cliente, su entidad de bloque mantiene una luz dinamica de Veil (README 21.1).
  */
-public class FluorescentLightBlock extends Block {
+public class FluorescentLightBlock extends Block implements EntityBlock {
 
     public static final BooleanProperty LIT = BlockStateProperties.LIT;
     public static final BooleanProperty FLICKERS = BooleanProperty.create("flickers");
@@ -56,5 +66,18 @@ public class FluorescentLightBlock extends Block {
             // Encendido: a veces vuelve a fallar enseguida (un parpadeo son varios cortes seguidos)
             level.scheduleTick(pos, this, 2 + random.nextInt(4));
         }
+    }
+
+    @Nullable
+    @Override
+    public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
+        return new FluorescentLightBlockEntity(pos, state);
+    }
+
+    @Nullable
+    @Override
+    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
+        if (!level.isClientSide || type != ModBlockEntities.FLUORESCENT_LIGHT.get()) return null;
+        return (lvl, pos, st, be) -> FluorescentLightBlockEntity.clientTick(lvl, pos, st, (FluorescentLightBlockEntity) be);
     }
 }

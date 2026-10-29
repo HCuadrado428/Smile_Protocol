@@ -223,18 +223,20 @@ public final class LobbyBuilder {
         for (Cabin c : CABINS) {
             // Interior de la cabina
             fill(c.x1(), 1, c.zMin(), c.x2(), c.height(), -1, Blocks.AIR);
-            fill(c.x1(), 0, c.zMin(), c.x2(), 0, -1, Blocks.POLISHED_ANDESITE);
-            // Paredes interiores de acero cepillado
-            fill(c.x1() - 1, 1, c.zMin(), c.x1() - 1, c.height(), -1, Blocks.IRON_BLOCK);
-            fill(c.x2() + 1, 1, c.zMin(), c.x2() + 1, c.height(), -1, Blocks.IRON_BLOCK);
-            fill(c.x1(), 1, c.zMin() - 1, c.x2(), c.height(), c.zMin() - 1, Blocks.IRON_BLOCK);
-            fill(c.x1(), 2, c.zMin() - 1, c.x2(), 2, c.zMin() - 1, Blocks.POLISHED_ANDESITE); // pasamanos
+            BlockState wallPanel = ModBlocks.ELEVATOR_WALL_PANEL.get().defaultBlockState();
+            BlockState frame = ModBlocks.ELEVATOR_FRAME.get().defaultBlockState();
+            fill(c.x1(), 0, c.zMin(), c.x2(), 0, -1, ModBlocks.ELEVATOR_FLOOR.get().defaultBlockState());
+            // Paredes interiores de paneles de acero, con el techo enmarcado
+            fill(c.x1() - 1, 1, c.zMin(), c.x1() - 1, c.height(), -1, wallPanel);
+            fill(c.x2() + 1, 1, c.zMin(), c.x2() + 1, c.height(), -1, wallPanel);
+            fill(c.x1(), 1, c.zMin() - 1, c.x2(), c.height(), c.zMin() - 1, wallPanel);
+            fill(c.x1() - 1, c.height() + 1, c.zMin() - 1, c.x2() + 1, c.height() + 1, -1, frame);
             int cx = (c.x1() + c.x2()) / 2;
             set(cx, c.height() + 1, (c.zMin() - 1) / 2, light);
             if (c.type() == ElevatorType.MEGA) set(cx + 2, c.height() + 1, (c.zMin() - 1) / 2, light);
 
             // Hueco de la puerta en la pared del fondo, con marco
-            fill(c.door1() - 1, 1, 0, c.door2() + 1, 3, 0, Blocks.IRON_BLOCK);
+            fill(c.door1() - 1, 1, 0, c.door2() + 1, 3, 0, frame);
             for (int x = c.door1(); x <= c.door2(); x++) {
                 set(x, 1, 0, door.setValue(ElevatorDoorBlock.HALF, DoubleBlockHalf.LOWER));
                 set(x, 2, 0, door.setValue(ElevatorDoorBlock.HALF, DoubleBlockHalf.UPPER));
