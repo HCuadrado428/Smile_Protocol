@@ -30,7 +30,15 @@ public final class DynamicLights {
     private static final Map<BlockPos, LightRenderHandle<PointLightData>> LIGHTS = new HashMap<>();
     private static boolean failed;
 
+    /** Dentro de las instancias las luces son mas cortas y tenues: es un laboratorio a oscuras. */
+    private static final float RADIUS_SP = 6f;
+    private static final float BRIGHTNESS_SP = 0.7f;
+
     private DynamicLights() {}
+
+    private static boolean inInstance(FluorescentLightBlockEntity be) {
+        return be.getLevel() != null && com.smileprotocol.dimension.SPDimension.isSP(be.getLevel());
+    }
 
     @Nullable
     private static LightRenderer renderer() {
@@ -48,7 +56,7 @@ public final class DynamicLights {
         BlockPos pos = be.getBlockPos();
         BlockState state = be.getBlockState();
         boolean lit = state.getBlock() instanceof FluorescentLightBlock && state.getValue(FluorescentLightBlock.LIT);
-        float target = lit ? BRIGHTNESS : 0f;
+        float target = lit ? (inInstance(be) ? BRIGHTNESS_SP : BRIGHTNESS) : 0f;
 
         LightRenderHandle<PointLightData> handle = LIGHTS.get(pos);
         if (handle == null) {
@@ -58,7 +66,7 @@ public final class DynamicLights {
             try {
                 PointLightData data = new PointLightData()
                         .setPosition(pos.getX() + 0.5, pos.getY() - 0.35, pos.getZ() + 0.5)
-                        .setRadius(RADIUS)
+                        .setRadius(inInstance(be) ? RADIUS_SP : RADIUS)
                         .setColor(R, G, B)
                         .setBrightness(target);
                 LIGHTS.put(pos.immutable(), lr.addLight(data));

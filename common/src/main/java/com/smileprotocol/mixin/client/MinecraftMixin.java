@@ -30,6 +30,12 @@ public abstract class MinecraftMixin {
         if (ClientState.inSmileProtocol()) ci.cancel();
     }
 
+    /** El click derecho dentro es la interaccion mantenida (README 11.1), no el uso vanilla. */
+    @Inject(method = "startUseItem", at = @At("HEAD"), cancellable = true)
+    private void smileprotocol$startUseItem(CallbackInfo ci) {
+        if (ClientState.inSmileProtocol()) ci.cancel();
+    }
+
     @Inject(method = "pickBlock", at = @At("HEAD"), cancellable = true)
     private void smileprotocol$pickBlock(CallbackInfo ci) {
         if (ClientState.inSmileProtocol()) ci.cancel();

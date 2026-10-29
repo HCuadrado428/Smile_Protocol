@@ -88,6 +88,8 @@ public final class SPSessionManager {
         SPPlayerData data = SPPlayerData.of(player);
         boolean wasIn = data.inSP();
         if (wasIn) RunManager.onPlayerLeft(player, data.getGroupId());
+        com.smileprotocol.hide.HideManager.forceExit(player, false);
+        com.smileprotocol.interact.InteractionManager.stop(player, true);
 
         data.setInSP(false);
         data.setGroupId(null);
@@ -153,7 +155,26 @@ public final class SPSessionManager {
     }
 
     public static void sync(ServerPlayer player) {
-        SPNetwork.sendTo(player, Payloads.SyncState.of(SPPlayerData.of(player)));
+        SPPlayerData data = SPPlayerData.of(player);
+        SPNetwork.sendTo(player, Payloads.SyncState.of(data));
+        if (data.inSP()) mirrorHand(player, data);
+    }
+
+    /**
+     * El objeto del hueco activo se ve en la mano (README 13.2): se copia al hueco 0 del inventario
+     * real, que dentro de la partida no tiene nada mas. Al salir se vacia y se restaura todo.
+     */
+    private static void mirrorHand(ServerPlayer player, SPPlayerData data) {
+        net.minecraft.world.entity.player.Inventory inv = player.getInventory();
+        net.minecraft.world.item.ItemStack want = data.getSPInventory().getSelectedStack().copy();
+        if (inv.selected != 0) {
+            inv.selected = 0;
+            player.connection.send(new net.minecraft.network.protocol.game.ClientboundSetCarriedItemPacket(0));
+        }
+        if (!net.minecraft.world.item.ItemStack.matches(inv.getItem(0), want)) {
+            inv.setItem(0, want);
+            player.containerMenu.broadcastChanges();
+        }
     }
 
     /** Repara incoherencias al conectarse (README 5.3). */

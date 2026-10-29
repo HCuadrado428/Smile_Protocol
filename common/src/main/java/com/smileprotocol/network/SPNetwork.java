@@ -38,7 +38,12 @@ public final class SPNetwork {
             new Def<>(Payloads.SelectSlot.TYPE, Payloads.SelectSlot.CODEC, false, SPNetwork::onSelectSlot),
             new Def<>(Payloads.Handshake.TYPE, Payloads.Handshake.CODEC, false, (p, player) -> ModCheck.onHandshake(player, p.mods())),
             new Def<>(Payloads.MotionInput.TYPE, Payloads.MotionInput.CODEC, false, com.smileprotocol.motion.MotionManager::onInput),
-            new Def<>(Payloads.SyncMotion.TYPE, Payloads.SyncMotion.CODEC, true, null)
+            new Def<>(Payloads.SyncMotion.TYPE, Payloads.SyncMotion.CODEC, true, null),
+            new Def<>(Payloads.Interact.TYPE, Payloads.Interact.CODEC, false, com.smileprotocol.interact.InteractionManager::onInput),
+            new Def<>(Payloads.InteractState.TYPE, Payloads.InteractState.CODEC, true, null),
+            new Def<>(Payloads.DropItem.TYPE, Payloads.DropItem.CODEC, false, com.smileprotocol.interact.InteractionManager::onDrop),
+            new Def<>(Payloads.SyncHide.TYPE, Payloads.SyncHide.CODEC, true, null),
+            new Def<>(Payloads.HideInput.TYPE, Payloads.HideInput.CODEC, false, com.smileprotocol.hide.HideManager::onInput)
     );
 
     private static final Map<CustomPacketPayload.Type<?>, Consumer<CustomPacketPayload>> CLIENT_HANDLERS = new HashMap<>();
@@ -67,6 +72,9 @@ public final class SPNetwork {
     private static void onSelectSlot(Payloads.SelectSlot p, ServerPlayer player) {
         if (p.slot() < 0 || p.slot() >= SPInventory.SIZE) return;
         SPPlayerData data = SPPlayerData.of(player);
-        if (data.inSP()) data.getSPInventory().setSelected(p.slot());
+        if (data.inSP()) {
+            data.getSPInventory().setSelected(p.slot());
+            com.smileprotocol.session.SPSessionManager.sync(player);
+        }
     }
 }

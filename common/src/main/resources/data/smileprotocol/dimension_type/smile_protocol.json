@@ -16,5 +16,5 @@
   "monster_spawn_light_level": 0,
   "monster_spawn_block_light_limit": 0,
   "infiniburn": "#minecraft:infiniburn_overworld",
-  "effects": "minecraft:the_nether"
+  "effects": "minecraft:overworld"
 }

@@ -388,10 +388,39 @@ public final class SPCommands {
                         .then(Commands.argument("players", EntityArgument.players())
                                 .executes(c -> leave(c, EntityArgument.getPlayers(c, "players"))))));
 
-        root.then(stub("lock", "F09"));
-        root.then(stub("circuit", "F09"));
-        root.then(stub("hide", "F10"));
-        root.then(Commands.literal("noise").then(stub("test", "F11")));
+        // Herramientas de construccion mirando un bloque (README 5.1, 14, 15)
+        root.then(Commands.literal("lock").then(Commands.literal("set")
+                .then(Commands.argument("lock_id", StringArgumentType.word())
+                        .executes(c -> MechanismCommands.lockSet(c, false))
+                        .then(Commands.literal("consume").executes(c -> MechanismCommands.lockSet(c, true))))));
+        root.then(Commands.literal("circuit").then(Commands.literal("set")
+                .then(Commands.argument("circuit_id", StringArgumentType.word())
+                        .executes(c -> MechanismCommands.circuitSet(c, -1))
+                        .then(Commands.argument("fuses", IntegerArgumentType.integer(1, 4))
+                                .executes(c -> MechanismCommands.circuitSet(c, IntegerArgumentType.getInteger(c, "fuses")))))));
+        root.then(Commands.literal("door").then(Commands.literal("set")
+                .then(Commands.argument("type", StringArgumentType.word()).suggests(MechanismCommands.DOOR_TYPES)
+                        .executes(c -> MechanismCommands.doorSet(c, ""))
+                        .then(Commands.argument("param", StringArgumentType.word())
+                                .executes(c -> MechanismCommands.doorSet(c, StringArgumentType.getString(c, "param")))))));
+        root.then(Commands.literal("valve").then(Commands.literal("set")
+                .then(Commands.argument("group", StringArgumentType.word())
+                        .executes(c -> MechanismCommands.valveSet(c, 0, false))
+                        .then(Commands.argument("order", IntegerArgumentType.integer(0, 16))
+                                .executes(c -> MechanismCommands.valveSet(c, IntegerArgumentType.getInteger(c, "order"), false))
+                                .then(Commands.literal("coop")
+                                        .executes(c -> MechanismCommands.valveSet(c, IntegerArgumentType.getInteger(c, "order"), true)))))));
+        root.then(Commands.literal("hide").then(Commands.literal("set")
+                .then(Commands.argument("type", StringArgumentType.word()).suggests(MechanismCommands.HIDE_TYPES)
+                        .executes(MechanismCommands::hideSet))));
+        root.then(Commands.literal("give")
+                .then(Commands.argument("item", StringArgumentType.word()).suggests(MechanismCommands.GIVE_ITEMS)
+                        .executes(c -> MechanismCommands.give(c, ""))
+                        .then(Commands.argument("param", StringArgumentType.word())
+                                .executes(c -> MechanismCommands.give(c, StringArgumentType.getString(c, "param"))))));
+        root.then(Commands.literal("noise").then(Commands.literal("test")
+                .then(Commands.argument("radius", com.mojang.brigadier.arguments.FloatArgumentType.floatArg(0.5f, 64f))
+                        .executes(MechanismCommands::noiseTest))));
 
         d.register(root);
     }

@@ -4,6 +4,11 @@ import com.smileprotocol.block.ElevatorBoardBlock;
 import com.smileprotocol.block.ElevatorButtonBlock;
 import com.smileprotocol.block.ElevatorDoorBlock;
 import com.smileprotocol.block.FluorescentLightBlock;
+import com.smileprotocol.block.FuseBoxBlock;
+import com.smileprotocol.block.HideBlock;
+import com.smileprotocol.block.LabDoorBlock;
+import com.smileprotocol.block.ValveBlock;
+import net.minecraft.world.level.block.state.properties.BlockSetType;
 import com.smileprotocol.platform.Services;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.level.block.Block;
@@ -33,14 +38,41 @@ public final class ModBlocks {
     public static final Supplier<FluorescentLightBlock> FLUORESCENT_LIGHT = register("fluorescent_light",
             () -> new FluorescentLightBlock(BlockBehaviour.Properties.of().mapColor(MapColor.QUARTZ)
                     .strength(0.5f).sound(SoundType.GLASS)
-                    .lightLevel(s -> s.getValue(FluorescentLightBlock.LIT) ? 15 : 0)));
+                    .lightLevel(s -> s.getValue(FluorescentLightBlock.LIT) ? 10 : 0)));
 
     // Acabados de las cabinas
     public static final Supplier<Block> ELEVATOR_FRAME = register("elevator_frame", () -> new Block(steel(SoundType.METAL)));
     public static final Supplier<Block> ELEVATOR_WALL_PANEL = register("elevator_wall_panel", () -> new Block(steel(SoundType.METAL)));
     public static final Supplier<Block> ELEVATOR_FLOOR = register("elevator_floor", () -> new Block(steel(SoundType.NETHERITE_BLOCK)));
 
+    // Mecanismos del laboratorio (README 14)
+    public static final Supplier<FuseBoxBlock> FUSE_BOX = register("fuse_box",
+            () -> new FuseBoxBlock(lab(SoundType.METAL).noOcclusion()));
+    public static final Supplier<LabDoorBlock> LAB_DOOR = register("lab_door",
+            () -> new LabDoorBlock(BlockSetType.OAK, lab(SoundType.WOOD).noOcclusion()));
+    public static final Supplier<LabDoorBlock> SECURITY_DOOR = register("security_door",
+            () -> new LabDoorBlock(BlockSetType.IRON, lab(SoundType.METAL).noOcclusion()));
+    public static final Supplier<ValveBlock> VALVE = register("valve",
+            () -> new ValveBlock(lab(SoundType.METAL).noOcclusion()));
+
+    // Escondites (README 15)
+    public static final Supplier<HideBlock> LOCKER = register("locker",
+            () -> new HideBlock(lab(SoundType.METAL).noOcclusion(), "locker", HideBlock.Kind.ENCLOSED));
+    public static final Supplier<HideBlock> WARDROBE = register("wardrobe",
+            () -> new HideBlock(lab(SoundType.WOOD).noOcclusion(), "wardrobe", HideBlock.Kind.ENCLOSED));
+    public static final Supplier<HideBlock> WASTE_CONTAINER = register("waste_container",
+            () -> new HideBlock(lab(SoundType.METAL).noOcclusion(), "container", HideBlock.Kind.ENCLOSED));
+    public static final Supplier<HideBlock> GURNEY = register("gurney",
+            () -> new HideBlock(lab(SoundType.METAL).noOcclusion(), "gurney", HideBlock.Kind.LOW));
+    public static final Supplier<HideBlock> CURTAIN = register("curtain",
+            () -> new HideBlock(lab(SoundType.WOOL).noOcclusion().noCollission(), "curtain", HideBlock.Kind.CURTAIN));
+
     private ModBlocks() {}
+
+    /** Mecanismos y mobiliario de las zonas: irrompibles salvo en creativo. */
+    private static BlockBehaviour.Properties lab(SoundType sound) {
+        return BlockBehaviour.Properties.of().mapColor(MapColor.METAL).strength(-1.0f, 3600000.0f).sound(sound);
+    }
 
     private static BlockBehaviour.Properties steel(SoundType sound) {
         return BlockBehaviour.Properties.of().mapColor(MapColor.METAL).strength(-1.0f, 3600000.0f).sound(sound);

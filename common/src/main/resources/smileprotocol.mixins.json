@@ -13,6 +13,7 @@
   ],
   "client": [
     "client.CameraMixin",
+    "client.EntityTurnMixin",
     "client.GameRendererMixin",
     "client.KeyboardInputMixin",
     "client.MinecraftMixin",

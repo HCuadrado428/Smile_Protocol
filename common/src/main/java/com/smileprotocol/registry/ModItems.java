@@ -2,7 +2,11 @@ package com.smileprotocol.registry;
 
 import com.smileprotocol.platform.Services;
 import net.minecraft.core.registries.BuiltInRegistries;
+import com.smileprotocol.item.FuseItem;
+import com.smileprotocol.item.KeyItem;
+import com.smileprotocol.item.KeycardItem;
 import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.DoubleHighBlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 
@@ -24,10 +28,51 @@ public final class ModItems {
     public static final Supplier<Item> ELEVATOR_WALL_PANEL = block("elevator_wall_panel", ModBlocks.ELEVATOR_WALL_PANEL);
     public static final Supplier<Item> ELEVATOR_FLOOR = block("elevator_floor", ModBlocks.ELEVATOR_FLOOR);
 
+    public static final Supplier<Item> FUSE_BOX = block("fuse_box", ModBlocks.FUSE_BOX);
+    public static final Supplier<Item> LAB_DOOR = doubleBlock("lab_door", ModBlocks.LAB_DOOR);
+    public static final Supplier<Item> SECURITY_DOOR = doubleBlock("security_door", ModBlocks.SECURITY_DOOR);
+    public static final Supplier<Item> VALVE = block("valve", ModBlocks.VALVE);
+    public static final Supplier<Item> LOCKER = block("locker", ModBlocks.LOCKER);
+    public static final Supplier<Item> WARDROBE = block("wardrobe", ModBlocks.WARDROBE);
+    public static final Supplier<Item> WASTE_CONTAINER = block("waste_container", ModBlocks.WASTE_CONTAINER);
+    public static final Supplier<Item> GURNEY = block("gurney", ModBlocks.GURNEY);
+    public static final Supplier<Item> CURTAIN = block("curtain", ModBlocks.CURTAIN);
+
+    // Objetos de la partida (README 10)
+    public static final Supplier<FuseItem> FUSE = item("fuse", () -> new FuseItem(one(), false));
+    public static final Supplier<FuseItem> FUSE_BLOWN = item("fuse_blown", () -> new FuseItem(one(), true));
+    public static final Supplier<KeyItem> KEY = item("key", () -> new KeyItem(one()));
+    public static final Supplier<KeycardItem> KEYCARD_1 = item("keycard_1", () -> new KeycardItem(one(), 1));
+    public static final Supplier<KeycardItem> KEYCARD_2 = item("keycard_2", () -> new KeycardItem(one(), 2));
+    public static final Supplier<KeycardItem> KEYCARD_3 = item("keycard_3", () -> new KeycardItem(one(), 3));
+    public static final Supplier<Item> VALVE_WHEEL = item("valve_wheel", () -> new Item(one()));
+
     private ModItems() {}
+
+    private static Item.Properties one() {
+        return new Item.Properties().stacksTo(1);
+    }
+
+    private static <T extends Item> Supplier<T> item(String name, Supplier<T> factory) {
+        Supplier<T> s = Services.PLATFORM.register(BuiltInRegistries.ITEM, name, factory);
+        ALL.add(s);
+        return s;
+    }
+
+    /** Item de un bloque registrado mas adelante. */
+    public static Supplier<Item> blockItem(String name, Supplier<? extends Block> block) {
+        return block(name, block);
+    }
 
     public static List<Supplier<? extends Item>> all() {
         return Collections.unmodifiableList(ALL);
+    }
+
+    private static Supplier<Item> doubleBlock(String name, Supplier<? extends Block> block) {
+        Supplier<Item> s = Services.PLATFORM.register(BuiltInRegistries.ITEM, name,
+                () -> new DoubleHighBlockItem(block.get(), new Item.Properties()));
+        ALL.add(s);
+        return s;
     }
 
     private static Supplier<Item> block(String name, Supplier<? extends Block> block) {

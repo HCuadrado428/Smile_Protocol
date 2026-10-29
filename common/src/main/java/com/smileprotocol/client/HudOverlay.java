@@ -64,7 +64,12 @@ public final class HudOverlay {
 
         if (!mc.options.hideGui) {
             if (inGame) {
-                renderCrosshair(g, w, h);
+                if (ClientHide.hidden()) {
+                    renderHide(g, font, w, h, partialTick);
+                } else {
+                    renderCrosshair(g, w, h);
+                    renderInteraction(g, font, w, h);
+                }
                 renderVitals(g, font, mc.player, h);
                 renderSlots(g, font, w, h);
             }
@@ -98,6 +103,96 @@ public final class HudOverlay {
         int cx = w / 2, cy = h / 2;
         g.fill(cx - 1, cy - 1, cx + 2, cy + 2, 0x70000000);
         g.fill(cx, cy, cx + 1, cy + 1, 0xE0F0F0F0);
+    }
+
+    // Interaccion (README 8.1: prompt y barra de progreso) -------------------------------------
+
+    private static void renderInteraction(GuiGraphics g, Font font, int w, int h) {
+        int cx = w / 2, y = h / 2 + 12;
+        Payloads.InteractState st = ClientInteraction.state();
+        if (st.active()) {
+            Component prompt = st.prompt();
+            g.drawString(font, prompt, cx - font.width(prompt) / 2, y, TEXT, true);
+            int bw = 92, bx = cx - bw / 2, by = y + 12;
+            g.fill(bx - 1, by - 1, bx + bw + 1, by + 5, 0xC0000000);
+            float k = st.total() <= 0 ? 1f : Mth.clamp(st.progress() / (float) st.total(), 0f, 1f);
+            int col = st.waiting() ? AMBER : ACCENT;
+            g.fill(bx, by, bx + Math.round(bw * k), by + 4, col);
+            g.fill(bx, by, bx + Math.round(bw * k), by + 1, 0x60FFFFFF);
+            if (st.waiting()) {
+                Component wait = Component.translatable("smileprotocol.interact.waiting");
+                g.drawString(font, wait, cx - font.width(wait) / 2, by + 8, AMBER, true);
+            }
+            return;
+        }
+        com.smileprotocol.interact.InteractionSpec spec = ClientInteraction.spec();
+        if (spec == null) return;
+        if (spec.blocked()) {
+            g.drawString(font, spec.prompt(), cx - font.width(spec.prompt()) / 2, y, 0xFF9AA6A2, true);
+            return;
+        }
+        Component key = Component.translatable(spec.ticks() > 0 ? "smileprotocol.interact.hold" : "smileprotocol.interact.press");
+        int kw = font.width(key) + 6;
+        int total = kw + 4 + font.width(spec.prompt());
+        int x = cx - total / 2;
+        g.fill(x, y - 2, x + kw, y + 10, 0xB0000000);
+        g.renderOutline(x, y - 2, kw, 12, ACCENT);
+        g.drawString(font, key, x + 3, y, ACCENT, false);
+        g.drawString(font, spec.prompt(), x + kw + 4, y, TEXT, true);
+    }
+
+    // Escondite (README 15.4: rendijas, aliento) -------------------------------------------------
+
+    private static void renderHide(GuiGraphics g, Font font, int w, int h, float pt) {
+        Payloads.SyncHide st = ClientHide.state();
+        switch (st.overlay()) {
+            case "crack" -> {
+                int gap = Math.max(10, w / 9), cx = w / 2;
+                g.fill(0, 0, cx - gap / 2, h, 0xF0050505);
+                g.fill(cx + gap / 2, 0, w, h, 0xF0050505);
+                g.fillGradient(cx - gap / 2, 0, cx + gap / 2, h / 4, 0xE0050505, 0x00050505);
+                g.fillGradient(cx - gap / 2, h * 3 / 4, cx + gap / 2, h, 0x00050505, 0xE0050505);
+            }
+            case "low" -> {
+                g.fill(0, 0, w, h * 2 / 5, 0xF0060606);
+                g.fillGradient(0, h * 2 / 5, w, h * 3 / 5, 0xF0060606, 0x30060606);
+                g.fillGradient(0, h - h / 8, w, h, 0x00060606, 0xC0060606);
+            }
+            case "cloth" -> {
+                g.fill(0, 0, w, h, 0x50B8A88A);
+                g.fillGradient(0, 0, w, h / 3, 0x70302820, 0x00302820);
+            }
+            default -> {
+                // Rendijas de taquilla: bandas horizontales en el centro
+                int slits = 6, sh = Math.max(3, h / 70), gap = Math.max(sh * 2, h / 22);
+                int band = slits * sh + (slits - 1) * gap;
+                int top = h / 2 - band / 2;
+                int sx0 = w / 2 - w / 3, sx1 = w / 2 + w / 3;
+                g.fill(0, 0, w, top, 0xF4040404);
+                g.fill(0, top + band, w, h, 0xF4040404);
+                g.fill(0, top, sx0, top + band, 0xF4040404);
+                g.fill(sx1, top, w, top + band, 0xF4040404);
+                for (int i = 0; i < slits - 1; i++) {
+                    int y0 = top + i * (sh + gap) + sh;
+                    g.fill(sx0, y0, sx1, y0 + gap, 0xF4040404);
+                }
+                g.fill(sx0, top, sx1, top + band, 0x22000000);
+            }
+        }
+
+        // Aliento (no en ocultacion parcial)
+        int cx = w / 2, y = h - 70;
+        if (!st.partial()) {
+            float b = ClientHide.breath(pt);
+            int bw = 120, bx = cx - bw / 2;
+            Component label = Component.translatable(st.holding() ? "smileprotocol.hud.holding_breath" : "smileprotocol.hud.breath");
+            g.drawString(font, label, cx - font.width(label) / 2, y - 11, st.holding() ? AMBER : MUTED, true);
+            g.fill(bx - 1, y - 1, bx + bw + 1, y + 5, 0xC0000000);
+            int col = b < 0.25f ? DANGER : st.holding() ? AMBER : ACCENT;
+            g.fill(bx, y, bx + Math.round(bw * b), y + 4, col);
+        }
+        Component hint = Component.translatable(st.partial() ? "smileprotocol.hud.hide_hint_partial" : "smileprotocol.hud.hide_hint");
+        g.drawString(font, hint, cx - font.width(hint) / 2, y + 9, 0xFF8A9A94, true);
     }
 
     // Constantes vitales ------------------------------------------------------------------

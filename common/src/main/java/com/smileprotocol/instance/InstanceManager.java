@@ -173,7 +173,8 @@ public final class InstanceManager {
                 String meta = nbt.getString("metadata").trim();
                 if (!meta.startsWith("sp:")) continue;
                 String[] parts = meta.substring(3).split("\\s+");
-                String name = parts[0];
+                // sp:item key red -> "item:key:red"
+                String name = parts[0].equals("item") ? String.join(":", parts) : parts[0];
                 markers.computeIfAbsent(name, k -> new ArrayList<>()).add(info.pos().immutable());
                 if (name.equals("entry") && parts.length > 1) {
                     try {
@@ -207,7 +208,10 @@ public final class InstanceManager {
         List<BlockPos> mobPoints = markers.getOrDefault("mob_spawn", List.of());
         List<BlockPos> fusePoints = markers.getOrDefault("fuse", List.of());
         List<BlockPos> mobs = pickRandom(mobPoints, group.difficulty().scaleMobs(mobPoints.size(), mobPoints.size()), rnd);
-        List<BlockPos> fuses = pickRandom(fusePoints, Math.min(fusePoints.size(), group.difficulty().scaleFuses(fusePoints.size())), rnd);
+        // Cajas, fusibles, objetos, circuitos y puertas de las cabinas (README 14)
+        List<BlockPos> fuses = template != null
+                ? ZoneSetup.setup(level, box, markers, group.difficulty(), rnd)
+                : List.of();
 
         ZonePlacement placement = new ZonePlacement(zoneId, index, sub, box, entry, yaw, markers, mobs, fuses);
         data.changed();
@@ -275,6 +279,7 @@ public final class InstanceManager {
             }
         }
         if (old != null) queueClear(data, group.slot(), old);
+        openEntry(level, target);
 
         InstanceContext ctx = InstanceContext.forGroup(server, group.id());
         if (ctx != null) ctx.resetZoneState();
@@ -288,11 +293,17 @@ public final class InstanceManager {
     public static ZonePlacement placeFirst(ServerLevel level, Group group) {
         ZonePlacement p = place(level, group, 0, 0);
         if (p != null) {
+            openEntry(level, p);
             group.setCurrent(p);
             group.setZoneIndex(0);
             group.setState(GroupState.INTRO);
         }
         return p;
+    }
+
+    /** Al llegar: se abren las puertas de la cabina de entrada (README 6.4). */
+    public static void openEntry(ServerLevel level, ZonePlacement p) {
+        for (BlockPos d : p.marker("entry_door")) com.smileprotocol.block.ElevatorDoorBlock.setOpen(level, d, true);
     }
 
     /** Vacia las zonas del grupo (al acabar su partida). */

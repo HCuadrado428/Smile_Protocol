@@ -154,4 +154,86 @@ public final class Payloads {
 
         @Override public Type<SyncMotion> type() { return TYPE; }
     }
+
+    /** C -> S: empezar o dejar de mantener una interaccion (README 11). kind: 0 soltar, 1 bloque, 2 entidad. */
+    public record Interact(int kind, BlockPos pos, int entityId) implements CustomPacketPayload {
+        public static final int STOP = 0, BLOCK = 1, ENTITY = 2;
+        public static final Type<Interact> TYPE = typeOf("interact");
+        public static final StreamCodec<ByteBuf, Interact> CODEC = StreamCodec.composite(
+                ByteBufCodecs.VAR_INT, Interact::kind,
+                BlockPos.STREAM_CODEC, Interact::pos,
+                ByteBufCodecs.VAR_INT, Interact::entityId,
+                Interact::new);
+
+        @Override public Type<Interact> type() { return TYPE; }
+    }
+
+    /** S -> C: progreso de la interaccion en curso. {@code waiting}: esperando a otro jugador. */
+    public record InteractState(boolean active, int progress, int total, boolean waiting, Component prompt)
+            implements CustomPacketPayload {
+        public static final Type<InteractState> TYPE = typeOf("interact_state");
+        public static final StreamCodec<RegistryFriendlyByteBuf, InteractState> CODEC = StreamCodec.composite(
+                ByteBufCodecs.BOOL, InteractState::active,
+                ByteBufCodecs.VAR_INT, InteractState::progress,
+                ByteBufCodecs.VAR_INT, InteractState::total,
+                ByteBufCodecs.BOOL, InteractState::waiting,
+                ComponentSerialization.TRUSTED_STREAM_CODEC, InteractState::prompt,
+                InteractState::new);
+
+        public static InteractState idle() {
+            return new InteractState(false, 0, 0, false, Component.empty());
+        }
+
+        @Override public Type<InteractState> type() { return TYPE; }
+    }
+
+    /** C -> S: soltar el objeto del hueco activo (tecla G, README 12.7). */
+    public record DropItem(int slot) implements CustomPacketPayload {
+        public static final Type<DropItem> TYPE = typeOf("drop_item");
+        public static final StreamCodec<ByteBuf, DropItem> CODEC = ByteBufCodecs.VAR_INT.map(DropItem::new, DropItem::slot);
+
+        @Override public Type<DropItem> type() { return TYPE; }
+    }
+
+    /** S -> C: estado del escondite del jugador (README 15.4). */
+    public record SyncHide(boolean hidden, String type, String overlay, float breath, boolean holding, float yaw,
+                           float cone, boolean partial) implements CustomPacketPayload {
+        public static final Type<SyncHide> TYPE = typeOf("sync_hide");
+        public static final StreamCodec<ByteBuf, SyncHide> CODEC = new StreamCodec<>() {
+            @Override
+            public SyncHide decode(ByteBuf b) {
+                return new SyncHide(b.readBoolean(), ByteBufCodecs.STRING_UTF8.decode(b), ByteBufCodecs.STRING_UTF8.decode(b),
+                        b.readFloat(), b.readBoolean(), b.readFloat(), b.readFloat(), b.readBoolean());
+            }
+
+            @Override
+            public void encode(ByteBuf b, SyncHide p) {
+                b.writeBoolean(p.hidden());
+                ByteBufCodecs.STRING_UTF8.encode(b, p.type());
+                ByteBufCodecs.STRING_UTF8.encode(b, p.overlay());
+                b.writeFloat(p.breath());
+                b.writeBoolean(p.holding());
+                b.writeFloat(p.yaw());
+                b.writeFloat(p.cone());
+                b.writeBoolean(p.partial());
+            }
+        };
+
+        public static SyncHide none() {
+            return new SyncHide(false, "", "", 1f, false, 0f, 360f, false);
+        }
+
+        @Override public Type<SyncHide> type() { return TYPE; }
+    }
+
+    /** C -> S: aguantar la respiracion (Shift) o salir del escondite (click derecho). */
+    public record HideInput(boolean holding, boolean exit) implements CustomPacketPayload {
+        public static final Type<HideInput> TYPE = typeOf("hide_input");
+        public static final StreamCodec<ByteBuf, HideInput> CODEC = StreamCodec.composite(
+                ByteBufCodecs.BOOL, HideInput::holding,
+                ByteBufCodecs.BOOL, HideInput::exit,
+                HideInput::new);
+
+        @Override public Type<HideInput> type() { return TYPE; }
+    }
 }
