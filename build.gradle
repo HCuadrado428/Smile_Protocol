@@ -36,6 +36,11 @@ subprojects {
         }
     }
 
+    dependencies {
+        // @Nullable y compania
+        compileOnly 'com.google.code.findbugs:jsr305:3.0.2'
+    }
+
     tasks.withType(JavaCompile).configureEach {
         options.encoding = 'UTF-8'
         options.release = java_version as int
