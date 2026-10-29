@@ -2,10 +2,10 @@
 
 ## Preparar el entorno
 
-1. Instala **Java 17** y **Gradle 8.8**.
-2. En la carpeta del repositorio, ejecuta una vez `gradle wrapper`. Desde entonces usa `./gradlew` (o `gradlew.bat` en Windows).
+1. Instala **Java 17** (no hace falta instalar Gradle: el repositorio trae el wrapper).
+2. Compila con `./gradlew build` (en Windows, `gradlew.bat build`). El jar del mod queda en `build/libs/smileprotocol-0.1.0.jar`.
 3. Arranca un cliente con `./gradlew runClient` o un servidor con `./gradlew runServer`.
-4. Cada push compila en GitHub Actions. El jar queda en la pestaña **Actions**, como artefacto `smileprotocol-jar`.
+4. Cada push compila también en GitHub Actions. El jar queda en la pestaña **Actions**, como artefacto `smileprotocol-jar`.
 
 > En el entorno de desarrollo el cliente carga mods internos de las librerías. Si el aviso de mods no permitidos sale en rojo al conectarte, añade esos mod id a `allowed_mods` en `config/smileprotocol-common.toml`. Los administradores en creativo no cuentan para los ascensores, así que para probarlos hay que estar en aventura o supervivencia.
 

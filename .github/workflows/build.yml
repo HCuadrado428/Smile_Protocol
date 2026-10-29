@@ -21,36 +21,15 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - name: Gradle 8.8
+      - name: Gradle
         uses: gradle/actions/setup-gradle@v5
-        with:
-          gradle-version: '8.8'
 
       - name: Compilar el mod
         shell: bash
         run: |
           set -o pipefail
-          gradle build --no-daemon --stacktrace 2>&1 | tee build.log
-
-      # Si el repositorio aun no tiene el Gradle wrapper, se genera y se deja en la rama ci-wrapper
-      - name: Generar el Gradle wrapper
-        if: always()
-        shell: bash
-        env:
-          TOKEN: ${{ github.token }}
-        run: |
-          [ -f gradlew ] && [ -f gradle/wrapper/gradle-wrapper.jar ] && exit 0
-          gradle wrapper --gradle-version 8.8 --distribution-type bin --no-daemon
-          mkdir /tmp/wrapper && cp -r gradlew gradlew.bat gradle /tmp/wrapper/
-          cd /tmp/wrapper
-          git init -q
-          git config user.name "ci"
-          git config user.email "ci@users.noreply.github.com"
-          git checkout -q --orphan ci-wrapper
-          git add -A
-          git commit -qm "Gradle wrapper 8.8"
-          git remote add origin "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
-          git push -qf origin HEAD:ci-wrapper
+          chmod +x gradlew
+          ./gradlew build --no-daemon --stacktrace 2>&1 | tee build.log
 
       - name: Marcar errores
         if: failure()
