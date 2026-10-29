@@ -21,6 +21,7 @@ public final class ClientController {
         SPNetwork.setClientHandler(Payloads.SyncBoards.TYPE, p -> ClientState.applyBoards(p.boards()));
         SPNetwork.setClientHandler(Payloads.ScreenFade.TYPE, p -> ClientState.startFade(p.fadeIn(), p.hold(), p.fadeOut()));
         SPNetwork.setClientHandler(Payloads.DebugData.TYPE, p -> ClientState.debugLines = p.lines());
+        SPNetwork.setClientHandler(Payloads.SyncMotion.TYPE, ClientMotion::onSync);
     }
 
     /** Al entrar en un servidor: capa 2 del aislamiento, la lista de mods (README 7.1). */
@@ -30,11 +31,13 @@ public final class ClientController {
 
     public static void onLeave() {
         ClientState.reset();
+        ClientMotion.reset();
         com.smileprotocol.client.light.DynamicLights.clear();
     }
 
     public static void tick(Minecraft mc) {
         ClientState.tickFade();
+        ClientMotion.tick(mc);
         if (mc.player == null || !ClientState.inSmileProtocol()) return;
 
         // F3 y F5 (README 8.2)

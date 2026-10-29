@@ -36,7 +36,9 @@ public final class SPNetwork {
             new Def<>(Payloads.ScreenFade.TYPE, Payloads.ScreenFade.CODEC, true, null),
             new Def<>(Payloads.DebugData.TYPE, Payloads.DebugData.CODEC, true, null),
             new Def<>(Payloads.SelectSlot.TYPE, Payloads.SelectSlot.CODEC, false, SPNetwork::onSelectSlot),
-            new Def<>(Payloads.Handshake.TYPE, Payloads.Handshake.CODEC, false, (p, player) -> ModCheck.onHandshake(player, p.mods()))
+            new Def<>(Payloads.Handshake.TYPE, Payloads.Handshake.CODEC, false, (p, player) -> ModCheck.onHandshake(player, p.mods())),
+            new Def<>(Payloads.MotionInput.TYPE, Payloads.MotionInput.CODEC, false, com.smileprotocol.motion.MotionManager::onInput),
+            new Def<>(Payloads.SyncMotion.TYPE, Payloads.SyncMotion.CODEC, true, null)
     );
 
     private static final Map<CustomPacketPayload.Type<?>, Consumer<CustomPacketPayload>> CLIENT_HANDLERS = new HashMap<>();

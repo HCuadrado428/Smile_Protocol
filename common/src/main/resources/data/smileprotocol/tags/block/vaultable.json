@@ -1,0 +1,10 @@
+{
+  "replace": false,
+  "values": [
+    "#minecraft:slabs",
+    "minecraft:barrel",
+    "minecraft:smooth_stone_slab",
+    "minecraft:iron_block",
+    "smileprotocol:gurney"
+  ]
+}

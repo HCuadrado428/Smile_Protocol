@@ -82,6 +82,29 @@ public final class SPConfig {
         public int lobby_reset_delay = 30;
         public boolean auto_newrun = true;
 
+        // Movimiento y ruido (README 12)
+        public int dive_cooldown = 60;
+        public boolean vault_any_obstacle = true;
+        public boolean look_back_toggle = false;
+        public boolean lean_toggle = false;
+        public float noise_crouch_walk = 3;
+        public float noise_walk = 8;
+        public float noise_sprint = 16;
+        public float noise_dive = 18;
+        public float noise_vault = 12;
+        public float noise_land = 14;
+        public float noise_drop = 4;
+        /** Teclas propias (nombres de InputConstants: key.keyboard.c...). No chocan con las vanilla. */
+        public String key_look_back = "key.keyboard.c";
+        public String key_lean_left = "key.keyboard.q";
+        public String key_lean_right = "key.keyboard.e";
+        public String key_drop = "key.keyboard.g";
+
+        // Ascensores de zona (README 6.5)
+        public int elevator_grace = 15;
+        public int elevator_ride_time = 4;
+        public String elevator_strip = "HURT_OR_REVIVED";
+
         // Ambientacion (README 21.1)
         public int max_dynamic_lights = 64;
 

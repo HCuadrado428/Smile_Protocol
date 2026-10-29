@@ -7,6 +7,7 @@ import com.smileprotocol.client.ClientState;
 import com.smileprotocol.client.ElevatorBoardRenderer;
 import com.smileprotocol.client.ElevatorDoorRenderer;
 import com.smileprotocol.client.HudOverlay;
+import com.smileprotocol.platform.Services;
 import com.smileprotocol.registry.ModBlockEntities;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
@@ -30,6 +31,10 @@ public final class NeoForgeClient {
     private static final Set<ResourceLocation> VANILLA_ALLOWED = Set.of(
             VanillaGuiLayers.CHAT, VanillaGuiLayers.SUBTITLE_OVERLAY, VanillaGuiLayers.TITLE,
             VanillaGuiLayers.TAB_LIST, VanillaGuiLayers.CAMERA_OVERLAYS);
+
+    /** PlayerAnimator instalado: animaciones del jugador (README 13). */
+    private static final boolean PAL = Services.PLATFORM.isModLoaded("playeranimator")
+            || Services.PLATFORM.isModLoaded("player-animator");
 
     private NeoForgeClient() {}
 
@@ -58,6 +63,7 @@ public final class NeoForgeClient {
         @SubscribeEvent
         public static void onTick(ClientTickEvent.Post event) {
             ClientController.tick(Minecraft.getInstance());
+            if (PAL) PalBridge.tick(Minecraft.getInstance());
         }
 
         @SubscribeEvent

@@ -71,6 +71,7 @@ public final class SPEvents {
         // El estado ya esta en los datos del jugador: no se pierde nada
         ModCheck.onLogout(player);
         LobbyManager.onLogout(player);
+        com.smileprotocol.motion.MotionManager.onLogout(player);
     }
 
     public static void onChangedDimension(ServerPlayer player, ResourceKey<Level> to) {
@@ -104,6 +105,7 @@ public final class SPEvents {
             InstanceManager.onServerStarted(server);
         }
         RunManager.tick(server);
+        com.smileprotocol.motion.MotionManager.tick(server);
         LobbyManager.tick(server);
         if (server.getTickCount() % 20 == 0) SPDebug.tick(server);
     }

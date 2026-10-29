@@ -5,6 +5,7 @@ import com.smileprotocol.client.ElevatorBoardRenderer;
 import com.smileprotocol.client.ElevatorDoorRenderer;
 import com.smileprotocol.client.HudOverlay;
 import com.smileprotocol.network.SPNetwork;
+import com.smileprotocol.platform.Services;
 import com.smileprotocol.registry.ModBlockEntities;
 import com.smileprotocol.registry.ModBlocks;
 import net.fabricmc.api.ClientModInitializer;
@@ -30,6 +31,10 @@ public final class SmileProtocolFabricClient implements ClientModInitializer {
         ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> ClientController.onJoin());
         ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> ClientController.onLeave());
         ClientTickEvents.END_CLIENT_TICK.register(ClientController::tick);
+        // Animaciones del jugador (README 13): solo con PlayerAnimator instalado
+        if (Services.PLATFORM.isModLoaded("playeranimator") || Services.PLATFORM.isModLoaded("player-animator")) {
+            ClientTickEvents.END_CLIENT_TICK.register(PalBridge::tick);
+        }
         HudRenderCallback.EVENT.register((graphics, delta) ->
                 HudOverlay.INSTANCE.render(graphics, delta.getGameTimeDeltaPartialTick(true)));
 

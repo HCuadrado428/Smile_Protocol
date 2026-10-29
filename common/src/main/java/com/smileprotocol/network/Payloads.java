@@ -121,4 +121,37 @@ public final class Payloads {
 
         @Override public Type<DebugData> type() { return TYPE; }
     }
+
+    /**
+     * C -> S: peticion de movimiento (README 12). {@code kind}: 0 estado (asomarse y mirar atras),
+     * 1 dive, 2 vault (con el bloque que se salta).
+     */
+    public record MotionInput(int kind, int lean, boolean lookBack, BlockPos obstacle) implements CustomPacketPayload {
+        public static final int STATE = 0, DIVE = 1, VAULT = 2;
+        public static final Type<MotionInput> TYPE = typeOf("motion_input");
+        public static final StreamCodec<ByteBuf, MotionInput> CODEC = StreamCodec.composite(
+                ByteBufCodecs.VAR_INT, MotionInput::kind,
+                ByteBufCodecs.VAR_INT, MotionInput::lean,
+                ByteBufCodecs.BOOL, MotionInput::lookBack,
+                BlockPos.STREAM_CODEC, MotionInput::obstacle,
+                MotionInput::new);
+
+        @Override public Type<MotionInput> type() { return TYPE; }
+    }
+
+    /** S -> C: estado de movimiento de un jugador, para animarlo (README 13.2, {@code SyncPlayerState}). */
+    public record SyncMotion(int entityId, int action, int lean, boolean lookBack, int detail, boolean lowPose)
+            implements CustomPacketPayload {
+        public static final Type<SyncMotion> TYPE = typeOf("sync_motion");
+        public static final StreamCodec<ByteBuf, SyncMotion> CODEC = StreamCodec.composite(
+                ByteBufCodecs.VAR_INT, SyncMotion::entityId,
+                ByteBufCodecs.VAR_INT, SyncMotion::action,
+                ByteBufCodecs.VAR_INT, SyncMotion::lean,
+                ByteBufCodecs.BOOL, SyncMotion::lookBack,
+                ByteBufCodecs.VAR_INT, SyncMotion::detail,
+                ByteBufCodecs.BOOL, SyncMotion::lowPose,
+                SyncMotion::new);
+
+        @Override public Type<SyncMotion> type() { return TYPE; }
+    }
 }

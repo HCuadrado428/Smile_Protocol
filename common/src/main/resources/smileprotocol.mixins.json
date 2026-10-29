@@ -12,6 +12,9 @@
     "ServerPlayerGameModeMixin"
   ],
   "client": [
+    "client.CameraMixin",
+    "client.GameRendererMixin",
+    "client.KeyboardInputMixin",
     "client.MinecraftMixin",
     "client.MouseHandlerMixin"
   ],
