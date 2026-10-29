@@ -45,7 +45,7 @@ public class SPGeoRenderer<T extends AnimatedBlockEntity> extends GeoBlockRender
 
     /** Modelo por id de bloque. */
     static final class Model<T extends AnimatedBlockEntity> extends GeoModel<T> {
-        private static String name(T be) {
+        private static String name(AnimatedBlockEntity be) {
             return net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(be.getBlockState().getBlock()).getPath();
         }
 
