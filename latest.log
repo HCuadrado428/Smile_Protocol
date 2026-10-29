@@ -25,16 +25,16 @@ Creating Minecraft artifacts without recompilation.
 Loaded 93 artifacts from /home/runner/work/Smile_Protocol/Smile_Protocol/common/build/tmp/createMinecraftArtifacts/nfrt_artifact_manifest.properties
 [1m*** Started working on [4mdownloadJson[23;0m[23;0m
  [1m[92m✓[23;0m Completed [4mdownloadJson[23;0m in 0.02s
+[1m*** Started working on [4mdownloadClientMappings[23;0m[23;0m
 [1m*** Started working on [4mdownloadServer[23;0m[23;0m
 [1m*** Started working on [4mdownloadClient[23;0m[23;0m
-[1m*** Started working on [4mdownloadClientMappings[23;0m[23;0m
- [1m[92m✓[23;0m Completed [4mdownloadClient[23;0m in 0.02s
- [1m[92m✓[23;0m Completed [4mdownloadClientMappings[23;0m in 0.03s
- [1m[92m✓[23;0m Completed [4mdownloadServer[23;0m in 0.03s
-[1m*** Started working on [4mstripClient[23;0m[23;0m
- [1m[92m♻[23;0m Used cache of [4mstripClient[23;0m in 0.00s
+ [1m[92m✓[23;0m Completed [4mdownloadClient[23;0m in 0.03s
+ [1m[92m✓[23;0m Completed [4mdownloadClientMappings[23;0m in 0.04s
+ [1m[92m✓[23;0m Completed [4mdownloadServer[23;0m in 0.04s
 [1m*** Started working on [4mmergeMappings[23;0m[23;0m
  [1m[92m♻[23;0m Used cache of [4mmergeMappings[23;0m in 0.00s
+[1m*** Started working on [4mstripClient[23;0m[23;0m
+ [1m[92m♻[23;0m Used cache of [4mstripClient[23;0m in 0.00s
 [1m*** Started working on [4mextractServer[23;0m[23;0m
  [1m[92m♻[23;0m Used cache of [4mextractServer[23;0m in 0.00s
 [1m*** Started working on [4mstripServer[23;0m[23;0m
@@ -43,7 +43,7 @@ Loaded 93 artifacts from /home/runner/work/Smile_Protocol/Smile_Protocol/common/
  [1m[92m♻[23;0m Used cache of [4mmerge[23;0m in 0.00s
 [1m*** Started working on [4mrename[23;0m[23;0m
  [1m[92m♻[23;0m Used cache of [4mrename[23;0m in 0.00s
-Total runtime: 0.72s
+Total runtime: 0.88s
 
 
 > Task :common:compileJava
@@ -61,827 +61,81 @@ Total runtime: 0.72s
 > Task :common:build
 
 > Task :fabric:compileJava
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/player/SPPlayerData.java:16: error: package javax.annotation does not exist
-import javax.annotation.Nullable;
-                       ^
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/network/SPNetwork.java:12: error: package javax.annotation does not exist
-import javax.annotation.Nullable;
-                       ^
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/ServerRef.java:7: error: package javax.annotation does not exist
-import javax.annotation.Nullable;
-                       ^
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/event/SPEvents.java:30: error: package javax.annotation does not exist
-import javax.annotation.Nullable;
-                       ^
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/lobby/LobbyProtection.java:18: error: package javax.annotation does not exist
-import javax.annotation.Nullable;
-                       ^
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/lobby/LobbyData.java:13: error: package javax.annotation does not exist
-import javax.annotation.Nullable;
-                       ^
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/lobby/ElevatorDef.java:11: error: package javax.annotation does not exist
-import javax.annotation.Nullable;
-                       ^
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/lobby/LobbyManager.java:29: error: package javax.annotation does not exist
-import javax.annotation.Nullable;
-                       ^
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/block/ElevatorBoardBlock.java:20: error: package javax.annotation does not exist
-import javax.annotation.Nullable;
-                       ^
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/block/FluorescentLightBlock.java:12: error: package javax.annotation does not exist
-import javax.annotation.Nullable;
-                       ^
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/block/ElevatorDoorBlock.java:33: error: package javax.annotation does not exist
-import javax.annotation.Nullable;
-                       ^
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/client/ClientState.java:8: error: package javax.annotation does not exist
-import javax.annotation.Nullable;
-                       ^
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/session/SPSessionManager.java:24: error: package javax.annotation does not exist
-import javax.annotation.Nullable;
-                       ^
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/session/TestRoom.java:17: error: package javax.annotation does not exist
-import javax.annotation.Nullable;
-                       ^
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/player/SPPlayerData.java:32: error: cannot find symbol
-    @Nullable private UUID groupId;
-     ^
-  symbol:   class Nullable
-  location: class SPPlayerData
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/player/SPPlayerData.java:40: error: cannot find symbol
-    @Nullable private ResourceKey<Level> savedDimension;
-     ^
-  symbol:   class Nullable
-  location: class SPPlayerData
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/player/SPPlayerData.java:59: error: cannot find symbol
-    @Nullable public UUID getGroupId() { return groupId; }
-     ^
-  symbol:   class Nullable
-  location: class SPPlayerData
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/player/SPPlayerData.java:60: error: cannot find symbol
-    public void setGroupId(@Nullable UUID groupId) { this.groupId = groupId; }
-                            ^
-  symbol:   class Nullable
-  location: class SPPlayerData
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/player/SPPlayerData.java:88: error: cannot find symbol
-    @Nullable public ResourceKey<Level> getSavedDimension() { return savedDimension; }
-     ^
-  symbol:   class Nullable
-  location: class SPPlayerData
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/network/SPNetwork.java:30: error: cannot find symbol
-                                                       @Nullable BiConsumer<T, ServerPlayer> serverHandler) {}
-                                                        ^
-  symbol:   class Nullable
-  location: class Def<T>
-  where T is a type-variable:
-    T extends CustomPacketPayload declared in record Def
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/ServerRef.java:15: error: cannot find symbol
-    @Nullable private static MinecraftServer server;
-     ^
-  symbol:   class Nullable
-  location: class ServerRef
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/ServerRef.java:19: error: cannot find symbol
-    public static void set(@Nullable MinecraftServer s) {
-                            ^
-  symbol:   class Nullable
-  location: class ServerRef
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/ServerRef.java:23: error: cannot find symbol
-    @Nullable
-     ^
-  symbol:   class Nullable
-  location: class ServerRef
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/event/SPEvents.java:114: error: cannot find symbol
-    @Nullable
-     ^
-  symbol:   class Nullable
-  location: class SPEvents
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/event/SPEvents.java:159: error: cannot find symbol
-    public static boolean cancelCommand(CommandSourceStack source, @Nullable String root) {
-                                                                    ^
-  symbol:   class Nullable
-  location: class SPEvents
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/lobby/LobbyProtection.java:29: error: cannot find symbol
-    @Nullable
-     ^
-  symbol:   class Nullable
-  location: class LobbyProtection
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/lobby/LobbyData.java:30: error: cannot find symbol
-    @Nullable private BlockPos spawn;
-     ^
-  symbol:   class Nullable
-  location: class LobbyData
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/lobby/LobbyData.java:32: error: cannot find symbol
-    @Nullable private BoundingBox region;
-     ^
-  symbol:   class Nullable
-  location: class LobbyData
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/lobby/ElevatorDef.java:20: error: cannot find symbol
-                          List<BlockPos> doors, @Nullable BlockPos button, @Nullable BlockPos board,
-                                                 ^
-  symbol:   class Nullable
-  location: class ElevatorDef
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/lobby/ElevatorDef.java:20: error: cannot find symbol
-                          List<BlockPos> doors, @Nullable BlockPos button, @Nullable BlockPos board,
-                                                                            ^
-  symbol:   class Nullable
-  location: class ElevatorDef
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/lobby/LobbyData.java:42: error: cannot find symbol
-    @Nullable public BlockPos getSpawn() { return spawn; }
-     ^
-  symbol:   class Nullable
-  location: class LobbyData
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/lobby/LobbyData.java:46: error: cannot find symbol
-    @Nullable public BoundingBox getRegion() { return region; }
-     ^
-  symbol:   class Nullable
-  location: class LobbyData
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/lobby/LobbyData.java:47: error: cannot find symbol
-    public void setRegion(@Nullable BoundingBox box) { region = box; setDirty(); }
-                           ^
-  symbol:   class Nullable
-  location: class LobbyData
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/lobby/LobbyData.java:59: error: cannot find symbol
-    @Nullable public ElevatorDef getElevator(String id) { return elevators.get(id); }
-     ^
-  symbol:   class Nullable
-  location: class LobbyData
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/lobby/LobbyManager.java:343: error: cannot find symbol
-    @Nullable
-     ^
-  symbol:   class Nullable
-  location: class LobbyManager
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/lobby/LobbyManager.java:61: error: cannot find symbol
-        @Nullable Boolean doorsOpen;
-         ^
-  symbol:   class Nullable
-  location: class Runtime
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/block/ElevatorBoardBlock.java:77: error: cannot find symbol
-    @Nullable
-     ^
-  symbol:   class Nullable
-  location: class ElevatorBoardBlock
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/block/FluorescentLightBlock.java:79: error: cannot find symbol
-    @Nullable
-     ^
-  symbol:   class Nullable
-  location: class FluorescentLightBlock
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/block/FluorescentLightBlock.java:85: error: cannot find symbol
-    @Nullable
-     ^
-  symbol:   class Nullable
-  location: class FluorescentLightBlock
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/block/ElevatorDoorBlock.java:93: error: cannot find symbol
-    @Nullable
-     ^
-  symbol:   class Nullable
-  location: class ElevatorDoorBlock
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/block/ElevatorDoorBlock.java:99: error: cannot find symbol
-    @Nullable
-     ^
-  symbol:   class Nullable
-  location: class ElevatorDoorBlock
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/block/ElevatorDoorBlock.java:106: error: cannot find symbol
-    @Nullable
-     ^
-  symbol:   class Nullable
-  location: class ElevatorDoorBlock
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/block/ElevatorDoorBlock.java:118: error: cannot find symbol
-    public void setPlacedBy(Level level, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack stack) {
-                                                                          ^
-  symbol:   class Nullable
-  location: class ElevatorDoorBlock
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/client/ClientState.java:21: error: cannot find symbol
-    @Nullable public static Payloads.SyncReady ready;
-     ^
-  symbol:   class Nullable
-  location: class ClientState
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/client/ClientState.java:62: error: cannot find symbol
-    @Nullable
-     ^
-  symbol:   class Nullable
-  location: class ClientState
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/session/SPSessionManager.java:55: error: cannot find symbol
-    public static void enter(ServerPlayer player, ServerLevel target, Vec3 pos, float yaw, @Nullable UUID groupId) {
-                                                                                            ^
-  symbol:   class Nullable
-  location: class SPSessionManager
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/session/TestRoom.java:33: error: cannot find symbol
-    @Nullable
-     ^
-  symbol:   class Nullable
-  location: class TestRoom
 Note: /home/runner/work/Smile_Protocol/Smile_Protocol/fabric/src/main/java/com/smileprotocol/fabric/FabricPlatform.java uses or overrides a deprecated API.
 Note: Recompile with -Xlint:deprecation for details.
-47 errors
 
-> Task :fabric:compileJava FAILED
-gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/__run-1793297501701.json
+> Task :fabric:processResources
+> Task :fabric:classes
+> Task :fabric:jar
+> Task :fabric:processIncludeJars
+> Task :fabric:sourcesJar
+> Task :fabric:compileTestJava NO-SOURCE
+> Task :fabric:processTestResources NO-SOURCE
+> Task :fabric:testClasses UP-TO-DATE
+> Task :fabric:test NO-SOURCE
+> Task :fabric:validateAccessWidener NO-SOURCE
+> Task :fabric:check UP-TO-DATE
+
+> Task :neoforge:createMinecraftArtifacts
+Loaded 131 artifacts from /home/runner/work/Smile_Protocol/Smile_Protocol/neoforge/build/tmp/createMinecraftArtifacts/nfrt_artifact_manifest.properties
+[1m*** Started working on [4mdownloadJson[23;0m[23;0m
+ [1m[92m✓[23;0m Completed [4mdownloadJson[23;0m in 0.06s
+[1m*** Started working on [4mdownloadServer[23;0m[23;0m
+[1m*** Started working on [4mdownloadClientMappings[23;0m[23;0m
+[1m*** Started working on [4mdownloadClient[23;0m[23;0m
+ [1m[92m✓[23;0m Completed [4mdownloadClientMappings[23;0m in 0.06s
+ [1m[92m✓[23;0m Completed [4mdownloadClient[23;0m in 0.06s
+ [1m[92m✓[23;0m Completed [4mdownloadServer[23;0m in 0.07s
+[1m*** Started working on [4mstripClient[23;0m[23;0m
+ [1m[92m♻[23;0m Used cache of [4mstripClient[23;0m in 0.00s
+[1m*** Started working on [4mmergeMappings[23;0m[23;0m
+ [1m[92m♻[23;0m Used cache of [4mmergeMappings[23;0m in 0.00s
+[1m*** Started working on [4mextractServer[23;0m[23;0m
+ [1m[92m♻[23;0m Used cache of [4mextractServer[23;0m in 0.00s
+[1m*** Started working on [4mstripServer[23;0m[23;0m
+ [1m[92m♻[23;0m Used cache of [4mstripServer[23;0m in 0.00s
+[1m*** Started working on [4mmerge[23;0m[23;0m
+ [1m[92m♻[23;0m Used cache of [4mmerge[23;0m in 0.00s
+[1m*** Started working on [4mrename[23;0m[23;0m
+ [1m[92m♻[23;0m Used cache of [4mrename[23;0m in 0.00s
+[1m*** Started working on [4mbinaryPatch[23;0m[23;0m
+ [1m[92m♻[23;0m Used cache of [4mbinaryPatch[23;0m in 0.00s
+[1m*** Started working on [4mcopyUnpatchedClasses[23;0m[23;0m
+ [1m[92m♻[23;0m Used cache of [4mcopyUnpatchedClasses[23;0m in 0.00s
+[1m*** Started working on [4mapplyDevTransforms[23;0m[23;0m
+ [1m[92m♻[23;0m Used cache of [4mapplyDevTransforms[23;0m in 0.00s
+
+> Task :fabric:remapJar
+
+> Task :neoforge:createMinecraftArtifacts
+[1m*** Started working on [4mbinaryWithNeoForge[23;0m[23;0m
+ [1m[92m♻[23;0m Used cache of [4mbinaryWithNeoForge[23;0m in 0.00s
+Total runtime: 2.21s
+
+
+> Task :neoforge:compileJava
+Note: /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/registry/ModCreativeTabs.java uses or overrides a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+
+> Task :fabric:remapSourcesJar
+> Task :fabric:assemble
+> Task :fabric:build
+> Task :neoforge:processResources
+> Task :neoforge:classes
+> Task :neoforge:jarJar NO-SOURCE
+> Task :neoforge:jar
+> Task :neoforge:sourcesJar
+> Task :neoforge:assemble
+> Task :neoforge:compileTestJava NO-SOURCE
+> Task :neoforge:processTestResources NO-SOURCE
+> Task :neoforge:testClasses UP-TO-DATE
+> Task :neoforge:test NO-SOURCE
+> Task :neoforge:check UP-TO-DATE
+> Task :neoforge:build
+gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/__run-1793297575961.json
 
 [Incubating] Problems report is available at: file:///home/runner/work/Smile_Protocol/Smile_Protocol/build/reports/problems/problems-report.html
 
-FAILURE: Build failed with an exception.
-
-* What went wrong:
-Execution failed for task ':fabric:compileJava'.
-> Compilation failed; see the compiler output below.
-  Note: /home/runner/work/Smile_Protocol/Smile_Protocol/fabric/src/main/java/com/smileprotocol/fabric/FabricPlatform.java uses or overrides a deprecated API.
-  Note: Recompile with -Xlint:deprecation for details.
-  /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/player/SPPlayerData.java:32: error: cannot find symbol
-      @Nullable private UUID groupId;
-       ^
-    symbol:   class Nullable
-    location: class SPPlayerData
-  /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/player/SPPlayerData.java:40: error: cannot find symbol
-      @Nullable private ResourceKey<Level> savedDimension;
-       ^
-    symbol:   class Nullable
-    location: class SPPlayerData
-  /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/player/SPPlayerData.java:59: error: cannot find symbol
-      @Nullable public UUID getGroupId() { return groupId; }
-       ^
-    symbol:   class Nullable
-    location: class SPPlayerData
-  /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/player/SPPlayerData.java:60: error: cannot find symbol
-      public void setGroupId(@Nullable UUID groupId) { this.groupId = groupId; }
-                              ^
-    symbol:   class Nullable
-    location: class SPPlayerData
-  /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/player/SPPlayerData.java:88: error: cannot find symbol
-      @Nullable public ResourceKey<Level> getSavedDimension() { return savedDimension; }
-       ^
-    symbol:   class Nullable
-    location: class SPPlayerData
-  /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/network/SPNetwork.java:30: error: cannot find symbol
-                                                         @Nullable BiConsumer<T, ServerPlayer> serverHandler) {}
-                                                          ^
-    symbol:   class Nullable
-    location: class Def<T>
-    where T is a type-variable:
-      T extends CustomPacketPayload declared in record Def
-  /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/ServerRef.java:15: error: cannot find symbol
-      @Nullable private static MinecraftServer server;
-       ^
-    symbol:   class Nullable
-    location: class ServerRef
-  /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/ServerRef.java:19: error: cannot find symbol
-      public static void set(@Nullable MinecraftServer s) {
-                              ^
-    symbol:   class Nullable
-    location: class ServerRef
-  /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/ServerRef.java:23: error: cannot find symbol
-      @Nullable
-       ^
-    symbol:   class Nullable
-    location: class ServerRef
-  /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/event/SPEvents.java:114: error: cannot find symbol
-      @Nullable
-       ^
-    symbol:   class Nullable
-    location: class SPEvents
-  /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/event/SPEvents.java:159: error: cannot find symbol
-      public static boolean cancelCommand(CommandSourceStack source, @Nullable String root) {
-                                                                      ^
-    symbol:   class Nullable
-    location: class SPEvents
-  /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/lobby/LobbyProtection.java:29: error: cannot find symbol
-      @Nullable
-       ^
-    symbol:   class Nullable
-    location: class LobbyProtection
-  /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/lobby/LobbyData.java:30: error: cannot find symbol
-      @Nullable private BlockPos spawn;
-       ^
-    symbol:   class Nullable
-    location: class LobbyData
-  /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/lobby/LobbyData.java:32: error: cannot find symbol
-      @Nullable private BoundingBox region;
-       ^
-    symbol:   class Nullable
-    location: class LobbyData
-  /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/lobby/ElevatorDef.java:20: error: cannot find symbol
-                            List<BlockPos> doors, @Nullable BlockPos button, @Nullable BlockPos board,
-                                                   ^
-    symbol:   class Nullable
-    location: class ElevatorDef
-  /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/lobby/ElevatorDef.java:20: error: cannot find symbol
-                            List<BlockPos> doors, @Nullable BlockPos button, @Nullable BlockPos board,
-                                                                              ^
-    symbol:   class Nullable
-    location: class ElevatorDef
-  /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/lobby/LobbyData.java:42: error: cannot find symbol
-      @Nullable public BlockPos getSpawn() { return spawn; }
-       ^
-    symbol:   class Nullable
-    location: class LobbyData
-  /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/lobby/LobbyData.java:46: error: cannot find symbol
-      @Nullable public BoundingBox getRegion() { return region; }
-       ^
-    symbol:   class Nullable
-    location: class LobbyData
-  /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/lobby/LobbyData.java:47: error: cannot find symbol
-      public void setRegion(@Nullable BoundingBox box) { region = box; setDirty(); }
-                             ^
-    symbol:   class Nullable
-    location: class LobbyData
-  /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/lobby/LobbyData.java:59: error: cannot find symbol
-      @Nullable public ElevatorDef getElevator(String id) { return elevators.get(id); }
-       ^
-    symbol:   class Nullable
-    location: class LobbyData
-  /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/lobby/LobbyManager.java:343: error: cannot find symbol
-      @Nullable
-       ^
-    symbol:   class Nullable
-    location: class LobbyManager
-  /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/lobby/LobbyManager.java:61: error: cannot find symbol
-          @Nullable Boolean doorsOpen;
-           ^
-    symbol:   class Nullable
-    location: class Runtime
-  /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/block/ElevatorBoardBlock.java:77: error: cannot find symbol
-      @Nullable
-       ^
-    symbol:   class Nullable
-    location: class ElevatorBoardBlock
-  /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/block/FluorescentLightBlock.java:79: error: cannot find symbol
-      @Nullable
-       ^
-    symbol:   class Nullable
-    location: class FluorescentLightBlock
-  /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/block/FluorescentLightBlock.java:85: error: cannot find symbol
-      @Nullable
-       ^
-    symbol:   class Nullable
-    location: class FluorescentLightBlock
-  /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/block/ElevatorDoorBlock.java:93: error: cannot find symbol
-      @Nullable
-       ^
-    symbol:   class Nullable
-    location: class ElevatorDoorBlock
-  /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/block/ElevatorDoorBlock.java:99: error: cannot find symbol
-      @Nullable
-       ^
-    symbol:   class Nullable
-    location: class ElevatorDoorBlock
-  /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/block/ElevatorDoorBlock.java:106: error: cannot find symbol
-      @Nullable
-       ^
-    symbol:   class Nullable
-    location: class ElevatorDoorBlock
-  /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/block/ElevatorDoorBlock.java:118: error: cannot find symbol
-      public void setPlacedBy(Level level, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack stack) {
-                                                                            ^
-    symbol:   class Nullable
-    location: class ElevatorDoorBlock
-  /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/client/ClientState.java:21: error: cannot find symbol
-      @Nullable public static Payloads.SyncReady ready;
-       ^
-    symbol:   class Nullable
-    location: class ClientState
-  /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/client/ClientState.java:62: error: cannot find symbol
-      @Nullable
-       ^
-    symbol:   class Nullable
-    location: class ClientState
-  /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/session/SPSessionManager.java:55: error: cannot find symbol
-      public static void enter(ServerPlayer player, ServerLevel target, Vec3 pos, float yaw, @Nullable UUID groupId) {
-                                                                                              ^
-    symbol:   class Nullable
-    location: class SPSessionManager
-  /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/session/TestRoom.java:33: error: cannot find symbol
-      @Nullable
-       ^
-    symbol:   class Nullable
-    location: class TestRoom
-  /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/player/SPPlayerData.java:16: error: package javax.annotation does not exist
-  import javax.annotation.Nullable;
-                         ^
-  /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/network/SPNetwork.java:12: error: package javax.annotation does not exist
-  import javax.annotation.Nullable;
-                         ^
-  /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/ServerRef.java:7: error: package javax.annotation does not exist
-  import javax.annotation.Nullable;
-                         ^
-  /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/event/SPEvents.java:30: error: package javax.annotation does not exist
-  import javax.annotation.Nullable;
-                         ^
-  /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/lobby/LobbyProtection.java:18: error: package javax.annotation does not exist
-  import javax.annotation.Nullable;
-                         ^
-  /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/lobby/LobbyData.java:13: error: package javax.annotation does not exist
-  import javax.annotation.Nullable;
-                         ^
-  /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/lobby/ElevatorDef.java:11: error: package javax.annotation does not exist
-  import javax.annotation.Nullable;
-                         ^
-  /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/lobby/LobbyManager.java:29: error: package javax.annotation does not exist
-  import javax.annotation.Nullable;
-                         ^
-  /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/block/ElevatorBoardBlock.java:20: error: package javax.annotation does not exist
-  import javax.annotation.Nullable;
-                         ^
-  /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/block/FluorescentLightBlock.java:12: error: package javax.annotation does not exist
-  import javax.annotation.Nullable;
-                         ^
-  /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/block/ElevatorDoorBlock.java:33: error: package javax.annotation does not exist
-  import javax.annotation.Nullable;
-                         ^
-  /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/client/ClientState.java:8: error: package javax.annotation does not exist
-  import javax.annotation.Nullable;
-                         ^
-  /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/session/SPSessionManager.java:24: error: package javax.annotation does not exist
-  import javax.annotation.Nullable;
-                         ^
-  /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/session/TestRoom.java:17: error: package javax.annotation does not exist
-  import javax.annotation.Nullable;
-                         ^
-  47 errors
-
-* Try:
-> Check your code and dependencies to fix the compilation error(s)
-> Run with --scan to get full insights from a Build Scan (powered by Develocity).
-
-* Exception is:
-org.gradle.api.tasks.TaskExecutionException: Execution failed for task ':fabric:compileJava'.
-	at org.gradle.api.internal.tasks.execution.ExecuteActionsTaskExecuter.lambda$executeIfValid$1(ExecuteActionsTaskExecuter.java:135)
-	at org.gradle.internal.Try$Failure.ifSuccessfulOrElse(Try.java:288)
-	at org.gradle.api.internal.tasks.execution.ExecuteActionsTaskExecuter.executeIfValid(ExecuteActionsTaskExecuter.java:133)
-	at org.gradle.api.internal.tasks.execution.ExecuteActionsTaskExecuter.execute(ExecuteActionsTaskExecuter.java:121)
-	at org.gradle.api.internal.tasks.execution.ProblemsTaskPathTrackingTaskExecuter.execute(ProblemsTaskPathTrackingTaskExecuter.java:41)
-	at org.gradle.api.internal.tasks.execution.ResolveTaskExecutionModeExecuter.execute(ResolveTaskExecutionModeExecuter.java:51)
-	at org.gradle.api.internal.tasks.execution.FinalizePropertiesTaskExecuter.execute(FinalizePropertiesTaskExecuter.java:46)
-	at org.gradle.api.internal.tasks.execution.SkipTaskWithNoActionsExecuter.execute(SkipTaskWithNoActionsExecuter.java:57)
-	at org.gradle.api.internal.tasks.execution.SkipOnlyIfTaskExecuter.execute(SkipOnlyIfTaskExecuter.java:74)
-	at org.gradle.api.internal.tasks.execution.CatchExceptionTaskExecuter.execute(CatchExceptionTaskExecuter.java:36)
-	at org.gradle.api.internal.tasks.execution.EventFiringTaskExecuter$1.executeTask(EventFiringTaskExecuter.java:77)
-	at org.gradle.api.internal.tasks.execution.EventFiringTaskExecuter$1.call(EventFiringTaskExecuter.java:55)
-	at org.gradle.api.internal.tasks.execution.EventFiringTaskExecuter$1.call(EventFiringTaskExecuter.java:52)
-	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBuildOperationWorker.execute(DefaultBuildOperationRunner.java:210)
-	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBuildOperationWorker.execute(DefaultBuildOperationRunner.java:205)
-	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:67)
-	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:60)
-	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:167)
-	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:60)
-	at org.gradle.internal.operations.DefaultBuildOperationRunner.call(DefaultBuildOperationRunner.java:54)
-	at org.gradle.api.internal.tasks.execution.EventFiringTaskExecuter.execute(EventFiringTaskExecuter.java:52)
-	at org.gradle.execution.plan.DefaultNodeExecutor.executeLocalTaskNode(DefaultNodeExecutor.java:55)
-	at org.gradle.execution.plan.DefaultNodeExecutor.execute(DefaultNodeExecutor.java:34)
-	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph$InvokeNodeExecutorsAction.execute(DefaultTaskExecutionGraph.java:355)
-	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph$InvokeNodeExecutorsAction.execute(DefaultTaskExecutionGraph.java:343)
-	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph$BuildOperationAwareExecutionAction.lambda$execute$0(DefaultTaskExecutionGraph.java:339)
-	at org.gradle.internal.operations.CurrentBuildOperationRef.with(CurrentBuildOperationRef.java:84)
-	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph$BuildOperationAwareExecutionAction.execute(DefaultTaskExecutionGraph.java:339)
-	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph$BuildOperationAwareExecutionAction.execute(DefaultTaskExecutionGraph.java:328)
-	at org.gradle.execution.plan.DefaultPlanExecutor$ExecutorWorker.execute(DefaultPlanExecutor.java:459)
-	at org.gradle.execution.plan.DefaultPlanExecutor$ExecutorWorker.run(DefaultPlanExecutor.java:376)
-	at org.gradle.internal.concurrent.ExecutorPolicy$CatchAndRecordFailures.onExecute(ExecutorPolicy.java:64)
-	at org.gradle.internal.concurrent.AbstractManagedExecutor$1.run(AbstractManagedExecutor.java:47)
-Caused by: org.gradle.api.internal.tasks.compile.CompilationFailedException: Compilation failed; see the compiler output below.
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/player/SPPlayerData.java:16: error: package javax.annotation does not exist
-import javax.annotation.Nullable;
-                       ^
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/network/SPNetwork.java:12: error: package javax.annotation does not exist
-import javax.annotation.Nullable;
-                       ^
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/ServerRef.java:7: error: package javax.annotation does not exist
-import javax.annotation.Nullable;
-                       ^
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/event/SPEvents.java:30: error: package javax.annotation does not exist
-import javax.annotation.Nullable;
-                       ^
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/lobby/LobbyProtection.java:18: error: package javax.annotation does not exist
-import javax.annotation.Nullable;
-                       ^
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/lobby/LobbyData.java:13: error: package javax.annotation does not exist
-import javax.annotation.Nullable;
-                       ^
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/lobby/ElevatorDef.java:11: error: package javax.annotation does not exist
-import javax.annotation.Nullable;
-                       ^
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/lobby/LobbyManager.java:29: error: package javax.annotation does not exist
-import javax.annotation.Nullable;
-                       ^
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/block/ElevatorBoardBlock.java:20: error: package javax.annotation does not exist
-import javax.annotation.Nullable;
-                       ^
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/block/FluorescentLightBlock.java:12: error: package javax.annotation does not exist
-import javax.annotation.Nullable;
-                       ^
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/block/ElevatorDoorBlock.java:33: error: package javax.annotation does not exist
-import javax.annotation.Nullable;
-                       ^
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/client/ClientState.java:8: error: package javax.annotation does not exist
-import javax.annotation.Nullable;
-                       ^
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/session/SPSessionManager.java:24: error: package javax.annotation does not exist
-import javax.annotation.Nullable;
-                       ^
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/session/TestRoom.java:17: error: package javax.annotation does not exist
-import javax.annotation.Nullable;
-                       ^
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/player/SPPlayerData.java:32: error: cannot find symbol
-    @Nullable private UUID groupId;
-     ^
-  symbol:   class Nullable
-  location: class SPPlayerData
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/player/SPPlayerData.java:40: error: cannot find symbol
-    @Nullable private ResourceKey<Level> savedDimension;
-     ^
-  symbol:   class Nullable
-  location: class SPPlayerData
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/player/SPPlayerData.java:59: error: cannot find symbol
-    @Nullable public UUID getGroupId() { return groupId; }
-     ^
-  symbol:   class Nullable
-  location: class SPPlayerData
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/player/SPPlayerData.java:60: error: cannot find symbol
-    public void setGroupId(@Nullable UUID groupId) { this.groupId = groupId; }
-                            ^
-  symbol:   class Nullable
-  location: class SPPlayerData
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/player/SPPlayerData.java:88: error: cannot find symbol
-    @Nullable public ResourceKey<Level> getSavedDimension() { return savedDimension; }
-     ^
-  symbol:   class Nullable
-  location: class SPPlayerData
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/network/SPNetwork.java:30: error: cannot find symbol
-                                                       @Nullable BiConsumer<T, ServerPlayer> serverHandler) {}
-                                                        ^
-  symbol:   class Nullable
-  location: class Def<T>
-  where T is a type-variable:
-    T extends CustomPacketPayload declared in record Def
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/ServerRef.java:15: error: cannot find symbol
-    @Nullable private static MinecraftServer server;
-     ^
-  symbol:   class Nullable
-  location: class ServerRef
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/ServerRef.java:19: error: cannot find symbol
-    public static void set(@Nullable MinecraftServer s) {
-                            ^
-  symbol:   class Nullable
-  location: class ServerRef
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/ServerRef.java:23: error: cannot find symbol
-    @Nullable
-     ^
-  symbol:   class Nullable
-  location: class ServerRef
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/event/SPEvents.java:114: error: cannot find symbol
-    @Nullable
-     ^
-  symbol:   class Nullable
-  location: class SPEvents
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/event/SPEvents.java:159: error: cannot find symbol
-    public static boolean cancelCommand(CommandSourceStack source, @Nullable String root) {
-                                                                    ^
-  symbol:   class Nullable
-  location: class SPEvents
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/lobby/LobbyProtection.java:29: error: cannot find symbol
-    @Nullable
-     ^
-  symbol:   class Nullable
-  location: class LobbyProtection
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/lobby/LobbyData.java:30: error: cannot find symbol
-    @Nullable private BlockPos spawn;
-     ^
-  symbol:   class Nullable
-  location: class LobbyData
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/lobby/LobbyData.java:32: error: cannot find symbol
-    @Nullable private BoundingBox region;
-     ^
-  symbol:   class Nullable
-  location: class LobbyData
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/lobby/ElevatorDef.java:20: error: cannot find symbol
-                          List<BlockPos> doors, @Nullable BlockPos button, @Nullable BlockPos board,
-                                                 ^
-  symbol:   class Nullable
-  location: class ElevatorDef
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/lobby/ElevatorDef.java:20: error: cannot find symbol
-                          List<BlockPos> doors, @Nullable BlockPos button, @Nullable BlockPos board,
-                                                                            ^
-  symbol:   class Nullable
-  location: class ElevatorDef
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/lobby/LobbyData.java:42: error: cannot find symbol
-    @Nullable public BlockPos getSpawn() { return spawn; }
-     ^
-  symbol:   class Nullable
-  location: class LobbyData
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/lobby/LobbyData.java:46: error: cannot find symbol
-    @Nullable public BoundingBox getRegion() { return region; }
-     ^
-  symbol:   class Nullable
-  location: class LobbyData
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/lobby/LobbyData.java:47: error: cannot find symbol
-    public void setRegion(@Nullable BoundingBox box) { region = box; setDirty(); }
-                           ^
-  symbol:   class Nullable
-  location: class LobbyData
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/lobby/LobbyData.java:59: error: cannot find symbol
-    @Nullable public ElevatorDef getElevator(String id) { return elevators.get(id); }
-     ^
-  symbol:   class Nullable
-  location: class LobbyData
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/lobby/LobbyManager.java:343: error: cannot find symbol
-    @Nullable
-     ^
-  symbol:   class Nullable
-  location: class LobbyManager
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/lobby/LobbyManager.java:61: error: cannot find symbol
-        @Nullable Boolean doorsOpen;
-         ^
-  symbol:   class Nullable
-  location: class Runtime
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/block/ElevatorBoardBlock.java:77: error: cannot find symbol
-    @Nullable
-     ^
-  symbol:   class Nullable
-  location: class ElevatorBoardBlock
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/block/FluorescentLightBlock.java:79: error: cannot find symbol
-    @Nullable
-     ^
-  symbol:   class Nullable
-  location: class FluorescentLightBlock
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/block/FluorescentLightBlock.java:85: error: cannot find symbol
-    @Nullable
-     ^
-  symbol:   class Nullable
-  location: class FluorescentLightBlock
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/block/ElevatorDoorBlock.java:93: error: cannot find symbol
-    @Nullable
-     ^
-  symbol:   class Nullable
-  location: class ElevatorDoorBlock
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/block/ElevatorDoorBlock.java:99: error: cannot find symbol
-    @Nullable
-     ^
-  symbol:   class Nullable
-  location: class ElevatorDoorBlock
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/block/ElevatorDoorBlock.java:106: error: cannot find symbol
-    @Nullable
-     ^
-  symbol:   class Nullable
-  location: class ElevatorDoorBlock
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/block/ElevatorDoorBlock.java:118: error: cannot find symbol
-    public void setPlacedBy(Level level, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack stack) {
-                                                                          ^
-  symbol:   class Nullable
-  location: class ElevatorDoorBlock
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/client/ClientState.java:21: error: cannot find symbol
-    @Nullable public static Payloads.SyncReady ready;
-     ^
-  symbol:   class Nullable
-  location: class ClientState
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/client/ClientState.java:62: error: cannot find symbol
-    @Nullable
-     ^
-  symbol:   class Nullable
-  location: class ClientState
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/session/SPSessionManager.java:55: error: cannot find symbol
-    public static void enter(ServerPlayer player, ServerLevel target, Vec3 pos, float yaw, @Nullable UUID groupId) {
-                                                                                            ^
-  symbol:   class Nullable
-  location: class SPSessionManager
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/session/TestRoom.java:33: error: cannot find symbol
-    @Nullable
-     ^
-  symbol:   class Nullable
-  location: class TestRoom
-Note: /home/runner/work/Smile_Protocol/Smile_Protocol/fabric/src/main/java/com/smileprotocol/fabric/FabricPlatform.java uses or overrides a deprecated API.
-Note: Recompile with -Xlint:deprecation for details.
-47 errors
-	at org.gradle.api.internal.tasks.compile.JdkJavaCompiler.execute(JdkJavaCompiler.java:89)
-	at org.gradle.api.internal.tasks.compile.JdkJavaCompiler.execute(JdkJavaCompiler.java:50)
-	at org.gradle.api.internal.tasks.compile.NormalizingJavaCompiler.delegateAndHandleErrors(NormalizingJavaCompiler.java:98)
-	at org.gradle.api.internal.tasks.compile.NormalizingJavaCompiler.execute(NormalizingJavaCompiler.java:52)
-	at org.gradle.api.internal.tasks.compile.NormalizingJavaCompiler.execute(NormalizingJavaCompiler.java:38)
-	at org.gradle.api.internal.tasks.compile.AnnotationProcessorDiscoveringCompiler.execute(AnnotationProcessorDiscoveringCompiler.java:52)
-	at org.gradle.api.internal.tasks.compile.AnnotationProcessorDiscoveringCompiler.execute(AnnotationProcessorDiscoveringCompiler.java:38)
-	at org.gradle.api.internal.tasks.compile.ModuleApplicationNameWritingCompiler.execute(ModuleApplicationNameWritingCompiler.java:46)
-	at org.gradle.api.internal.tasks.compile.ModuleApplicationNameWritingCompiler.execute(ModuleApplicationNameWritingCompiler.java:36)
-	at org.gradle.jvm.toolchain.internal.DefaultToolchainJavaCompiler.execute(DefaultToolchainJavaCompiler.java:57)
-	at org.gradle.api.tasks.compile.JavaCompile.lambda$createToolchainCompiler$3(JavaCompile.java:206)
-	at org.gradle.api.internal.tasks.compile.CleaningJavaCompiler.execute(CleaningJavaCompiler.java:53)
-	at org.gradle.api.internal.tasks.compile.incremental.IncrementalCompilerFactory.lambda$createRebuildAllCompiler$0(IncrementalCompilerFactory.java:55)
-	at org.gradle.api.internal.tasks.compile.incremental.SelectiveCompiler.execute(SelectiveCompiler.java:70)
-	at org.gradle.api.internal.tasks.compile.incremental.SelectiveCompiler.execute(SelectiveCompiler.java:44)
-	at org.gradle.api.internal.tasks.compile.incremental.IncrementalResultStoringCompiler.execute(IncrementalResultStoringCompiler.java:66)
-	at org.gradle.api.internal.tasks.compile.incremental.IncrementalResultStoringCompiler.execute(IncrementalResultStoringCompiler.java:52)
-	at org.gradle.api.internal.tasks.compile.CompileJavaBuildOperationReportingCompiler$1.call(CompileJavaBuildOperationReportingCompiler.java:64)
-	at org.gradle.api.internal.tasks.compile.CompileJavaBuildOperationReportingCompiler$1.call(CompileJavaBuildOperationReportingCompiler.java:48)
-	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBuildOperationWorker.execute(DefaultBuildOperationRunner.java:210)
-	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBuildOperationWorker.execute(DefaultBuildOperationRunner.java:205)
-	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:67)
-	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:60)
-	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:167)
-	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:60)
-	at org.gradle.internal.operations.DefaultBuildOperationRunner.call(DefaultBuildOperationRunner.java:54)
-	at org.gradle.api.internal.tasks.compile.CompileJavaBuildOperationReportingCompiler.execute(CompileJavaBuildOperationReportingCompiler.java:48)
-	at org.gradle.api.tasks.compile.JavaCompile.performCompilation(JavaCompile.java:224)
-	at org.gradle.api.tasks.compile.JavaCompile.performIncrementalCompilation(JavaCompile.java:165)
-	at org.gradle.api.tasks.compile.JavaCompile.compile(JavaCompile.java:150)
-	at org.gradle.internal.reflect.JavaMethod.invoke(JavaMethod.java:125)
-	at org.gradle.api.internal.project.taskfactory.IncrementalTaskAction.doExecute(IncrementalTaskAction.java:45)
-	at org.gradle.api.internal.project.taskfactory.StandardTaskAction.execute(StandardTaskAction.java:51)
-	at org.gradle.api.internal.project.taskfactory.IncrementalTaskAction.execute(IncrementalTaskAction.java:26)
-	at org.gradle.api.internal.project.taskfactory.StandardTaskAction.execute(StandardTaskAction.java:29)
-	at org.gradle.api.internal.tasks.execution.TaskExecution$3.run(TaskExecution.java:259)
-	at org.gradle.internal.operations.DefaultBuildOperationRunner$1.execute(DefaultBuildOperationRunner.java:30)
-	at org.gradle.internal.operations.DefaultBuildOperationRunner$1.execute(DefaultBuildOperationRunner.java:27)
-	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:67)
-	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:60)
-	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:167)
-	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:60)
-	at org.gradle.internal.operations.DefaultBuildOperationRunner.run(DefaultBuildOperationRunner.java:48)
-	at org.gradle.api.internal.tasks.execution.TaskExecution.executeAction(TaskExecution.java:244)
-	at org.gradle.api.internal.tasks.execution.TaskExecution.executeActions(TaskExecution.java:227)
-	at org.gradle.api.internal.tasks.execution.TaskExecution.executeWithPreviousOutputFiles(TaskExecution.java:210)
-	at org.gradle.api.internal.tasks.execution.TaskExecution.execute(TaskExecution.java:176)
-	at org.gradle.internal.execution.steps.ExecuteStep.executeInternal(ExecuteStep.java:167)
-	at org.gradle.internal.execution.steps.ExecuteStep.access$000(ExecuteStep.java:47)
-	at org.gradle.internal.execution.steps.ExecuteStep$1.call(ExecuteStep.java:137)
-	at org.gradle.internal.execution.steps.ExecuteStep$1.call(ExecuteStep.java:134)
-	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBuildOperationWorker.execute(DefaultBuildOperationRunner.java:210)
-	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBuildOperationWorker.execute(DefaultBuildOperationRunner.java:205)
-	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:67)
-	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:60)
-	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:167)
-	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:60)
-	at org.gradle.internal.operations.DefaultBuildOperationRunner.call(DefaultBuildOperationRunner.java:54)
-	at org.gradle.internal.execution.steps.ExecuteStep.execute(ExecuteStep.java:134)
-	at org.gradle.internal.execution.steps.ExecuteStep$Mutable.execute(ExecuteStep.java:80)
-	at org.gradle.internal.execution.steps.CancelExecutionStep.execute(CancelExecutionStep.java:42)
-	at org.gradle.internal.execution.steps.TimeoutStep.executeWithoutTimeout(TimeoutStep.java:75)
-	at org.gradle.internal.execution.steps.TimeoutStep.execute(TimeoutStep.java:55)
-	at org.gradle.internal.execution.steps.PreCreateOutputParentsStep.execute(PreCreateOutputParentsStep.java:51)
-	at org.gradle.internal.execution.steps.PreCreateOutputParentsStep.execute(PreCreateOutputParentsStep.java:29)
-	at org.gradle.internal.execution.steps.RemovePreviousOutputsStep.executeMutable(RemovePreviousOutputsStep.java:67)
-	at org.gradle.internal.execution.steps.RemovePreviousOutputsStep.executeMutable(RemovePreviousOutputsStep.java:39)
-	at org.gradle.internal.execution.steps.MutableStep.execute(MutableStep.java:26)
-	at org.gradle.internal.execution.steps.BroadcastChangingOutputsStep.execute(BroadcastChangingOutputsStep.java:42)
-	at org.gradle.internal.execution.steps.BroadcastChangingOutputsStep.execute(BroadcastChangingOutputsStep.java:24)
-	at org.gradle.internal.execution.steps.CaptureOutputsAfterExecutionStep.execute(CaptureOutputsAfterExecutionStep.java:69)
-	at org.gradle.internal.execution.steps.CaptureOutputsAfterExecutionStep.execute(CaptureOutputsAfterExecutionStep.java:46)
-	at org.gradle.internal.execution.steps.ResolveInputChangesStep.executeMutable(ResolveInputChangesStep.java:39)
-	at org.gradle.internal.execution.steps.ResolveInputChangesStep.executeMutable(ResolveInputChangesStep.java:28)
-	at org.gradle.internal.execution.steps.MutableStep.execute(MutableStep.java:26)
-	at org.gradle.internal.execution.steps.BuildCacheStep.executeWithoutCache(BuildCacheStep.java:189)
-	at org.gradle.internal.execution.steps.BuildCacheStep.lambda$execute$1(BuildCacheStep.java:76)
-	at org.gradle.internal.Either$Right.fold(Either.java:176)
-	at org.gradle.internal.execution.caching.CachingState.fold(CachingState.java:62)
-	at org.gradle.internal.execution.steps.BuildCacheStep.execute(BuildCacheStep.java:74)
-	at org.gradle.internal.execution.steps.BuildCacheStep.execute(BuildCacheStep.java:49)
-	at org.gradle.internal.execution.steps.StoreExecutionStateStep.executeMutable(StoreExecutionStateStep.java:46)
-	at org.gradle.internal.execution.steps.StoreExecutionStateStep.executeMutable(StoreExecutionStateStep.java:35)
-	at org.gradle.internal.execution.steps.MutableStep.execute(MutableStep.java:26)
-	at org.gradle.internal.execution.steps.SkipUpToDateStep.executeBecause(SkipUpToDateStep.java:75)
-	at org.gradle.internal.execution.steps.SkipUpToDateStep.lambda$execute$2(SkipUpToDateStep.java:53)
-	at org.gradle.internal.execution.steps.SkipUpToDateStep.execute(SkipUpToDateStep.java:53)
-	at org.gradle.internal.execution.steps.SkipUpToDateStep.execute(SkipUpToDateStep.java:35)
-	at org.gradle.internal.execution.steps.legacy.MarkSnapshottingInputsFinishedStep.execute(MarkSnapshottingInputsFinishedStep.java:37)
-	at org.gradle.internal.execution.steps.legacy.MarkSnapshottingInputsFinishedStep.execute(MarkSnapshottingInputsFinishedStep.java:27)
-	at org.gradle.internal.execution.steps.ResolveMutableCachingStateStep.executeDelegate(ResolveMutableCachingStateStep.java:70)
-	at org.gradle.internal.execution.steps.ResolveMutableCachingStateStep.executeDelegate(ResolveMutableCachingStateStep.java:32)
-	at org.gradle.internal.execution.steps.AbstractResolveCachingStateStep.execute(AbstractResolveCachingStateStep.java:69)
-	at org.gradle.internal.execution.steps.AbstractResolveCachingStateStep.execute(AbstractResolveCachingStateStep.java:37)
-	at org.gradle.internal.execution.steps.ResolveChangesStep.executeMutable(ResolveChangesStep.java:63)
-	at org.gradle.internal.execution.steps.ResolveChangesStep.executeMutable(ResolveChangesStep.java:34)
-	at org.gradle.internal.execution.steps.MutableStep.execute(MutableStep.java:26)
-	at org.gradle.internal.execution.steps.ValidateStep$Mutable.executeDelegate(ValidateStep.java:79)
-	at org.gradle.internal.execution.steps.ValidateStep$Mutable.executeDelegate(ValidateStep.java:65)
-	at org.gradle.internal.execution.steps.ValidateStep.execute(ValidateStep.java:99)
-	at org.gradle.internal.execution.steps.ValidateStep$Mutable.execute(ValidateStep.java:65)
-	at org.gradle.internal.execution.steps.CaptureMutableStateBeforeExecutionStep.executeMutable(CaptureMutableStateBeforeExecutionStep.java:86)
-	at org.gradle.internal.execution.steps.CaptureMutableStateBeforeExecutionStep.execute(CaptureMutableStateBeforeExecutionStep.java:65)
-	at org.gradle.internal.execution.steps.CaptureMutableStateBeforeExecutionStep.execute(CaptureMutableStateBeforeExecutionStep.java:45)
-	at org.gradle.internal.execution.steps.SkipEmptyMutableWorkStep.executeWithNonEmptySources(SkipEmptyMutableWorkStep.java:210)
-	at org.gradle.internal.execution.steps.SkipEmptyMutableWorkStep.executeMutable(SkipEmptyMutableWorkStep.java:90)
-	at org.gradle.internal.execution.steps.SkipEmptyMutableWorkStep.executeMutable(SkipEmptyMutableWorkStep.java:53)
-	at org.gradle.internal.execution.steps.MutableStep.execute(MutableStep.java:26)
-	at org.gradle.internal.execution.steps.legacy.MarkSnapshottingInputsStartedStep.execute(MarkSnapshottingInputsStartedStep.java:38)
-	at org.gradle.internal.execution.steps.LoadPreviousExecutionStateStep.executeMutable(LoadPreviousExecutionStateStep.java:36)
-	at org.gradle.internal.execution.steps.LoadPreviousExecutionStateStep.executeMutable(LoadPreviousExecutionStateStep.java:23)
-	at org.gradle.internal.execution.steps.MutableStep.execute(MutableStep.java:26)
-	at org.gradle.internal.execution.steps.HandleStaleOutputsStep.executeMutable(HandleStaleOutputsStep.java:77)
-	at org.gradle.internal.execution.steps.HandleStaleOutputsStep.executeMutable(HandleStaleOutputsStep.java:43)
-	at org.gradle.internal.execution.steps.MutableStep.execute(MutableStep.java:26)
-	at org.gradle.internal.execution.steps.AssignMutableWorkspaceStep.lambda$executeMutable$0(AssignMutableWorkspaceStep.java:34)
-	at org.gradle.api.internal.tasks.execution.TaskExecution$4.withWorkspace(TaskExecution.java:305)
-	at org.gradle.internal.execution.steps.AssignMutableWorkspaceStep.executeMutable(AssignMutableWorkspaceStep.java:30)
-	at org.gradle.internal.execution.steps.AssignMutableWorkspaceStep.executeMutable(AssignMutableWorkspaceStep.java:21)
-	at org.gradle.internal.execution.steps.MutableStep.execute(MutableStep.java:26)
-	at org.gradle.internal.execution.steps.ChoosePipelineStep.execute(ChoosePipelineStep.java:40)
-	at org.gradle.internal.execution.steps.ChoosePipelineStep.execute(ChoosePipelineStep.java:23)
-	at org.gradle.internal.execution.steps.ExecuteWorkBuildOperationFiringStep.lambda$execute$2(ExecuteWorkBuildOperationFiringStep.java:67)
-	at org.gradle.internal.execution.steps.ExecuteWorkBuildOperationFiringStep.execute(ExecuteWorkBuildOperationFiringStep.java:67)
-	at org.gradle.internal.execution.steps.ExecuteWorkBuildOperationFiringStep.execute(ExecuteWorkBuildOperationFiringStep.java:39)
-	at org.gradle.internal.execution.steps.IdentityCacheStep.execute(IdentityCacheStep.java:46)
-	at org.gradle.internal.execution.steps.IdentityCacheStep.execute(IdentityCacheStep.java:34)
-	at org.gradle.internal.execution.steps.IdentifyStep.execute(IdentifyStep.java:56)
-	at org.gradle.internal.execution.steps.IdentifyStep.execute(IdentifyStep.java:38)
-	at org.gradle.internal.execution.impl.DefaultExecutionEngine$1.execute(DefaultExecutionEngine.java:68)
-	at org.gradle.api.internal.tasks.execution.ExecuteActionsTaskExecuter.executeIfValid(ExecuteActionsTaskExecuter.java:132)
-	... 30 more
-
-
-BUILD FAILED in 25s
-6 actionable tasks: 6 executed
+BUILD SUCCESSFUL in 34s
+17 actionable tasks: 17 executed
+Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.4.0/userguide/configuration_cache_enabling.html
