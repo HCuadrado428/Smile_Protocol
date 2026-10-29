@@ -41,6 +41,7 @@ public final class ClientController {
     }
 
     public static void tick(Minecraft mc) {
+        ClientSelfTest.tick(mc);
         ClientState.tickFade();
         ClientMotion.tick(mc);
         ClientHide.tick(mc);
