@@ -78,16 +78,13 @@ public final class ClientInteraction {
         }
         prevDrop = drop;
 
-        // Linterna (F): hace falta llevarla en algun hueco
+        // Linterna (F): va siempre equipada; sin bateria no enciende
         boolean light = ClientMotion.isDown(SPConfig.get().key_flashlight);
         if (light && !prevLight) {
-            boolean has = false;
-            for (int i = 0; i < SPInventory.SIZE; i++) {
-                if (ClientState.slot(i).getItem() == com.smileprotocol.registry.ModItems.FLASHLIGHT.get()) has = true;
-            }
             boolean on = !com.smileprotocol.client.light.Flashlight.isOn(player.getId());
-            if (has || !on) {
-                com.smileprotocol.client.light.Flashlight.set(player.getId(), on);
+            if (!on || com.smileprotocol.client.light.Flashlight.battery(player.getId()) > 0f) {
+                com.smileprotocol.client.light.Flashlight.sync(player.getId(), on,
+                        com.smileprotocol.client.light.Flashlight.battery(player.getId()));
                 SPNetwork.sendToServer(new Payloads.ToggleFlashlight(on));
             }
         }

@@ -100,6 +100,8 @@ public final class SPConfig {
         public String key_lean_right = "key.keyboard.e";
         public String key_drop = "key.keyboard.g";
         public String key_flashlight = "key.keyboard.f";
+        /** Segundos de linterna encendida con la bateria llena (README 10). */
+        public int flashlight_battery_seconds = 420;
 
         // Ascensores de zona (README 6.5)
         public int elevator_grace = 15;

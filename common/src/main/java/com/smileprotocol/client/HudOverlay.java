@@ -71,6 +71,7 @@ public final class HudOverlay {
                     renderInteraction(g, font, w, h);
                 }
                 renderVitals(g, font, mc.player, h);
+                renderBattery(g, font, mc.player, h);
                 renderSlots(g, font, w, h);
             }
             Payloads.SyncReady ready = ClientState.ready;
@@ -281,6 +282,37 @@ public final class HudOverlay {
                 g.fill(x0, by, x0 + Math.max(1, Math.round(seg * k)), by + 1, 0x60FFFFFF);
             }
         }
+    }
+
+    // Bateria de la linterna: solo con la linterna encendida (y un momento al apagarla) --------
+
+    private static void renderBattery(GuiGraphics g, Font font, Player p, int h) {
+        int id = p.getId();
+        boolean on = com.smileprotocol.client.light.Flashlight.isOn(id);
+        long since = com.smileprotocol.client.light.Flashlight.sinceToggle();
+        if (!on && since > 2500) return;
+        float alpha = on ? 1f : Mth.clamp(1f - (since - 1500) / 1000f, 0f, 1f);
+        if (alpha <= 0.02f) return;
+        int a = (int) (alpha * 255) << 24;
+        float b = com.smileprotocol.client.light.Flashlight.battery(id);
+        int pw = 86, ph = 18, px = 8, py = h - 36 - 8 - ph - 3;
+        RenderSystem.setShaderColor(1f, 1f, 1f, alpha);
+        g.blitSprite(b < 0.15f ? PANEL_ALERT : PANEL, px, py, pw, ph);
+        RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
+        // Icono de pila: 5 segmentos
+        int bx = px + 6, by = py + 5, bw = 22, bh = 8;
+        int col = b < 0.15f ? DANGER : b < 0.4f ? AMBER : 0x46D27A;
+        g.renderOutline(bx, by, bw, bh, a | 0xC8D8D2);
+        g.fill(bx + bw, by + 2, bx + bw + 2, by + bh - 2, a | 0xC8D8D2);
+        int segs = (int) Math.ceil(b * 5 - 0.001);
+        boolean blink = b < 0.10f && (net.minecraft.Util.getMillis() / 300) % 2 == 0;
+        for (int i = 0; i < 5 && !blink; i++) {
+            if (i < segs) g.fill(bx + 2 + i * 4, by + 2, bx + 5 + i * 4, by + bh - 2, a | (col & 0xFFFFFF));
+        }
+        String pct = Math.round(b * 100) + "%";
+        Component label = Component.translatable(on ? "smileprotocol.hud.flashlight" : "smileprotocol.hud.flashlight_off");
+        g.drawString(font, label, bx + bw + 6, py + 5, a | (MUTED & 0xFFFFFF), false);
+        g.drawString(font, pct, px + pw - 6 - font.width(pct), py + 5, a | ((b < 0.15f ? DANGER : TEXT) & 0xFFFFFF), false);
     }
 
     // Huecos ---------------------------------------------------------------------------

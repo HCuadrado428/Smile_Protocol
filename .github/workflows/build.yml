@@ -94,7 +94,7 @@ jobs:
           set +e
           sudo apt-get update -qq && sudo apt-get install -y -qq xvfb libgl1-mesa-dri mesa-utils > /dev/null
           : > client.log
-          for L in fabric; do
+          for L in fabric neoforge; do
             mkdir -p $L/runs/client/saves
             rm -rf $L/runs/client/saves/smoke
             cp -r $L/runs/server/world $L/runs/client/saves/smoke
@@ -102,7 +102,8 @@ jobs:
             timeout 900 xvfb-run -a -s "-screen 0 1280x720x24" ./gradlew :$L:runClient --no-daemon > client-$L.log 2>&1
             echo "== $L: salida $?" >> client.log
             grep -aE "CLIENTTEST|[Mm]ixin.*([Ff]ail|[Ee]rror|[Ee]xception)|Exception|ERROR|Caused by|Veil" client-$L.log | head -200 >> client.log
-            mkdir -p shots && cp $L/runs/client/screenshots/*.png shots/ 2>/dev/null
+            mkdir -p shots
+            for f in $L/runs/client/screenshots/*.png; do [ -f "$f" ] && cp "$f" "shots/$L-$(basename "$f")"; done
           done
           exit 0
 
@@ -126,7 +127,7 @@ jobs:
           [ -s "$GITHUB_WORKSPACE/libs.txt" ] && cp "$GITHUB_WORKSPACE/libs.txt" "logs/${GITHUB_SHA}-libs.txt"
           [ -s "$GITHUB_WORKSPACE/smoke.log" ] && cp "$GITHUB_WORKSPACE/smoke.log" "logs/${GITHUB_SHA}-smoke.log"
           [ -s "$GITHUB_WORKSPACE/client.log" ] && cp "$GITHUB_WORKSPACE/client.log" "logs/${GITHUB_SHA}-client.log"
-          [ -s "$GITHUB_WORKSPACE/client-fabric.log" ] && tail -c 600000 "$GITHUB_WORKSPACE/client-fabric.log" > "logs/${GITHUB_SHA}-client-fabric.log"
+          for L in fabric neoforge; do [ -s "$GITHUB_WORKSPACE/client-$L.log" ] && tail -c 600000 "$GITHUB_WORKSPACE/client-$L.log" > "logs/${GITHUB_SHA}-client-$L.log"; done
           if ls "$GITHUB_WORKSPACE"/shots/*.png >/dev/null 2>&1; then rm -rf shots && mkdir -p shots && cp "$GITHUB_WORKSPACE"/shots/*.png shots/; fi
           for L in neoforge fabric; do [ -s "$GITHUB_WORKSPACE/smoke-$L.log" ] && tail -c 400000 "$GITHUB_WORKSPACE/smoke-$L.log" > "logs/${GITHUB_SHA}-smoke-$L.log"; done
           jars=$(ls "$GITHUB_WORKSPACE"/fabric/build/libs/*.jar "$GITHUB_WORKSPACE"/neoforge/build/libs/*.jar 2>/dev/null | grep -v -- '-sources' || true)

@@ -1,43 +1,52 @@
 package com.smileprotocol.motion;
 
-import com.smileprotocol.interact.SPInventoryOps;
+import com.smileprotocol.config.SPConfig;
 import com.smileprotocol.mechanism.LabEvents;
 import com.smileprotocol.network.Payloads;
 import com.smileprotocol.network.SPNetwork;
 import com.smileprotocol.player.SPPlayerData;
-import com.smileprotocol.registry.ModItems;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
 /**
- * Linterna (README 10, 21.1): se lleva en un hueco y se enciende con F. El servidor guarda quien
- * la tiene encendida y lo envia a los cercanos para que vean su haz (luz de Veil). La bateria
- * llega en la fase 20.
+ * Linterna (README 10, 21.1): va siempre equipada dentro de la partida, sin ocupar hueco, y se
+ * enciende con F. Gasta bateria mientras esta encendida ({@code flashlight_battery_seconds}); sin
+ * bateria se apaga. El servidor envia el estado a los cercanos para que vean el haz (Veil).
  */
 public final class Flashlights {
 
     private static final Set<UUID> ON = new HashSet<>();
+    private static final Map<UUID, Float> BATTERY = new HashMap<>();
 
     private Flashlights() {}
-
-    public static boolean hasFlashlight(ServerPlayer p) {
-        return SPInventoryOps.find(p, s -> s.getItem() == ModItems.FLASHLIGHT.get()) >= 0;
-    }
 
     public static boolean isOn(ServerPlayer p) {
         return ON.contains(p.getUUID());
     }
 
+    public static float battery(ServerPlayer p) {
+        return BATTERY.getOrDefault(p.getUUID(), 1f);
+    }
+
+    /** Recarga (al empezar la partida; las baterias como consumible llegan en la fase 13). */
+    public static void recharge(ServerPlayer p, float amount) {
+        BATTERY.put(p.getUUID(), Math.min(1f, battery(p) + amount));
+        broadcast(p, isOn(p));
+    }
+
     public static void onToggle(Payloads.ToggleFlashlight in, ServerPlayer p) {
         if (!SPPlayerData.inSP(p)) return;
-        boolean on = in.on() && hasFlashlight(p);
-        set(p, on);
+        set(p, in.on() && battery(p) > 0f);
     }
 
     public static void set(ServerPlayer p, boolean on) {
@@ -52,20 +61,30 @@ public final class Flashlights {
     }
 
     private static void broadcast(ServerPlayer p, boolean on) {
-        Payloads.SyncFlashlight packet = new Payloads.SyncFlashlight(p.getId(), on);
+        Payloads.SyncFlashlight packet = new Payloads.SyncFlashlight(p.getId(), on, battery(p));
         for (ServerPlayer o : p.serverLevel().players()) {
             if (o == p || o.distanceToSqr(p) < 96 * 96) SPNetwork.sendTo(o, packet);
         }
     }
 
-    /** Cada segundo: se apaga si ya no la lleva o salio de la partida; los que llegan ven las encendidas. */
+    /** Cada segundo: gasta bateria, se apaga al agotarse o al salir de la partida. */
     public static void tick(MinecraftServer server) {
         if (server.getTickCount() % 20 != 0) return;
+        float drain = 1f / Math.max(10, SPConfig.get().flashlight_battery_seconds);
         for (UUID id : Set.copyOf(ON)) {
             ServerPlayer p = server.getPlayerList().getPlayer(id);
             if (p == null) {
                 ON.remove(id);
-            } else if (!SPPlayerData.inSP(p) || !hasFlashlight(p)) {
+                continue;
+            }
+            if (!SPPlayerData.inSP(p)) {
+                set(p, false);
+                continue;
+            }
+            float b = Math.max(0f, battery(p) - drain);
+            BATTERY.put(id, b);
+            if (b <= 0f) {
+                p.displayClientMessage(Component.translatable("smileprotocol.flashlight.empty").withStyle(ChatFormatting.RED), true);
                 set(p, false);
             } else {
                 broadcast(p, true);

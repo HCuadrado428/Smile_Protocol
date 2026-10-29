@@ -189,5 +189,8 @@
   "smileprotocol.command.give.done": "Recibes: %s",
   "smileprotocol.command.noise.test": "Ruido de prueba de %s bloques.",
   "smileprotocol.floor.title": "PLANTA -%s",
-  "item.smileprotocol.flashlight": "Linterna"
+  "item.smileprotocol.flashlight": "Linterna",
+  "smileprotocol.hud.flashlight": "LUZ",
+  "smileprotocol.hud.flashlight_off": "APAGADA",
+  "smileprotocol.flashlight.empty": "La linterna se ha quedado sin batería"
 }

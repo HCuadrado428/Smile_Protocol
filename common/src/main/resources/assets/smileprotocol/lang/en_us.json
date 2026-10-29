@@ -189,5 +189,8 @@
   "smileprotocol.command.give.done": "You get: %s",
   "smileprotocol.command.noise.test": "Test noise of %s blocks.",
   "smileprotocol.floor.title": "FLOOR -%s",
-  "item.smileprotocol.flashlight": "Flashlight"
+  "item.smileprotocol.flashlight": "Flashlight",
+  "smileprotocol.hud.flashlight": "LIGHT",
+  "smileprotocol.hud.flashlight_off": "OFF",
+  "smileprotocol.flashlight.empty": "Your flashlight is out of battery"
 }

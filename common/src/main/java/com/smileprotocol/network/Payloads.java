@@ -246,11 +246,12 @@ public final class Payloads {
     }
 
     /** S -> C: linterna encendida o apagada de un jugador (README 21.1). */
-    public record SyncFlashlight(int entityId, boolean on) implements CustomPacketPayload {
+    public record SyncFlashlight(int entityId, boolean on, float battery) implements CustomPacketPayload {
         public static final Type<SyncFlashlight> TYPE = typeOf("sync_flashlight");
         public static final StreamCodec<ByteBuf, SyncFlashlight> CODEC = StreamCodec.composite(
                 ByteBufCodecs.VAR_INT, SyncFlashlight::entityId,
                 ByteBufCodecs.BOOL, SyncFlashlight::on,
+                ByteBufCodecs.FLOAT, SyncFlashlight::battery,
                 SyncFlashlight::new);
 
         @Override public Type<SyncFlashlight> type() { return TYPE; }
