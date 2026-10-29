@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """
-Sprites del HUD (README 8.1), estilo monitor medico de laboratorio. Van en el atlas de GUI
-(textures/gui/sprites/hud/) y los paneles se escalan en nueve partes (nine-slice).
+Sprites de la HUD de terror (textures/gui/sprites/hud): vineta sucia, venas de sangre para la
+vida baja, grano de pelicula, manchas de fondo a brochazos, corazon anatomico, barras de sangre
+y de luz, huecos de inventario, cinta adhesiva para las teclas y papel rasgado para el lobby.
 
     python3 tools/hud_textures.py [preview.png]
 """
@@ -11,276 +12,328 @@ import sys
 from pathlib import Path
 
 import numpy as np
-from PIL import Image
+from PIL import Image, ImageDraw
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from texlib import Canvas, fbm, white, blur, smoothstep, splat_mask, apply_blood  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent / "common/src/main/resources/assets/smileprotocol/textures/gui/sprites/hud"
 
-ACCENT = (86, 224, 200)       # fosforo verde azulado
-ACCENT_DIM = (36, 110, 100)
-DANGER = (226, 44, 58)
-GLASS = (9, 15, 14)
-EDGE = (0, 0, 0)
+
+def R(seed):
+    return np.random.default_rng(seed)
 
 
-def canvas(w, h):
-    return np.zeros((h, w, 4), dtype=np.float64)
-
-
-def put(a, x, y, rgb, alpha):
-    h, w = a.shape[:2]
-    if 0 <= x < w and 0 <= y < h:
-        src = np.array([*rgb, alpha], dtype=np.float64)
-        da = a[y, x, 3] / 255.0
-        sa = alpha / 255.0
-        out_a = sa + da * (1 - sa)
-        if out_a <= 0:
-            return
-        a[y, x, :3] = (src[:3] * sa + a[y, x, :3] * da * (1 - sa)) / out_a
-        a[y, x, 3] = out_a * 255
-
-
-def save(name, a, nine=None):
-    ROOT.mkdir(parents=True, exist_ok=True)
-    img = Image.fromarray(np.clip(a, 0, 255).round().astype(np.uint8), "RGBA")
-    img.save(ROOT / f"{name}.png")
-    meta = ROOT / f"{name}.png.mcmeta"
+def save(cv, name, nine=None):
+    p = ROOT / f"{name}.png"
+    cv.save(p)
+    meta = p.with_suffix(".png.mcmeta")
     if nine:
-        w, h, border = nine
-        meta.write_text(json.dumps({"gui": {"scaling": {"type": "nine_slice", "width": w, "height": h, "border": border}}}, indent=2) + "\n")
+        w, h, b = nine
+        meta.write_text(json.dumps({"gui": {"scaling": {"type": "nine_slice", "width": w, "height": h, "border": b}}},
+                                   indent=2) + "\n")
     elif meta.exists():
         meta.unlink()
-    return img
+    return cv
 
 
-def corner_brackets(a, x0, y0, x1, y1, length, rgb, alpha):
-    for i in range(length):
-        for (x, y) in ((x0 + i, y0), (x0, y0 + i), (x1 - i, y0), (x1, y0 + i),
-                       (x0 + i, y1), (x0, y1 - i), (x1 - i, y1), (x1, y1 - i)):
-            put(a, x, y, rgb, alpha)
+def ragged_rect(w, h, r, edge=4.0, rough=0.8, base=6):
+    """Mascara de un rectangulo con bordes de brochazo."""
+    yy, xx = np.mgrid[0:h, 0:w].astype(float)
+    d = np.minimum(np.minimum(xx, w - 1 - xx), np.minimum(yy, h - 1 - yy))
+    n = fbm(h, w, r, base=base, octaves=4, periodic=False)
+    return smoothstep(0, edge, d - (n - 0.5) * edge * 2 * rough)
 
 
-def panel(size=32, accent=ACCENT):
-    """Cristal oscuro con borde, linea interior y esquinas de acento."""
-    a = canvas(size, size)
-    for y in range(size):
-        g = 1 - y / size * 0.35
-        for x in range(size):
-            base = tuple(int(c * (0.8 + 0.4 * g)) for c in GLASS)
-            alpha = 205 if y % 2 == 0 else 190  # lineas de barrido
-            put(a, x, y, base, alpha)
-    # Borde exterior negro y brillo superior
-    for i in range(size):
-        for p in ((i, 0), (i, size - 1), (0, i), (size - 1, i)):
-            put(a, *p, EDGE, 230)
-    for i in range(2, size - 2):
-        put(a, i, 1, (60, 90, 84), 120)
-    # Linea interior tenue
-    for i in range(3, size - 3):
-        for p in ((i, 3), (i, size - 4), (3, i), (size - 4, i)):
-            put(a, *p, ACCENT_DIM, 90)
-    corner_brackets(a, 1, 1, size - 2, size - 2, 6, accent, 235)
-    return a
+# Pantalla completa -------------------------------------------------------------------------------------
+
+def vignette():
+    r = R(1)
+    S = 256
+    cv = Canvas(S, S, (0, 0, 0), 0)
+    yy, xx = np.mgrid[0:S, 0:S].astype(float)
+    d = np.hypot((xx - S / 2) / (S / 2), (yy - S / 2) / (S / 2))
+    n = fbm(S, S, r, base=5, octaves=5, periodic=False)
+    a = smoothstep(0.45, 1.25, d + (n - 0.5) * 0.35)
+    cv.a = np.clip(a ** 1.3, 0, 1)
+    # algo de mancha en las esquinas (lente sucia)
+    cv.c[:] = 0
+    return save(cv, "vignette")
+
+
+def blood_vignette():
+    """Venas y sangre que entran desde los bordes; se tine y late con la vida baja."""
+    r = R(2)
+    S = 256
+    cv = Canvas(S, S, (0, 0, 0), 0)
+    yy, xx = np.mgrid[0:S, 0:S].astype(float)
+    d = np.hypot((xx - S / 2) / (S / 2), (yy - S / 2) / (S / 2))
+    m = smoothstep(0.75, 1.3, d + (fbm(S, S, r, base=4, octaves=5, periodic=False) - 0.5) * 0.5)
+    # venas: paseos aleatorios desde el borde hacia dentro, ramificandose
+    veins = Image.new("L", (S, S), 0)
+    dr = ImageDraw.Draw(veins)
+    for i in range(34):
+        side = i % 4
+        t = r.uniform(0, S)
+        x, y = [(t, 0), (S - 1, t), (t, S - 1), (0, t)][side]
+        ang = math.atan2(S / 2 - y, S / 2 - x) + r.uniform(-0.5, 0.5)
+        stack = [(x, y, ang, r.uniform(40, 90), 3.0)]
+        while stack:
+            x, y, ang, ln, wd = stack.pop()
+            for _ in range(int(ln)):
+                ang += r.uniform(-0.35, 0.35)
+                nx, ny = x + math.cos(ang) * 2, y + math.sin(ang) * 2
+                dr.line([(x, y), (nx, ny)], fill=255, width=max(1, int(wd)))
+                x, y = nx, ny
+                wd *= 0.985
+                if r.random() < 0.04 and wd > 1.2:
+                    stack.append((x, y, ang + r.choice([-1, 1]) * r.uniform(0.5, 1.1), ln * 0.5, wd * 0.7))
+    v = np.asarray(veins, dtype=float) / 255
+    v *= smoothstep(0.35, 0.95, d)
+    a = np.maximum(m * 0.9, v * 0.85)
+    cv.a = np.clip(a, 0, 1)
+    col = np.zeros((S, S, 3)) + (120, 6, 8)
+    col = col * (0.6 + 0.6 * fbm(S, S, r, base=6, octaves=3, periodic=False))[..., None]
+    col[v > 0.5] *= 0.7
+    cv.c = col
+    return save(cv, "blood_vignette")
+
+
+def grain():
+    r = R(3)
+    S = 128
+    cv = Canvas(S, S, (0, 0, 0), 0)
+    w = white(S, S, r)
+    cv.c[:] = (w[..., None] > 0.5) * 255
+    cv.a = np.abs(w - 0.5) * 2
+    # rayas verticales de pelicula vieja
+    for _ in range(3):
+        x = r.integers(S)
+        cv.a[:, x] = np.maximum(cv.a[:, x], 0.6 * (white(S, 1, r)[:, 0] > 0.3))
+        cv.c[:, x] = 220
+    return save(cv, "grain")
+
+
+# Fondos y barras -----------------------------------------------------------------------------------
+
+def smear(name, seed, w=128, h=40, color=(8, 6, 6), alpha=0.82):
+    """Fondo de brochazo oscuro, con borde irregular y estrias del pincel."""
+    r = R(seed)
+    cv = Canvas(w, h, color, 0)
+    m = ragged_rect(w, h, r, edge=7, rough=1.0, base=6)
+    yy = np.arange(h)[:, None]
+    stri = 0.88 + 0.12 * np.sin(yy * 1.7 + fbm(h, w, r, base=3, octaves=2, periodic=False) * 6)
+    cv.a = np.clip(m * stri * alpha, 0, 1)
+    cv.c = cv.c + (fbm(h, w, r, base=4, octaves=3, periodic=False)[..., None] * 18)
+    return save(cv, name, nine=(w, h, 12))
+
+
+def bar(name, seed, w, h, color, dry=False, empty=False):
+    """Trazo de pincel para las barras: sangre (vida), luz (bateria) o su hueco vacio."""
+    r = R(seed)
+    cv = Canvas(w, h, color, 0)
+    yy, xx = np.mgrid[0:h, 0:w].astype(float)
+    n = fbm(h, w, r, base=8, octaves=3, periodic=False)
+    top = 1 + n * 1.3
+    bot = h - 1.5 - (1 - n) * 1.3
+    m = smoothstep(top - 0.6, top + 0.6, yy) * smoothstep(bot + 0.6, bot - 0.6, yy)
+    m *= smoothstep(-1, 2, xx) * smoothstep(w + 1, w - 3, xx)
+    stri = np.sin(yy * 3.1 + n * 4) > -0.7
+    cv.a = np.clip(m * (0.75 + 0.25 * stri), 0, 1)
+    if empty:
+        cv.a *= 0.55
+        cv.c = cv.c * (0.8 + 0.4 * fbm(h, w, r, base=6, octaves=2, periodic=False))[..., None]
+        return save(cv, name)
+    if color[0] > color[1] * 2:  # sangre
+        tmp = Canvas(w, h)
+        apply_blood(tmp, r, (m > 0.2).astype(float), age=0.25 if not dry else 0.8)
+        cv.c = tmp.c * 1.25
+        cv.c[(yy < top + 1.5) & (m > 0.4)] *= 1.35                   # brillo humedo arriba
+    else:
+        cv.c = np.zeros((h, w, 3)) + color
+        cv.c *= (0.85 + 0.3 * fbm(h, w, r, base=6, octaves=2, periodic=False))[..., None]
+        cv.c[(yy < top + 1.2) & (m > 0.4)] *= 1.25
+    return save(cv, name)
+
+
+def heart():
+    """Corazon anatomico de 16x16: auriculas, aorta y venas, en rojo oscuro."""
+    r = R(5)
+    S = 16
+    n = 6
+    im = Image.new("L", (S * n, S * n), 0)
+    d = ImageDraw.Draw(im)
+    d.ellipse([2.5 * n, 5 * n, 13.5 * n, 15 * n], fill=255)
+    d.polygon([(3 * n, 10 * n), (8.5 * n, 15.8 * n), (13 * n, 9 * n)], fill=255)
+    d.ellipse([2 * n, 3.5 * n, 7.5 * n, 9 * n], fill=255)                 # auricula
+    d.rectangle([7 * n, 0.5 * n, 10 * n, 6 * n], fill=255)                # aorta
+    d.rectangle([10.5 * n, 1.5 * n, 12.5 * n, 6.5 * n], fill=255)         # pulmonar
+    d.rectangle([4 * n, 1.5 * n, 6 * n, 5 * n], fill=255)
+    m = np.asarray(im.resize((S, S), Image.BOX), dtype=float) / 255
+    cv = Canvas(S, S, (120, 16, 20), 0)
+    cv.a = (m > 0.45).astype(float)
+    yy, xx = np.mgrid[0:S, 0:S].astype(float)
+    cv.c *= (1.25 - 0.05 * (xx + yy - 10))[..., None].clip(0.5, 1.5)
+    # venas coronarias oscuras y brillo humedo
+    for (x0, y0), (x1, y1) in (((8, 7), (6, 14)), ((9, 7), (12, 12)), ((7, 9), (4, 11))):
+        for t in np.linspace(0, 1, 12):
+            x, y = int(round(x0 + (x1 - x0) * t + math.sin(t * 6) * 0.6)), int(round(y0 + (y1 - y0) * t))
+            if 0 <= x < S and 0 <= y < S and cv.a[y, x]:
+                cv.c[y, x] = (60, 10, 30)
+    cv.c[6, 4:6] = (230, 120, 120)
+    cv.c[7, 4] = (200, 90, 90)
+    cv.c[1:4, 7:10] = (150, 60, 60)
+    cv.c[1, 7:10] = (190, 110, 100)
+    # contorno
+    a = cv.a > 0.5
+    ring = np.zeros_like(a)
+    for dy, dx in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+        ring |= np.roll(np.roll(a, dy, 0), dx, 1)
+    ring &= ~a
+    cv.c[ring] = (20, 4, 4)
+    cv.a[ring] = 1
+    return save(cv, "heart")
+
+
+def bulb():
+    """Icono de bombilla (bateria de la linterna), 12x12."""
+    S = 12
+    cv = Canvas(S, S, (210, 190, 120), 0)
+    yy, xx = np.mgrid[0:S, 0:S].astype(float)
+    glass = np.hypot(xx - 5.5, yy - 4.5) <= 4.3
+    base = (yy >= 8) & (yy <= 10) & (np.abs(xx - 5.5) <= 2)
+    cv.a = (glass | base).astype(float)
+    cv.c[glass] = np.array([220, 200, 130]) * (1.2 - 0.05 * (xx + yy)[glass])[:, None].clip(0.6, 1.3)
+    cv.c[base] = (120, 116, 106)
+    cv.c[9, 3:9] = (70, 66, 60)
+    for x, y in ((4, 4), (5, 5), (6, 4), (7, 5)):
+        cv.c[y, x] = (130, 90, 40)                                         # filamento
+    cv.c[2, 3:5] = (255, 250, 220)
+    a = cv.a > 0.5
+    ring = np.zeros_like(a)
+    for dy, dx in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+        ring |= np.roll(np.roll(a, dy, 0), dx, 1)
+    ring &= ~a
+    cv.c[ring] = (10, 8, 6)
+    cv.a[ring] = 0.9
+    return save(cv, "bulb")
 
 
 def slot(selected):
-    s = 24
-    a = canvas(s, s)
-    for y in range(s):
-        for x in range(s):
-            put(a, x, y, (8, 13, 12), 185 if y % 2 else 200)
-    for i in range(s):
-        for p in ((i, 0), (i, s - 1), (0, i), (s - 1, i)):
-            put(a, *p, EDGE, 230)
+    """Hueco de inventario: chapa sucia y aranada; el elegido, con marco de sangre."""
+    r = R(6 + selected)
+    S = 24
+    cv = Canvas(S, S, (16, 14, 13), 0.78)
+    cv.c = cv.c * (0.8 + 0.5 * fbm(S, S, r, base=3, octaves=3, periodic=False))[..., None]
+    m = ragged_rect(S, S, r, edge=1.6, rough=0.7, base=5)
+    cv.a = np.clip(m, 0, 1) * 0.8
+    yy, xx = np.mgrid[0:S, 0:S]
+    d = np.minimum(np.minimum(xx, S - 1 - xx), np.minimum(yy, S - 1 - yy))
+    rim = (d >= 1) & (d <= 1)
     if selected:
-        # Halo interior
-        for y in range(1, s - 1):
-            for x in range(1, s - 1):
-                d = min(x - 1, y - 1, s - 2 - x, s - 2 - y)
-                if d < 4:
-                    put(a, x, y, ACCENT, 70 * (1 - d / 4))
-        for i in range(1, s - 1):
-            for p in ((i, 1), (i, s - 2), (1, i), (s - 2, i)):
-                put(a, *p, ACCENT, 230)
-        corner_brackets(a, 0, 0, s - 1, s - 1, 5, (190, 255, 240), 255)
+        fr = Canvas(S, S)
+        mm = ((d >= 1) & (d <= 2)).astype(float) * (white(S, S, r) > 0.12)
+        apply_blood(fr, r, mm, age=0.2)
+        cv.c = np.where(mm[..., None] > 0, fr.c * 1.4, cv.c)
+        cv.a = np.where(mm > 0, 1.0, cv.a)
+        # goterones del marco
+        for x in (5, 13, 19):
+            for y in range(S - 3, S):
+                cv.c[y, x] = (110, 10, 12)
+                cv.a[y, x] = 1
     else:
-        for i in range(2, s - 2):
-            for p in ((i, 1), (i, s - 2), (1, i), (s - 2, i)):
-                put(a, *p, (54, 74, 70), 160)
-        corner_brackets(a, 1, 1, s - 2, s - 2, 3, ACCENT_DIM, 200)
-    return a
+        cv.c[rim] = (70, 66, 60)
+        cv.a[rim & (white(S, S, r) > 0.25)] = 0.9
+    # aranazos
+    for _ in range(4):
+        x, y = r.integers(3, S - 3), r.integers(3, S - 3)
+        a = r.uniform(0, math.pi)
+        for i in range(int(r.integers(2, 6))):
+            xx_, yy_ = int(x + math.cos(a) * i), int(y + math.sin(a) * i)
+            if 2 <= xx_ < S - 2 and 2 <= yy_ < S - 2:
+                cv.c[yy_, xx_] = cv.c[yy_, xx_] * 0.5 + 40
+    return save(cv, "slot_selected" if selected else "slot")
 
 
-HEART = [
-    "..XX...XX..",
-    ".XXXX.XXXX.",
-    "XXXXXXXXXXX",
-    "XXXXXXXXXXX",
-    "XXXXXXXXXXX",
-    ".XXXXXXXXX.",
-    "..XXXXXXX..",
-    "...XXXXX...",
-    "....XXX....",
-    ".....X.....",
-]
+def tape():
+    """Trozo de cinta de carrocero para las teclas (nine-slice)."""
+    r = R(8)
+    w, h = 32, 14
+    cv = Canvas(w, h, (178, 164, 124), 0.92)
+    cv.c = cv.c * (0.85 + 0.25 * fbm(h, w, r, base=4, octaves=3, periodic=False))[..., None]
+    yy, xx = np.mgrid[0:h, 0:w].astype(float)
+    # bordes cortados en dientes de sierra a izquierda y derecha
+    teeth = (np.abs((yy % 3) - 1)) * 0.9
+    m = (xx >= teeth) & (xx <= w - 1 - teeth)
+    cv.a = np.where(m, 0.94, 0)
+    cv.c[0, :] *= 0.85
+    cv.c[h - 1, :] *= 0.75
+    cv.mix((90, 70, 40), smoothstep(0.6, 1, fbm(h, w, r, base=3, octaves=2, periodic=False)) * 0.5)
+    return save(cv, "tape", nine=(w, h, 4))
 
 
-def heart(color):
-    a = canvas(13, 12)
-    # Contorno oscuro
-    for y, row in enumerate(HEART):
-        for x, c in enumerate(row):
-            if c == "X":
-                for dx, dy in ((-1, 0), (1, 0), (0, -1), (0, 1)):
-                    put(a, x + 1 + dx, y + 1 + dy, (20, 4, 6), 230)
-    for y, row in enumerate(HEART):
-        for x, c in enumerate(row):
-            if c == "X":
-                shade = 1.0 - 0.35 * (y / len(HEART))
-                put(a, x + 1, y + 1, tuple(int(v * shade) for v in color), 255)
-    # Brillo
-    for p in ((3, 2), (4, 2), (3, 3), (2, 3)):
-        put(a, *p, (255, 210, 210), 200)
-    return a
+def note():
+    """Papel rasgado y manchado (panel del ascensor del lobby), nine-slice."""
+    r = R(9)
+    w, h = 96, 64
+    cv = Canvas(w, h, (172, 162, 132), 0)
+    cv.c = cv.c * (0.82 + 0.25 * fbm(h, w, r, base=5, octaves=4, periodic=False))[..., None]
+    m = ragged_rect(w, h, r, edge=3, rough=1.2, base=10)
+    cv.a = (m > 0.5) * 0.96
+    yy, xx = np.mgrid[0:h, 0:w]
+    # lineas de libreta y cerco de cafe/sangre
+    cv.c[(yy % 8 == 7) & (xx > 10)] *= 0.86
+    cv.mix((110, 80, 40), smoothstep(0.6, 1, fbm(h, w, r, base=3, octaves=3, periodic=False)) * 0.45)
+    s = splat_mask(h, w, r, w - 14, 12, 4, drops=8)
+    tmp = Canvas(w, h)
+    tmp.c = cv.c.copy()
+    apply_blood(tmp, r, s, age=0.7)
+    cv.c = tmp.c
+    # se oscurece hacia el borde
+    d = np.minimum(np.minimum(xx, w - 1 - xx), np.minimum(yy, h - 1 - yy))
+    cv.c *= (0.7 + 0.3 * smoothstep(0, 8, d))[..., None]
+    return save(cv, "note", nine=(w, h, 14))
 
 
-def pip(on):
-    a = canvas(7, 7)
-    for y in range(7):
-        for x in range(7):
-            d = math.hypot(x - 3, y - 3)
-            if on:
-                if d <= 2.2:
-                    put(a, x, y, ACCENT, 255)
-                elif d <= 3.4:
-                    put(a, x, y, ACCENT, 90)
-            else:
-                if 1.6 <= d <= 2.6:
-                    put(a, x, y, (90, 120, 114), 200)
-    return a
+def panel(name, alert):
+    """Panel oscuro (depuracion): ahora sucio, sin el aspecto de monitor."""
+    r = R(10 + alert)
+    S = 32
+    cv = Canvas(S, S, (14, 10, 10) if not alert else (36, 6, 8), 0.85)
+    m = ragged_rect(S, S, r, edge=3, rough=0.8, base=4)
+    cv.a = m * 0.86
+    cv.c = cv.c * (0.8 + 0.5 * fbm(S, S, r, base=3, octaves=3, periodic=False))[..., None]
+    return save(cv, name, nine=(S, S, 8))
 
 
-def vignette(size=128):
-    """Degradado radial: transparente en el centro y opaco en los bordes (se tinta en el juego)."""
-    a = canvas(size, size)
-    c = (size - 1) / 2
-    for y in range(size):
-        for x in range(size):
-            d = math.hypot((x - c) / c, (y - c) / c) / math.sqrt(2)
-            k = max(0.0, (d - 0.35) / 0.65)
-            put(a, x, y, (255, 255, 255), 255 * (k ** 1.6))
-    return a
+def pips():
+    r = R(12)
+    S = 7
+    on = Canvas(S, S, (0, 0, 0), 0)
+    m = splat_mask(S, S, r, 3, 3.4, 2.4, drops=0, lumpy=0.2)
+    apply_blood(on, r, (m > 0.4).astype(float), age=0.2)
+    on.a = (m > 0.4).astype(float)
+    on.c[1, 2] = (200, 90, 90)
+    save(on, "pip_on")
+    off = Canvas(S, S, (150, 140, 120), 0)
+    yy, xx = np.mgrid[0:S, 0:S]
+    d = np.hypot(xx - 3, yy - 3)
+    off.a = ((d > 2) & (d < 3.2) & (white(S, S, r) > 0.15)).astype(float) * 0.85
+    save(off, "pip_off")
 
 
 def main():
-    save("panel", panel(), nine=(32, 32, 8))
-    save("panel_alert", panel(accent=DANGER), nine=(32, 32, 8))
-    save("slot", slot(False))
-    save("slot_selected", slot(True))
-    save("heart", heart((232, 48, 62)))
-    save("pip_on", pip(True))
-    save("pip_off", pip(False))
-    save("vignette", vignette())
-    print("Sprites del HUD en", ROOT)
+    ROOT.mkdir(parents=True, exist_ok=True)
+    made = [vignette(), blood_vignette(), grain(), smear("smear", 20), smear("smear_small", 21, 64, 24),
+            bar("bar_blood", 30, 100, 8, (120, 8, 10)), bar("bar_empty", 31, 100, 8, (40, 14, 12), empty=True),
+            bar("bar_light", 32, 64, 6, (196, 180, 104)), bar("bar_light_empty", 33, 64, 6, (40, 38, 30), empty=True),
+            heart(), bulb(), slot(False), slot(True), tape(), note(), panel("panel", 0), panel("panel_alert", 1)]
+    pips()
+    print(len(made) + 2, "sprites")
     if len(sys.argv) > 1:
-        preview(sys.argv[1])
-
-
-# Vista previa aproximada (fuente y escalado no son los del juego) ------------------------
-
-def preview(path):
-    from PIL import ImageDraw, ImageFont
-    S = 3
-    W, H = 427, 240  # GUI 1280x720 a escala 3
-    bg = Image.new("RGBA", (W, H), (30, 34, 32, 255))
-    # Fondo oscuro de laboratorio con un poco de luz
-    d = ImageDraw.Draw(bg)
-    for y in range(H):
-        v = int(18 + 22 * (1 - abs(y - H * 0.45) / H))
-        d.line([(0, y), (W, y)], fill=(v, v + 4, v + 2, 255))
-    sp = lambda n: Image.open(ROOT / f"{n}.png").convert("RGBA")
-
-    def nine(img, w, h, b=8):
-        out = Image.new("RGBA", (w, h))
-        iw, ih = img.size
-        boxes = [(0, b), (b, iw - b), (iw - b, iw)]
-        ys = [(0, b), (b, ih - b), (ih - b, ih)]
-        tx = [(0, b), (b, w - b), (w - b, w)]
-        ty = [(0, b), (b, h - b), (h - b, h)]
-        for j in range(3):
-            for i in range(3):
-                part = img.crop((boxes[i][0], ys[j][0], boxes[i][1], ys[j][1]))
-                tw, th = tx[i][1] - tx[i][0], ty[j][1] - ty[j][0]
-                if tw > 0 and th > 0:
-                    out.paste(part.resize((tw, th), Image.NEAREST), (tx[i][0], ty[j][0]))
-        return out
-
-    vig = sp("vignette").resize((W, H), Image.BILINEAR)
-    r, g, b, al = vig.split()
-    dark = Image.merge("RGBA", (r.point(lambda v: 0), g.point(lambda v: 0), b.point(lambda v: 0), al.point(lambda v: int(v * 0.5))))
-    bg.alpha_composite(dark)
-    try:
-        f = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf", 7)
-        fb = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf", 14)
-        fs = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf", 6)
-    except OSError:
-        f = fb = fs = ImageFont.load_default()
-    d = ImageDraw.Draw(bg)
-
-    # Panel de constantes vitales
-    px, py, pw, ph = 8, H - 38, 138, 30
-    bg.alpha_composite(nine(sp("panel"), pw, ph), (px, py))
-    bg.alpha_composite(sp("heart"), (px + 7, py + 9))
-    d.text((px + 25, py + 4), "CONSTANTES", fill=(130, 150, 145), font=fs)
-    d.text((px + pw - 26, py + 4), "72%", fill=(220, 232, 228), font=fs)
-    # ECG
-    ex, ey, ew, eh = px + 25, py + 12, pw - 33, 9
-    def ecg(p):
-        if 0.10 < p < 0.18: return 0.15 * math.sin((p - 0.10) / 0.08 * math.pi)
-        if 0.26 < p < 0.29: return -0.25
-        if 0.29 <= p < 0.33: return 1.0
-        if 0.33 <= p < 0.36: return -0.45
-        if 0.50 < p < 0.66: return 0.25 * math.sin((p - 0.50) / 0.16 * math.pi)
-        return 0.0
-    prev = None
-    for x in range(ew):
-        p = ((x / 46.0) + 0.4) % 1.0
-        y = int(ey + eh / 2 - ecg(p) * (eh / 2))
-        fade = 0.35 + 0.65 * (x / ew)
-        col = tuple(int(c * fade) for c in ACCENT) + (255,)
-        if prev is not None:
-            for yy in range(min(prev, y), max(prev, y) + 1):
-                d.point((ex + x, yy), fill=col)
-        prev = y
-    # Barra segmentada
-    bx, by = px + 25, py + 23
-    for i in range(10):
-        col = (226, 44, 58, 255) if i < 7 else (40, 18, 20, 255)
-        d.rectangle([bx + i * 10, by, bx + i * 10 + 8, by + 3], fill=col)
-
-    # Huecos
-    sx = W // 2 - (4 * 24 + 3 * 4) // 2
-    sy = H - 32
-    for i in range(4):
-        bg.alpha_composite(sp("slot_selected" if i == 1 else "slot"), (sx + i * 28, sy))
-        d.text((sx + i * 28 + 3, sy + 2), str(i + 1), fill=(130, 150, 145) if i != 1 else (190, 255, 240), font=fs)
-    d.text((W // 2, sy - 8), "Linterna", fill=(220, 232, 228), font=f, anchor="mm")
-
-    # Punto de mira
-    d.rectangle([W // 2 - 1, H // 2 - 1, W // 2 + 1, H // 2 + 1], fill=(0, 0, 0, 150))
-    d.point((W // 2, H // 2), fill=(240, 240, 240, 255))
-
-    # Panel del ascensor
-    rw, rh = 170, 56
-    rx, ry = W // 2 - rw // 2, 8
-    bg.alpha_composite(nine(sp("panel"), rw, rh), (rx, ry))
-    d.text((W // 2, ry + 8), "ASCENSOR 1", fill=ACCENT + (255,), font=fs, anchor="mm")
-    d.text((W // 2, ry + 21), "3/4", fill=(240, 224, 64, 255), font=fb, anchor="mm")
-    for i in range(4):
-        bg.alpha_composite(sp("pip_on" if i < 3 else "pip_off"), (W // 2 - 16 + i * 9, ry + 32))
-    d.text((W // 2, ry + 47), "Pulsa el botón cuando estés listo", fill=(180, 196, 190, 255), font=fs, anchor="mm")
-
-    bg = bg.resize((W * S, H * S), Image.NEAREST)
-    bg.save(path)
+        from texlib import sheet
+        ims = [c.image() for c in made]
+        sheet(ims, 6, 2, labels=None, bg=(120, 116, 104)).save(sys.argv[1])
 
 
 if __name__ == "__main__":

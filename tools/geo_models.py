@@ -561,7 +561,7 @@ class Geo:
             "format_version": "1.12.0",
             "minecraft:geometry": [{
                 "description": {"identifier": f"geometry.{self.name}", "texture_width": TW, "texture_height": TH,
-                                "visible_bounds_width": 4, "visible_bounds_height": 3, "visible_bounds_offset": [0, 1, 0]},
+                                "visible_bounds_width": 5, "visible_bounds_height": 3, "visible_bounds_offset": [0, 1, 0]},
                 "bones": bones_out,
             }],
         }
@@ -689,41 +689,56 @@ def waste_container():
 
 
 def gurney():
+    """Camilla de dos bloques: la cabecera en el bloque raiz (Z de -8 a 8) y los pies hacia +Z (hasta 24)."""
     g = Geo("gurney", 8)
     g.bone("root")
-    # bastidor y patas con ruedas
-    g.cube("root", (-7.5, 8.5, -7.5), (15, 1, 15), "steel")
-    for x, z in ((-7, -7), (6, -7), (-7, 6), (6, 6)):
-        g.cube("root", (x, 1.8, z), (1, 6.7, 1), "chrome")
-        g.cube("root", (x - 0.25, 1.2, z - 0.25), (1.5, 0.6, 1.5), "steel")
-        g.cube("root", (x - 0.2, 0, z - 0.6), (1.4, 1.6, 2.2), "rubber")
-    g.cube("root", (-7, 3.5, -0.5), (14, 1, 1), "steel")
-    g.cube("root", (-0.5, 3.5, -7), (1, 1, 14), "steel")
-    # colchon con cabecero levantado
-    g.cube("root", (-7, 9.5, -7), (14, 2, 10), "mattress")
-    g.cube("root", (-7, 9.5, 3), (14, 2, 4.2), "mattress", rotation=(-25, 0, 0), pivot=(0, 10.5, 3))
-    # sabana arrugada que cuelga por un lado
-    g.cube("root", (-7.3, 11.4, -7.2), (14.6, 0.5, 9.5), "sheet")
-    g.cube("root", (-7.6, 6.5, -6), (0.4, 5.4, 8), "sheet_torn")
-    # correas de sujecion con hebilla
-    for z in (-4.5, 0.5):
-        g.cube("root", (-7.4, 11.5, z), (14.8, 0.7, 1.6), "leather", blood=False)
-        g.cube("root", (5.2, 11.6, z + 0.1), (1.2, 0.9, 1.4), "chrome", blood=False)
-    # barandillas abatibles
-    for x in (-8, 7.2):
-        g.cube("root", (x, 13.5, -6), (0.8, 0.8, 10), "chrome")
-        for z in (-6, 3.2):
-            g.cube("root", (x, 9.5, z), (0.8, 4, 0.8), "chrome")
-    # gotero con bolsa de sangre
-    g.cube("root", (6.4, 9.5, 6.4), (0.6, 18, 0.6), "chrome")
-    g.cube("root", (3, 27, 6.4), (4, 0.5, 0.5), "chrome")
-    g.cube("root", (3, 22, 5.9), (2.2, 4.5, 1.4), "blood_bag", blood=False)
-    g.cube("root", (3.9, 15, 6.4), (0.3, 7, 0.3), "blood_bag", blood=False)
-    # la mancha: empapa el colchon, la sabana y gotea al suelo
-    g.blood("splat", (-1, 12, -2), 4.5)
-    g.blood("splat", (2, 11.5, 2.5), 2.2)
-    g.blood("drip", -7.4, -1, 11.5, 7)
-    g.blood("drip", -7.4, -3, 11, 5)
+    z0, z1 = -7.5, 23.5
+    L = z1 - z0
+    # bastidor, patas con ruedas y travesanos
+    g.cube("root", (-7.5, 8.5, z0), (15, 1, L), "steel")
+    for x in (-7, 6):
+        for z in (z0 + 0.5, z1 - 1.5):
+            g.cube("root", (x, 1.8, z), (1, 6.7, 1), "chrome")
+            g.cube("root", (x - 0.25, 1.2, z - 0.25), (1.5, 0.6, 1.5), "steel")
+            g.cube("root", (x - 0.2, 0, z - 0.6), (1.4, 1.6, 2.2), "rubber")
+    g.cube("root", (-7, 3.5, 7.5), (14, 1, 1), "steel")
+    g.cube("root", (-0.5, 3.5, z0 + 1), (1, 1, L - 2), "steel")
+    g.cube("root", (-6, 5, 0), (12, 0.6, 14), "steel_dark")                     # bandeja de abajo
+    # colchon con el cabecero levantado (hacia -Z)
+    g.cube("root", (-7, 9.5, -1.5), (14, 2, 24.5), "mattress")
+    g.cube("root", (-7, 9.5, -8.2), (14, 2, 7), "mattress", rotation=(-28, 0, 0), pivot=(0, 10.5, -1.5))
+    g.cube("root", (-5.5, 11.5, -6.8), (11, 1.8, 4), "sheet", rotation=(-28, 0, 0), pivot=(0, 10.5, -1.5))  # almohada
+    # sabana arrugada: cubre los pies y cuelga por un lado
+    g.cube("root", (-7.3, 11.4, 6), (14.6, 0.5, 17.8), "sheet")
+    g.cube("root", (-7.3, 11.9, 6), (14.6, 1.0, 2.5), "sheet")                   # doblez
+    g.cube("root", (-7.7, 5.5, 8), (0.4, 6.4, 14), "sheet_torn")
+    # correas de sujecion con hebilla (pecho, cintura y tobillos)
+    for z in (1.5, 9, 19):
+        g.cube("root", (-7.4, 11.6, z), (14.8, 0.7, 1.8), "leather", blood=False)
+        g.cube("root", (5.0, 11.7, z + 0.1), (1.3, 0.9, 1.6), "chrome", blood=False)
+        for x in (-7.8, 7.1):
+            g.cube("root", (x, 9.5, z), (0.7, 2.8, 1.8), "leather", blood=False)
+    # barandillas laterales
+    for x in (-8.2, 7.4):
+        g.cube("root", (x, 14, -0.5), (0.8, 0.8, 14), "chrome")
+        for z in (-0.5, 12.7):
+            g.cube("root", (x, 9.5, z), (0.8, 4.5, 0.8), "chrome")
+    # asa de los pies
+    g.cube("root", (-6, 13.5, z1 - 0.8), (12, 0.8, 0.8), "chrome")
+    for x in (-6, 5.2):
+        g.cube("root", (x, 9.5, z1 - 0.8), (0.8, 4, 0.8), "chrome")
+    # gotero con bolsa de sangre en la cabecera
+    g.cube("root", (6.6, 9.5, -7.4), (0.6, 19, 0.6), "chrome")
+    g.cube("root", (3, 28, -7.4), (4.2, 0.5, 0.6), "chrome")
+    g.cube("root", (3, 23, -7.9), (2.4, 4.8, 1.4), "blood_bag", blood=False)
+    g.cube("root", (4.0, 14, -7.3), (0.3, 9, 0.3), "blood_bag", blood=False)
+    # la mancha: empapa el colchon y la sabana y gotea al suelo
+    g.blood("splat", (-1, 12, 4), 5.0)
+    g.blood("splat", (2, 11.8, 12), 2.6)
+    g.blood("splat", (-2, 12.5, -4), 2.0)
+    g.blood("drip", -7.6, 10, 11.5, 7)
+    g.blood("drip", -7.6, 13, 11, 5)
+    g.blood("splat", (-8, 0.2, 11), 2.4)
     return g.save()
 
 

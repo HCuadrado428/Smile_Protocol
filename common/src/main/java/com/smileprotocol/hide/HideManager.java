@@ -109,6 +109,10 @@ public final class HideManager {
         int n = occupants(spot);
         Vec3 side = Vec3.atLowerCornerOf(facing.getClockWise().getNormal()).scale(type.capacity() > 1 ? (n == 0 ? -0.18 : 0.18) : 0);
         Vec3 anchor = Vec3.atBottomCenterOf(spot).add(side).add(0, block.kind() == HideBlock.Kind.ENCLOSED ? 0.0625 : 0, 0);
+        if (block.kind() == HideBlock.Kind.LOW) {
+            // Bajo la camilla: en medio de las dos mitades
+            anchor = anchor.add(Vec3.atLowerCornerOf(facing.getNormal()).scale(0.5));
+        }
         if (block.kind() == HideBlock.Kind.CURTAIN) {
             anchor = anchor.add(Vec3.atLowerCornerOf(facing.getOpposite().getNormal()).scale(0.3));
         }
@@ -155,7 +159,17 @@ public final class HideManager {
         p.setInvisible(false);
         MotionManager.clearAction(p, Action.HIDDEN);
         if (teleportOut) {
+            // La camilla ocupa el bloque de delante: se sale por un lado
+            BlockState st = level.getBlockState(h.spot);
+            boolean low = st.getBlock() instanceof HideBlock hb && hb.kind() == HideBlock.Kind.LOW;
             Vec3 out = Vec3.atBottomCenterOf(h.spot.relative(h.facing));
+            if (low) {
+                Direction side = h.facing.getClockWise();
+                if (!level.getBlockState(h.spot.relative(side)).getCollisionShape(level, h.spot.relative(side)).isEmpty()) {
+                    side = side.getOpposite();
+                }
+                out = Vec3.atBottomCenterOf(h.spot.relative(side)).add(Vec3.atLowerCornerOf(h.facing.getNormal()).scale(0.5));
+            }
             SPSessionManager.teleport(p, level, out, h.yaw, 0f);
         }
         if (occupants(h.spot) == 0) {

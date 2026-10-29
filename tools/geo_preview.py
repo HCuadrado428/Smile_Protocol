@@ -46,7 +46,7 @@ NORMALS = {"north": (0, 0, -1), "south": (0, 0, 1), "east": (1, 0, 0), "west": (
            "down": (0, -1, 0)}
 
 
-def render(name, size=360, yaw=35, pitch=-25, light=1.0):
+def render(name, size=360, yaw=35, pitch=-25, light=1.0, bg=(34, 34, 38, 255), skip_bones=()):
     geo = json.loads((ROOT / "geo/block" / f"{name}.geo.json").read_text())["minecraft:geometry"][0]
     tex = np.asarray(Image.open(ROOT / "textures/block" / f"{name}.png").convert("RGBA"))
     cam = rot_matrix(pitch, 0, 0) @ rot_matrix(0, yaw, 0)
@@ -54,6 +54,8 @@ def render(name, size=360, yaw=35, pitch=-25, light=1.0):
     ldir /= np.linalg.norm(ldir)
     quads = []
     for b in geo["bones"]:
+        if b["name"] in skip_bones:
+            continue
         for c in b.get("cubes", []):
             o, s = c["origin"], c["size"]
             R = np.eye(3)
@@ -87,7 +89,7 @@ def render(name, size=360, yaw=35, pitch=-25, light=1.0):
     allp = np.array([p for q in quads for p in q[1]])
     mn, mx = allp.min(0), allp.max(0)
     k = (size - 20) / max(mx - mn)
-    img = Image.new("RGB", (size, size), (34, 34, 38))
+    img = Image.new("RGBA", (size, size), bg)
     d = ImageDraw.Draw(img)
     off = (size - (mx - mn) * k) / 2
     for z, pts, col in quads:
@@ -105,7 +107,7 @@ def main():
     rows = (len(ims) + cols - 1) // cols
     sheet = Image.new("RGB", (cols * 360, rows * 360), (20, 20, 20))
     for i, im in enumerate(ims):
-        sheet.paste(im, ((i % cols) * 360, (i // cols) * 360))
+        sheet.paste(im.convert("RGB"), ((i % cols) * 360, (i // cols) * 360))
     sheet.save(out)
 
 

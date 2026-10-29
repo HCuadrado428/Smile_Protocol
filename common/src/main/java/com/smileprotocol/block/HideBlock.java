@@ -87,6 +87,14 @@ public class HideBlock extends HorizontalDirectionalBlock implements SPInteracta
         return kind != Kind.LOW;
     }
 
+    /** Todos los escondites ocupan dos bloques: los altos hacia arriba y la camilla a lo largo (hacia FACING). */
+    public static Direction towardsOther(HideBlock b, BlockState st) {
+        boolean lower = st.getValue(HALF) == DoubleBlockHalf.LOWER;
+        if (b.isTall()) return lower ? Direction.UP : Direction.DOWN;
+        Direction f = st.getValue(FACING);
+        return lower ? f : f.getOpposite();
+    }
+
     @Override
     protected MapCodec<? extends HorizontalDirectionalBlock> codec() {
         return CODEC;
@@ -101,23 +109,27 @@ public class HideBlock extends HorizontalDirectionalBlock implements SPInteracta
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext ctx) {
         BlockPos pos = ctx.getClickedPos();
-        if (isTall() && !ctx.getLevel().getBlockState(pos.above()).canBeReplaced(ctx)) return null;
-        return defaultBlockState().setValue(FACING, ctx.getHorizontalDirection().getOpposite());
+        if (isTall()) {
+            if (!ctx.getLevel().getBlockState(pos.above()).canBeReplaced(ctx)) return null;
+            return defaultBlockState().setValue(FACING, ctx.getHorizontalDirection().getOpposite());
+        }
+        // Camilla: como una cama, se extiende hacia donde mira el jugador
+        Direction f = ctx.getHorizontalDirection();
+        if (!ctx.getLevel().getBlockState(pos.relative(f)).canBeReplaced(ctx)) return null;
+        return defaultBlockState().setValue(FACING, f);
     }
 
     @Override
     public void setPlacedBy(Level level, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack stack) {
-        if (isTall()) level.setBlock(pos.above(), state.setValue(HALF, DoubleBlockHalf.UPPER), Block.UPDATE_ALL);
+        level.setBlock(pos.relative(towardsOther(this, state)), state.setValue(HALF, DoubleBlockHalf.UPPER), Block.UPDATE_ALL);
     }
 
     @Override
     protected BlockState updateShape(BlockState state, Direction dir, BlockState neighbor, LevelAccessor level, BlockPos pos, BlockPos neighborPos) {
-        if (isTall()) {
+        if (dir == towardsOther(this, state)) {
             DoubleBlockHalf half = state.getValue(HALF);
-            if (dir.getAxis() == Direction.Axis.Y && (half == DoubleBlockHalf.LOWER) == (dir == Direction.UP)) {
-                if (!neighbor.is(this) || neighbor.getValue(HALF) == half) return Blocks.AIR.defaultBlockState();
-                return state.setValue(OPEN, neighbor.getValue(OPEN)).setValue(FACING, neighbor.getValue(FACING));
-            }
+            if (!neighbor.is(this) || neighbor.getValue(HALF) == half) return Blocks.AIR.defaultBlockState();
+            return state.setValue(OPEN, neighbor.getValue(OPEN)).setValue(FACING, neighbor.getValue(FACING));
         }
         return super.updateShape(state, dir, neighbor, level, pos, neighborPos);
     }
@@ -143,7 +155,7 @@ public class HideBlock extends HorizontalDirectionalBlock implements SPInteracta
 
     @Override
     public BlockPos root(Level level, BlockPos pos, BlockState state) {
-        return state.getValue(HALF) == DoubleBlockHalf.UPPER ? pos.below() : pos;
+        return state.getValue(HALF) == DoubleBlockHalf.UPPER ? pos.relative(towardsOther(this, state)) : pos;
     }
 
     /** Abre o cierra la puerta del escondite (las dos mitades). */
@@ -151,10 +163,9 @@ public class HideBlock extends HorizontalDirectionalBlock implements SPInteracta
         BlockState st = level.getBlockState(root);
         if (!(st.getBlock() instanceof HideBlock hb) || st.getValue(OPEN) == open) return;
         level.setBlock(root, st.setValue(OPEN, open), Block.UPDATE_CLIENTS);
-        if (hb.isTall()) {
-            BlockState up = level.getBlockState(root.above());
-            if (up.is(hb)) level.setBlock(root.above(), up.setValue(OPEN, open), Block.UPDATE_CLIENTS);
-        }
+        BlockPos other = root.relative(towardsOther(hb, st));
+        BlockState up = level.getBlockState(other);
+        if (up.is(hb)) level.setBlock(other, up.setValue(OPEN, open), Block.UPDATE_CLIENTS);
     }
 
     @Nullable

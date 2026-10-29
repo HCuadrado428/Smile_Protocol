@@ -60,7 +60,7 @@
   "smileprotocol.command.debug.on": "Debug mode on.",
   "smileprotocol.command.debug.off": "Debug mode off.",
   "smileprotocol.command.test.enter": "%s players in the test room.",
-  "smileprotocol.hud.vitals": "VITALS",
+  "smileprotocol.hud.vitals": "PULSE",
   "smileprotocol.run.no_dimension": "The instance dimension does not exist.",
   "smileprotocol.run.nobody": "Nobody can go down.",
   "smileprotocol.run.no_space": "No room: %s slots needed, %s free.",

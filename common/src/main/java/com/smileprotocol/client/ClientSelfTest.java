@@ -140,6 +140,10 @@ public final class ClientSelfTest {
         // 5. Con corriente: enciende el circuito de salida
         SHOTS.add(() -> server.execute(() -> CircuitManager.notify(level, BlockPos.containing(e), "exit", true)));
         shot(mc, server, "13_con_corriente", e.add(0, 0, 30), 0f, 5f, 40);
+        // 6. HUD con poca vida (venas, pulso acelerado) y una sala con sangre
+        SHOTS.add(() -> server.execute(() -> sp.setHealth(4f)));
+        lookAt(mc, server, level, z, "14_vida_baja_camilla", be -> be instanceof HideBlockEntity h && h.modelName().equals("gurney"));
+        SHOTS.add(() -> server.execute(() -> sp.setHealth(sp.getMaxHealth())));
     }
 
     private static void shot(Minecraft mc, MinecraftServer server, String name, Vec3 pos, float yaw, float pitch, int delay) {

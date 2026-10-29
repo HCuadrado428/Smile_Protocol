@@ -82,6 +82,11 @@ public class SPGeoRenderer<T extends AnimatedBlockEntity> extends GeoBlockRender
         return true;
     }
 
+    /** NeoForge: la caja de recorte cubre las piezas de dos bloques (puertas, camilla). */
+    public net.minecraft.world.phys.AABB getRenderBoundingBox(T be) {
+        return new net.minecraft.world.phys.AABB(be.getBlockPos()).inflate(1.5);
+    }
+
     @Override
     public void renderRecursively(PoseStack pose, T be, GeoBone bone, RenderType renderType, MultiBufferSource buffers,
                                   VertexConsumer buffer, boolean isReRender, float pt, int light, int overlay, int colour) {

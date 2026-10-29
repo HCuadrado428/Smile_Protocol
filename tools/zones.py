@@ -337,6 +337,17 @@ class Floor:
         self.used.add((x, z))
         return True
 
+    def gurney(self, x, z, f):
+        """Camilla de dos bloques: la cabecera en (x, z) y los pies hacia `f`."""
+        dx, dz = {"north": (0, -1), "south": (0, 1), "east": (1, 0), "west": (-1, 0)}[f]
+        if not (self.free(x, z) and self.free(x + dx, z + dz)):
+            return False
+        self.t.set(x, 1, z, f"{MOD}:gurney", facing=f, half="lower", open=False)
+        self.t.set(x + dx, 1, z + dz, f"{MOD}:gurney", facing=f, half="upper", open=False)
+        self.used.add((x, z))
+        self.used.add((x + dx, z + dz))
+        return True
+
     def put(self, x, z, block, y=1, **props):
         if not self.free(x, z):
             return False
@@ -384,8 +395,10 @@ class Floor:
             self.take(spots, 2, lambda x, z, f: self.tall(f"{MOD}:waste_container", x, z, f))
         elif kind == "morgue":
             for x in range(x0 + 1, x1, 2):
-                z = z0 + 2 if r.random() < 0.5 else z1 - 2
-                self.put(x, z, f"{MOD}:gurney", facing=r.choice(["north", "east"]), half="lower", open=False)
+                if r.random() < 0.5:
+                    self.gurney(x, z0 + 1, "south")
+                else:
+                    self.gurney(x, z1 - 1, "north")
             self.take(spots, 2, lambda x, z, f: self.tall(f"{MOD}:locker", x, z, f))
         elif kind == "lockers":
             self.take(spots, 8, lambda x, z, f: self.tall(f"{MOD}:locker", x, z, f))
@@ -393,7 +406,7 @@ class Floor:
                 self.put(x, (z0 + z1) // 2, "minecraft:spruce_slab", type="bottom")
         elif kind == "ward":
             for x in range(x0 + 1, x1, 3):
-                self.put(x, z0 + 1, f"{MOD}:gurney", facing="north", half="lower", open=False)
+                self.gurney(x, z0 + 1, "south")
                 self.tall(f"{MOD}:curtain", x + 1, z0 + 1, "east")
         elif kind == "server":
             for x in range(x0 + 1, x1, 2):

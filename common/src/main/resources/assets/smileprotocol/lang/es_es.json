@@ -60,7 +60,7 @@
   "smileprotocol.command.debug.on": "Modo depuración activado.",
   "smileprotocol.command.debug.off": "Modo depuración desactivado.",
   "smileprotocol.command.test.enter": "%s jugadores en la sala de pruebas.",
-  "smileprotocol.hud.vitals": "CONSTANTES",
+  "smileprotocol.hud.vitals": "PULSO",
   "smileprotocol.run.no_dimension": "No existe la dimensión de instancias.",
   "smileprotocol.run.nobody": "No hay nadie que pueda bajar.",
   "smileprotocol.run.no_space": "No hay sitio: hacen falta %s huecos y quedan %s libres.",
