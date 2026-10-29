@@ -1,6 +1,6 @@
 # Smile Protocol
 
-Mod de **Forge 1.20.1** (47.x, Java 17) para un evento de terror multijugador en un laboratorio abandonado, con misiones, sigilo y objetivos. Los jugadores **no atacan**: son las víctimas.
+Mod para **Minecraft 1.21.1** en **Fabric y NeoForge** (Java 21; un jar por loader) para un evento de terror multijugador en un laboratorio abandonado, con misiones, sigilo y objetivos. Los jugadores **no atacan**: son las víctimas.
 
 > ## Implementación: TODO lo hace Claude
 >
@@ -45,13 +45,13 @@ Mod de **Forge 1.20.1** (47.x, Java 17) para un evento de terror multijugador en
 
 | Necesidad | Herramienta | Notas |
 |---|---|---|
-| Base | Forge 1.20.1 (47.x), Java 17, mappings oficiales | |
-| Modelos 3D y animaciones de mobs/bloques/items | **GeckoLib 4** (Forge 1.20.1) | Dependencia obligatoria |
+| Base | Minecraft 1.21.1, **Fabric** (Loader 0.16.14 + Fabric API) y **NeoForge** 21.1, Java 21, mappings oficiales. Proyecto multiloader: `common` (código compartido), `fabric` y `neoforge` | La versión Forge 1.20.1 está en la rama `forge-1.20.1` |
+| Modelos 3D y animaciones de mobs/bloques/items | **GeckoLib 4** (4.7.2 para 1.21.1, Fabric y NeoForge) | Dependencia obligatoria |
 | **Iluminación dinámica** (linterna con cono de luz, luces de circuitos) | **Veil** (FoundryMC, build Forge 1.20.1) | **Dependencia obligatoria.** Sin ella el mod no carga. Existe build Forge 1.20.1 (por ejemplo `Veil-forge-1.20.1-1.0.0.9`); **verificar la versión exacta, las coordenadas Maven y si debe estar en cliente y servidor** antes de fijarla en `build.gradle` y `mods.toml` (`mandatory=true`) |
 | Animaciones del **jugador** | **PlayerAnimator** (KosmX, build Forge 1.20.1) | Recomendado. Las animaciones se crean en Blockbench (plugin Emotecraft) y se exportan en JSON. Alternativa: renderer propio (ver 13.4). **Verificar disponibilidad** |
 | Voz de proximidad | **Simple Voice Chat** (mod id `voicechat`) | Dependencia **opcional** (soft dependency). Mod externo permitido en el evento (junto con Sound Physics Remastered) |
 | Acústica del sonido | **Sound Physics Remastered** (henkelmax, build Forge 1.20.1) | Mod **permitido e incluido en el modpack del evento**. Efecto de audio de cliente (en servidor es opcional). El mod id y la versión exacta, **verificar**. No es una librería de código: el mod propio no depende de sus clases (ver 7.5) |
-| Red | `SimpleChannel` de Forge | |
+| Red | `CustomPacketPayload` (1.21.1), registrado por cada loader | |
 | Shaders | `PostChain` de vanilla (JSON + GLSL) | Incompatible con shaders de terceros, que quedan prohibidos |
 | Mixins | Los incluidos con Forge | Solo si hace falta |
 | Mapa | WorldEdit + bloques de estructura (NBT) | Fase posterior |

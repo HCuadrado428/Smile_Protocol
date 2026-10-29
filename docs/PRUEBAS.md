@@ -2,10 +2,24 @@
 
 ## Preparar el entorno
 
-1. Instala **Java 17** (no hace falta instalar Gradle: el repositorio trae el wrapper).
-2. Compila con `./gradlew build` (en Windows, `gradlew.bat build`). El jar del mod queda en `build/libs/smileprotocol-0.1.0.jar`.
-3. Arranca un cliente con `./gradlew runClient` o un servidor con `./gradlew runServer`.
-4. Cada push compila también en GitHub Actions. El jar queda en la pestaña **Actions**, como artefacto `smileprotocol-jar`.
+1. Instala **Java 21** (no hace falta instalar Gradle: el repositorio trae el wrapper).
+2. Compila con `./gradlew build` (en Windows, `gradlew.bat build`). Salen dos jar:
+   - `fabric/build/libs/smileprotocol-fabric-1.21.1-<versión>.jar`
+   - `neoforge/build/libs/smileprotocol-neoforge-1.21.1-<versión>.jar`
+3. Para probar: `./gradlew :fabric:runClient` o `./gradlew :neoforge:runClient` (y `runServer`).
+4. Cada push compila también en GitHub Actions. Los jar quedan en la pestaña **Actions**, como artefacto `smileprotocol-jars`.
+
+**Mods necesarios en la carpeta `mods` (Minecraft 1.21.1):**
+
+| | Fabric | NeoForge |
+|---|---|---|
+| Loader | Fabric Loader 0.16.14 o superior + Fabric API | NeoForge 21.1.172 o superior |
+| GeckoLib | `geckolib-fabric-1.21.1` 4.7.2 o superior | `geckolib-neoforge-1.21.1` 4.7.2 o superior |
+| Veil | `veil-fabric-1.21.1` 4.3.0 | `veil-neoforge-1.21.1` 4.3.0 |
+| Sound Physics Remastered | versión Fabric 1.21.1 | versión NeoForge 1.21.1 |
+| Simple Voice Chat | opcional | opcional |
+
+La configuración está en `config/smileprotocol.json`.
 
 > En el entorno de desarrollo el cliente carga mods internos de las librerías. Si el aviso de mods no permitidos sale en rojo al conectarte, añade esos mod id a `allowed_mods` en `config/smileprotocol-common.toml`. Los administradores en creativo no cuentan para los ascensores, así que para probarlos hay que estar en aventura o supervivencia.
 

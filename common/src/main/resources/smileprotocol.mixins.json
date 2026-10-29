@@ -3,7 +3,6 @@
   "minVersion": "0.8",
   "package": "com.smileprotocol.mixin",
   "compatibilityLevel": "JAVA_21",
-  "refmap": "smileprotocol.refmap.json",
   "mixins": [
     "CommandsMixin",
     "ItemEntityMixin",
