@@ -26,10 +26,16 @@ public final class ModIsolation {
         return id != null && SmileProtocol.MODID.equals(id.getNamespace());
     }
 
-    /** En la dimension de instancias solo entran jugadores y entidades del mod. */
+    /**
+     * En la dimension de instancias no entran entidades de otros mods ni mobs vanilla (README 4.1,
+     * 7.3). Si se permiten las entidades vanilla que no son mobs: objetos del suelo, proyectiles...
+     */
     public static boolean blocksEntity(ServerLevel level, Entity e) {
         if (!SPDimension.isSP(level) || e instanceof Player) return false;
-        return !isOwn(BuiltInRegistries.ENTITY_TYPE.getKey(e.getType()));
+        ResourceLocation id = BuiltInRegistries.ENTITY_TYPE.getKey(e.getType());
+        if (isOwn(id)) return false;
+        if (!"minecraft".equals(id.getNamespace())) return true;
+        return e instanceof net.minecraft.world.entity.Mob;
     }
 
     /** Dentro de la partida, un jugador sin permisos solo puede usar los comandos permitidos. */
