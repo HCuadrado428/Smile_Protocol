@@ -213,7 +213,8 @@ class Floor:
                 for y in range(1, H + 1):
                     t.set(x, y, z, th["wall_low"] if y == 1 else th["wall"])
         # Vestibulos de los ascensores
-        for z0, z1 in ((7, SOUTH_Z - 1), (NORTH_Z + 1, NORTH_Z + 7)):
+        # La fila de la cabina (z = 6 y z = NORTH_Z + 8) tambien es pared: el vestibulo es mas ancho que la cabina
+        for z0, z1 in ((6, SOUTH_Z - 1), (NORTH_Z + 1, NORTH_Z + 8)):
             for x in range(-HALL_W - 1, HALL_W + 2):
                 for z in range(z0, z1 + 1):
                     t.set(x, 0, z, th["hall_floor"][(x + z) % 2])
