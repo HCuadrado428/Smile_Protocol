@@ -173,7 +173,7 @@
   "smileprotocol.zone_elevator.title": "ASCENSOR DE SERVICIO",
   "smileprotocol.zone_elevator.waiting": "Sale en %s s · entrad todos",
   "smileprotocol.zone_elevator.departing": "Cerrando puertas…",
-  "smileprotocol.zone_elevator.arrived": "Zona %s",
+  "smileprotocol.zone_elevator.arrived": "Planta -%s",
   "smileprotocol.zone_elevator.stripped": "Has subido herido o tarde: has perdido tus objetos.",
   "smileprotocol.command.look_block": "Mira a un bloque.",
   "smileprotocol.command.lock.set": "Cerradura «%s» asignada.",
@@ -187,5 +187,6 @@
   "smileprotocol.command.hide.set": "Escondite «%s» colocado.",
   "smileprotocol.command.give.in_game": "Solo dentro de una partida.",
   "smileprotocol.command.give.done": "Recibes: %s",
-  "smileprotocol.command.noise.test": "Ruido de prueba de %s bloques."
+  "smileprotocol.command.noise.test": "Ruido de prueba de %s bloques.",
+  "smileprotocol.floor.title": "PLANTA -%s"
 }

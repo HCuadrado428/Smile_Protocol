@@ -19,5 +19,5 @@ import javax.annotation.Nullable;
  * plantilla tiene el marcador {@code sp:entry}.
  */
 public record ZoneDef(ResourceLocation id, ResourceLocation template, ZoneKind kind, int difficulty,
-                      @Nullable BlockPos entry, float entryYaw) {
+                      @Nullable BlockPos entry, float entryYaw, String name) {
 }

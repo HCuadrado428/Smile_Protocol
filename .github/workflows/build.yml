@@ -63,6 +63,26 @@ jobs:
           done < tools/inspect.txt
           exit 0
 
+      # Arranca un servidor de cada loader sin jugadores: se aplican los mixins y se colocan todas
+      # las plantas (SelfTest). Nunca hace fallar el job; el resultado va a smoke.log.
+      - name: Prueba en servidor
+        if: success()
+        shell: bash
+        env:
+          SMILEPROTOCOL_SELFTEST: "1"
+        run: |
+          set +e
+          : > smoke.log
+          for L in neoforge fabric; do
+            mkdir -p $L/runs/server
+            echo "eula=true" > $L/runs/server/eula.txt
+            printf 'online-mode=false\nspawn-protection=0\nlevel-type=minecraft\\:flat\n' > $L/runs/server/server.properties
+            timeout 900 ./gradlew :$L:runServer --no-daemon > smoke-$L.log 2>&1
+            echo "== $L: salida $?" >> smoke.log
+            grep -aE "SELFTEST|[Mm]ixin.*([Ff]ail|[Ee]rror|[Ee]xception)|Exception|ERROR|Caused by|Done \(" smoke-$L.log | head -200 >> smoke.log
+          done
+          exit 0
+
       # El log (y los jar) se guardan en la rama ci-logs para poder leerlos sin la API de Actions
       - name: Guardar el log y los jar
         if: always()
@@ -81,6 +101,8 @@ jobs:
           cp "$GITHUB_WORKSPACE/build.log" "logs/${GITHUB_SHA}.log"
           cp "$GITHUB_WORKSPACE/build.log" latest.log
           [ -s "$GITHUB_WORKSPACE/libs.txt" ] && cp "$GITHUB_WORKSPACE/libs.txt" "logs/${GITHUB_SHA}-libs.txt"
+          [ -s "$GITHUB_WORKSPACE/smoke.log" ] && cp "$GITHUB_WORKSPACE/smoke.log" "logs/${GITHUB_SHA}-smoke.log"
+          for L in neoforge fabric; do [ -s "$GITHUB_WORKSPACE/smoke-$L.log" ] && tail -c 400000 "$GITHUB_WORKSPACE/smoke-$L.log" > "logs/${GITHUB_SHA}-smoke-$L.log"; done
           jars=$(ls "$GITHUB_WORKSPACE"/fabric/build/libs/*.jar "$GITHUB_WORKSPACE"/neoforge/build/libs/*.jar 2>/dev/null | grep -v -- '-sources' || true)
           if [ -n "$jars" ]; then
             mkdir -p jars && rm -f jars/*.jar

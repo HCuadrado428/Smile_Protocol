@@ -173,7 +173,7 @@
   "smileprotocol.zone_elevator.title": "SERVICE ELEVATOR",
   "smileprotocol.zone_elevator.waiting": "Leaving in %s s · everyone in",
   "smileprotocol.zone_elevator.departing": "Closing doors…",
-  "smileprotocol.zone_elevator.arrived": "Zone %s",
+  "smileprotocol.zone_elevator.arrived": "Planta -%s",
   "smileprotocol.zone_elevator.stripped": "You rode up hurt or late: you lost your items.",
   "smileprotocol.command.look_block": "Look at a block.",
   "smileprotocol.command.lock.set": "Lock \"%s\" assigned.",
@@ -187,5 +187,6 @@
   "smileprotocol.command.hide.set": "Hiding spot \"%s\" placed.",
   "smileprotocol.command.give.in_game": "Only inside a run.",
   "smileprotocol.command.give.done": "You get: %s",
-  "smileprotocol.command.noise.test": "Test noise of %s blocks."
+  "smileprotocol.command.noise.test": "Test noise of %s blocks.",
+  "smileprotocol.floor.title": "FLOOR -%s"
 }

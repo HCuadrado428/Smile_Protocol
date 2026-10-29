@@ -105,6 +105,10 @@ public final class SPEvents {
         if (firstTick) {
             firstTick = false;
             InstanceManager.onServerStarted(server);
+            if (com.smileprotocol.debug.SelfTest.enabled()) {
+                com.smileprotocol.debug.SelfTest.run(server);
+                server.halt(false);
+            }
         }
         RunManager.tick(server);
         com.smileprotocol.motion.MotionManager.tick(server);

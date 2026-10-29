@@ -276,6 +276,7 @@ public final class InstanceManager {
             ServerPlayer p = server.getPlayerList().getPlayer(id);
             if (p != null && SPPlayerData.inSP(p)) {
                 SPSessionManager.teleport(p, level, target.entry(), target.entryYaw(), 0f);
+                FloorTitle.show(p, index, target.zoneId());
             }
         }
         if (old != null) queueClear(data, group.slot(), old);

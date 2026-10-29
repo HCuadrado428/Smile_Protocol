@@ -2,5 +2,6 @@
   "template": "smileprotocol:zones/lab_generators",
   "kind": "intermediate",
   "difficulty": 2,
-  "entry_yaw": 0
+  "entry_yaw": 0,
+  "name": "Planta de energía"
 }

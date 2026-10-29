@@ -239,6 +239,7 @@ public final class RunManager {
                 ServerPlayer p = server.getPlayerList().getPlayer(id);
                 if (p == null || entry == null) continue;
                 SPSessionManager.enter(p, level, entry.entry(), entry.entryYaw(), g.id());
+                com.smileprotocol.instance.FloorTitle.show(p, 0, entry.zoneId());
                 data.plays.merge(id, 1, Integer::sum);
                 p.sendSystemMessage(Component.translatable("smileprotocol.run.joined", g.label(), g.members().size(),
                         Component.translatable("smileprotocol.run.type." + type.name().toLowerCase())).withStyle(ChatFormatting.DARK_AQUA));

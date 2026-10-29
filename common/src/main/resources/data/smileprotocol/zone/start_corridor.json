@@ -2,5 +2,6 @@
   "template": "smileprotocol:zones/start_corridor",
   "kind": "start",
   "difficulty": 0,
-  "entry_yaw": 0
+  "entry_yaw": 0,
+  "name": "Recepción de investigación"
 }

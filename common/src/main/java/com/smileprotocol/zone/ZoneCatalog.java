@@ -88,7 +88,8 @@ public final class ZoneCatalog {
             entry = new BlockPos(a.get(0).getAsInt(), a.get(1).getAsInt(), a.get(2).getAsInt());
         }
         float yaw = o.has("entry_yaw") ? o.get("entry_yaw").getAsFloat() : 0f;
-        return new ZoneDef(id, template, kind, difficulty, entry, yaw);
+        String name = o.has("name") ? o.get("name").getAsString() : id.getPath();
+        return new ZoneDef(id, template, kind, difficulty, entry, yaw, name);
     }
 
     @Nullable

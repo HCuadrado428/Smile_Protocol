@@ -201,13 +201,7 @@ public final class ZoneElevators {
         }
         int next = g.zoneIndex() + 1;
         Component result = RunManager.setZone(server, g, next);
-        if (next <= g.lastIndex()) {
-            for (UUID id : g.activeMembers()) {
-                ServerPlayer p = server.getPlayerList().getPlayer(id);
-                if (p != null) p.displayClientMessage(Component.translatable("smileprotocol.zone_elevator.arrived", next)
-                        .withStyle(ChatFormatting.DARK_AQUA), true);
-            }
-        }
+        // El rotulo de la planta lo pone InstanceManager al llegar (FloorTitle)
         SPDebug.log(result.getString());
     }
 
