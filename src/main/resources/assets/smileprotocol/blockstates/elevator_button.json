@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=south": {
+      "model": "smileprotocol:block/elevator_button"
+    },
+    "facing=west": {
+      "model": "smileprotocol:block/elevator_button",
+      "y": 90
+    },
+    "facing=north": {
+      "model": "smileprotocol:block/elevator_button",
+      "y": 180
+    },
+    "facing=east": {
+      "model": "smileprotocol:block/elevator_button",
+      "y": 270
+    }
+  }
+}

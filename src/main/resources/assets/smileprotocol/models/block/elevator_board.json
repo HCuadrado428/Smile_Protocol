@@ -1,0 +1,42 @@
+{
+  "parent": "block/block",
+  "textures": {
+    "side": "smileprotocol:block/elevator_panel",
+    "front": "smileprotocol:block/elevator_screen",
+    "particle": "smileprotocol:block/elevator_panel"
+  },
+  "elements": [
+    {
+      "from": [
+        0,
+        2,
+        0
+      ],
+      "to": [
+        16,
+        14,
+        2
+      ],
+      "faces": {
+        "north": {
+          "texture": "#side"
+        },
+        "south": {
+          "texture": "#front"
+        },
+        "east": {
+          "texture": "#side"
+        },
+        "west": {
+          "texture": "#side"
+        },
+        "up": {
+          "texture": "#side"
+        },
+        "down": {
+          "texture": "#side"
+        }
+      }
+    }
+  ]
+}

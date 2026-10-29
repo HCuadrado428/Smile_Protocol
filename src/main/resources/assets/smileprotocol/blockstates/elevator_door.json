@@ -1,0 +1,64 @@
+{
+  "variants": {
+    "facing=south,half=lower,open=false": {
+      "model": "smileprotocol:block/elevator_door"
+    },
+    "facing=south,half=lower,open=true": {
+      "model": "smileprotocol:block/elevator_door"
+    },
+    "facing=south,half=upper,open=false": {
+      "model": "smileprotocol:block/elevator_door"
+    },
+    "facing=south,half=upper,open=true": {
+      "model": "smileprotocol:block/elevator_door"
+    },
+    "facing=west,half=lower,open=false": {
+      "model": "smileprotocol:block/elevator_door",
+      "y": 90
+    },
+    "facing=west,half=lower,open=true": {
+      "model": "smileprotocol:block/elevator_door",
+      "y": 90
+    },
+    "facing=west,half=upper,open=false": {
+      "model": "smileprotocol:block/elevator_door",
+      "y": 90
+    },
+    "facing=west,half=upper,open=true": {
+      "model": "smileprotocol:block/elevator_door",
+      "y": 90
+    },
+    "facing=north,half=lower,open=false": {
+      "model": "smileprotocol:block/elevator_door",
+      "y": 180
+    },
+    "facing=north,half=lower,open=true": {
+      "model": "smileprotocol:block/elevator_door",
+      "y": 180
+    },
+    "facing=north,half=upper,open=false": {
+      "model": "smileprotocol:block/elevator_door",
+      "y": 180
+    },
+    "facing=north,half=upper,open=true": {
+      "model": "smileprotocol:block/elevator_door",
+      "y": 180
+    },
+    "facing=east,half=lower,open=false": {
+      "model": "smileprotocol:block/elevator_door",
+      "y": 270
+    },
+    "facing=east,half=lower,open=true": {
+      "model": "smileprotocol:block/elevator_door",
+      "y": 270
+    },
+    "facing=east,half=upper,open=false": {
+      "model": "smileprotocol:block/elevator_door",
+      "y": 270
+    },
+    "facing=east,half=upper,open=true": {
+      "model": "smileprotocol:block/elevator_door",
+      "y": 270
+    }
+  }
+}

@@ -2,14 +2,22 @@ package com.smileprotocol;
 
 import com.mojang.logging.LogUtils;
 import com.smileprotocol.command.SPCommands;
+import com.smileprotocol.config.SPConfig;
+import com.smileprotocol.network.SPNetwork;
+import com.smileprotocol.registry.ModBlockEntities;
 import com.smileprotocol.registry.ModBlocks;
+import com.smileprotocol.registry.ModCapabilities;
+import com.smileprotocol.registry.ModCreativeTabs;
 import com.smileprotocol.registry.ModEntities;
 import com.smileprotocol.registry.ModItems;
 import com.smileprotocol.registry.ModSounds;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.Entity;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.slf4j.Logger;
@@ -32,15 +40,23 @@ public final class SmileProtocol {
 
         ModBlocks.BLOCKS.register(modBus);
         ModItems.ITEMS.register(modBus);
+        ModBlockEntities.BLOCK_ENTITIES.register(modBus);
         ModEntities.ENTITIES.register(modBus);
         ModSounds.SOUNDS.register(modBus);
+        ModCreativeTabs.TABS.register(modBus);
+
+        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, SPConfig.SPEC);
 
         modBus.addListener(this::commonSetup);
+        modBus.addListener(ModCapabilities::onRegister);
 
+        MinecraftForge.EVENT_BUS.addGenericListener(Entity.class, ModCapabilities::onAttach);
+        MinecraftForge.EVENT_BUS.addListener(ModCapabilities::onClone);
         MinecraftForge.EVENT_BUS.addListener(SPCommands::onRegisterCommands);
     }
 
     private void commonSetup(FMLCommonSetupEvent event) {
+        event.enqueueWork(SPNetwork::register);
         LOGGER.info("Smile Protocol: configuracion comun lista");
     }
 

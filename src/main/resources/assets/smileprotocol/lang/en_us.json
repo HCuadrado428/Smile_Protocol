@@ -1,3 +1,70 @@
 {
-  "commands.smileprotocol.not_implemented": "This command is not implemented yet (phase %s)."
+  "itemGroup.smileprotocol": "Smile Protocol",
+  "block.smileprotocol.elevator_door": "Elevator Door",
+  "block.smileprotocol.elevator_button": "Elevator Button",
+  "block.smileprotocol.elevator_board": "Elevator Display",
+  "block.smileprotocol.fluorescent_light": "Fluorescent Light",
+
+  "commands.smileprotocol.not_implemented": "This command is not implemented yet (phase %s).",
+
+  "smileprotocol.session.rejoined": "You are back in the game.",
+
+  "smileprotocol.modcheck.pending": "Your client has not sent its mod list yet. Wait a few seconds.",
+  "smileprotocol.modcheck.timeout": "Your client did not send its mod list. Reconnect with the event modpack.",
+  "smileprotocol.modcheck.disallowed": "You cannot play with these mods: %s. Use the event modpack.",
+  "smileprotocol.modcheck.missing": "You are missing required event mods: %s.",
+
+  "smileprotocol.isolation.command_blocked": "That command cannot be used during a game.",
+
+  "smileprotocol.mode.free": "free",
+  "smileprotocol.mode.event": "event",
+  "smileprotocol.mode.announce.free": "The small elevators are open: go down as a group whenever you like.",
+  "smileprotocol.mode.announce.event": "The event is starting: everyone into the service elevator.",
+
+  "smileprotocol.elevator.closed": "This elevator is closed.",
+  "smileprotocol.elevator.full": "The cabin is full.",
+  "smileprotocol.elevator.afk": "You were removed from the elevator for not being ready.",
+  "smileprotocol.elevator.cancelled": "Countdown cancelled.",
+  "smileprotocol.elevator.unknown": "There is no elevator called \"%s\".",
+  "smileprotocol.elevator.busy": "%s is busy.",
+  "smileprotocol.elevator.closed_admin": "%s is closed in this mode. Use \"force\" to send it down anyway.",
+  "smileprotocol.elevator.empty": "Nobody is inside %s.",
+  "smileprotocol.elevator.started": "%s is going down with %s players.",
+  "smileprotocol.elevator.unlinked": "This button does not belong to any elevator.",
+  "smileprotocol.elevator.enter_first": "Step into the cabin to press the button.",
+  "smileprotocol.elevator.mega_auto": "The elevator will go down once everyone is inside.",
+  "smileprotocol.elevator.not_ready": "You are no longer ready.",
+  "smileprotocol.elevator.ready": "Ready!",
+  "smileprotocol.elevator.cannot_play": "You cannot go down right now.",
+  "smileprotocol.elevator.countdown": "Going down in %s…",
+  "smileprotocol.elevator.need_players": "At least %s players needed",
+  "smileprotocol.elevator.waiting_all": "Waiting for the whole lobby",
+  "smileprotocol.elevator.press_ready": "Press the button when you are ready",
+
+  "smileprotocol.board.countdown": "Going down in %s",
+  "smileprotocol.board.closing": "Doors closing",
+  "smileprotocol.board.running": "In progress",
+  "smileprotocol.board.closed": "Closed",
+  "smileprotocol.board.free": "Free",
+  "smileprotocol.board.ready": "%s/%s ready",
+
+  "smileprotocol.hud.ready": "%s/%s ready",
+
+  "smileprotocol.lobby.built": "Lobby built. Spawn at %s, %s elevators registered.",
+
+  "smileprotocol.command.lobby.in_game": "You cannot use /sp lobby during a game.",
+  "smileprotocol.command.lobby.cooldown": "Wait %s s before using it again.",
+  "smileprotocol.command.lobby.sent": "%s players sent to the lobby.",
+  "smileprotocol.command.leave.done": "%s players removed from the game.",
+  "smileprotocol.command.mode.current": "Lobby mode: %s.",
+  "smileprotocol.command.mode.set": "Lobby mode set to %s.",
+  "smileprotocol.command.setlobby.overworld": "The lobby must be in the overworld.",
+  "smileprotocol.command.setlobby.done": "Lobby spawn set at %s.",
+  "smileprotocol.command.build.preview": "The lobby will be built in a %s×%s×%s area (from %s to %s) and everything there will be erased. Add \"confirm\" to the command to do it.",
+  "smileprotocol.command.region.set": "Lobby region: from %s to %s.",
+  "smileprotocol.command.elevator.set": "Elevator \"%s\" registered: %s doors, button %s, display %s.",
+  "smileprotocol.command.elevator.removed": "Elevator \"%s\" removed.",
+  "smileprotocol.command.debug.on": "Debug mode on.",
+  "smileprotocol.command.debug.off": "Debug mode off.",
+  "smileprotocol.command.test.enter": "%s players in the test room."
 }
