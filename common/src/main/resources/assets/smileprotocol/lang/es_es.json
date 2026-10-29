@@ -59,5 +59,6 @@
   "smileprotocol.command.elevator.removed": "Ascensor «%s» eliminado.",
   "smileprotocol.command.debug.on": "Modo depuración activado.",
   "smileprotocol.command.debug.off": "Modo depuración desactivado.",
-  "smileprotocol.command.test.enter": "%s jugadores en la sala de pruebas."
+  "smileprotocol.command.test.enter": "%s jugadores en la sala de pruebas.",
+  "smileprotocol.hud.vitals": "CONSTANTES"
 }

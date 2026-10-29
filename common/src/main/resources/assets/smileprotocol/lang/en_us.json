@@ -59,5 +59,6 @@
   "smileprotocol.command.elevator.removed": "Elevator \"%s\" removed.",
   "smileprotocol.command.debug.on": "Debug mode on.",
   "smileprotocol.command.debug.off": "Debug mode off.",
-  "smileprotocol.command.test.enter": "%s players in the test room."
+  "smileprotocol.command.test.enter": "%s players in the test room.",
+  "smileprotocol.hud.vitals": "VITALS"
 }

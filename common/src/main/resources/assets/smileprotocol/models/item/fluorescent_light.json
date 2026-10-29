@@ -1,3 +1,6 @@
 {
-  "parent": "smileprotocol:block/fluorescent_light_on"
+  "parent": "item/generated",
+  "textures": {
+    "layer0": "smileprotocol:block/fluorescent_light_on"
+  }
 }

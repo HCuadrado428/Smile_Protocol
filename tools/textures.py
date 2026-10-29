@@ -420,16 +420,201 @@ def elevator_door_icon():
     return t
 
 
+
+# Version de alta resolucion (64x64) de luces, boton y pantalla ---------------------------
+
+FONT3x5 = {
+    "L": ["X..", "X..", "X..", "X..", "XXX"], "I": ["XXX", ".X.", ".X.", ".X.", "XXX"],
+    "S": [".XX", "X..", ".X.", "..X", "XX."], "T": ["XXX", ".X.", ".X.", ".X.", ".X."],
+    "O": [".X.", "X.X", "X.X", "X.X", ".X."], "P": ["XX.", "X.X", "XX.", "X..", "X.."],
+    "-": ["...", "...", "XXX", "...", "..."], "0": ["XXX", "X.X", "X.X", "X.X", "XXX"],
+    "1": [".X.", "XX.", ".X.", ".X.", "XXX"], "2": ["XX.", "..X", ".X.", "X..", "XXX"],
+    "E": ["XXX", "X..", "XX.", "X..", "XXX"], "V": ["X.X", "X.X", "X.X", "X.X", ".X."],
+    "A": [".X.", "X.X", "XXX", "X.X", "X.X"], "R": ["XX.", "X.X", "XX.", "X.X", "X.X"],
+    "M": ["X.X", "XXX", "XXX", "X.X", "X.X"], "C": [".XX", "X..", "X..", "X..", ".XX"],
+    " ": ["...", "...", "...", "...", "..."],
+}
+
+
+def text3x5(t, x, y, s, color, k=1.0):
+    for ch in s:
+        g = FONT3x5.get(ch, FONT3x5[" "])
+        for dy, row in enumerate(g):
+            for dx, c in enumerate(row):
+                if c == "X":
+                    t.blend(x + dx, y + dy, color, k)
+        x += 4
+
+
+def phillips(t, cx, cy):
+    """Tornillo de estrella de 5x5."""
+    disc(t, cx + 0.5, cy + 0.5, 2.4, lambda x, y, d: t.blend(x, y, (176, 180, 184) if (x - cx) + (y - cy) < 0 else (118, 122, 126), 0.95))
+    for dx in (-1, 0, 1):
+        t.blend(cx + dx, cy, (58, 62, 66), 0.9)
+        t.blend(cx, cy + dx, (58, 62, 66), 0.9)
+    t.shade(cx + 2, cy + 2, -30)
+
+
+def fluorescent_lens(on):
+    """Plafon de techo: marco de aluminio, difusor prismatico y dos tubos detras."""
+    S = 64
+    t = Tex(S, S)
+    brushed(t, (204, 206, 202) if on else (170, 172, 170), 171, "h", 4, 2)
+    bevel(t, 0, 0, S - 1, S - 1, 26, -40, 2)
+    for x, y in ((3, 3), (59, 3), (3, 59), (59, 59)):
+        phillips(t, x, y)
+    x0, y0, x1, y1 = 6, 6, S - 7, S - 7
+    r = rng(172 if on else 173)
+    tubes = (22.0, 41.0)
+    for y in range(y0, y1 + 1):
+        for x in range(x0, x1 + 1):
+            # Brillo de los tubos a traves del difusor (bandas horizontales suaves)
+            glow = sum(np.exp(-((y - ty) / 6.5) ** 2) for ty in tubes)
+            edge = min(x - x0, x1 - x, y - y0, y1 - y) / 6.0
+            edge = min(1.0, edge)
+            # Prismas: rombos de 4x4 con brillo arriba-izquierda
+            px, py = (x - x0) % 4, (y - y0) % 4
+            prism = 10 if (px + py) == 1 else (-8 if (px + py) == 5 else 0)
+            if on:
+                base = np.array((214, 232, 222)) + np.array((40, 24, 30)) * glow
+                c = base * (0.86 + 0.14 * edge) + prism + r.normal(0, 1.2)
+            else:
+                base = np.array((112, 122, 124)) + np.array((14, 14, 16)) * glow
+                c = base * (0.80 + 0.20 * edge) + prism * 0.6 + r.normal(0, 2.0)
+            t.rgb[y, x] = np.clip(c, 0, 255)
+    # Sombra interior del marco
+    for i in range(3):
+        for x in range(x0, x1 + 1):
+            t.shade(x, y0 + i, -18 + i * 6)
+        for y in range(y0, y1 + 1):
+            t.shade(x0 + i, y, -14 + i * 5)
+    # Bichos muertos dentro del difusor (siluetas oscuras) y polvo en una esquina
+    for (bx, by) in ((44, 47), (47, 49), (15, 50)):
+        for dx, dy in ((0, 0), (1, 0), (0, 1), (-1, 1), (2, 1)):
+            t.blend(bx + dx, by + dy, (40, 44, 40), 0.55 if on else 0.75)
+    sub = Tex(S, S)
+    sub.rgb = t.rgb.copy()
+    sub.a = t.a.copy()
+    grime(sub, 174, 0.30 if on else 0.45, (92, 84, 66), 0.55)
+    t.rgb = sub.rgb
+    if not on:
+        # Extremos de los tubos ennegrecidos
+        for ty in tubes:
+            for x in list(range(x0, x0 + 6)) + list(range(x1 - 5, x1 + 1)):
+                for y in range(int(ty) - 2, int(ty) + 3):
+                    t.blend(x, y, (56, 54, 52), 0.5)
+    return t
+
+
+def fluorescent_housing():
+    """Carcasa del plafon (lo que asoma por los lados): chapa pintada con rejilla de ventilacion."""
+    t = Tex(32, 32)
+    brushed(t, (190, 192, 188), 181, "h", 4, 2)
+    bevel(t, 0, 0, 31, 31, 20, -30, 1)
+    for y in range(9, 23, 3):
+        for x in range(6, 26):
+            t.shade(x, y, -42)
+            t.shade(x, y + 1, 16)
+    grime(t, 182, 0.25, (90, 82, 66), 0.5)
+    return t
+
+
+def elevator_button_hd():
+    """Placa de 64x64: boton cromado con aro iluminado, flecha de bajada y rotulo LISTO."""
+    S = 64
+    t = Tex(S, S)
+    brushed(t, (170, 175, 180), 151, "h", 9, 3)
+    bevel(t, 0, 0, S - 1, S - 1, 34, -46, 3)
+    for x, y in ((6, 6), (57, 6), (6, 57), (57, 57)):
+        phillips(t, x, y)
+    cx, cy = 32, 36
+    # Rebaje de la placa alrededor del boton
+    disc(t, cx, cy, 18.5, lambda x, y, d: t.shade(x, y, -14 if (x - cx) + (y - cy) < 0 else 10))
+    # Bisel cromado con degradado
+    def bezel(x, y, d):
+        k = ((x - cx) * -0.7 + (y - cy) * -0.7) / 17.0
+        v = 160 + 70 * k
+        t.blend(x, y, (v, v + 3, v + 6), 0.95)
+    disc(t, cx, cy, 16.5, bezel)
+    disc(t, cx, cy, 15.0, lambda x, y, d: t.blend(x, y, (70, 74, 80), 0.9))
+    # Aro de luz (apagado; el brillo esta en la capa _glow)
+    disc(t, cx, cy, 13.6, lambda x, y, d: t.blend(x, y, (130, 92, 34), 0.95) if d > 10.6 else None)
+    disc(t, cx, cy, 10.6, lambda x, y, d: t.blend(x, y, (46, 50, 54), 1.0))
+    # Capuchon verde con brillo especular
+    def cap(x, y, d):
+        k = 1 - d / 9.2
+        t.blend(x, y, (40 + 40 * k, 120 + 60 * k, 72 + 40 * k), 1.0)
+    disc(t, cx, cy, 9.2, cap)
+    disc(t, cx - 3, cy - 3.5, 3.2, lambda x, y, d: t.blend(x, y, (210, 255, 226), 0.55 * (1 - d / 3.2)))
+    # Flecha de bajada grabada
+    for i, w in enumerate((6, 5, 4, 3, 2, 1, 0)):
+        for dx in range(-w, w + 1):
+            t.blend(cx + dx, 9 + i, (52, 56, 60), 0.85)
+            t.shade(cx + dx, 10 + i, 0)
+    # Rotulo LISTO
+    t.rect(20, 54, 43, 60, (44, 48, 52))
+    bevel(t, 20, 54, 43, 60, -10, 24, 1)
+    text3x5(t, 22, 55, "LISTO", (226, 232, 226), 0.95)
+    return t
+
+
+def elevator_button_glow_hd():
+    S = 64
+    t = Tex(S, S, alpha=0)
+    cx, cy = 32, 36
+    disc(t, cx, cy, 13.6, lambda x, y, d: t.px(x, y, (255, 178 + int(20 * (13.6 - d)), 70)) if d > 10.6 else None)
+    def cap(x, y, d):
+        k = 1 - d / 9.2
+        t.px(x, y, (int(70 + 120 * k), 255, int(140 + 80 * k)))
+    disc(t, cx, cy, 9.2, cap)
+    return t
+
+
+def elevator_screen_hd():
+    """Monitor viejo de 64x64: marco de plastico, cristal de fosforo verde y quemado de pantalla."""
+    S = 64
+    t = Tex(S, S)
+    brushed(t, (40, 43, 46), 161, "h", 3, 2)
+    bevel(t, 0, 0, S - 1, S - 1, 24, -18, 2)
+    for x, y in ((4, 4), (59, 4), (4, 59), (59, 59)):
+        phillips(t, x, y)
+    r = rng(162)
+    x0, y0, x1, y1 = 7, 8, S - 8, S - 10
+    for y in range(y0, y1 + 1):
+        for x in range(x0, x1 + 1):
+            dx = (x - (x0 + x1) / 2) / ((x1 - x0) / 2)
+            dy = (y - (y0 + y1) / 2) / ((y1 - y0) / 2)
+            corner = (abs(dx) ** 6 + abs(dy) ** 6)
+            if corner > 1.0:
+                continue  # esquinas redondeadas del tubo
+            v = 1 - 0.6 * min(1, (dx * dx + dy * dy) / 1.7)
+            line = 1.22 if y % 2 == 0 else 0.82
+            g = (11 + r.normal(0, 1.8)) * v * line
+            t.rgb[y, x] = (g * 0.5, g * 1.75 + 7 * v, g * 1.05)
+    # Quemado de pantalla: texto fantasma
+    text3x5(t, x0 + 6, y1 - 9, "SP-01", (40, 90, 60), 0.35)
+    # Reflejo diagonal
+    for i in range(26):
+        for w in range(3):
+            t.blend(x0 + 8 + i + w, y0 + 2 + i // 2, (110, 150, 130), 0.10 - w * 0.025)
+    bevel(t, x0 - 1, y0 - 1, x1 + 1, y1 + 1, -16, 22, 1)
+    # Piloto y marca
+    disc(t, 52.5, 58.5, 1.4, lambda x, y, d: t.px(x, y, (90, 240, 130)))
+    text3x5(t, 9, 56, "SMILE", (120, 126, 130), 0.8)
+    return t
+
+
 ALL = {
     "block/elevator_frame.png": elevator_frame,
     "block/elevator_wall_panel.png": elevator_wall_panel,
     "block/elevator_floor.png": elevator_floor,
     "block/elevator_panel.png": elevator_panel,
-    "block/elevator_button.png": elevator_button,
-    "block/elevator_button_glow.png": elevator_button_glow,
-    "block/elevator_screen.png": elevator_screen,
-    "block/fluorescent_light_on.png": lambda: fluorescent(True),
-    "block/fluorescent_light_off.png": lambda: fluorescent(False),
+    "block/elevator_button.png": elevator_button_hd,
+    "block/elevator_button_glow.png": elevator_button_glow_hd,
+    "block/elevator_screen.png": elevator_screen_hd,
+    "block/fluorescent_light_on.png": lambda: fluorescent_lens(True),
+    "block/fluorescent_light_off.png": lambda: fluorescent_lens(False),
+    "block/fluorescent_housing.png": fluorescent_housing,
     "block/elevator_door.png": elevator_door_geo,
     "item/elevator_door.png": elevator_door_icon,
 }

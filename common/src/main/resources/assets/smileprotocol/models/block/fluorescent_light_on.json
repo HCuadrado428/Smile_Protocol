@@ -2,8 +2,9 @@
   "parent": "block/block",
   "ambientocclusion": false,
   "textures": {
-    "all": "smileprotocol:block/fluorescent_light_on",
-    "particle": "smileprotocol:block/fluorescent_light_on"
+    "lens": "smileprotocol:block/fluorescent_light_on",
+    "housing": "smileprotocol:block/fluorescent_housing",
+    "particle": "smileprotocol:block/fluorescent_housing"
   },
   "elements": [
     {
@@ -19,52 +20,27 @@
       ],
       "faces": {
         "north": {
-          "texture": "#all",
-          "cullface": "north",
-          "neoforge_data": {
-            "block_light": 15,
-            "sky_light": 15,
-            "ambient_occlusion": false
-          }
+          "texture": "#housing",
+          "cullface": "north"
         },
         "south": {
-          "texture": "#all",
-          "cullface": "south",
-          "neoforge_data": {
-            "block_light": 15,
-            "sky_light": 15,
-            "ambient_occlusion": false
-          }
+          "texture": "#housing",
+          "cullface": "south"
         },
         "east": {
-          "texture": "#all",
-          "cullface": "east",
-          "neoforge_data": {
-            "block_light": 15,
-            "sky_light": 15,
-            "ambient_occlusion": false
-          }
+          "texture": "#housing",
+          "cullface": "east"
         },
         "west": {
-          "texture": "#all",
-          "cullface": "west",
-          "neoforge_data": {
-            "block_light": 15,
-            "sky_light": 15,
-            "ambient_occlusion": false
-          }
+          "texture": "#housing",
+          "cullface": "west"
         },
         "up": {
-          "texture": "#all",
-          "cullface": "up",
-          "neoforge_data": {
-            "block_light": 15,
-            "sky_light": 15,
-            "ambient_occlusion": false
-          }
+          "texture": "#housing",
+          "cullface": "up"
         },
         "down": {
-          "texture": "#all",
+          "texture": "#lens",
           "cullface": "down",
           "neoforge_data": {
             "block_light": 15,

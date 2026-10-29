@@ -137,19 +137,30 @@ def main():
     write(ASSETS / "blockstates/elevator_board.json", {"variants": facing_variants("elevator_board")})
     item_from_block("elevator_board")
 
-    # Fluorescente: encendido emisivo en todas las caras
-    block_model("fluorescent_light_on", {
-        "parent": "block/block",
-        "ambientocclusion": False,
-        "textures": {"all": tex("fluorescent_light_on"), "particle": tex("fluorescent_light_on")},
-        "elements": [{"from": [0, 0, 0], "to": [16, 16, 16], "faces": {
-            d: {"texture": "#all", "cullface": d, "neoforge_data": GLOW} for d in DIRS}}],
-    })
-    block_model("fluorescent_light_off", {"parent": "block/cube_all", "textures": {"all": tex("fluorescent_light_off")}})
+    # Fluorescente de techo: el difusor abajo (emisivo encendido) y la carcasa en el resto
+    for state in ("on", "off"):
+        faces = {}
+        for d in DIRS:
+            if d == "down":
+                f = {"texture": "#lens", "cullface": d}
+                if state == "on":
+                    f["neoforge_data"] = GLOW
+            else:
+                f = {"texture": "#housing", "cullface": d}
+            faces[d] = f
+        block_model(f"fluorescent_light_{state}", {
+            "parent": "block/block",
+            "ambientocclusion": state != "on",
+            "textures": {"lens": tex(f"fluorescent_light_{state}"), "housing": tex("fluorescent_housing"),
+                         "particle": tex("fluorescent_housing")},
+            "elements": [{"from": [0, 0, 0], "to": [16, 16, 16], "faces": faces}],
+        })
     write(ASSETS / "blockstates/fluorescent_light.json", {"variants": {
         f"flickers={fl},lit={lit}": {"model": f"{MOD}:block/fluorescent_light_{'on' if lit == 'true' else 'off'}"}
         for fl in ("false", "true") for lit in ("false", "true")}})
-    item_from_block("fluorescent_light", "fluorescent_light_on")
+    # Icono plano con el difusor encendido (desde arriba solo se veria la carcasa)
+    write(ASSETS / "models/item/fluorescent_light.json",
+          {"parent": "item/generated", "textures": {"layer0": tex("fluorescent_light_on")}})
 
     # El fluorescente se puede romper y se recupera
     write(DATA / "loot_table/blocks/fluorescent_light.json", {

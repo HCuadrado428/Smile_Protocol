@@ -1,128 +1,277 @@
 package com.smileprotocol.client;
 
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.smileprotocol.SmileProtocol;
 import com.smileprotocol.network.Payloads;
 import com.smileprotocol.player.SPInventory;
+import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 
 /**
- * HUD propio (README 8.1). Dentro de la partida: barra de vida, 4 huecos y punto de mira
- * minimo. En el lobby: el contador «X/Y listos» del ascensor. Siempre: el fundido a negro y,
- * para operadores, el modo depuracion.
+ * HUD propio con aspecto de monitor medico de laboratorio (README 8.1).
+ * <ul>
+ *   <li>Dentro de la partida: constantes vitales (corazon que late, electrocardiograma y barra
+ *   de vida), los 4 huecos, un punto de mira minimo y una vineta oscura que se vuelve roja con
+ *   poca vida.</li>
+ *   <li>En el lobby: el panel del ascensor con «X/Y listos», indicadores y cuenta atras.</li>
+ *   <li>Siempre: el fundido a negro y, para operadores, el panel de depuracion.</li>
+ * </ul>
  */
 public final class HudOverlay {
 
     public static final HudOverlay INSTANCE = new HudOverlay();
 
-    // Paleta de laboratorio
-    private static final int PANEL = 0xB0101614;
-    private static final int PANEL_EDGE = 0xFF2A3A34;
-    private static final int TEXT = 0xFFD8E4DE;
-    private static final int MUTED = 0xFF8FA39A;
-    private static final int HEALTH = 0xFFB3202B;
-    private static final int HEALTH_LOW = 0xFFE03040;
-    private static final int SLOT_ACTIVE = 0xFFD8E4DE;
+    private static final ResourceLocation PANEL = SmileProtocol.id("hud/panel");
+    private static final ResourceLocation PANEL_ALERT = SmileProtocol.id("hud/panel_alert");
+    private static final ResourceLocation SLOT = SmileProtocol.id("hud/slot");
+    private static final ResourceLocation SLOT_SELECTED = SmileProtocol.id("hud/slot_selected");
+    private static final ResourceLocation HEART = SmileProtocol.id("hud/heart");
+    private static final ResourceLocation PIP_ON = SmileProtocol.id("hud/pip_on");
+    private static final ResourceLocation PIP_OFF = SmileProtocol.id("hud/pip_off");
+    private static final ResourceLocation VIGNETTE = SmileProtocol.id("hud/vignette");
+
+    private static final int ACCENT = 0xFF56E0C8;
+    private static final int DANGER = 0xFFE22C3A;
+    private static final int TEXT = 0xFFDCE8E4;
+    private static final int MUTED = 0xFF82968F;
+    private static final int AMBER = 0xFFFFB020;
+    private static final int READY = 0xFF46D27A;
+    private static final int WAITING = 0xFFF0E040;
+
+    /** Nombre del item al cambiar de hueco: se muestra 2 s y se desvanece. */
+    private int lastSelected = -1;
+    private long selectedAt;
 
     private HudOverlay() {}
 
     /** Lo llama cada loader al dibujar el HUD, por encima de todo. */
     public void render(GuiGraphics g, float partialTick) {
         Minecraft mc = Minecraft.getInstance();
-        int width = g.guiWidth();
-        int height = g.guiHeight();
         Font font = mc.font;
+        int w = g.guiWidth();
+        int h = g.guiHeight();
+
+        RenderSystem.enableBlend();
+        boolean inGame = ClientState.inSmileProtocol() && mc.player != null;
+        if (inGame) renderVignette(g, mc.player, w, h);
 
         if (!mc.options.hideGui) {
-            if (ClientState.inSmileProtocol() && mc.player != null) {
-                renderCrosshair(g, width, height);
-                renderHealth(g, mc.player, height);
-                renderSlots(g, font, width, height);
+            if (inGame) {
+                renderCrosshair(g, w, h);
+                renderVitals(g, font, mc.player, h);
+                renderSlots(g, font, w, h);
             }
             Payloads.SyncReady ready = ClientState.ready;
-            if (ready != null) renderReady(g, font, ready, width);
+            if (ready != null) renderReady(g, font, ready, w);
             renderDebug(g, font);
         }
 
         float fade = ClientState.fadeAlpha(partialTick);
-        if (fade > 0f) {
-            int a = Mth.clamp((int) (fade * 255), 0, 255);
-            g.fill(0, 0, width, height, a << 24);
-        }
+        if (fade > 0f) g.fill(0, 0, w, h, Mth.clamp((int) (fade * 255), 0, 255) << 24);
     }
+
+    // Vineta ---------------------------------------------------------------------
+
+    private static void renderVignette(GuiGraphics g, Player p, int w, int h) {
+        float frac = healthFraction(p);
+        RenderSystem.setShaderColor(0f, 0f, 0f, 0.55f);
+        g.blitSprite(VIGNETTE, 0, 0, w, h);
+        if (frac < 0.35f) {
+            float beat = heartbeat(frac);
+            float alpha = (0.35f - frac) / 0.35f * (0.35f + 0.25f * beat);
+            RenderSystem.setShaderColor(0.75f, 0.02f, 0.05f, alpha);
+            g.blitSprite(VIGNETTE, 0, 0, w, h);
+        }
+        RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
+    }
+
+    // Punto de mira -----------------------------------------------------------------
 
     private static void renderCrosshair(GuiGraphics g, int w, int h) {
         int cx = w / 2, cy = h / 2;
-        g.fill(cx, cy, cx + 1, cy + 1, 0xC0FFFFFF);
+        g.fill(cx - 1, cy - 1, cx + 2, cy + 2, 0x70000000);
+        g.fill(cx, cy, cx + 1, cy + 1, 0xE0F0F0F0);
     }
 
-    private static void renderHealth(GuiGraphics g, Player p, int h) {
-        int x = 12, y = h - 18, bw = 92, bh = 6;
-        float frac = p.getMaxHealth() <= 0 ? 0 : Mth.clamp(p.getHealth() / p.getMaxHealth(), 0f, 1f);
+    // Constantes vitales ------------------------------------------------------------------
+
+    private static float healthFraction(Player p) {
+        return p.getMaxHealth() <= 0 ? 0f : Mth.clamp(p.getHealth() / p.getMaxHealth(), 0f, 1f);
+    }
+
+    /** Latidos por segundo: 70 ppm con la vida llena, hasta 150 con poca vida. */
+    private static double beatsPerSecond(float frac) {
+        return (70 + (1 - frac) * 80) / 60.0;
+    }
+
+    /** Fase actual del latido (0 a 1). */
+    private static double beatPhase(float frac, double secondsAgo) {
+        double t = Util.getMillis() / 1000.0 - secondsAgo;
+        double ph = (t * beatsPerSecond(frac)) % 1.0;
+        return ph < 0 ? ph + 1 : ph;
+    }
+
+    /** Intensidad del latido (0 a 1), maxima en el complejo QRS. */
+    private static float heartbeat(float frac) {
+        double ph = beatPhase(frac, 0);
+        return (float) Math.exp(-Math.pow((ph - 0.31) * 12, 2));
+    }
+
+    /** Forma del electrocardiograma en una fase del latido (-0.45 a 1). */
+    private static double ecg(double p) {
+        if (p > 0.10 && p < 0.18) return 0.15 * Math.sin((p - 0.10) / 0.08 * Math.PI);
+        if (p > 0.26 && p < 0.29) return -0.25;
+        if (p >= 0.29 && p < 0.33) return 1.0;
+        if (p >= 0.33 && p < 0.36) return -0.45;
+        if (p > 0.50 && p < 0.66) return 0.25 * Math.sin((p - 0.50) / 0.16 * Math.PI);
+        return 0.0;
+    }
+
+    private static void renderVitals(GuiGraphics g, Font font, Player p, int h) {
+        float frac = healthFraction(p);
         boolean low = frac <= 0.3f;
-        int color = HEALTH;
-        if (low) {
-            // Late cuando queda poca vida
-            float pulse = (Mth.sin(p.tickCount * 0.4f) + 1f) * 0.5f;
-            color = pulse > 0.5f ? HEALTH_LOW : HEALTH;
+        int pw = 142, ph = 36;
+        int px = 8, py = h - ph - 8;
+        g.blitSprite(low ? PANEL_ALERT : PANEL, px, py, pw, ph);
+
+        // Corazon que late
+        float beat = heartbeat(frac);
+        float scale = 1f + 0.18f * beat;
+        g.pose().pushPose();
+        g.pose().translate(px + 13, py + 18, 0);
+        g.pose().scale(scale, scale, 1f);
+        g.blitSprite(HEART, -6, -6, 13, 12);
+        g.pose().popPose();
+
+        // Rotulo y porcentaje
+        int tx = px + 26;
+        g.drawString(font, Component.translatable("smileprotocol.hud.vitals"), tx, py + 5, MUTED, false);
+        String pct = Math.round(frac * 100) + "%";
+        g.drawString(font, pct, px + pw - 7 - font.width(pct), py + 5, low ? DANGER : TEXT, false);
+
+        // Electrocardiograma: los ultimos 2 segundos, lo mas reciente a la derecha
+        int ex = tx, ey = py + 15, ew = pw - 33, eh = 10;
+        int color = low ? DANGER : ACCENT;
+        int prev = Integer.MIN_VALUE;
+        for (int x = 0; x < ew; x++) {
+            double ago = (ew - 1 - x) / (double) ew * 2.0;
+            double v = p.getHealth() <= 0 ? 0 : ecg(beatPhase(frac, ago));
+            int y = ey + eh / 2 - (int) Math.round(v * (eh / 2.0));
+            int a = 60 + (int) (195 * (x / (float) ew));
+            int c = (a << 24) | (color & 0xFFFFFF);
+            if (prev == Integer.MIN_VALUE) prev = y;
+            g.fill(ex + x, Math.min(prev, y), ex + x + 1, Math.max(prev, y) + 1, c);
+            prev = y;
         }
-        g.fill(x - 1, y - 1, x + bw + 1, y + bh + 1, PANEL_EDGE);
-        g.fill(x, y, x + bw, y + bh, PANEL);
-        g.fill(x, y, x + Math.round(bw * frac), y + bh, color);
-        // Marcas cada 25 %
-        for (int i = 1; i < 4; i++) {
-            int mx = x + bw * i / 4;
-            g.fill(mx, y, mx + 1, y + bh, 0x60000000);
+        // Cabeza del trazo
+        g.fill(ex + ew - 2, prev - 1, ex + ew + 1, prev + 2, color);
+
+        // Barra segmentada (10 segmentos)
+        int bx = tx, by = py + ph - 9, seg = (ew - 9) / 10;
+        float filled = frac * 10f;
+        for (int i = 0; i < 10; i++) {
+            int x0 = bx + i * (seg + 1);
+            g.fill(x0, by, x0 + seg, by + 4, 0xFF2A1012);
+            float k = Mth.clamp(filled - i, 0f, 1f);
+            if (k > 0f) {
+                int on = low && beat > 0.5f ? 0xFFFF4A58 : DANGER;
+                g.fill(x0, by, x0 + Math.max(1, Math.round(seg * k)), by + 4, on);
+                g.fill(x0, by, x0 + Math.max(1, Math.round(seg * k)), by + 1, 0x60FFFFFF);
+            }
         }
     }
 
-    private static void renderSlots(GuiGraphics g, Font font, int w, int h) {
-        int size = 22, gap = 4;
+    // Huecos ---------------------------------------------------------------------------
+
+    private void renderSlots(GuiGraphics g, Font font, int w, int h) {
+        int size = 24, gap = 4;
         int total = SPInventory.SIZE * size + (SPInventory.SIZE - 1) * gap;
         int x0 = (w - total) / 2;
         int y = h - size - 8;
+        int sel = ClientState.selected();
+        if (sel != lastSelected) {
+            lastSelected = sel;
+            selectedAt = Util.getMillis();
+        }
+
         for (int i = 0; i < SPInventory.SIZE; i++) {
             int x = x0 + i * (size + gap);
-            boolean active = i == ClientState.selected();
-            g.fill(x - 1, y - 1, x + size + 1, y + size + 1, active ? SLOT_ACTIVE : PANEL_EDGE);
-            g.fill(x, y, x + size, y + size, PANEL);
+            boolean active = i == sel;
+            g.blitSprite(active ? SLOT_SELECTED : SLOT, x, y, size, size);
             ItemStack stack = ClientState.slot(i);
             if (!stack.isEmpty()) {
-                g.renderItem(stack, x + 3, y + 3);
-                g.renderItemDecorations(font, stack, x + 3, y + 3);
+                g.renderItem(stack, x + 4, y + 4);
+                g.renderItemDecorations(font, stack, x + 4, y + 4);
             }
-            g.drawString(font, String.valueOf(i + 1), x + 2, y + 1, active ? TEXT : MUTED, false);
+            g.pose().pushPose();
+            g.pose().translate(x + 3, y + 3, 200);
+            g.pose().scale(0.5f, 0.5f, 1f);
+            g.drawString(font, String.valueOf(i + 1), 0, 0, active ? 0xFFBEFFF0 : MUTED, false);
+            g.pose().popPose();
+        }
+
+        // Nombre del item del hueco activo, al cambiar
+        ItemStack current = ClientState.slot(sel);
+        long age = Util.getMillis() - selectedAt;
+        if (!current.isEmpty() && age < 2000) {
+            int alpha = age < 1500 ? 255 : (int) (255 * (1 - (age - 1500) / 500f));
+            if (alpha > 8) {
+                Component name = current.getHoverName();
+                g.drawString(font, name, (w - font.width(name)) / 2, y - 12, (alpha << 24) | (TEXT & 0xFFFFFF), true);
+            }
         }
     }
 
+    // Ascensor del lobby -------------------------------------------------------------------
+
     private static void renderReady(GuiGraphics g, Font font, Payloads.SyncReady r, int w) {
-        Component count = Component.translatable("smileprotocol.hud.ready", r.ready(), r.total());
-        int boxW = Math.max(160, Math.max(font.width(r.status()), font.width(r.title())) + 20);
-        int x = (w - boxW) / 2, y = 10, boxH = 44;
-        g.fill(x - 1, y - 1, x + boxW + 1, y + boxH + 1, PANEL_EDGE);
-        g.fill(x, y, x + boxW, y + boxH, PANEL);
-        g.drawCenteredString(font, r.title(), w / 2, y + 5, MUTED);
+        boolean pips = r.total() > 0 && r.total() <= 8;
+        int bw = Math.max(176, Math.max(font.width(r.status()), font.width(r.title())) + 28);
+        int bh = pips ? 62 : 52;
+        int x = (w - bw) / 2, y = 8;
+        boolean counting = r.countdown() >= 0;
+        g.blitSprite(PANEL, x, y, bw, bh);
+
+        Component title = r.title().copy();
+        g.drawString(font, title, (w - font.width(title)) / 2, y + 7, ACCENT, false);
+
+        Component big = counting ? Component.literal(String.valueOf(r.countdown()))
+                : Component.translatable("smileprotocol.hud.ready", r.ready(), r.total());
+        int color = counting ? AMBER : (r.total() > 0 && r.ready() >= r.total() ? READY : WAITING);
         g.pose().pushPose();
-        g.pose().translate(w / 2f, y + 16, 0);
-        g.pose().scale(1.5f, 1.5f, 1f);
-        int color = r.countdown() >= 0 ? 0xFFFFB020 : (r.ready() >= r.total() && r.total() > 0 ? 0xFF40D070 : 0xFFF0E040);
-        g.drawCenteredString(font, count, 0, 0, color);
+        g.pose().translate(w / 2f, y + 19, 0);
+        g.pose().scale(2f, 2f, 1f);
+        g.drawString(font, big, -font.width(big) / 2, 0, color, true);
         g.pose().popPose();
-        g.drawCenteredString(font, r.status(), w / 2, y + 32, TEXT);
+
+        int sy = y + 41;
+        if (pips) {
+            int pw = r.total() * 9 - 2;
+            for (int i = 0; i < r.total(); i++) {
+                g.blitSprite(i < r.ready() ? PIP_ON : PIP_OFF, (w - pw) / 2 + i * 9, sy, 7, 7);
+            }
+            sy += 11;
+        }
+        g.drawString(font, r.status(), (w - font.width(r.status())) / 2, sy, 0xFFB4C4BE, false);
     }
+
+    // Depuracion ------------------------------------------------------------------------------
 
     private static void renderDebug(GuiGraphics g, Font font) {
         if (ClientState.debugLines.isEmpty()) return;
-        int y = 4;
         int maxW = 0;
         for (String l : ClientState.debugLines) maxW = Math.max(maxW, font.width(l));
-        g.fill(2, 2, 8 + maxW, 6 + ClientState.debugLines.size() * 10, 0x90000000);
+        g.blitSprite(PANEL, 2, 2, maxW + 16, ClientState.debugLines.size() * 10 + 12);
+        int y = 8;
         for (String l : ClientState.debugLines) {
-            g.drawString(font, l, 5, y, 0xFFE0E0E0, false);
+            g.drawString(font, l, 9, y, 0xFFE0E0E0, false);
             y += 10;
         }
     }

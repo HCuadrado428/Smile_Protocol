@@ -1,6 +1,49 @@
 {
-  "parent": "block/cube_all",
+  "parent": "block/block",
+  "ambientocclusion": true,
   "textures": {
-    "all": "smileprotocol:block/fluorescent_light_off"
-  }
+    "lens": "smileprotocol:block/fluorescent_light_off",
+    "housing": "smileprotocol:block/fluorescent_housing",
+    "particle": "smileprotocol:block/fluorescent_housing"
+  },
+  "elements": [
+    {
+      "from": [
+        0,
+        0,
+        0
+      ],
+      "to": [
+        16,
+        16,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#housing",
+          "cullface": "north"
+        },
+        "south": {
+          "texture": "#housing",
+          "cullface": "south"
+        },
+        "east": {
+          "texture": "#housing",
+          "cullface": "east"
+        },
+        "west": {
+          "texture": "#housing",
+          "cullface": "west"
+        },
+        "up": {
+          "texture": "#housing",
+          "cullface": "up"
+        },
+        "down": {
+          "texture": "#lens",
+          "cullface": "down"
+        }
+      }
+    }
+  ]
 }
