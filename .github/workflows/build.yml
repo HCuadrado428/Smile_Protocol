@@ -37,6 +37,25 @@ jobs:
         run: |
           grep -nE "error:|What went wrong|Could not (resolve|find)|FAILED|Exception" build.log | head -40 | while IFS= read -r l; do echo "::error::${l//%/%25}"; done
 
+      # Temporal: comparar los jar de Veil (completo y slim)
+      - name: Inspeccionar Veil
+        if: always()
+        shell: bash
+        run: |
+          set +e
+          base=https://maven.blamejared.com/foundry/veil/Veil-forge-1.20.1/1.0.0.287
+          for f in Veil-forge-1.20.1-1.0.0.287.jar Veil-forge-1.20.1-1.0.0.287-slim.jar; do
+            curl -sSfL -o "/tmp/$f" "$base/$f"
+            echo "=== $f"
+            unzip -l "/tmp/$f" | awk '{print $4}' | grep -E '\.class$' | sed -E 's#/[^/]+\.class$##' | sort | uniq -c | sort -rn | head -40
+            echo "--- jarjar"
+            unzip -l "/tmp/$f" | awk '{print $4}' | grep -E '^META-INF/jarjar/' 
+            unzip -p "/tmp/$f" META-INF/jarjar/metadata.json 2>/dev/null | head -60
+            echo "--- org/lwjgl"
+            unzip -l "/tmp/$f" | awk '{print $4}' | grep '^org/lwjgl' | head -20
+          done > "$GITHUB_WORKSPACE/libs.txt" 2>&1
+          exit 0
+
       # El log se guarda en la rama ci-logs para poder leerlo sin acceso a la API de Actions
       - name: Guardar el log
         if: always()
@@ -54,6 +73,7 @@ jobs:
           mkdir -p logs
           cp "$GITHUB_WORKSPACE/build.log" "logs/${GITHUB_SHA}.log"
           cp "$GITHUB_WORKSPACE/build.log" latest.log
+          [ -f "$GITHUB_WORKSPACE/libs.txt" ] && cp "$GITHUB_WORKSPACE/libs.txt" "logs/${GITHUB_SHA}-libs.txt"
           # Ultimo jar compilado, para poder descargarlo sin la pestana Actions
           if ls "$GITHUB_WORKSPACE"/build/libs/*.jar >/dev/null 2>&1; then
             mkdir -p jars && rm -f jars/*.jar
