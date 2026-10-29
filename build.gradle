@@ -91,7 +91,11 @@ dependencies {
 
     // Obligatorias (README seccion 2)
     implementation fg.deobf("software.bernie.geckolib:geckolib-forge-${minecraft_version}:${geckolib_version}")
-    implementation fg.deobf("foundry.veil:Veil-forge-${minecraft_version}:${veil_version}")
+    // Veil empaqueta sus librerias (molang-compiler...) dentro del jar (jar-in-jar),
+    // asi que no hace falta resolverlas por Maven
+    implementation(fg.deobf("foundry.veil:Veil-forge-${minecraft_version}:${veil_version}")) {
+        transitive = false
+    }
     implementation fg.deobf("dev.kosmx.player-anim:player-animation-lib-forge:${player_anim_version}")
 
     // Opcional: Simple Voice Chat se usa solo a traves de su API (soft dependency)
