@@ -87,6 +87,12 @@ jobs:
           cp "$GITHUB_WORKSPACE/build.log" "logs/${GITHUB_SHA}.log"
           cp "$GITHUB_WORKSPACE/build.log" latest.log
           [ -f "$GITHUB_WORKSPACE/libs.txt" ] && cp "$GITHUB_WORKSPACE/libs.txt" "logs/${GITHUB_SHA}-libs.txt"
+          # Ultimo jar compilado, para poder descargarlo sin la pestana Actions
+          if ls "$GITHUB_WORKSPACE"/build/libs/*.jar >/dev/null 2>&1; then
+            mkdir -p jars && rm -f jars/*.jar
+            cp "$GITHUB_WORKSPACE"/build/libs/*.jar jars/
+            echo "${GITHUB_SHA}" > jars/COMMIT
+          fi
           git add -A
           git commit -qm "log ${GITHUB_SHA}"
           git push -q origin HEAD:ci-logs
