@@ -188,5 +188,6 @@
   "smileprotocol.command.give.in_game": "Solo dentro de una partida.",
   "smileprotocol.command.give.done": "Recibes: %s",
   "smileprotocol.command.noise.test": "Ruido de prueba de %s bloques.",
-  "smileprotocol.floor.title": "PLANTA -%s"
+  "smileprotocol.floor.title": "PLANTA -%s",
+  "item.smileprotocol.flashlight": "Linterna"
 }

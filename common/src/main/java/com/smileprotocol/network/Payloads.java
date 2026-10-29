@@ -236,4 +236,23 @@ public final class Payloads {
 
         @Override public Type<HideInput> type() { return TYPE; }
     }
+
+    /** C -> S: encender o apagar la linterna (tecla F). */
+    public record ToggleFlashlight(boolean on) implements CustomPacketPayload {
+        public static final Type<ToggleFlashlight> TYPE = typeOf("toggle_flashlight");
+        public static final StreamCodec<ByteBuf, ToggleFlashlight> CODEC = ByteBufCodecs.BOOL.map(ToggleFlashlight::new, ToggleFlashlight::on);
+
+        @Override public Type<ToggleFlashlight> type() { return TYPE; }
+    }
+
+    /** S -> C: linterna encendida o apagada de un jugador (README 21.1). */
+    public record SyncFlashlight(int entityId, boolean on) implements CustomPacketPayload {
+        public static final Type<SyncFlashlight> TYPE = typeOf("sync_flashlight");
+        public static final StreamCodec<ByteBuf, SyncFlashlight> CODEC = StreamCodec.composite(
+                ByteBufCodecs.VAR_INT, SyncFlashlight::entityId,
+                ByteBufCodecs.BOOL, SyncFlashlight::on,
+                SyncFlashlight::new);
+
+        @Override public Type<SyncFlashlight> type() { return TYPE; }
+    }
 }

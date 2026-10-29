@@ -240,6 +240,10 @@ public final class RunManager {
                 if (p == null || entry == null) continue;
                 SPSessionManager.enter(p, level, entry.entry(), entry.entryYaw(), g.id());
                 com.smileprotocol.instance.FloorTitle.show(p, 0, entry.zoneId());
+                // Equipo inicial (README 6.4): la linterna, encendida
+                com.smileprotocol.interact.SPInventoryOps.give(p, new net.minecraft.world.item.ItemStack(
+                        com.smileprotocol.registry.ModItems.FLASHLIGHT.get()));
+                com.smileprotocol.motion.Flashlights.set(p, true);
                 data.plays.merge(id, 1, Integer::sum);
                 p.sendSystemMessage(Component.translatable("smileprotocol.run.joined", g.label(), g.members().size(),
                         Component.translatable("smileprotocol.run.type." + type.name().toLowerCase())).withStyle(ChatFormatting.DARK_AQUA));

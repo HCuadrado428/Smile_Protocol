@@ -40,6 +40,7 @@ public final class ClientInteraction {
     private static boolean needRelease;
     private static Payloads.InteractState state = Payloads.InteractState.idle();
     private static boolean prevDrop;
+    private static boolean prevLight;
 
     private ClientInteraction() {}
 
@@ -76,6 +77,21 @@ public final class ClientInteraction {
             SPNetwork.sendToServer(new Payloads.DropItem(ClientState.selected()));
         }
         prevDrop = drop;
+
+        // Linterna (F): hace falta llevarla en algun hueco
+        boolean light = ClientMotion.isDown(SPConfig.get().key_flashlight);
+        if (light && !prevLight) {
+            boolean has = false;
+            for (int i = 0; i < SPInventory.SIZE; i++) {
+                if (ClientState.slot(i).getItem() == com.smileprotocol.registry.ModItems.FLASHLIGHT.get()) has = true;
+            }
+            boolean on = !com.smileprotocol.client.light.Flashlight.isOn(player.getId());
+            if (has || !on) {
+                com.smileprotocol.client.light.Flashlight.set(player.getId(), on);
+                SPNetwork.sendToServer(new Payloads.ToggleFlashlight(on));
+            }
+        }
+        prevLight = light;
 
         Action action = MotionStates.view(player).action();
         if (action == Action.HIDDEN || action == Action.DIVE || action == Action.VAULT) {

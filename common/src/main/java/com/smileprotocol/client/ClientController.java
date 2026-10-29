@@ -24,6 +24,7 @@ public final class ClientController {
         SPNetwork.setClientHandler(Payloads.SyncMotion.TYPE, ClientMotion::onSync);
         SPNetwork.setClientHandler(Payloads.InteractState.TYPE, ClientInteraction::onState);
         SPNetwork.setClientHandler(Payloads.SyncHide.TYPE, ClientHide::onSync);
+        SPNetwork.setClientHandler(Payloads.SyncFlashlight.TYPE, p -> com.smileprotocol.client.light.Flashlight.set(p.entityId(), p.on()));
         com.smileprotocol.interact.ClientInventoryView.setProvider(ClientState::slot);
     }
 
@@ -37,6 +38,7 @@ public final class ClientController {
         ClientMotion.reset();
         ClientInteraction.reset();
         ClientHide.reset();
+        com.smileprotocol.client.light.Flashlight.reset();
         com.smileprotocol.client.light.DynamicLights.clear();
     }
 

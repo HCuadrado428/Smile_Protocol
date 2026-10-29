@@ -46,6 +46,7 @@ public final class ModItems {
     public static final Supplier<KeycardItem> KEYCARD_2 = item("keycard_2", () -> new KeycardItem(one(), 2));
     public static final Supplier<KeycardItem> KEYCARD_3 = item("keycard_3", () -> new KeycardItem(one(), 3));
     public static final Supplier<Item> VALVE_WHEEL = item("valve_wheel", () -> new Item(one()));
+    public static final Supplier<Item> FLASHLIGHT = item("flashlight", () -> new Item(one()));
 
     private ModItems() {}
 

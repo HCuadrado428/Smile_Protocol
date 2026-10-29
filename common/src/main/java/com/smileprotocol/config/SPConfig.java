@@ -99,6 +99,7 @@ public final class SPConfig {
         public String key_lean_left = "key.keyboard.q";
         public String key_lean_right = "key.keyboard.e";
         public String key_drop = "key.keyboard.g";
+        public String key_flashlight = "key.keyboard.f";
 
         // Ascensores de zona (README 6.5)
         public int elevator_grace = 15;

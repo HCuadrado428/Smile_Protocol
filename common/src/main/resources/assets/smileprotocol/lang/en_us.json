@@ -188,5 +188,6 @@
   "smileprotocol.command.give.in_game": "Only inside a run.",
   "smileprotocol.command.give.done": "You get: %s",
   "smileprotocol.command.noise.test": "Test noise of %s blocks.",
-  "smileprotocol.floor.title": "FLOOR -%s"
+  "smileprotocol.floor.title": "FLOOR -%s",
+  "item.smileprotocol.flashlight": "Flashlight"
 }

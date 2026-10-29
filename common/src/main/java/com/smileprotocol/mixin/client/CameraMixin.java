@@ -29,6 +29,7 @@ public abstract class CameraMixin {
 
     @Inject(method = "setup", at = @At("TAIL"))
     private void smileprotocol$setup(BlockGetter level, Entity entity, boolean detached, boolean reverse, float pt, CallbackInfo ci) {
+        com.smileprotocol.client.light.Flashlight.update((Camera) (Object) this, pt);
         if (this.detached) return;
         float yawOffset = ClientMotion.cameraYawOffset(entity, pt);
         float lean = ClientMotion.cameraLeanOffset(pt);
