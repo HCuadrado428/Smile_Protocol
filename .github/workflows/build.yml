@@ -38,6 +38,38 @@ jobs:
         run: |
           grep -nE "error:|What went wrong|Could not (resolve|find)|FAILED|Exception" build.log | head -40 | while IFS= read -r l; do echo "::error::${l//%/%25}"; done
 
+      # Firmas de las librerias, para escribir codigo contra su API exacta
+      - name: Inspeccionar librerias
+        if: always()
+        shell: bash
+        run: |
+          out="$GITHUB_WORKSPACE/libs.txt"
+          : > "$out"
+          for pat in 'geckolib-forge-1.20.1-*_mapped_official*.jar' 'Veil-forge-1.20.1-*_mapped_official*.jar'; do
+            jar=$(find ~/.gradle "$GITHUB_WORKSPACE/build" -name "$pat" 2>/dev/null | grep -v sources | head -1)
+            echo "=== $pat -> $jar" >> "$out"
+            [ -n "$jar" ] || continue
+            unzip -l "$jar" | awk '{print $4}' | grep '\.class$' | grep -iE 'light|geoblock|geomodel|defaulted|geckolibutil|animatablemanager|animationstate|geobone|coregeobone|animatableinstancecache|veilrendersystem|renderer|dynamicbuffer' | grep -v '\$' | head -150 >> "$out"
+            if [ -f tools/inspect/classes.txt ]; then
+              while read -r cls; do
+                [ -z "$cls" ] && continue
+                if unzip -l "$jar" | grep -q "${cls//.//}.class"; then
+                  echo "--- $cls" >> "$out"
+                  javap -cp "$jar" -p "$cls" >> "$out" 2>&1 || true
+                fi
+              done < tools/inspect/classes.txt
+            fi
+          done
+          if [ -f tools/inspect/code.txt ]; then
+            while read -r cls meth; do
+              [ -z "$cls" ] && continue
+              jar=$(find ~/.gradle -name 'geckolib-forge-1.20.1-*_mapped_official*.jar' -o -name 'Veil-forge-1.20.1-*_mapped_official*.jar' 2>/dev/null | grep -v sources | xargs -I{} sh -c "unzip -l {} | grep -q '${cls//.//}.class' && echo {}" | head -1)
+              [ -n "$jar" ] || continue
+              echo "--- code $cls $meth" >> "$out"
+              javap -cp "$jar" -c -p "$cls" | awk -v m="$meth" '$0 ~ m"\\(" {p=1} p {print} p && /^$/ {p=0}' | head -80 >> "$out" || true
+            done < tools/inspect/code.txt
+          fi
+
       # El log se guarda en la rama ci-logs para poder leerlo sin acceso a la API de Actions
       - name: Guardar el log
         if: always()
@@ -55,6 +87,7 @@ jobs:
           mkdir -p logs
           cp "$GITHUB_WORKSPACE/build.log" "logs/${GITHUB_SHA}.log"
           cp "$GITHUB_WORKSPACE/build.log" latest.log
+          [ -f "$GITHUB_WORKSPACE/libs.txt" ] && cp "$GITHUB_WORKSPACE/libs.txt" "logs/${GITHUB_SHA}-libs.txt"
           git add -A
           git commit -qm "log ${GITHUB_SHA}"
           git push -q origin HEAD:ci-logs
