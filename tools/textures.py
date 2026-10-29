@@ -383,17 +383,6 @@ def elevator_door_geo():
             for x in range(x0 + 3, x1 - 2):
                 t.shade(x, 46, -40)
                 t.shade(x, 51, 24)
-            # Placa con el numero de planta
-            t.rect(x0 + 11, 8, x0 + 20, 13, (44, 48, 52))
-            bevel(t, x0 + 11, 8, x0 + 20, 13, 30, -10, 1)
-            for (dx, dy) in ((14, 10), (15, 10), (16, 10), (17, 10), (14, 11), (15, 11), (16, 11), (17, 11)):
-                pass
-            # «-1» en blanco
-            for dx in (13, 14, 15):
-                t.px(x0 + dx, 11, (226, 230, 226))
-            for dy in range(9, 13):
-                t.px(x0 + 18, dy, (226, 230, 226))
-            t.px(x0 + 17, 10, (226, 230, 226))
         # Zocalo de chapa estriada
         diamond_plate(t, (112, 116, 120), seed + 1, x0 + 2, 55, x1 - 2, 62, cell=6)
         groove(t, x0 + 2, 54, x1 - 2, 54)
