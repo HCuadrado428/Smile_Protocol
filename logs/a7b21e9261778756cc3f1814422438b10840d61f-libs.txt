@@ -1,0 +1,107 @@
+=== Veil-forge-1.20.1-1.0.0.287.jar
+    156 foundry/veil/lib/opencl
+    109 org/lwjgl/system/linux
+     69 org/lwjgl/system
+     45 org/lwjgl/system/windows
+     41 foundry/veil/api/client/util
+     38 foundry/veil/lib/asm/tree
+     37 imgui/flag
+     35 foundry/veil/lib/asm
+     33 org/lwjgl/system/linux/liburing
+     27 org/lwjgl/system/macosx
+     23 imgui
+     22 gg/moonflower/molangcompiler/core/ast
+     22 foundry/veil/impl/client/editor
+     21 foundry/veil/impl/glsl/grammar
+     18 imgui/glfw
+     18 foundry/veil/impl/glsl/node/expression
+     16 foundry/veil/impl/client/render/shader/modifier
+     16 foundry/veil/api/client/render
+     15 foundry/veil/api/util
+     15 foundry/veil/api/client/registry
+     13 foundry/veil/impl/client/render/shader
+     13 foundry/veil/api/opencl
+     13 foundry/veil/api/client/render/framebuffer
+     12 foundry/veil/api/resource/type
+     11 org/lwjgl/util/shaderc
+     11 imgui/callback
+     11 foundry/veil/mixin/accessor
+     11 foundry/veil/ext
+     11 foundry/veil/api/quasar/particle
+     11 foundry/veil/api/event
+     10 imgui/extension/implot/flag
+     10 foundry/veil/impl/client/render/pipeline
+     10 foundry/veil/api/client/render/shader/processor
+     10 foundry/veil/api/client/render/shader
+     10 foundry/veil/api/client/editor
+      9 imgui/type
+      9 gg/moonflower/molangcompiler/core/compiler
+      9 gg/moonflower/molangcompiler/api
+      9 foundry/veil/mixin/client/pipeline
+      9 foundry/veil/api/quasar/emitters/shape
+--- jarjar
+--- org/lwjgl
+org/lwjgl/
+org/lwjgl/BufferUtils.class
+org/lwjgl/CLongBuffer.class
+org/lwjgl/PointerBuffer.class
+org/lwjgl/Version$BuildType.class
+org/lwjgl/Version.class
+org/lwjgl/package-info.class
+org/lwjgl/system/
+org/lwjgl/system/APIUtil$1.class
+org/lwjgl/system/APIUtil$APIVersion.class
+org/lwjgl/system/APIUtil$Encoder.class
+org/lwjgl/system/APIUtil.class
+org/lwjgl/system/Callback$1.class
+org/lwjgl/system/Callback$2.class
+org/lwjgl/system/Callback$ClosureRegistry.class
+org/lwjgl/system/Callback.class
+org/lwjgl/system/CallbackI.class
+org/lwjgl/system/CheckIntrinsics.class
+org/lwjgl/system/Checks.class
+org/lwjgl/system/Configuration$StateInit.class
+grep: write error: Broken pipe
+=== Veil-forge-1.20.1-1.0.0.287-slim.jar
+     41 foundry/veil/api/client/util
+     22 foundry/veil/impl/client/editor
+     21 foundry/veil/impl/glsl/grammar
+     18 foundry/veil/impl/glsl/node/expression
+     16 foundry/veil/impl/client/render/shader/modifier
+     16 foundry/veil/api/client/render
+     15 foundry/veil/api/util
+     15 foundry/veil/api/client/registry
+     13 foundry/veil/impl/client/render/shader
+     13 foundry/veil/api/opencl
+     13 foundry/veil/api/client/render/framebuffer
+     12 foundry/veil/api/resource/type
+     11 foundry/veil/mixin/accessor
+     11 foundry/veil/ext
+     11 foundry/veil/api/quasar/particle
+     11 foundry/veil/api/event
+     10 foundry/veil/impl/client/render/pipeline
+     10 foundry/veil/api/client/render/shader/processor
+     10 foundry/veil/api/client/render/shader
+     10 foundry/veil/api/client/editor
+      9 foundry/veil/mixin/client/pipeline
+      9 foundry/veil/api/quasar/emitters/shape
+      9 foundry/veil/api/client/render/shader/program
+      8 foundry/veil/impl/glsl/node/branch
+      8 foundry/veil/impl/glsl
+      8 foundry/veil/api/resource
+      8 foundry/veil/api/quasar/emitters/module/render
+      8 foundry/veil/api/quasar/emitters/module/force
+      8 foundry/veil/api/quasar/data
+      8 foundry/veil/api/client/render/rendertype/layer
+      7 foundry/veil/mixin/client/deferred
+      7 foundry/veil/impl/resource/loader
+      7 foundry/veil/impl/resource
+      7 foundry/veil/forge/platform
+      7 foundry/veil/forge/event
+      7 foundry/veil/api/quasar/data/module/force
+      7 foundry/veil/api/client/render/post/stage
+      7 foundry/veil/api/client/render/deferred/light
+      7 foundry/veil/api/client/necromancer
+      7 foundry/veil/api/client/graveyard/render/mesh
+--- jarjar
+--- org/lwjgl
