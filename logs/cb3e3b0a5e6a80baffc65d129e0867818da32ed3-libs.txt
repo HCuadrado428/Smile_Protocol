@@ -1,0 +1,681 @@
+=== geckolib-forge-1.20.1-*_mapped_official*.jar -> /home/runner/.gradle/caches/forge_gradle/deobf_dependencies/software/bernie/geckolib/geckolib-forge-1.20.1/4.7.4_mapped_official_1.20.1/geckolib-forge-1.20.1-4.7.4_mapped_official_1.20.1.jar
+software/bernie/example/client/renderer/armor/GeckoArmorRenderer.class
+software/bernie/example/client/renderer/armor/WolfArmorRenderer.class
+software/bernie/example/client/renderer/block/FertilizerBlockRenderer.class
+software/bernie/example/client/renderer/block/GeckoHabitatBlockRenderer.class
+software/bernie/example/client/renderer/entity/BatRenderer.class
+software/bernie/example/client/renderer/entity/BikeRenderer.class
+software/bernie/example/client/renderer/entity/CoolKidRenderer.class
+software/bernie/example/client/renderer/entity/FakeGlassRenderer.class
+software/bernie/example/client/renderer/entity/GremlinRenderer.class
+software/bernie/example/client/renderer/entity/MutantZombieRenderer.class
+software/bernie/example/client/renderer/entity/ParasiteRenderer.class
+software/bernie/example/client/renderer/entity/RaceCarRenderer.class
+software/bernie/example/client/renderer/entity/ReplacedCreeperRenderer.class
+software/bernie/example/client/renderer/entity/layer/CoolKidGlassesLayer.class
+software/bernie/example/client/renderer/item/JackInTheBoxRenderer.class
+software/bernie/geckolib/animatable/GeoBlockEntity.class
+software/bernie/geckolib/cache/object/BakedGeoModel.class
+software/bernie/geckolib/cache/object/GeoBone.class
+software/bernie/geckolib/core/animatable/instance/AnimatableInstanceCache.class
+software/bernie/geckolib/core/animatable/instance/InstancedAnimatableInstanceCache.class
+software/bernie/geckolib/core/animatable/instance/SingletonAnimatableInstanceCache.class
+software/bernie/geckolib/core/animatable/model/CoreBakedGeoModel.class
+software/bernie/geckolib/core/animatable/model/CoreGeoBone.class
+software/bernie/geckolib/core/animatable/model/CoreGeoModel.class
+software/bernie/geckolib/core/animation/AnimatableManager.class
+software/bernie/geckolib/core/animation/AnimationState.class
+software/bernie/geckolib/core/animation/ContextAwareAnimatableManager.class
+software/bernie/geckolib/model/DefaultedBlockGeoModel.class
+software/bernie/geckolib/model/DefaultedEntityGeoModel.class
+software/bernie/geckolib/model/DefaultedGeoModel.class
+software/bernie/geckolib/model/DefaultedItemGeoModel.class
+software/bernie/geckolib/model/GeoModel.class
+software/bernie/geckolib/renderer/DyeableGeoArmorRenderer.class
+software/bernie/geckolib/renderer/DynamicGeoEntityRenderer.class
+software/bernie/geckolib/renderer/GeoArmorRenderer.class
+software/bernie/geckolib/renderer/GeoBlockRenderer.class
+software/bernie/geckolib/renderer/GeoEntityRenderer.class
+software/bernie/geckolib/renderer/GeoItemRenderer.class
+software/bernie/geckolib/renderer/GeoObjectRenderer.class
+software/bernie/geckolib/renderer/GeoRenderer.class
+software/bernie/geckolib/renderer/GeoReplacedEntityRenderer.class
+software/bernie/geckolib/renderer/layer/AutoGlowingGeoLayer.class
+software/bernie/geckolib/renderer/layer/BlockAndItemGeoLayer.class
+software/bernie/geckolib/renderer/layer/BoneFilterGeoLayer.class
+software/bernie/geckolib/renderer/layer/FastBoneFilterGeoLayer.class
+software/bernie/geckolib/renderer/layer/GeoRenderLayer.class
+software/bernie/geckolib/renderer/layer/GeoRenderLayersContainer.class
+software/bernie/geckolib/renderer/layer/ItemArmorGeoLayer.class
+software/bernie/geckolib/util/GeckoLibUtil.class
+--- software.bernie.geckolib.animatable.GeoBlockEntity
+Compiled from "GeoBlockEntity.java"
+public interface software.bernie.geckolib.animatable.GeoBlockEntity extends software.bernie.geckolib.core.animatable.GeoAnimatable {
+  public default <D> D getAnimData(software.bernie.geckolib.network.SerializableDataTicket<D>);
+  public default <D> void setAnimData(software.bernie.geckolib.network.SerializableDataTicket<D>, D);
+  public default void triggerAnim(java.lang.String, java.lang.String);
+  public default void stopTriggeredAnimation(java.lang.String, java.lang.String);
+  public default double getTick(java.lang.Object);
+  private static net.minecraft.world.level.chunk.LevelChunk lambda$stopTriggeredAnimation$2(net.minecraft.world.level.Level, net.minecraft.core.BlockPos);
+  private static net.minecraft.world.level.chunk.LevelChunk lambda$triggerAnim$1(net.minecraft.world.level.Level, net.minecraft.core.BlockPos);
+  private static net.minecraft.world.level.chunk.LevelChunk lambda$setAnimData$0(net.minecraft.world.level.Level, net.minecraft.core.BlockPos);
+}
+--- software.bernie.geckolib.renderer.GeoBlockRenderer
+Compiled from "GeoBlockRenderer.java"
+public class software.bernie.geckolib.renderer.GeoBlockRenderer<T extends net.minecraft.world.level.block.entity.BlockEntity & software.bernie.geckolib.core.animatable.GeoAnimatable> implements software.bernie.geckolib.renderer.GeoRenderer<T>, net.minecraft.client.renderer.blockentity.BlockEntityRenderer<T> {
+  protected final software.bernie.geckolib.renderer.layer.GeoRenderLayersContainer<T> renderLayers;
+  protected final software.bernie.geckolib.model.GeoModel<T> model;
+  protected T animatable;
+  protected float scaleWidth;
+  protected float scaleHeight;
+  protected org.joml.Matrix4f blockRenderTranslations;
+  protected org.joml.Matrix4f modelRenderTranslations;
+  public software.bernie.geckolib.renderer.GeoBlockRenderer(software.bernie.geckolib.model.GeoModel<T>);
+  public software.bernie.geckolib.model.GeoModel<T> getGeoModel();
+  public T getAnimatable();
+  public long getInstanceId(T);
+  public java.util.List<software.bernie.geckolib.renderer.layer.GeoRenderLayer<T>> getRenderLayers();
+  public software.bernie.geckolib.renderer.GeoBlockRenderer<T> addRenderLayer(software.bernie.geckolib.renderer.layer.GeoRenderLayer<T>);
+  public software.bernie.geckolib.renderer.GeoBlockRenderer<T> withScale(float);
+  public software.bernie.geckolib.renderer.GeoBlockRenderer<T> withScale(float, float);
+  public void preRender(com.mojang.blaze3d.vertex.PoseStack, T, software.bernie.geckolib.cache.object.BakedGeoModel, net.minecraft.client.renderer.MultiBufferSource, com.mojang.blaze3d.vertex.VertexConsumer, boolean, float, int, int, float, float, float, float);
+  public void render(net.minecraft.world.level.block.entity.BlockEntity, float, com.mojang.blaze3d.vertex.PoseStack, net.minecraft.client.renderer.MultiBufferSource, int, int);
+  public void actuallyRender(com.mojang.blaze3d.vertex.PoseStack, T, software.bernie.geckolib.cache.object.BakedGeoModel, net.minecraft.client.renderer.RenderType, net.minecraft.client.renderer.MultiBufferSource, com.mojang.blaze3d.vertex.VertexConsumer, boolean, float, int, int, float, float, float, float);
+  public void doPostRenderCleanup();
+  public void renderRecursively(com.mojang.blaze3d.vertex.PoseStack, T, software.bernie.geckolib.cache.object.GeoBone, net.minecraft.client.renderer.RenderType, net.minecraft.client.renderer.MultiBufferSource, com.mojang.blaze3d.vertex.VertexConsumer, boolean, float, int, int, float, float, float, float);
+  protected void rotateBlock(net.minecraft.core.Direction, com.mojang.blaze3d.vertex.PoseStack);
+  protected net.minecraft.core.Direction getFacing(T);
+  public void updateAnimatedTextureFrame(T);
+  public void fireCompileRenderLayersEvent();
+  public boolean firePreRenderEvent(com.mojang.blaze3d.vertex.PoseStack, software.bernie.geckolib.cache.object.BakedGeoModel, net.minecraft.client.renderer.MultiBufferSource, float, int);
+  public void firePostRenderEvent(com.mojang.blaze3d.vertex.PoseStack, software.bernie.geckolib.cache.object.BakedGeoModel, net.minecraft.client.renderer.MultiBufferSource, float, int);
+  public void updateAnimatedTextureFrame(software.bernie.geckolib.core.animatable.GeoAnimatable);
+  public void renderRecursively(com.mojang.blaze3d.vertex.PoseStack, software.bernie.geckolib.core.animatable.GeoAnimatable, software.bernie.geckolib.cache.object.GeoBone, net.minecraft.client.renderer.RenderType, net.minecraft.client.renderer.MultiBufferSource, com.mojang.blaze3d.vertex.VertexConsumer, boolean, float, int, int, float, float, float, float);
+  public void preRender(com.mojang.blaze3d.vertex.PoseStack, software.bernie.geckolib.core.animatable.GeoAnimatable, software.bernie.geckolib.cache.object.BakedGeoModel, net.minecraft.client.renderer.MultiBufferSource, com.mojang.blaze3d.vertex.VertexConsumer, boolean, float, int, int, float, float, float, float);
+  public void actuallyRender(com.mojang.blaze3d.vertex.PoseStack, software.bernie.geckolib.core.animatable.GeoAnimatable, software.bernie.geckolib.cache.object.BakedGeoModel, net.minecraft.client.renderer.RenderType, net.minecraft.client.renderer.MultiBufferSource, com.mojang.blaze3d.vertex.VertexConsumer, boolean, float, int, int, float, float, float, float);
+  public long getInstanceId(software.bernie.geckolib.core.animatable.GeoAnimatable);
+  public software.bernie.geckolib.core.animatable.GeoAnimatable getAnimatable();
+}
+--- software.bernie.geckolib.model.GeoModel
+Compiled from "GeoModel.java"
+public abstract class software.bernie.geckolib.model.GeoModel<T extends software.bernie.geckolib.core.animatable.GeoAnimatable> implements software.bernie.geckolib.core.animatable.model.CoreGeoModel<T> {
+  private final software.bernie.geckolib.core.animation.AnimationProcessor<T> processor;
+  private software.bernie.geckolib.cache.object.BakedGeoModel currentModel;
+  private double animTime;
+  private double lastGameTickTime;
+  private long lastRenderedInstance;
+  public software.bernie.geckolib.model.GeoModel();
+  public net.minecraft.resources.ResourceLocation getModelResource(T, software.bernie.geckolib.renderer.GeoRenderer<T>);
+  public abstract net.minecraft.resources.ResourceLocation getModelResource(T);
+  public net.minecraft.resources.ResourceLocation getTextureResource(T, software.bernie.geckolib.renderer.GeoRenderer<T>);
+  public abstract net.minecraft.resources.ResourceLocation getTextureResource(T);
+  public abstract net.minecraft.resources.ResourceLocation getAnimationResource(T);
+  public net.minecraft.resources.ResourceLocation[] getAnimationResourceFallbacks(T);
+  public boolean crashIfBoneMissing();
+  public net.minecraft.client.renderer.RenderType getRenderType(T, net.minecraft.resources.ResourceLocation);
+  public final software.bernie.geckolib.cache.object.BakedGeoModel getBakedGeoModel(java.lang.String);
+  public software.bernie.geckolib.cache.object.BakedGeoModel getBakedModel(net.minecraft.resources.ResourceLocation);
+  public java.util.Optional<software.bernie.geckolib.cache.object.GeoBone> getBone(java.lang.String);
+  public software.bernie.geckolib.core.animation.Animation getAnimation(T, java.lang.String);
+  public software.bernie.geckolib.core.animation.AnimationProcessor<T> getAnimationProcessor();
+  public void addAdditionalStateData(T, long, java.util.function.BiConsumer<software.bernie.geckolib.core.object.DataTicket<T>, T>);
+  public void handleAnimations(T, long, software.bernie.geckolib.core.animation.AnimationState<T>);
+  public void applyMolangQueries(T, double);
+  public software.bernie.geckolib.core.animatable.model.CoreBakedGeoModel getBakedGeoModel(java.lang.String);
+  private static double lambda$applyMolangQueries$9(net.minecraft.world.entity.LivingEntity, double);
+  private static double lambda$applyMolangQueries$8(net.minecraft.world.entity.LivingEntity);
+  private static double lambda$applyMolangQueries$7(net.minecraft.world.entity.LivingEntity);
+  private static double lambda$applyMolangQueries$6(net.minecraft.world.entity.Entity);
+  private static double lambda$applyMolangQueries$5(net.minecraft.world.entity.Entity);
+  private static double lambda$applyMolangQueries$4(net.minecraft.world.entity.Entity);
+  private static double lambda$applyMolangQueries$3(net.minecraft.client.Minecraft, net.minecraft.world.entity.Entity);
+  private static double lambda$applyMolangQueries$2(net.minecraft.client.Minecraft);
+  private static double lambda$applyMolangQueries$1(double);
+  private static double lambda$handleAnimations$0(software.bernie.geckolib.core.animation.AnimationState);
+}
+--- software.bernie.geckolib.model.DefaultedBlockGeoModel
+Compiled from "DefaultedBlockGeoModel.java"
+public class software.bernie.geckolib.model.DefaultedBlockGeoModel<T extends software.bernie.geckolib.core.animatable.GeoAnimatable> extends software.bernie.geckolib.model.DefaultedGeoModel<T> {
+  public software.bernie.geckolib.model.DefaultedBlockGeoModel(net.minecraft.resources.ResourceLocation);
+  protected java.lang.String subtype();
+  public software.bernie.geckolib.model.DefaultedBlockGeoModel<T> withAltModel(net.minecraft.resources.ResourceLocation);
+  public software.bernie.geckolib.model.DefaultedBlockGeoModel<T> withAltAnimations(net.minecraft.resources.ResourceLocation);
+  public software.bernie.geckolib.model.DefaultedBlockGeoModel<T> withAltTexture(net.minecraft.resources.ResourceLocation);
+  public software.bernie.geckolib.model.DefaultedGeoModel withAltTexture(net.minecraft.resources.ResourceLocation);
+  public software.bernie.geckolib.model.DefaultedGeoModel withAltAnimations(net.minecraft.resources.ResourceLocation);
+  public software.bernie.geckolib.model.DefaultedGeoModel withAltModel(net.minecraft.resources.ResourceLocation);
+}
+--- software.bernie.geckolib.util.GeckoLibUtil
+Compiled from "GeckoLibUtil.java"
+public final class software.bernie.geckolib.util.GeckoLibUtil {
+  public software.bernie.geckolib.util.GeckoLibUtil();
+  public static software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache createInstanceCache(software.bernie.geckolib.core.animatable.GeoAnimatable);
+  public static software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache createInstanceCache(software.bernie.geckolib.core.animatable.GeoAnimatable, boolean);
+  public static synchronized software.bernie.geckolib.core.animation.Animation$LoopType addCustomLoopType(java.lang.String, software.bernie.geckolib.core.animation.Animation$LoopType);
+  public static synchronized software.bernie.geckolib.core.animation.EasingType addCustomEasingType(java.lang.String, software.bernie.geckolib.core.animation.EasingType);
+  public static synchronized void addCustomBakedModelFactory(java.lang.String, software.bernie.geckolib.loading.object.BakedModelFactory);
+  public static synchronized <D> software.bernie.geckolib.network.SerializableDataTicket<D> addDataTicket(software.bernie.geckolib.network.SerializableDataTicket<D>);
+}
+--- software.bernie.geckolib.core.animation.AnimatableManager$ControllerRegistrar
+Compiled from "AnimatableManager.java"
+public final class software.bernie.geckolib.core.animation.AnimatableManager$ControllerRegistrar {
+  private final java.util.List<software.bernie.geckolib.core.animation.AnimationController<? extends software.bernie.geckolib.core.animatable.GeoAnimatable>> controllers;
+  public software.bernie.geckolib.core.animation.AnimatableManager$ControllerRegistrar();
+  public software.bernie.geckolib.core.animation.AnimatableManager$ControllerRegistrar add(software.bernie.geckolib.core.animation.AnimationController<?>...);
+  public software.bernie.geckolib.core.animation.AnimatableManager$ControllerRegistrar remove(java.lang.String);
+  private <T extends software.bernie.geckolib.core.animatable.GeoAnimatable> it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap<java.lang.String, software.bernie.geckolib.core.animation.AnimationController<T>> build();
+  private static void lambda$build$1(it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap, software.bernie.geckolib.core.animation.AnimationController);
+  private static boolean lambda$remove$0(java.lang.String, software.bernie.geckolib.core.animation.AnimationController);
+}
+--- software.bernie.geckolib.core.animatable.model.CoreGeoBone
+Compiled from "CoreGeoBone.java"
+public interface software.bernie.geckolib.core.animatable.model.CoreGeoBone {
+  public abstract java.lang.String getName();
+  public abstract software.bernie.geckolib.core.animatable.model.CoreGeoBone getParent();
+  public abstract float getRotX();
+  public abstract float getRotY();
+  public abstract float getRotZ();
+  public abstract float getPosX();
+  public abstract float getPosY();
+  public abstract float getPosZ();
+  public abstract float getScaleX();
+  public abstract float getScaleY();
+  public abstract float getScaleZ();
+  public abstract void setRotX(float);
+  public abstract void setRotY(float);
+  public abstract void setRotZ(float);
+  public default void updateRotation(float, float, float);
+  public abstract void setPosX(float);
+  public abstract void setPosY(float);
+  public abstract void setPosZ(float);
+  public default void updatePosition(float, float, float);
+  public abstract void setScaleX(float);
+  public abstract void setScaleY(float);
+  public abstract void setScaleZ(float);
+  public default void updateScale(float, float, float);
+  public abstract void setPivotX(float);
+  public abstract void setPivotY(float);
+  public abstract void setPivotZ(float);
+  public default void updatePivot(float, float, float);
+  public abstract float getPivotX();
+  public abstract float getPivotY();
+  public abstract float getPivotZ();
+  public abstract boolean isHidden();
+  public abstract boolean isHidingChildren();
+  public abstract void setHidden(boolean);
+  public abstract void setChildrenHidden(boolean);
+  public abstract void saveInitialSnapshot();
+  public abstract void markScaleAsChanged();
+  public abstract void markRotationAsChanged();
+  public abstract void markPositionAsChanged();
+  public abstract boolean hasScaleChanged();
+  public abstract boolean hasRotationChanged();
+  public abstract boolean hasPositionChanged();
+  public abstract void resetStateChanges();
+  public abstract software.bernie.geckolib.core.state.BoneSnapshot getInitialSnapshot();
+  public abstract java.util.List<? extends software.bernie.geckolib.core.animatable.model.CoreGeoBone> getChildBones();
+  public default software.bernie.geckolib.core.state.BoneSnapshot saveSnapshot();
+}
+--- software.bernie.geckolib.cache.object.GeoBone
+Compiled from "GeoBone.java"
+public class software.bernie.geckolib.cache.object.GeoBone implements software.bernie.geckolib.core.animatable.model.CoreGeoBone {
+  private final software.bernie.geckolib.cache.object.GeoBone parent;
+  private final java.lang.String name;
+  private final java.util.List<software.bernie.geckolib.cache.object.GeoBone> children;
+  private final java.util.List<software.bernie.geckolib.cache.object.GeoCube> cubes;
+  private final java.lang.Boolean mirror;
+  private final java.lang.Double inflate;
+  private final java.lang.Boolean dontRender;
+  private final java.lang.Boolean reset;
+  private software.bernie.geckolib.core.state.BoneSnapshot initialSnapshot;
+  private boolean hidden;
+  private boolean childrenHidden;
+  private float scaleX;
+  private float scaleY;
+  private float scaleZ;
+  private float positionX;
+  private float positionY;
+  private float positionZ;
+  private float pivotX;
+  private float pivotY;
+  private float pivotZ;
+  private float rotX;
+  private float rotY;
+  private float rotZ;
+  private boolean positionChanged;
+  private boolean rotationChanged;
+  private boolean scaleChanged;
+  private final org.joml.Matrix4f modelSpaceMatrix;
+  private final org.joml.Matrix4f localSpaceMatrix;
+  private final org.joml.Matrix4f worldSpaceMatrix;
+  private org.joml.Matrix3f worldSpaceNormal;
+  private boolean trackingMatrices;
+  public software.bernie.geckolib.cache.object.GeoBone(software.bernie.geckolib.cache.object.GeoBone, java.lang.String, java.lang.Boolean, java.lang.Double, java.lang.Boolean, java.lang.Boolean);
+  public java.lang.String getName();
+  public software.bernie.geckolib.cache.object.GeoBone getParent();
+  public float getRotX();
+  public float getRotY();
+  public float getRotZ();
+  public float getPosX();
+  public float getPosY();
+  public float getPosZ();
+  public float getScaleX();
+  public float getScaleY();
+  public float getScaleZ();
+  public void setRotX(float);
+  public void setRotY(float);
+  public void setRotZ(float);
+  public void setPosX(float);
+  public void setPosY(float);
+  public void setPosZ(float);
+  public void setScaleX(float);
+  public void setScaleY(float);
+  public void setScaleZ(float);
+  public boolean isHidden();
+  public void setHidden(boolean);
+  public void setChildrenHidden(boolean);
+  public void setPivotX(float);
+  public void setPivotY(float);
+  public void setPivotZ(float);
+  public float getPivotX();
+  public float getPivotY();
+  public float getPivotZ();
+  public boolean isHidingChildren();
+  public void markScaleAsChanged();
+  public void markRotationAsChanged();
+  public void markPositionAsChanged();
+  public boolean hasScaleChanged();
+  public boolean hasRotationChanged();
+  public boolean hasPositionChanged();
+  public void resetStateChanges();
+  public software.bernie.geckolib.core.state.BoneSnapshot getInitialSnapshot();
+  public java.util.List<software.bernie.geckolib.cache.object.GeoBone> getChildBones();
+  public void saveInitialSnapshot();
+  public java.lang.Boolean getMirror();
+  public java.lang.Double getInflate();
+  public java.lang.Boolean shouldNeverRender();
+  public java.lang.Boolean getReset();
+  public java.util.List<software.bernie.geckolib.cache.object.GeoCube> getCubes();
+  public boolean isTrackingMatrices();
+  public void setTrackingMatrices(boolean);
+  public org.joml.Matrix4f getModelSpaceMatrix();
+  public void setModelSpaceMatrix(org.joml.Matrix4f);
+  public org.joml.Matrix4f getLocalSpaceMatrix();
+  public void setLocalSpaceMatrix(org.joml.Matrix4f);
+  public org.joml.Matrix4f getWorldSpaceMatrix();
+  public void setWorldSpaceMatrix(org.joml.Matrix4f);
+  public void setWorldSpaceNormal(org.joml.Matrix3f);
+  public org.joml.Matrix3f getWorldSpaceNormal();
+  public org.joml.Vector3d getLocalPosition();
+  public org.joml.Vector3d getModelPosition();
+  public org.joml.Vector3d getWorldPosition();
+  public void setModelPosition(org.joml.Vector3d);
+  public org.joml.Matrix4f getModelRotationMatrix();
+  public org.joml.Vector3d getPositionVector();
+  public org.joml.Vector3d getRotationVector();
+  public org.joml.Vector3d getScaleVector();
+  public void addRotationOffsetFromBone(software.bernie.geckolib.cache.object.GeoBone);
+  public boolean equals(java.lang.Object);
+  public int hashCode();
+  public software.bernie.geckolib.core.animatable.model.CoreGeoBone getParent();
+}
+--- software.bernie.geckolib.renderer.layer.AutoGlowingGeoLayer
+Compiled from "AutoGlowingGeoLayer.java"
+public class software.bernie.geckolib.renderer.layer.AutoGlowingGeoLayer<T extends software.bernie.geckolib.core.animatable.GeoAnimatable> extends software.bernie.geckolib.renderer.layer.GeoRenderLayer<T> {
+  public software.bernie.geckolib.renderer.layer.AutoGlowingGeoLayer(software.bernie.geckolib.renderer.GeoRenderer<T>);
+  protected net.minecraft.client.renderer.RenderType getRenderType(T);
+  public void render(com.mojang.blaze3d.vertex.PoseStack, T, software.bernie.geckolib.cache.object.BakedGeoModel, net.minecraft.client.renderer.RenderType, net.minecraft.client.renderer.MultiBufferSource, com.mojang.blaze3d.vertex.VertexConsumer, float, int, int);
+}
+=== Veil-forge-1.20.1-*_mapped_official*.jar -> /home/runner/.gradle/caches/forge_gradle/deobf_dependencies/foundry/veil/Veil-forge-1.20.1/1.0.0.287_mapped_official_1.20.1/Veil-forge-1.20.1-1.0.0.287_mapped_official_1.20.1.jar
+foundry/veil/api/client/graveyard/render/InterpolatedEntityRenderer.class
+foundry/veil/api/client/registry/LightTypeRegistry.class
+foundry/veil/api/client/render/VeilLevelPerspectiveRenderer.class
+foundry/veil/api/client/render/VeilRenderSystem.class
+foundry/veil/api/client/render/VeilRenderer.class
+foundry/veil/api/client/render/deferred/VeilDeferredRenderer.class
+foundry/veil/api/client/render/deferred/light/AreaLight.class
+foundry/veil/api/client/render/deferred/light/DirectionalLight.class
+foundry/veil/api/client/render/deferred/light/IndirectLight.class
+foundry/veil/api/client/render/deferred/light/InstancedLight.class
+foundry/veil/api/client/render/deferred/light/Light.class
+foundry/veil/api/client/render/deferred/light/PointLight.class
+foundry/veil/api/client/render/deferred/light/PositionedLight.class
+foundry/veil/api/client/render/deferred/light/renderer/IndirectLightRenderer.class
+foundry/veil/api/client/render/deferred/light/renderer/InstancedLightRenderer.class
+foundry/veil/api/client/render/deferred/light/renderer/LightRenderer.class
+foundry/veil/api/client/render/deferred/light/renderer/LightTypeRenderer.class
+foundry/veil/api/client/util/DebugFrustumRenderer.class
+foundry/veil/api/event/VeilRendererEvent.class
+foundry/veil/api/quasar/data/module/init/LightModuleData.class
+foundry/veil/api/quasar/emitters/module/render/CustomLightModule.class
+foundry/veil/api/quasar/emitters/module/render/DynamicLightModule.class
+foundry/veil/api/quasar/emitters/module/render/StaticLightModule.class
+foundry/veil/ext/GameRendererExtension.class
+foundry/veil/ext/LevelRendererBlockLayerExtension.class
+foundry/veil/ext/LevelRendererExtension.class
+foundry/veil/forge/event/ForgeVeilRendererEvent.class
+foundry/veil/forge/mixin/client/deferred/ModelBlockRendererMixin.class
+foundry/veil/forge/mixin/client/deferred/vanilla/LevelRendererMixin.class
+foundry/veil/forge/mixin/client/quasar/LevelRendererMixin.class
+foundry/veil/impl/client/editor/LightEditor.class
+foundry/veil/impl/client/render/VeilUITooltipRenderer.class
+foundry/veil/impl/client/render/deferred/light/AreaLightRenderer.class
+foundry/veil/impl/client/render/deferred/light/DirectionalLightRenderer.class
+foundry/veil/impl/client/render/deferred/light/IndirectPointLightRenderer.class
+foundry/veil/impl/client/render/deferred/light/InstancedPointLightRenderer.class
+foundry/veil/impl/client/render/deferred/light/VanillaLightRenderer.class
+foundry/veil/impl/client/render/pipeline/VeilFirstPersonRenderer.class
+foundry/veil/impl/resource/VeilResourceRenderer.class
+foundry/veil/mixin/accessor/GameRendererAccessor.class
+foundry/veil/mixin/accessor/LevelRendererAccessor.class
+foundry/veil/mixin/client/deferred/LevelRendererMixin.class
+foundry/veil/mixin/client/pipeline/GameRendererMixin.class
+foundry/veil/mixin/client/pipeline/LevelRendererMixin.class
+foundry/veil/mixin/client/quasar/EntityRendererMixin.class
+foundry/veil/mixin/client/shader/GameRendererMixin.class
+--- foundry.veil.api.client.render.VeilRenderSystem
+Compiled from "VeilRenderSystem.java"
+public final class foundry.veil.api.client.render.VeilRenderSystem {
+  private static final java.util.concurrent.Executor RENDER_THREAD_EXECUTOR;
+  private static final java.util.Set<net.minecraft.resources.ResourceLocation> ERRORED_SHADERS;
+  private static final foundry.veil.impl.client.render.pipeline.VeilUniformBlockState UNIFORM_BLOCK_STATE;
+  private static final java.util.function.BooleanSupplier COMPUTE_SUPPORTED;
+  private static final java.util.function.BooleanSupplier ATOMIC_COUNTER_SUPPORTED;
+  private static final java.util.function.BooleanSupplier TRANSFORM_FEEDBACK_SUPPORTED;
+  private static final java.util.function.BooleanSupplier TEXTURE_MULTIBIND_SUPPORTED;
+  private static final java.util.function.BooleanSupplier SPARSE_BUFFERS_SUPPORTED;
+  private static final java.util.function.IntSupplier MAX_COMBINED_TEXTURE_IMAGE_UNITS;
+  private static final java.util.function.IntSupplier MAX_COLOR_ATTACHMENTS;
+  private static final java.util.function.IntSupplier MAX_SAMPLES;
+  private static final java.util.function.IntSupplier MAX_TRANSFORM_FEEDBACK_BUFFERS;
+  private static final java.util.function.IntSupplier MAX_UNIFORM_BUFFER_BINDINGS;
+  private static final java.util.function.IntSupplier MAX_ATOMIC_COUNTER_BUFFER_BINDINGS;
+  private static final java.util.function.IntSupplier MAX_SHADER_STORAGE_BUFFER_BINDINGS;
+  private static final java.util.function.Supplier<foundry.veil.api.client.render.VeilShaderLimits> VERTEX_SHADER_LIMITS;
+  private static final java.util.function.Supplier<foundry.veil.api.client.render.VeilShaderLimits> GL_TESS_CONTROL_SHADER_LIMITS;
+  private static final java.util.function.Supplier<foundry.veil.api.client.render.VeilShaderLimits> GL_TESS_EVALUATION_SHADER_LIMITS;
+  private static final java.util.function.Supplier<foundry.veil.api.client.render.VeilShaderLimits> GL_GEOMETRY_SHADER_LIMITS;
+  private static final java.util.function.Supplier<foundry.veil.api.client.render.VeilShaderLimits> GL_FRAGMENT_SHADER_LIMITS;
+  private static final java.util.function.Supplier<foundry.veil.api.client.render.VeilShaderLimits> GL_COMPUTE_SHADER_LIMITS;
+  private static final java.util.function.Supplier<org.joml.Vector2ic> MAX_FRAMEBUFFER_SIZE;
+  private static final java.util.function.Supplier<org.joml.Vector3ic> MAX_COMPUTE_WORK_GROUP_COUNT;
+  private static final java.util.function.Supplier<org.joml.Vector3ic> MAX_COMPUTE_WORK_GROUP_SIZE;
+  private static final java.util.function.IntSupplier MAX_COMPUTE_WORK_GROUP_INVOCATIONS;
+  private static final org.joml.Vector3f LIGHT0_POSITION;
+  private static final org.joml.Vector3f LIGHT1_POSITION;
+  private static foundry.veil.api.client.render.VeilRenderer renderer;
+  private static net.minecraft.resources.ResourceLocation shaderLocation;
+  private foundry.veil.api.client.render.VeilRenderSystem();
+  private static java.util.function.BooleanSupplier glCapability(java.util.function.Function<org.lwjgl.opengl.GLCapabilities, java.lang.Boolean>);
+  private static java.util.function.IntSupplier glGetter(java.util.function.IntSupplier);
+  private static <T> java.util.function.Supplier<T> glGetter(java.util.function.Supplier<T>);
+  public static void init();
+  private static void invalidateTextures(int, int);
+  public static void bindTextures(int, java.nio.IntBuffer);
+  public static void bindTextures(int, int...);
+  public static foundry.veil.api.client.render.shader.program.ShaderProgram setShader(net.minecraft.resources.ResourceLocation);
+  public static foundry.veil.api.client.render.shader.program.ShaderProgram setShader(foundry.veil.api.client.render.shader.program.ShaderProgram);
+  public static foundry.veil.api.client.render.shader.program.ShaderProgram setShader(java.util.function.Supplier<foundry.veil.api.client.render.shader.program.ShaderProgram>);
+  public static void finalizeShaderCompilation();
+  public static void throwShaderError();
+  public static void drawInstanced(com.mojang.blaze3d.vertex.VertexBuffer, int);
+  public static void drawIndirect(com.mojang.blaze3d.vertex.VertexBuffer, long, int, int);
+  public static void printGlErrors(java.lang.String);
+  public static int getIndexCount(com.mojang.blaze3d.vertex.VertexBuffer);
+  public static boolean computeSupported();
+  public static boolean atomicCounterSupported();
+  public static boolean transformFeedbackSupported();
+  public static boolean textureMultibindSupported();
+  public static boolean sparseBuffersSupported();
+  public static int maxCombinedTextureUnits();
+  public static int maxColorAttachments();
+  public static int maxSamples();
+  public static int maxTargetBindings(int);
+  public static foundry.veil.api.client.render.VeilShaderLimits shaderLimits(int);
+  public static int maxTransformFeedbackBindings();
+  public static int maxUniformBuffersBindings();
+  public static int maxAtomicCounterBufferBindings();
+  public static int maxShaderStorageBufferBindings();
+  public static int maxFramebufferWidth();
+  public static int maxFramebufferHeight();
+  public static int maxComputeWorkGroupCountX();
+  public static int maxComputeWorkGroupCountY();
+  public static int maxComputeWorkGroupCountZ();
+  public static int maxComputeWorkGroupSizeX();
+  public static int maxComputeWorkGroupSizeY();
+  public static int maxComputeWorkGroupSizeZ();
+  public static int maxComputeWorkGroupInvocations();
+  public static void bind(foundry.veil.api.client.render.shader.definition.ShaderBlock<?>);
+  public static void bind(java.lang.CharSequence, foundry.veil.api.client.render.shader.definition.ShaderBlock<?>);
+  public static void unbind(foundry.veil.api.client.render.shader.definition.ShaderBlock<?>);
+  public static void bindVertexArray(int);
+  public static foundry.veil.api.client.render.VeilRenderer renderer();
+  public static java.util.concurrent.Executor renderThreadExecutor();
+  public static foundry.veil.api.client.render.shader.program.ShaderProgram getShader();
+  public static org.joml.Vector3fc getLight0Position();
+  public static org.joml.Vector3fc getLight1Position();
+  public static void beginFrame();
+  public static void endFrame();
+  public static void shaderUpdate();
+  public static void resize(int, int);
+  public static void close();
+  public static void renderPost();
+  public static void setShaderLights(org.joml.Vector3fc, org.joml.Vector3fc);
+  private static net.minecraft.client.renderer.ShaderInstance lambda$setShader$25(java.util.function.Supplier);
+  private static foundry.veil.api.client.render.shader.program.ShaderProgram lambda$setShader$24(foundry.veil.api.client.render.shader.program.ShaderProgram);
+  private static foundry.veil.api.client.render.shader.program.ShaderProgram lambda$setShader$23(foundry.veil.api.client.render.shader.ShaderManager, net.minecraft.resources.ResourceLocation);
+  private static int lambda$static$22();
+  private static org.joml.Vector3ic lambda$static$21();
+  private static org.joml.Vector3ic lambda$static$20();
+  private static org.joml.Vector2ic lambda$static$19();
+  private static foundry.veil.api.client.render.VeilShaderLimits lambda$static$18();
+  private static foundry.veil.api.client.render.VeilShaderLimits lambda$static$17();
+  private static foundry.veil.api.client.render.VeilShaderLimits lambda$static$16();
+  private static foundry.veil.api.client.render.VeilShaderLimits lambda$static$15();
+  private static foundry.veil.api.client.render.VeilShaderLimits lambda$static$14();
+  private static foundry.veil.api.client.render.VeilShaderLimits lambda$static$13();
+  private static int lambda$static$12();
+  private static int lambda$static$11();
+  private static int lambda$static$10();
+  private static int lambda$static$9();
+  private static int lambda$static$8();
+  private static int lambda$static$7();
+  private static int lambda$static$6();
+  private static java.lang.Boolean lambda$static$5(org.lwjgl.opengl.GLCapabilities);
+  private static java.lang.Boolean lambda$static$4(org.lwjgl.opengl.GLCapabilities);
+  private static java.lang.Boolean lambda$static$3(org.lwjgl.opengl.GLCapabilities);
+  private static java.lang.Boolean lambda$static$2(org.lwjgl.opengl.GLCapabilities);
+  private static java.lang.Boolean lambda$static$1(org.lwjgl.opengl.GLCapabilities);
+  private static void lambda$static$0(java.lang.Runnable);
+  static {};
+}
+--- foundry.veil.api.client.render.VeilRenderer
+Compiled from "VeilRenderer.java"
+public class foundry.veil.api.client.render.VeilRenderer implements org.lwjgl.system.NativeResource {
+  private final foundry.veil.api.client.render.shader.ShaderModificationManager shaderModificationManager;
+  private final foundry.veil.api.client.render.shader.definition.ShaderPreDefinitions shaderPreDefinitions;
+  private final foundry.veil.api.client.render.shader.ShaderManager shaderManager;
+  private final foundry.veil.api.client.render.framebuffer.FramebufferManager framebufferManager;
+  private final foundry.veil.api.client.render.post.PostProcessingManager postProcessingManager;
+  private final foundry.veil.api.client.render.deferred.VeilDeferredRenderer deferredRenderer;
+  private final foundry.veil.api.client.render.rendertype.layer.DynamicRenderTypeManager dynamicRenderTypeManager;
+  private final foundry.veil.api.quasar.particle.ParticleSystemManager quasarParticleManager;
+  private final foundry.veil.api.client.editor.EditorManager editorManager;
+  private final foundry.veil.api.client.render.CameraMatrices cameraMatrices;
+  private final foundry.veil.api.client.render.GuiInfo guiInfo;
+  public foundry.veil.api.client.render.VeilRenderer(net.minecraft.server.packs.resources.ReloadableResourceManager);
+  public foundry.veil.api.client.render.shader.ShaderModificationManager getShaderModificationManager();
+  public foundry.veil.api.client.render.shader.definition.ShaderPreDefinitions getShaderDefinitions();
+  public foundry.veil.api.client.render.shader.ShaderManager getShaderManager();
+  public foundry.veil.api.client.render.framebuffer.FramebufferManager getFramebufferManager();
+  public foundry.veil.api.client.render.post.PostProcessingManager getPostProcessingManager();
+  public foundry.veil.api.client.render.deferred.VeilDeferredRenderer getDeferredRenderer();
+  public foundry.veil.api.client.render.rendertype.layer.DynamicRenderTypeManager getDynamicRenderTypeManager();
+  public foundry.veil.api.quasar.particle.ParticleSystemManager getParticleManager();
+  public foundry.veil.api.client.editor.EditorManager getEditorManager();
+  public foundry.veil.api.client.render.CameraMatrices getCameraMatrices();
+  public foundry.veil.api.client.render.GuiInfo getGuiInfo();
+  public static boolean hasImGui();
+  public static foundry.veil.api.client.render.CullFrustum getCullingFrustum();
+  public void free();
+}
+--- foundry.veil.api.client.render.deferred.light.PointLight
+Compiled from "PointLight.java"
+public class foundry.veil.api.client.render.deferred.light.PointLight extends foundry.veil.api.client.render.deferred.light.Light implements foundry.veil.api.client.render.deferred.light.IndirectLight<foundry.veil.api.client.render.deferred.light.PointLight>, foundry.veil.api.client.editor.EditorAttributeProvider {
+  protected final org.joml.Vector3d position;
+  protected float radius;
+  public foundry.veil.api.client.render.deferred.light.PointLight();
+  public void store(java.nio.ByteBuffer);
+  public org.joml.Vector3d getPosition();
+  public float getRadius();
+  public foundry.veil.api.client.render.deferred.light.PointLight setColor(float, float, float);
+  public foundry.veil.api.client.render.deferred.light.PointLight setColor(org.joml.Vector3fc);
+  public foundry.veil.api.client.render.deferred.light.PointLight setBrightness(float);
+  public foundry.veil.api.client.render.deferred.light.PointLight setPosition(double, double, double);
+  public foundry.veil.api.client.render.deferred.light.PointLight setRadius(float);
+  public foundry.veil.api.client.render.deferred.light.PointLight setTo(net.minecraft.client.Camera);
+  public foundry.veil.api.client.registry.LightTypeRegistry$LightType<?> getType();
+  public foundry.veil.api.client.render.deferred.light.PointLight clone();
+  public void renderImGuiAttributes();
+  public foundry.veil.api.client.render.deferred.light.Light clone();
+  public foundry.veil.api.client.render.deferred.light.Light setTo(net.minecraft.client.Camera);
+  public foundry.veil.api.client.render.deferred.light.Light setBrightness(float);
+  public foundry.veil.api.client.render.deferred.light.Light setColor(float, float, float);
+  public foundry.veil.api.client.render.deferred.light.Light setColor(org.joml.Vector3fc);
+  public java.lang.Object clone() throws java.lang.CloneNotSupportedException;
+  public foundry.veil.api.client.render.deferred.light.PositionedLight setRadius(float);
+  public foundry.veil.api.client.render.deferred.light.PositionedLight setPosition(double, double, double);
+}
+--- foundry.veil.api.client.render.deferred.light.AreaLight
+Compiled from "AreaLight.java"
+public class foundry.veil.api.client.render.deferred.light.AreaLight extends foundry.veil.api.client.render.deferred.light.Light implements foundry.veil.api.client.render.deferred.light.InstancedLight, foundry.veil.api.client.render.deferred.light.PositionedLight<foundry.veil.api.client.render.deferred.light.AreaLight>, foundry.veil.api.client.editor.EditorAttributeProvider {
+  private static final float MAX_ANGLE_SIZE;
+  protected final org.joml.Vector3d position;
+  protected final org.joml.Quaternionf orientation;
+  private final org.joml.Matrix4d matrix;
+  protected final org.joml.Vector2f size;
+  protected float angle;
+  protected float distance;
+  public foundry.veil.api.client.render.deferred.light.AreaLight();
+  public void store(java.nio.ByteBuffer);
+  public foundry.veil.api.client.registry.LightTypeRegistry$LightType<?> getType();
+  public org.joml.Vector3d getPosition();
+  public org.joml.Quaternionf getOrientation();
+  public org.joml.Vector2f getSize();
+  public float getAngle();
+  public float getDistance();
+  public foundry.veil.api.client.render.deferred.light.AreaLight setColor(float, float, float);
+  public foundry.veil.api.client.render.deferred.light.AreaLight setColor(org.joml.Vector3fc);
+  public foundry.veil.api.client.render.deferred.light.AreaLight setBrightness(float);
+  public foundry.veil.api.client.render.deferred.light.AreaLight setPosition(double, double, double);
+  public foundry.veil.api.client.render.deferred.light.AreaLight setOrientation(org.joml.Quaternionfc);
+  public foundry.veil.api.client.render.deferred.light.AreaLight setSize(double, double);
+  public foundry.veil.api.client.render.deferred.light.AreaLight setAngle(float);
+  public foundry.veil.api.client.render.deferred.light.AreaLight setDistance(float);
+  public foundry.veil.api.client.render.deferred.light.Light setTo(net.minecraft.client.Camera);
+  protected void updateMatrix();
+  public foundry.veil.api.client.render.deferred.light.AreaLight clone();
+  public void renderImGuiAttributes();
+  public foundry.veil.api.client.render.deferred.light.Light clone();
+  public foundry.veil.api.client.render.deferred.light.Light setBrightness(float);
+  public foundry.veil.api.client.render.deferred.light.Light setColor(float, float, float);
+  public foundry.veil.api.client.render.deferred.light.Light setColor(org.joml.Vector3fc);
+  public java.lang.Object clone() throws java.lang.CloneNotSupportedException;
+  public foundry.veil.api.client.render.deferred.light.PositionedLight setPosition(double, double, double);
+}
+--- foundry.veil.api.client.render.deferred.light.Light
+Compiled from "Light.java"
+public abstract class foundry.veil.api.client.render.deferred.light.Light implements java.lang.Cloneable {
+  protected final org.joml.Vector3f color;
+  protected float brightness;
+  private boolean dirty;
+  public foundry.veil.api.client.render.deferred.light.Light();
+  public void markDirty();
+  public void clean();
+  public org.joml.Vector3fc getColor();
+  public int getColorInt();
+  public foundry.veil.api.client.render.deferred.light.Light setColor(org.joml.Vector3fc);
+  public foundry.veil.api.client.render.deferred.light.Light setColor(float, float, float);
+  public foundry.veil.api.client.render.deferred.light.Light setColor(int);
+  public foundry.veil.api.client.render.deferred.light.Light setBrightness(float);
+  public foundry.veil.api.client.render.deferred.light.Light setTo(net.minecraft.client.Camera);
+  public float getBrightness();
+  public boolean isDirty();
+  public abstract foundry.veil.api.client.registry.LightTypeRegistry$LightType<?> getType();
+  public abstract foundry.veil.api.client.render.deferred.light.Light clone();
+  public java.lang.Object clone() throws java.lang.CloneNotSupportedException;
+}
+--- foundry.veil.api.client.render.deferred.light.renderer.LightRenderer
+Compiled from "LightRenderer.java"
+public class foundry.veil.api.client.render.deferred.light.renderer.LightRenderer implements org.lwjgl.system.NativeResource {
+  private final java.util.Map<foundry.veil.api.client.registry.LightTypeRegistry$LightType<?>, foundry.veil.api.client.render.deferred.light.renderer.LightRenderer$LightData<?>> lights;
+  private foundry.veil.impl.client.render.deferred.light.VanillaLightRenderer vanillaLightRenderer;
+  private boolean vanillaLightEnabled;
+  private boolean ambientOcclusionEnabled;
+  private foundry.veil.api.client.render.framebuffer.AdvancedFbo framebuffer;
+  public foundry.veil.api.client.render.deferred.light.renderer.LightRenderer();
+  public void applyShader();
+  public void setup(foundry.veil.api.client.render.CullFrustum);
+  public void clear();
+  public void render(foundry.veil.api.client.render.framebuffer.AdvancedFbo);
+  public void addLight(foundry.veil.api.client.render.deferred.light.Light);
+  public <T extends foundry.veil.api.client.render.deferred.light.Light> void removeLight(T);
+  public <T extends foundry.veil.api.client.render.deferred.light.Light> java.util.List<T> getLights(foundry.veil.api.client.registry.LightTypeRegistry$LightType<? extends T>);
+  public void enableVanillaLight();
+  public void disableVanillaLight();
+  public void enableAmbientOcclusion();
+  public void disableAmbientOcclusion();
+  public foundry.veil.api.client.render.framebuffer.AdvancedFbo getFramebuffer();
+  public boolean isVanillaLightEnabled();
+  public boolean isAmbientOcclusionEnabled();
+  public void free();
+  public void addDebugInfo(java.util.function.Consumer<java.lang.String>);
+  private static int lambda$addDebugInfo$1(foundry.veil.api.client.render.deferred.light.renderer.LightRenderer$LightData);
+  private static int lambda$addDebugInfo$0(foundry.veil.api.client.render.deferred.light.renderer.LightRenderer$LightData);
+}
+--- foundry.veil.api.client.render.deferred.VeilDeferredRenderer
+Compiled from "VeilDeferredRenderer.java"
+public class foundry.veil.api.client.render.deferred.VeilDeferredRenderer implements net.minecraft.server.packs.resources.PreparableReloadListener,org.lwjgl.system.NativeResource {
+  public static final net.minecraft.resources.ResourceLocation PACK_ID;
+  public static final java.lang.String DISABLE_VANILLA_ENTITY_LIGHT_KEY;
+  public static final net.minecraft.resources.ResourceLocation OPAQUE_POST;
+  public static final net.minecraft.resources.ResourceLocation LIGHT_POST;
+  public static final net.minecraft.resources.ResourceLocation OPAQUE_MIX;
+  public static final net.minecraft.resources.ResourceLocation TRANSPARENT_MIX;
+  public static final net.minecraft.resources.ResourceLocation TRANSPARENT_POST;
+  public static final net.minecraft.resources.ResourceLocation SCREEN_POST;
+  public static final net.minecraft.network.chat.MutableComponent UNSUPPORTED_TITLE;
+  public static final net.minecraft.network.chat.MutableComponent UNSUPPORTED_SODIUM_DESC;
+  public static final net.minecraft.network.chat.MutableComponent UNSUPPORTED_FABULOUS_DESC;
+  private final foundry.veil.api.client.render.shader.ShaderManager deferredShaderManager;
+  private final foundry.veil.api.client.render.shader.definition.ShaderPreDefinitions shaderPreDefinitions;
+  private final foundry.veil.api.client.render.framebuffer.FramebufferManager framebufferManager;
+  private final foundry.veil.api.client.render.post.PostProcessingManager postProcessingManager;
+  private final foundry.veil.api.client.render.deferred.light.renderer.LightRenderer lightRenderer;
+  private boolean enabled;
+  private foundry.veil.api.client.render.deferred.VeilDeferredRenderer$RendererState state;
+  public foundry.veil.api.client.render.deferred.VeilDeferredRenderer(foundry.veil.api.client.render.shader.ShaderManager, foundry.veil.api.client.render.shader.definition.ShaderPreDefinitions, foundry.veil.api.client.render.framebuffer.FramebufferManager, foundry.veil.api.client.render.post.PostProcessingManager);
+  public java.util.concurrent.CompletableFuture<java.lang.Void> reload(net.minecraft.server.packs.resources.PreparableReloadListener$PreparationBarrier, net.minecraft.server.packs.resources.ResourceManager, net.minecraft.util.profiling.ProfilerFiller, net.minecraft.util.profiling.ProfilerFiller, java.util.concurrent.Executor, java.util.concurrent.Executor);
+  public void free();
+  public void reset();
+  public void setup();
+  public void clear();
+  public void beginOpaque();
+  public void beginTranslucent();
+  private void run(net.minecraft.util.profiling.ProfilerFiller, foundry.veil.api.client.render.framebuffer.AdvancedFbo, foundry.veil.api.client.render.framebuffer.AdvancedFbo, net.minecraft.resources.ResourceLocation, net.minecraft.resources.ResourceLocation);
+  public void blit();
+  public void end();
+  public void addDebugInfo(java.util.function.Consumer<java.lang.String>);
+  public void enable();
+  public void disable();
+  public boolean isEnabled();
+  public static boolean isSupported();
+  public boolean isActive();
+  public foundry.veil.api.client.render.deferred.light.renderer.LightRenderer getLightRenderer();
+  public foundry.veil.api.client.render.deferred.VeilDeferredRenderer$RendererState getRendererState();
+  public foundry.veil.api.client.render.shader.ShaderManager getDeferredShaderManager();
+  private static java.util.concurrent.CompletionStage lambda$reload$2(java.util.concurrent.CompletableFuture);
+  private java.util.concurrent.CompletableFuture lambda$reload$1(net.minecraft.server.packs.resources.ResourceManager, net.minecraft.server.packs.resources.PreparableReloadListener$PreparationBarrier, java.util.concurrent.Executor, net.minecraft.util.profiling.ProfilerFiller, net.minecraft.util.profiling.ProfilerFiller, java.util.concurrent.Executor);
+  private static boolean lambda$reload$0(net.minecraft.server.packs.PackResources);
+  static {};
+}
