@@ -47,10 +47,10 @@ description='''${mod_description}'''
     ordering="AFTER"
     side="BOTH"
 
-# Voz de proximidad: opcional (README 7.4)
+# Voz de proximidad: opcional (README 7.4). Sus versiones llevan delante la de Minecraft (1.20.1-2.6.22)
 [[dependencies.${mod_id}]]
     modId="voicechat"
     mandatory=false
-    versionRange="[2.4,)"
+    versionRange="[1.20.1-2.4,)"
     ordering="AFTER"
     side="BOTH"
