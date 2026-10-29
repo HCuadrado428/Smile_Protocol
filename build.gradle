@@ -30,6 +30,11 @@ subprojects {
         // Veil y sus librerias (molang-compiler...)
         maven { name = 'BlameJared'; url = 'https://maven.blamejared.com/' }
         maven {
+            name = 'KosmX'
+            url = 'https://maven.kosmx.dev/'
+            content { includeGroup('dev.kosmx.player-anim') }
+        }
+        maven {
             name = 'henkelmax'
             url = 'https://maven.maxhenkel.de/repository/public'
             content { includeGroup('de.maxhenkel.voicechat') }

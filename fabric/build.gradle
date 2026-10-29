@@ -15,6 +15,7 @@ dependencies {
 
     modImplementation "software.bernie.geckolib:geckolib-fabric-${minecraft_version}:${geckolib_version}"
     modImplementation "foundry.veil:veil-fabric-${minecraft_version}:${veil_version}"
+    modImplementation "dev.kosmx.player-anim:player-animation-lib-fabric:${playeranimator_version}"
     compileOnly "de.maxhenkel.voicechat:voicechat-api:${voicechat_api_version}"
 
     compileOnly project(':common')

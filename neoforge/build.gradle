@@ -31,6 +31,7 @@ neoForge {
 dependencies {
     implementation "software.bernie.geckolib:geckolib-neoforge-${minecraft_version}:${geckolib_version}"
     implementation "foundry.veil:veil-neoforge-${minecraft_version}:${veil_version}"
+    implementation "dev.kosmx.player-anim:player-animation-lib-forge:${playeranimator_version}"
     compileOnly "de.maxhenkel.voicechat:voicechat-api:${voicechat_api_version}"
 
     compileOnly project(':common')

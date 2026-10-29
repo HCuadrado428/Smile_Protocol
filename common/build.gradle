@@ -14,6 +14,7 @@ dependencies {
 
     compileOnly "software.bernie.geckolib:geckolib-common-${minecraft_version}:${geckolib_version}"
     compileOnly "foundry.veil:veil-common-${minecraft_version}:${veil_version}"
+    compileOnly "dev.kosmx.player-anim:player-animation-lib:${playeranimator_version}"
     compileOnly "de.maxhenkel.voicechat:voicechat-api:${voicechat_api_version}"
 }
 
