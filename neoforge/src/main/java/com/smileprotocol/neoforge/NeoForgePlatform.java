@@ -3,11 +3,16 @@ package com.smileprotocol.neoforge;
 import com.smileprotocol.SmileProtocol;
 import com.smileprotocol.platform.Platform;
 import com.smileprotocol.player.SPPlayerData;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.loading.FMLEnvironment;
@@ -22,6 +27,7 @@ import java.nio.file.Path;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
 /** Implementacion de {@link Platform} para NeoForge. */
@@ -74,6 +80,12 @@ public final class NeoForgePlatform implements Platform {
         DeferredRegister<T> reg = (DeferredRegister<T>) REGISTERS.computeIfAbsent(registry.key(),
                 k -> DeferredRegister.create((ResourceKey<? extends Registry<T>>) k, SmileProtocol.MODID));
         return reg.register(name, factory);
+    }
+
+    @Override
+    @SuppressWarnings("DataFlowIssue")
+    public <T extends BlockEntity> BlockEntityType<T> blockEntityType(BiFunction<BlockPos, BlockState, T> factory, Block... blocks) {
+        return BlockEntityType.Builder.of(factory::apply, blocks).build(null);
     }
 
     @Override

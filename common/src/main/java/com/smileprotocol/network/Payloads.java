@@ -21,13 +21,13 @@ public final class Payloads {
 
     private Payloads() {}
 
-    private static <T extends CustomPacketPayload> CustomPacketPayload.Type<T> type(String name) {
+    private static <T extends CustomPacketPayload> CustomPacketPayload.Type<T> typeOf(String name) {
         return new CustomPacketPayload.Type<>(SmileProtocol.id(name));
     }
 
     /** S -> C: si el jugador esta en una partida y su inventario de 4 huecos. */
     public record SyncState(boolean inSP, List<ItemStack> slots, int selected) implements CustomPacketPayload {
-        public static final Type<SyncState> TYPE = type("sync_state");
+        public static final Type<SyncState> TYPE = typeOf("sync_state");
         public static final StreamCodec<RegistryFriendlyByteBuf, SyncState> CODEC = StreamCodec.composite(
                 ByteBufCodecs.BOOL, SyncState::inSP,
                 ItemStack.OPTIONAL_STREAM_CODEC.apply(ByteBufCodecs.list(SPInventory.SIZE)), SyncState::slots,
@@ -46,7 +46,7 @@ public final class Payloads {
 
     /** C -> S: hueco activo (1-4). */
     public record SelectSlot(int slot) implements CustomPacketPayload {
-        public static final Type<SelectSlot> TYPE = type("select_slot");
+        public static final Type<SelectSlot> TYPE = typeOf("select_slot");
         public static final StreamCodec<ByteBuf, SelectSlot> CODEC =
                 ByteBufCodecs.VAR_INT.map(SelectSlot::new, SelectSlot::slot);
 
@@ -55,7 +55,7 @@ public final class Payloads {
 
     /** C -> S: mods cargados en el cliente (README 7.1, capa 2). */
     public record Handshake(List<String> mods) implements CustomPacketPayload {
-        public static final Type<Handshake> TYPE = type("handshake");
+        public static final Type<Handshake> TYPE = typeOf("handshake");
         public static final StreamCodec<ByteBuf, Handshake> CODEC =
                 ByteBufCodecs.stringUtf8(64).apply(ByteBufCodecs.list(1024)).map(Handshake::new, Handshake::mods);
 
@@ -65,7 +65,7 @@ public final class Payloads {
     /** S -> C: contador «X/Y listos» del ascensor del lobby. {@code show == false} lo oculta. */
     public record SyncReady(boolean show, Component title, int ready, int total, int countdown, Component status)
             implements CustomPacketPayload {
-        public static final Type<SyncReady> TYPE = type("sync_ready");
+        public static final Type<SyncReady> TYPE = typeOf("sync_ready");
         public static final StreamCodec<RegistryFriendlyByteBuf, SyncReady> CODEC = StreamCodec.composite(
                 ByteBufCodecs.BOOL, SyncReady::show,
                 ComponentSerialization.TRUSTED_STREAM_CODEC, SyncReady::title,
@@ -94,7 +94,7 @@ public final class Payloads {
 
     /** S -> C: lo que muestra cada pantalla de ascensor del lobby. */
     public record SyncBoards(List<Board> boards) implements CustomPacketPayload {
-        public static final Type<SyncBoards> TYPE = type("sync_boards");
+        public static final Type<SyncBoards> TYPE = typeOf("sync_boards");
         public static final StreamCodec<RegistryFriendlyByteBuf, SyncBoards> CODEC =
                 Board.CODEC.apply(ByteBufCodecs.list(256)).map(SyncBoards::new, SyncBoards::boards);
 
@@ -103,7 +103,7 @@ public final class Payloads {
 
     /** S -> C: fundido a negro (entrada, negro y salida, en ticks). */
     public record ScreenFade(int fadeIn, int hold, int fadeOut) implements CustomPacketPayload {
-        public static final Type<ScreenFade> TYPE = type("screen_fade");
+        public static final Type<ScreenFade> TYPE = typeOf("screen_fade");
         public static final StreamCodec<ByteBuf, ScreenFade> CODEC = StreamCodec.composite(
                 ByteBufCodecs.VAR_INT, ScreenFade::fadeIn,
                 ByteBufCodecs.VAR_INT, ScreenFade::hold,
@@ -115,7 +115,7 @@ public final class Payloads {
 
     /** S -> C: lineas del modo depuracion, solo para operadores (README 24.1). Vacio = apagado. */
     public record DebugData(List<String> lines) implements CustomPacketPayload {
-        public static final Type<DebugData> TYPE = type("debug_data");
+        public static final Type<DebugData> TYPE = typeOf("debug_data");
         public static final StreamCodec<ByteBuf, DebugData> CODEC =
                 ByteBufCodecs.stringUtf8(256).apply(ByteBufCodecs.list(64)).map(DebugData::new, DebugData::lines);
 

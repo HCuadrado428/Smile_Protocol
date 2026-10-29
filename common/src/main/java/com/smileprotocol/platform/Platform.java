@@ -1,13 +1,19 @@
 package com.smileprotocol.platform;
 
 import com.smileprotocol.player.SPPlayerData;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockState;
 
 import java.nio.file.Path;
 import java.util.List;
+import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
 /**
@@ -33,6 +39,9 @@ public interface Platform {
 
     /** Registra un objeto en un registro vanilla. En NeoForge es diferido. */
     <T> Supplier<T> register(Registry<? super T> registry, String name, Supplier<T> factory);
+
+    /** Tipo de entidad de bloque (el constructor vanilla no es publico sin el loader). */
+    <T extends BlockEntity> BlockEntityType<T> blockEntityType(BiFunction<BlockPos, BlockState, T> factory, Block... blocks);
 
     /** Datos persistentes del jugador (adjuntos a la entidad, se copian al morir). */
     SPPlayerData playerData(Player player);

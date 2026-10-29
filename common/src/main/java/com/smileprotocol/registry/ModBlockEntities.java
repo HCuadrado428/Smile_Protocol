@@ -15,15 +15,15 @@ public final class ModBlockEntities {
 
     public static final Supplier<BlockEntityType<ElevatorBoardBlockEntity>> ELEVATOR_BOARD = Services.PLATFORM.register(
             BuiltInRegistries.BLOCK_ENTITY_TYPE, "elevator_board",
-            () -> BlockEntityType.Builder.of(ElevatorBoardBlockEntity::new, ModBlocks.ELEVATOR_BOARD.get()).build(null));
+            () -> Services.PLATFORM.blockEntityType(ElevatorBoardBlockEntity::new, ModBlocks.ELEVATOR_BOARD.get()));
 
     public static final Supplier<BlockEntityType<ElevatorDoorBlockEntity>> ELEVATOR_DOOR = Services.PLATFORM.register(
             BuiltInRegistries.BLOCK_ENTITY_TYPE, "elevator_door",
-            () -> BlockEntityType.Builder.of(ElevatorDoorBlockEntity::new, ModBlocks.ELEVATOR_DOOR.get()).build(null));
+            () -> Services.PLATFORM.blockEntityType(ElevatorDoorBlockEntity::new, ModBlocks.ELEVATOR_DOOR.get()));
 
     public static final Supplier<BlockEntityType<FluorescentLightBlockEntity>> FLUORESCENT_LIGHT = Services.PLATFORM.register(
             BuiltInRegistries.BLOCK_ENTITY_TYPE, "fluorescent_light",
-            () -> BlockEntityType.Builder.of(FluorescentLightBlockEntity::new, ModBlocks.FLUORESCENT_LIGHT.get()).build(null));
+            () -> Services.PLATFORM.blockEntityType(FluorescentLightBlockEntity::new, ModBlocks.FLUORESCENT_LIGHT.get()));
 
     private ModBlockEntities() {}
 
