@@ -1,0 +1,677 @@
+=== geckolib-common-1.21.1-*.jar -> /home/runner/.gradle/caches/modules-2/files-2.1/software.bernie.geckolib/geckolib-common-1.21.1/4.7.2/ad887dc4060596abf4863fcb6b73a441fc7bbb33/geckolib-common-1.21.1-4.7.2.jar
+--- software.bernie.geckolib.animatable.GeoBlockEntity
+Compiled from "GeoBlockEntity.java"
+public interface software.bernie.geckolib.animatable.GeoBlockEntity extends software.bernie.geckolib.animatable.GeoAnimatable {
+  public default <D> D getAnimData(software.bernie.geckolib.constant.dataticket.SerializableDataTicket<D>);
+  public default <D> void setAnimData(software.bernie.geckolib.constant.dataticket.SerializableDataTicket<D>, D);
+  public default void triggerAnim(java.lang.String, java.lang.String);
+  public default void stopTriggeredAnim(java.lang.String, java.lang.String);
+  public default double getTick(java.lang.Object);
+}
+--- software.bernie.geckolib.renderer.GeoBlockRenderer
+Compiled from "GeoBlockRenderer.java"
+public class software.bernie.geckolib.renderer.GeoBlockRenderer<T extends net.minecraft.world.level.block.entity.BlockEntity & software.bernie.geckolib.animatable.GeoAnimatable> implements software.bernie.geckolib.renderer.GeoRenderer<T>, net.minecraft.client.renderer.blockentity.BlockEntityRenderer<T> {
+  protected final software.bernie.geckolib.renderer.layer.GeoRenderLayersContainer<T> renderLayers;
+  protected final software.bernie.geckolib.model.GeoModel<T> model;
+  protected T animatable;
+  protected float scaleWidth;
+  protected float scaleHeight;
+  protected org.joml.Matrix4f blockRenderTranslations;
+  protected org.joml.Matrix4f modelRenderTranslations;
+  public software.bernie.geckolib.renderer.GeoBlockRenderer(software.bernie.geckolib.model.GeoModel<T>);
+  public software.bernie.geckolib.model.GeoModel<T> getGeoModel();
+  public T getAnimatable();
+  public long getInstanceId(T);
+  public java.util.List<software.bernie.geckolib.renderer.layer.GeoRenderLayer<T>> getRenderLayers();
+  public software.bernie.geckolib.renderer.GeoBlockRenderer<T> addRenderLayer(software.bernie.geckolib.renderer.layer.GeoRenderLayer<T>);
+  public software.bernie.geckolib.renderer.GeoBlockRenderer<T> withScale(float);
+  public software.bernie.geckolib.renderer.GeoBlockRenderer<T> withScale(float, float);
+  public void preRender(com.mojang.blaze3d.vertex.PoseStack, T, software.bernie.geckolib.cache.object.BakedGeoModel, net.minecraft.client.renderer.MultiBufferSource, com.mojang.blaze3d.vertex.VertexConsumer, boolean, float, int, int, int);
+  public void render(T, float, com.mojang.blaze3d.vertex.PoseStack, net.minecraft.client.renderer.MultiBufferSource, int, int);
+  public void actuallyRender(com.mojang.blaze3d.vertex.PoseStack, T, software.bernie.geckolib.cache.object.BakedGeoModel, net.minecraft.client.renderer.RenderType, net.minecraft.client.renderer.MultiBufferSource, com.mojang.blaze3d.vertex.VertexConsumer, boolean, float, int, int, int);
+  public void doPostRenderCleanup();
+  public void renderRecursively(com.mojang.blaze3d.vertex.PoseStack, T, software.bernie.geckolib.cache.object.GeoBone, net.minecraft.client.renderer.RenderType, net.minecraft.client.renderer.MultiBufferSource, com.mojang.blaze3d.vertex.VertexConsumer, boolean, float, int, int, int);
+  protected void rotateBlock(net.minecraft.core.Direction, com.mojang.blaze3d.vertex.PoseStack);
+  protected net.minecraft.core.Direction getFacing(T);
+  public void updateAnimatedTextureFrame(T);
+  public void fireCompileRenderLayersEvent();
+  public boolean firePreRenderEvent(com.mojang.blaze3d.vertex.PoseStack, software.bernie.geckolib.cache.object.BakedGeoModel, net.minecraft.client.renderer.MultiBufferSource, float, int);
+  public void firePostRenderEvent(com.mojang.blaze3d.vertex.PoseStack, software.bernie.geckolib.cache.object.BakedGeoModel, net.minecraft.client.renderer.MultiBufferSource, float, int);
+  public void updateAnimatedTextureFrame(software.bernie.geckolib.animatable.GeoAnimatable);
+  public void renderRecursively(com.mojang.blaze3d.vertex.PoseStack, software.bernie.geckolib.animatable.GeoAnimatable, software.bernie.geckolib.cache.object.GeoBone, net.minecraft.client.renderer.RenderType, net.minecraft.client.renderer.MultiBufferSource, com.mojang.blaze3d.vertex.VertexConsumer, boolean, float, int, int, int);
+  public void preRender(com.mojang.blaze3d.vertex.PoseStack, software.bernie.geckolib.animatable.GeoAnimatable, software.bernie.geckolib.cache.object.BakedGeoModel, net.minecraft.client.renderer.MultiBufferSource, com.mojang.blaze3d.vertex.VertexConsumer, boolean, float, int, int, int);
+  public void actuallyRender(com.mojang.blaze3d.vertex.PoseStack, software.bernie.geckolib.animatable.GeoAnimatable, software.bernie.geckolib.cache.object.BakedGeoModel, net.minecraft.client.renderer.RenderType, net.minecraft.client.renderer.MultiBufferSource, com.mojang.blaze3d.vertex.VertexConsumer, boolean, float, int, int, int);
+  public long getInstanceId(software.bernie.geckolib.animatable.GeoAnimatable);
+  public software.bernie.geckolib.animatable.GeoAnimatable getAnimatable();
+  private static void lambda$actuallyRender$0(software.bernie.geckolib.animation.AnimationState, software.bernie.geckolib.constant.dataticket.DataTicket, java.lang.Object);
+}
+--- software.bernie.geckolib.model.DefaultedBlockGeoModel
+Compiled from "DefaultedBlockGeoModel.java"
+public class software.bernie.geckolib.model.DefaultedBlockGeoModel<T extends software.bernie.geckolib.animatable.GeoAnimatable> extends software.bernie.geckolib.model.DefaultedGeoModel<T> {
+  public software.bernie.geckolib.model.DefaultedBlockGeoModel(net.minecraft.resources.ResourceLocation);
+  protected java.lang.String subtype();
+  public software.bernie.geckolib.model.DefaultedBlockGeoModel<T> withAltModel(net.minecraft.resources.ResourceLocation);
+  public software.bernie.geckolib.model.DefaultedBlockGeoModel<T> withAltAnimations(net.minecraft.resources.ResourceLocation);
+  public software.bernie.geckolib.model.DefaultedBlockGeoModel<T> withAltTexture(net.minecraft.resources.ResourceLocation);
+  public software.bernie.geckolib.model.DefaultedGeoModel withAltTexture(net.minecraft.resources.ResourceLocation);
+  public software.bernie.geckolib.model.DefaultedGeoModel withAltAnimations(net.minecraft.resources.ResourceLocation);
+  public software.bernie.geckolib.model.DefaultedGeoModel withAltModel(net.minecraft.resources.ResourceLocation);
+}
+--- software.bernie.geckolib.util.GeckoLibUtil
+Compiled from "GeckoLibUtil.java"
+public final class software.bernie.geckolib.util.GeckoLibUtil {
+  public static final java.util.Map<java.lang.String, software.bernie.geckolib.animatable.GeoAnimatable> SYNCED_ANIMATABLES;
+  public software.bernie.geckolib.util.GeckoLibUtil();
+  public static software.bernie.geckolib.animatable.instance.AnimatableInstanceCache createInstanceCache(software.bernie.geckolib.animatable.GeoAnimatable);
+  public static software.bernie.geckolib.animatable.instance.AnimatableInstanceCache createInstanceCache(software.bernie.geckolib.animatable.GeoAnimatable, boolean);
+  public static synchronized software.bernie.geckolib.animation.Animation$LoopType addCustomLoopType(java.lang.String, software.bernie.geckolib.animation.Animation$LoopType);
+  public static synchronized software.bernie.geckolib.animation.EasingType addCustomEasingType(java.lang.String, software.bernie.geckolib.animation.EasingType);
+  public static synchronized void addCustomBakedModelFactory(java.lang.String, software.bernie.geckolib.loading.object.BakedModelFactory);
+  public static synchronized <D> software.bernie.geckolib.constant.dataticket.SerializableDataTicket<D> addDataTicket(software.bernie.geckolib.constant.dataticket.SerializableDataTicket<D>);
+  public static synchronized void registerSyncedAnimatable(software.bernie.geckolib.animatable.GeoAnimatable);
+  public static software.bernie.geckolib.animatable.GeoAnimatable getSyncedAnimatable(java.lang.String);
+  static {};
+}
+--- software.bernie.geckolib.animation.AnimatableManager$ControllerRegistrar
+Compiled from "AnimatableManager.java"
+public final class software.bernie.geckolib.animation.AnimatableManager$ControllerRegistrar extends java.lang.Record {
+  private final java.util.List<software.bernie.geckolib.animation.AnimationController<? extends software.bernie.geckolib.animatable.GeoAnimatable>> controllers;
+  public software.bernie.geckolib.animation.AnimatableManager$ControllerRegistrar(java.util.List<software.bernie.geckolib.animation.AnimationController<? extends software.bernie.geckolib.animatable.GeoAnimatable>>);
+  public software.bernie.geckolib.animation.AnimatableManager$ControllerRegistrar add(software.bernie.geckolib.animation.AnimationController<?>...);
+  public software.bernie.geckolib.animation.AnimatableManager$ControllerRegistrar add(software.bernie.geckolib.animation.AnimationController<?>);
+  public software.bernie.geckolib.animation.AnimatableManager$ControllerRegistrar remove(java.lang.String);
+  private <T extends software.bernie.geckolib.animatable.GeoAnimatable> it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap<java.lang.String, software.bernie.geckolib.animation.AnimationController<T>> build();
+  public final java.lang.String toString();
+  public final int hashCode();
+  public final boolean equals(java.lang.Object);
+  public java.util.List<software.bernie.geckolib.animation.AnimationController<? extends software.bernie.geckolib.animatable.GeoAnimatable>> controllers();
+  private static void lambda$build$1(it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap, software.bernie.geckolib.animation.AnimationController);
+  private static boolean lambda$remove$0(java.lang.String, software.bernie.geckolib.animation.AnimationController);
+}
+--- software.bernie.geckolib.animatable.instance.AnimatableInstanceCache
+Compiled from "AnimatableInstanceCache.java"
+public abstract class software.bernie.geckolib.animatable.instance.AnimatableInstanceCache {
+  protected final software.bernie.geckolib.animatable.GeoAnimatable animatable;
+  protected final java.util.function.Supplier<software.bernie.geckolib.animatable.client.GeoRenderProvider> renderProvider;
+  public software.bernie.geckolib.animatable.instance.AnimatableInstanceCache(software.bernie.geckolib.animatable.GeoAnimatable);
+  public abstract <T extends software.bernie.geckolib.animatable.GeoAnimatable> software.bernie.geckolib.animation.AnimatableManager<T> getManagerForId(long);
+  public <D> void addDataPoint(long, software.bernie.geckolib.constant.dataticket.DataTicket<D>, D);
+  public <D> D getDataPoint(long, software.bernie.geckolib.constant.dataticket.DataTicket<D>);
+  public java.lang.Object getRenderProvider();
+  private software.bernie.geckolib.animatable.client.GeoRenderProvider lambda$new$0();
+}
+=== veil-common-1.21.1-*.jar -> /home/runner/.gradle/caches/modules-2/files-2.1/foundry.veil/veil-common-1.21.1/4.3.0/f6c94bc2036b1b6b250c51e3cff66584b9b2a91c/veil-common-1.21.1-4.3.0.jar
+foundry/veil/Veil
+foundry/veil/VeilClient
+foundry/veil/VeilDebugHooks
+foundry/veil/api/CodecReloadListener
+foundry/veil/api/TickTaskScheduler
+foundry/veil/api/client/color/Color
+foundry/veil/api/client/color/Colorc
+foundry/veil/api/client/editor/EditorAttributeProvider
+foundry/veil/api/client/editor/EditorManager
+foundry/veil/api/client/editor/Inspector
+foundry/veil/api/client/editor/SingleWindowInspector
+foundry/veil/api/client/imgui/VeilImGuiUtil
+foundry/veil/api/client/necromancer/Bone
+foundry/veil/api/client/necromancer/Skeleton
+foundry/veil/api/client/necromancer/SkeletonParent
+foundry/veil/api/client/necromancer/animation/Animation
+foundry/veil/api/client/necromancer/animation/Animator
+foundry/veil/api/client/necromancer/animation/keyframe/Interpolation
+foundry/veil/api/client/necromancer/animation/keyframe/Keyframe
+foundry/veil/api/client/necromancer/animation/keyframe/KeyframeTimeline
+foundry/veil/api/client/necromancer/animation/keyframe/KeyframedAnimation
+foundry/veil/api/client/necromancer/constraint/Constraint
+foundry/veil/api/client/necromancer/render/NecromancerEntityRenderLayer
+foundry/veil/api/client/necromancer/render/NecromancerEntityRenderer
+foundry/veil/api/client/necromancer/render/NecromancerRenderer
+foundry/veil/api/client/necromancer/render/NecromancerSkinEntityRenderLayer
+foundry/veil/api/client/necromancer/render/Skin
+foundry/veil/api/client/property/ImmutableProperty
+foundry/veil/api/client/property/InapplicableProperty
+foundry/veil/api/client/property/InvertibleProperty
+foundry/veil/api/client/property/ModelProperty
+foundry/veil/api/client/property/Property
+foundry/veil/api/client/property/model/Mat4ModelProperty
+foundry/veil/api/client/property/model/RotationModelProperty
+foundry/veil/api/client/property/model/Vec3ModelProperty
+foundry/veil/api/client/property/properties/BoolProperty
+foundry/veil/api/client/property/properties/FloatProperty
+foundry/veil/api/client/property/properties/IntProperty
+foundry/veil/api/client/property/properties/Mat3Property
+foundry/veil/api/client/property/properties/Mat4Property
+foundry/veil/api/client/property/properties/RandomFloatProperty
+foundry/veil/api/client/property/properties/Sampler2DProperty
+foundry/veil/api/client/property/properties/TimeProperty
+foundry/veil/api/client/property/properties/Vec2Property
+foundry/veil/api/client/property/properties/Vec3Property
+foundry/veil/api/client/property/properties/Vec4Property
+foundry/veil/api/client/registry/LightTypeRegistry
+foundry/veil/api/client/registry/PostPipelineStageRegistry
+foundry/veil/api/client/registry/PropertyModifierRegistry
+foundry/veil/api/client/registry/PropertyRegistry
+foundry/veil/api/client/registry/RenderTypeLayerRegistry
+foundry/veil/api/client/registry/RenderTypeShardRegistry
+foundry/veil/api/client/registry/VeilResourceEditorRegistry
+foundry/veil/api/client/registry/VeilShaderBufferRegistry
+foundry/veil/api/client/render/CachedBufferSource
+foundry/veil/api/client/render/CameraMatrices
+foundry/veil/api/client/render/CullFrustum
+foundry/veil/api/client/render/GpuVendor
+foundry/veil/api/client/render/GuiInfo
+foundry/veil/api/client/render/MatrixStack
+foundry/veil/api/client/render/VeilLevelPerspectiveRenderer
+foundry/veil/api/client/render/VeilRenderBridge
+foundry/veil/api/client/render/VeilRenderSystem
+foundry/veil/api/client/render/VeilRenderer
+foundry/veil/api/client/render/VeilShaderBufferLayout
+foundry/veil/api/client/render/VeilShaderLimits
+foundry/veil/api/client/render/dynamicbuffer/DynamicBufferType
+foundry/veil/api/client/render/dynamicbuffer/DynamicBuffersChange
+foundry/veil/api/client/render/ext/VeilDebug
+foundry/veil/api/client/render/ext/VeilMultiBind
+foundry/veil/api/client/render/framebuffer/AdvancedFbo
+foundry/veil/api/client/render/framebuffer/AdvancedFboAttachment
+foundry/veil/api/client/render/framebuffer/AdvancedFboRenderAttachment
+foundry/veil/api/client/render/framebuffer/AdvancedFboTextureAttachment
+foundry/veil/api/client/render/framebuffer/FramebufferAttachmentDefinition
+foundry/veil/api/client/render/framebuffer/FramebufferDefinition
+foundry/veil/api/client/render/framebuffer/FramebufferManager
+foundry/veil/api/client/render/framebuffer/FramebufferStack
+foundry/veil/api/client/render/framebuffer/VeilFramebuffers
+foundry/veil/api/client/render/light/DDALightData
+foundry/veil/api/client/render/light/IndirectLightData
+foundry/veil/api/client/render/light/InstancedLightData
+foundry/veil/api/client/render/light/data/AreaLightData
+foundry/veil/api/client/render/light/data/DirectionalLightData
+foundry/veil/api/client/render/light/data/LightData
+foundry/veil/api/client/render/light/data/PointLightData
+foundry/veil/api/client/render/light/renderer/DDALightRenderer
+foundry/veil/api/client/render/light/renderer/InstancedLightRenderer
+foundry/veil/api/client/render/light/renderer/LightRenderHandle
+foundry/veil/api/client/render/light/renderer/LightRenderer
+foundry/veil/api/client/render/light/renderer/LightTypeRenderer
+foundry/veil/api/client/render/post/PostPipeline
+foundry/veil/api/client/render/post/PostProcessingManager
+foundry/veil/api/client/render/post/stage/BlitPostStage
+foundry/veil/api/client/render/post/stage/CompositePostPipeline
+foundry/veil/api/client/render/post/stage/CopyPostStage
+foundry/veil/api/client/render/post/stage/DepthFunctionPostStage
+foundry/veil/api/client/render/post/stage/FramebufferPostStage
+foundry/veil/api/client/render/post/stage/MaskPostStage
+foundry/veil/api/client/render/post/uniform/FloatUniform
+foundry/veil/api/client/render/post/uniform/IntUniform
+foundry/veil/api/client/render/post/uniform/Matrix2Uniform
+foundry/veil/api/client/render/post/uniform/Matrix3Uniform
+foundry/veil/api/client/render/post/uniform/Matrix4Uniform
+foundry/veil/api/client/render/post/uniform/UniformValue
+foundry/veil/api/client/render/profiler/RenderProfilerCounter
+foundry/veil/api/client/render/profiler/VeilRenderProfiler
+foundry/veil/api/client/render/rendertype/VeilRenderType
+foundry/veil/api/client/render/rendertype/VeilRenderTypeAccessor
+foundry/veil/api/client/render/rendertype/VeilRenderTypeBuilder
+foundry/veil/api/client/render/rendertype/layer/ColorLogicLayer
+foundry/veil/api/client/render/rendertype/layer/CompositeRenderTypeData
+foundry/veil/api/client/render/rendertype/layer/CullLayer
+foundry/veil/api/client/render/rendertype/layer/DepthClampLayer
+foundry/veil/api/client/render/rendertype/layer/DepthTestLayer
+foundry/veil/api/client/render/rendertype/layer/LayerTemplateValue
+foundry/veil/api/client/render/rendertype/layer/LayeringLayer
+foundry/veil/api/client/render/rendertype/layer/LightmapLayer
+foundry/veil/api/client/render/rendertype/layer/LineLayer
+foundry/veil/api/client/render/rendertype/layer/MultiTextureLayer
+foundry/veil/api/client/render/rendertype/layer/MultisampleLayer
+foundry/veil/api/client/render/rendertype/layer/OutputLayer
+foundry/veil/api/client/render/rendertype/layer/OverlayLayer
+foundry/veil/api/client/render/rendertype/layer/PatchesLayer
+foundry/veil/api/client/render/rendertype/layer/RenderTypeLayer
+foundry/veil/api/client/render/rendertype/layer/SeamlessCubemapLayer
+foundry/veil/api/client/render/rendertype/layer/TextureLayer
+foundry/veil/api/client/render/rendertype/layer/TexturingLayer
+foundry/veil/api/client/render/rendertype/layer/TransparencyLayer
+foundry/veil/api/client/render/rendertype/layer/VanillaShaderLayer
+foundry/veil/api/client/render/rendertype/layer/VeilShaderLayer
+foundry/veil/api/client/render/rendertype/layer/WriteMaskLayer
+foundry/veil/api/client/render/shader/ShaderFeature
+foundry/veil/api/client/render/shader/ShaderManager
+foundry/veil/api/client/render/shader/ShaderModificationManager
+foundry/veil/api/client/render/shader/ShaderPreDefinitions
+foundry/veil/api/client/render/shader/ShaderSourceSet
+foundry/veil/api/client/render/shader/block/DynamicShaderBlock
+foundry/veil/api/client/render/shader/block/ShaderBlock
+foundry/veil/api/client/render/shader/compiler/CompiledShader
+foundry/veil/api/client/render/shader/compiler/ShaderCompiler
+foundry/veil/api/client/render/shader/compiler/ShaderException
+foundry/veil/api/client/render/shader/compiler/VeilShaderSource
+foundry/veil/api/client/render/shader/processor/ShaderBindingProcessor
+foundry/veil/api/client/render/shader/processor/ShaderBufferProcessor
+foundry/veil/api/client/render/shader/processor/ShaderFeatureProcessor
+foundry/veil/api/client/render/shader/processor/ShaderImportProcessor
+foundry/veil/api/client/render/shader/processor/ShaderImporter
+foundry/veil/api/client/render/shader/processor/ShaderInjectProcessor
+foundry/veil/api/client/render/shader/processor/ShaderModifyProcessor
+foundry/veil/api/client/render/shader/processor/ShaderMultiProcessor
+foundry/veil/api/client/render/shader/processor/ShaderPreProcessor
+foundry/veil/api/client/render/shader/processor/ShaderVersionProcessor
+foundry/veil/api/client/render/shader/program/ProgramDefinition
+foundry/veil/api/client/render/shader/program/ShaderBlendMode
+foundry/veil/api/client/render/shader/program/ShaderProgram
+foundry/veil/api/client/render/shader/program/ShaderUniformCache
+foundry/veil/api/client/render/shader/program/TextureUniformAccess
+foundry/veil/api/client/render/shader/program/UniformAccess
+foundry/veil/api/client/render/shader/texture/FramebufferSource
+foundry/veil/api/client/render/shader/texture/LocationSource
+foundry/veil/api/client/render/shader/texture/ShaderTextureSource
+foundry/veil/api/client/render/shader/uniform/ShaderUniform
+foundry/veil/api/client/render/shader/uniform/ShaderUniformAccess
+foundry/veil/api/client/render/texture/ArrayTexture
+foundry/veil/api/client/render/texture/CubemapTexture
+foundry/veil/api/client/render/texture/DynamicCubemapTexture
+foundry/veil/api/client/render/texture/SamplerObject
+foundry/veil/api/client/render/texture/SimpleArrayTexture
+foundry/veil/api/client/render/texture/SimpleCubemapTexture
+foundry/veil/api/client/render/texture/TextureFilter
+foundry/veil/api/client/render/texture/TextureTypeMetadataSection
+foundry/veil/api/client/render/texture/VeilPreloadedTexture
+foundry/veil/api/client/render/vertex/VeilVertexFormat
+foundry/veil/api/client/render/vertex/VertexArray
+foundry/veil/api/client/render/vertex/VertexArrayBuilder
+foundry/veil/api/client/util/DebugFrustumRenderer
+foundry/veil/api/client/util/DebugRenderHelper
+foundry/veil/api/client/util/Easing
+foundry/veil/api/client/util/ScissorStack
+foundry/veil/api/client/util/TextureDownloader
+foundry/veil/api/client/util/VertexFormatCodec
+foundry/veil/api/compat/FlashbackCompat
+foundry/veil/api/compat/IrisCompat
+foundry/veil/api/compat/SodiumCompat
+foundry/veil/api/event/FreeNativeResourcesEvent
+foundry/veil/api/event/VeilAddShaderPreProcessorsEvent
+foundry/veil/api/event/VeilDynamicBuffersChangedEvent
+foundry/veil/api/event/VeilPostProcessingEvent
+foundry/veil/api/event/VeilRegisterBlockLayersEvent
+foundry/veil/api/event/VeilRegisterFixedBuffersEvent
+foundry/veil/api/event/VeilRegisterGlobalControllersEvent
+foundry/veil/api/event/VeilRegisterInspectorsEvent
+foundry/veil/api/event/VeilRenderLevelStageEvent
+foundry/veil/api/event/VeilRendererAvailableEvent
+foundry/veil/api/event/VeilShaderCompileEvent
+foundry/veil/api/flare/EffectHost
+foundry/veil/api/flare/FlareEffectManager
+foundry/veil/api/flare/data/FloatCurve
+foundry/veil/api/flare/data/effect/FlareEffectLayer
+foundry/veil/api/flare/data/effect/FlareEffectTemplate
+foundry/veil/api/flare/data/effect/FlareMaterial
+foundry/veil/api/flare/data/effect/FlareModel
+foundry/veil/api/flare/data/effect/FlareModule
+foundry/veil/api/flare/data/effect/FlareSubModule
+foundry/veil/api/flare/data/model/FlareBakedQuad
+foundry/veil/api/flare/data/model/FlareShell
+foundry/veil/api/flare/data/model/ShellElement
+foundry/veil/api/flare/data/model/ShellElementFace
+foundry/veil/api/flare/data/model/ShellElementRotation
+foundry/veil/api/flare/data/model/ShellFaceUV
+foundry/veil/api/flare/data/model/SimpleBakedShell
+foundry/veil/api/flare/model/BakedShell
+foundry/veil/api/flare/model/ShellBakery
+foundry/veil/api/flare/model/UnbakedShell
+foundry/veil/api/flare/modifier/Controller
+foundry/veil/api/flare/modifier/ControllerManager
+foundry/veil/api/flare/modifier/GlobalController
+foundry/veil/api/flare/modifier/HostBoundController
+foundry/veil/api/flare/modifier/PropertyModifier
+foundry/veil/api/flare/modifier/RandomnessController
+foundry/veil/api/flare/modifier/modifiers/FloatPropertyModifier
+foundry/veil/api/flare/modifier/modifiers/Vec2PropertyModifier
+foundry/veil/api/flare/modifier/modifiers/Vec3PropertyModifier
+foundry/veil/api/flare/modifier/modifiers/Vec4PropertyModifier
+foundry/veil/api/molang/MolangExpressionCodec
+foundry/veil/api/molang/VeilMolang
+foundry/veil/api/network/VeilPacketManager
+foundry/veil/api/network/handler/ClientPacketContext
+foundry/veil/api/network/handler/PacketContext
+foundry/veil/api/network/handler/ServerPacketContext
+foundry/veil/api/quasar/data/EmitterSettings
+foundry/veil/api/quasar/data/EmitterShapeSettings
+foundry/veil/api/quasar/data/ParticleEmitterData
+foundry/veil/api/quasar/data/ParticleModuleTypeRegistry
+foundry/veil/api/quasar/data/ParticleSettings
+foundry/veil/api/quasar/data/QuasarParticleData
+foundry/veil/api/quasar/data/QuasarParticles
+foundry/veil/api/quasar/data/module/CodeModule
+foundry/veil/api/quasar/data/module/Force
+foundry/veil/api/quasar/data/module/ModuleType
+foundry/veil/api/quasar/data/module/ParticleModuleData
+foundry/veil/api/quasar/data/module/collision/CollisionSubEmitterData
+foundry/veil/api/quasar/data/module/collision/DieOnCollisionModuleData
+foundry/veil/api/quasar/data/module/force/DragForceData
+foundry/veil/api/quasar/data/module/force/GravityForceData
+foundry/veil/api/quasar/data/module/force/PointAttractorForceData
+foundry/veil/api/quasar/data/module/force/PointForceData
+foundry/veil/api/quasar/data/module/force/VectorFieldForceData
+foundry/veil/api/quasar/data/module/force/VortexForceData
+foundry/veil/api/quasar/data/module/force/WindForceData
+foundry/veil/api/quasar/data/module/init/BlockParticleModuleData
+foundry/veil/api/quasar/data/module/init/InitSizeParticleModuleData
+foundry/veil/api/quasar/data/module/init/InitSubEmitterModuleData
+foundry/veil/api/quasar/data/module/init/InitialVelocityModuleData
+foundry/veil/api/quasar/data/module/init/LightModuleData
+foundry/veil/api/quasar/data/module/init/LightmapParticleModuleData
+foundry/veil/api/quasar/data/module/render/ColorParticleModuleData
+foundry/veil/api/quasar/data/module/render/TrailParticleModuleData
+foundry/veil/api/quasar/data/module/update/TickSizeParticleModuleData
+foundry/veil/api/quasar/data/module/update/TickSubEmitterModuleData
+foundry/veil/api/quasar/emitters/AnchorPoint
+foundry/veil/api/quasar/emitters/module/CollisionParticleModule
+foundry/veil/api/quasar/emitters/module/ForceParticleModule
+foundry/veil/api/quasar/emitters/module/InitParticleModule
+foundry/veil/api/quasar/emitters/module/ParticleModule
+foundry/veil/api/quasar/emitters/module/RenderParticleModule
+foundry/veil/api/quasar/emitters/module/UpdateParticleModule
+foundry/veil/api/quasar/emitters/module/force/ConstantForceModule
+foundry/veil/api/quasar/emitters/module/force/PointAttractorForceModule
+foundry/veil/api/quasar/emitters/module/force/PointForceModule
+foundry/veil/api/quasar/emitters/module/force/PositionedForce
+foundry/veil/api/quasar/emitters/module/force/ScaleForceModule
+foundry/veil/api/quasar/emitters/module/force/SimplePositionedForce
+foundry/veil/api/quasar/emitters/module/force/VectorFieldForceModule
+foundry/veil/api/quasar/emitters/module/force/VortexForceModule
+foundry/veil/api/quasar/emitters/module/init/InitRandomRotationModuleData
+foundry/veil/api/quasar/emitters/module/render/ColorRenderModule
+foundry/veil/api/quasar/emitters/module/render/CustomLightModule
+foundry/veil/api/quasar/emitters/module/render/DynamicLightModule
+foundry/veil/api/quasar/emitters/module/render/StaticLightModule
+foundry/veil/api/quasar/emitters/module/render/TrailParticleModule
+foundry/veil/api/quasar/emitters/module/render/TrailSettings
+foundry/veil/api/quasar/emitters/module/update/FaceVelocityModule
+foundry/veil/api/quasar/emitters/module/update/TickSubEmitterModule
+foundry/veil/api/quasar/emitters/module/update/VectorField
+foundry/veil/api/quasar/emitters/module/update/WindField
+foundry/veil/api/quasar/emitters/shape/Cube
+foundry/veil/api/quasar/emitters/shape/Cylinder
+foundry/veil/api/quasar/emitters/shape/Disc
+foundry/veil/api/quasar/emitters/shape/EmitterShape
+foundry/veil/api/quasar/emitters/shape/Hemisphere
+foundry/veil/api/quasar/emitters/shape/Plane
+foundry/veil/api/quasar/emitters/shape/Point
+foundry/veil/api/quasar/emitters/shape/Sphere
+foundry/veil/api/quasar/emitters/shape/Torus
+foundry/veil/api/quasar/fx/Line
+foundry/veil/api/quasar/fx/Trail
+foundry/veil/api/quasar/particle/ParticleEmitter
+foundry/veil/api/quasar/particle/ParticleModuleSet
+foundry/veil/api/quasar/particle/ParticleSystemManager
+foundry/veil/api/quasar/particle/QuasarParticle
+foundry/veil/api/quasar/particle/RenderData
+foundry/veil/api/quasar/particle/RenderStyle
+foundry/veil/api/quasar/particle/SpriteData
+foundry/veil/api/quasar/registry/EmitterShapeRegistry
+foundry/veil/api/quasar/registry/RenderStyleRegistry
+foundry/veil/api/resource/VeilDynamicRegistry
+foundry/veil/api/resource/VeilEditorEnvironment
+foundry/veil/api/resource/VeilResource
+foundry/veil/api/resource/VeilResourceAction
+foundry/veil/api/resource/VeilResourceInfo
+foundry/veil/api/resource/VeilResourceLoader
+foundry/veil/api/resource/VeilResourceManager
+foundry/veil/api/resource/editor/BlockModelInspector
+foundry/veil/api/resource/editor/EffectInspector
+foundry/veil/api/resource/editor/FramebufferFileEditor
+foundry/veil/api/resource/editor/ResourceFileEditor
+foundry/veil/api/resource/editor/ResourceOverrideEditor
+foundry/veil/api/resource/editor/ShellInspector
+foundry/veil/api/resource/editor/TextFileEditor
+foundry/veil/api/resource/type/BlockModelResource
+foundry/veil/api/resource/type/FlareResource
+foundry/veil/api/resource/type/FramebufferResource
+foundry/veil/api/resource/type/LanguageResource
+foundry/veil/api/resource/type/McMetaResource
+foundry/veil/api/resource/type/PostPipelineResource
+foundry/veil/api/resource/type/RenderTypeResource
+foundry/veil/api/resource/type/ShellResource
+foundry/veil/api/resource/type/TextResource
+foundry/veil/api/resource/type/TextureResource
+foundry/veil/api/resource/type/UnknownResource
+foundry/veil/api/resource/type/VanillaShaderFileResource
+foundry/veil/api/resource/type/VeilShaderDefinitionResource
+foundry/veil/api/resource/type/VeilShaderFileResource
+foundry/veil/api/resource/type/VeilShaderIncludeResource
+foundry/veil/api/resource/type/VeilShaderResource
+foundry/veil/api/resource/type/VeilTextResource
+foundry/veil/api/util/CatmulRomSpline
+foundry/veil/api/util/CodecUtil
+foundry/veil/api/util/CompositeReloadListener
+foundry/veil/api/util/EnumCodec
+foundry/veil/api/util/FastNoiseLite
+foundry/veil/ext/AbstractTextureExtension
+foundry/veil/ext/AgeableListModelExtension
+foundry/veil/ext/AutoStorageIndexBufferExtension
+foundry/veil/ext/CompositeStateExtension
+foundry/veil/ext/DebugVertexBufferExt
+foundry/veil/ext/EntityExtension
+foundry/veil/ext/FrustumExtension
+foundry/veil/ext/LevelRendererBlockLayerExtension
+foundry/veil/ext/LevelRendererExtension
+foundry/veil/ext/MinecraftServerExtension
+foundry/veil/ext/PackResourcesExtension
+foundry/veil/ext/PerformanceRenderTargetExtension
+foundry/veil/ext/RenderTargetExtension
+foundry/veil/ext/ShaderInstanceExtension
+foundry/veil/ext/TextureAtlasExtension
+foundry/veil/ext/TextureManagerExtension
+foundry/veil/ext/VeilClientSuggestionProvider
+foundry/veil/ext/VertexBufferExtension
+foundry/veil/ext/iris/IrisRenderTargetExtension
+foundry/veil/ext/iris/IrisRenderingPipelineExtension
+foundry/veil/ext/sodium/ChunkShaderOptionsExtension
+foundry/veil/ext/sodium/ChunkVertexEncoderVertexExtension
+foundry/veil/impl/ClientEnumArgument
+foundry/veil/impl/ThreadTaskScheduler
+foundry/veil/impl/TickTaskSchedulerImpl
+foundry/veil/impl/VeilMixinPlugin
+foundry/veil/impl/VeilReloadListeners
+foundry/veil/impl/client/VeilClientSchedulerImpl
+foundry/veil/impl/client/editor/DemoInspector
+foundry/veil/impl/client/editor/DeviceInfoViewer
+foundry/veil/impl/client/editor/FramebufferInspector
+foundry/veil/impl/client/editor/LightInspector
+foundry/veil/impl/client/editor/ParticleEditorInspector
+foundry/veil/impl/client/editor/PipelineStatisticsViewer
+foundry/veil/impl/client/editor/PostInspector
+foundry/veil/impl/client/editor/ResourceManagerInspector
+foundry/veil/impl/client/editor/ShaderInspector
+foundry/veil/impl/client/editor/TextureInspector
+foundry/veil/impl/client/imgui/AdvancedFboImGuiAreaImpl
+foundry/veil/impl/client/imgui/VeilImGuiCompat
+foundry/veil/impl/client/imgui/VeilImGuiStylesheet
+foundry/veil/impl/client/necromancer/render/NecromancerRenderDispatcher
+foundry/veil/impl/client/render/LayoutSerializer
+foundry/veil/impl/client/render/dynamicbuffer/DynamicBufferManager
+foundry/veil/impl/client/render/dynamicbuffer/DynamicBufferProcessor
+foundry/veil/impl/client/render/dynamicbuffer/DynamicBufferShard
+foundry/veil/impl/client/render/dynamicbuffer/VanillaShaderCompiler
+foundry/veil/impl/client/render/framebuffer/AdvancedFboImpl
+foundry/veil/impl/client/render/framebuffer/AdvancedFboMutableTextureAttachment
+foundry/veil/impl/client/render/framebuffer/DSAAdvancedFboImpl
+foundry/veil/impl/client/render/framebuffer/LegacyAdvancedFboImpl
+foundry/veil/impl/client/render/light/AreaLightRenderer
+foundry/veil/impl/client/render/light/DirectionalLightRenderer
+foundry/veil/impl/client/render/light/InstancedPointLightRenderer
+foundry/veil/impl/client/render/light/VoxelShadowGrid
+foundry/veil/impl/client/render/perspective/FlashbackAccess
+foundry/veil/impl/client/render/perspective/IrisPipelineAccess
+foundry/veil/impl/client/render/perspective/LevelPerspectiveCamera
+foundry/veil/impl/client/render/perspective/VeilSectionOcclusionGraph
+foundry/veil/impl/client/render/pipeline/AdvancedFboShard
+foundry/veil/impl/client/render/pipeline/CullFaceShard
+foundry/veil/impl/client/render/pipeline/FlagShards
+foundry/veil/impl/client/render/pipeline/PatchStateShard
+foundry/veil/impl/client/render/pipeline/PostPipelineContext
+foundry/veil/impl/client/render/pipeline/ShaderProgramShard
+foundry/veil/impl/client/render/pipeline/VeilBloomRenderer
+foundry/veil/impl/client/render/pipeline/VeilFirstPersonRenderer
+foundry/veil/impl/client/render/pipeline/VeilShaderBlockState
+foundry/veil/impl/client/render/pipeline/VeilShaderBufferCache
+foundry/veil/impl/client/render/profiler/VeilRenderProfilerImpl
+foundry/veil/impl/client/render/rendertype/DynamicRenderTypeManager
+foundry/veil/impl/client/render/rendertype/WhiteTextureStateShard
+foundry/veil/impl/client/render/shader/ShaderImporterImpl
+foundry/veil/impl/client/render/shader/VeilVanillaShaders
+foundry/veil/impl/client/render/shader/block/DynamicShaderBlockImpl
+foundry/veil/impl/client/render/shader/block/LayoutShaderBlockImpl
+foundry/veil/impl/client/render/shader/block/ShaderBlockImpl
+foundry/veil/impl/client/render/shader/block/SizedShaderBlockImpl
+foundry/veil/impl/client/render/shader/block/WrapperShaderBlockImpl
+foundry/veil/impl/client/render/shader/compiler/CachedShaderCompiler
+foundry/veil/impl/client/render/shader/compiler/DirectShaderCompiler
+foundry/veil/impl/client/render/shader/injection/InjectionBodyParser
+foundry/veil/impl/client/render/shader/injection/ShaderInjectionAdapter
+foundry/veil/impl/client/render/shader/injection/ShaderInjectionLoader
+foundry/veil/impl/client/render/shader/injection/ShaderInjectionManager
+foundry/veil/impl/client/render/shader/injection/ShaderInjectionValidator
+foundry/veil/impl/client/render/shader/injection/SimpleShaderInjection
+foundry/veil/impl/client/render/shader/injection/util/Diagnostic
+foundry/veil/impl/client/render/shader/injection/util/Severity
+foundry/veil/impl/client/render/shader/injection/util/ShaderInjection
+foundry/veil/impl/client/render/shader/injection/util/ShaderInjectionDefinition
+foundry/veil/impl/client/render/shader/injection/util/ShaderInjectionFunction
+foundry/veil/impl/client/render/shader/injection/util/ValidationResult
+foundry/veil/impl/client/render/shader/processor/ShaderProcessorList
+foundry/veil/impl/client/render/shader/processor/SodiumShaderProcessor
+foundry/veil/impl/client/render/shader/processor/VanillaShaderProcessor
+foundry/veil/impl/client/render/shader/program/DynamicShaderProgramImpl
+foundry/veil/impl/client/render/shader/program/ShaderProgramImpl
+foundry/veil/impl/client/render/shader/program/ShaderTextureCache
+foundry/veil/impl/client/render/shader/uniform/CompositeShaderUniformAccess
+foundry/veil/impl/client/render/shader/uniform/EmptyShaderUniformAccess
+foundry/veil/impl/client/render/shader/uniform/ShaderUniformImpl
+foundry/veil/impl/client/render/shader/uniform/WrapperUniformAccess
+foundry/veil/impl/client/render/vertex/ARBVertexArray
+foundry/veil/impl/client/render/vertex/ARBVertexAttribBindingBuilder
+foundry/veil/impl/client/render/vertex/DSAVertexArray
+foundry/veil/impl/client/render/vertex/DSAVertexAttribBindingBuilder
+foundry/veil/impl/client/render/vertex/LegacyVertexArray
+foundry/veil/impl/client/render/vertex/LegacyVertexAttribBindingBuilder
+foundry/veil/impl/client/render/wrapper/DSAVanillaAdvancedFboWrapper
+foundry/veil/impl/client/render/wrapper/LegacyVanillaAdvancedFboWrapper
+foundry/veil/impl/client/render/wrapper/VanillaAdvancedFboWrapper
+foundry/veil/impl/client/render/wrapper/VanillaUniformWrapper
+foundry/veil/impl/command/VeilClientSuggestions
+foundry/veil/impl/command/VeilCommand
+foundry/veil/impl/compat/sodium/SodiumShaderPreProcessor
+foundry/veil/impl/flare/FlareManager
+foundry/veil/impl/flare/ShellManager
+foundry/veil/impl/network/ClientPacketSink
+foundry/veil/impl/network/ClientboundAddPostProcessingPacket
+foundry/veil/impl/network/ClientboundClearPostProcessingPacket
+foundry/veil/impl/network/ClientboundRemovePostProcessingPacket
+foundry/veil/impl/network/VeilClientServerFlags
+foundry/veil/impl/network/VeilPacketSender
+foundry/veil/impl/quasar/ColorGradient
+foundry/veil/impl/quasar/MathUtil
+foundry/veil/impl/quasar/QuasarParticleHandler
+foundry/veil/impl/resource/VeilPackResources
+foundry/veil/impl/resource/VeilResourceManagerImpl
+foundry/veil/impl/resource/VeilResourceRenderer
+foundry/veil/impl/resource/action/FramebufferEditAction
+foundry/veil/impl/resource/action/ModelInspectAction
+foundry/veil/impl/resource/action/OverrideAction
+foundry/veil/impl/resource/action/ShellInspectAction
+foundry/veil/impl/resource/action/TemplateInspectAction
+foundry/veil/impl/resource/action/TextEditAction
+foundry/veil/impl/resource/loader/BlockModelResourceLoader
+foundry/veil/impl/resource/loader/FlareResourcesLoader
+foundry/veil/impl/resource/loader/FramebufferResourceLoader
+foundry/veil/impl/resource/loader/LanguageResourceLoader
+foundry/veil/impl/resource/loader/McMetaResourceLoader
+foundry/veil/impl/resource/loader/PostPipelineResourceLoader
+foundry/veil/impl/resource/loader/RenderTypeResourceLoader
+foundry/veil/impl/resource/loader/ShaderIncludeLoader
+foundry/veil/impl/resource/loader/ShaderResourceLoader
+foundry/veil/impl/resource/loader/ShellResourceLoader
+foundry/veil/impl/resource/loader/TextResourceLoader
+foundry/veil/impl/resource/loader/TextureResourceLoader
+foundry/veil/impl/resource/loader/VanillaShaderResourceLoader
+foundry/veil/impl/resource/tree/VeilResourceFolder
+foundry/veil/mixin/command/client/ClientCommandSourceMixin
+foundry/veil/mixin/debug/SimpleReloadInstanceMixin
+foundry/veil/mixin/debug/accessor/DebugGameRendererAccessor
+foundry/veil/mixin/debug/accessor/DebugLevelRendererAccessor
+foundry/veil/mixin/debug/accessor/DebugPostChainAccessor
+foundry/veil/mixin/debug/client/DebugActiveProfilerMixin
+foundry/veil/mixin/debug/client/DebugAutoStorageIndexBufferMixin
+foundry/veil/mixin/debug/client/DebugGlDebugMixin
+foundry/veil/mixin/debug/client/DebugKeyboardHandlerMixin
+foundry/veil/mixin/debug/client/DebugLevelRendererMixin
+foundry/veil/mixin/debug/client/DebugMainMixin
+foundry/veil/mixin/debug/client/DebugMinecraftMixin
+foundry/veil/mixin/debug/client/DebugTextureManagerMixin
+foundry/veil/mixin/debug/client/DebugVertexBufferMixin
+foundry/veil/mixin/debug/client/DebugVertexFormatMixin
+foundry/veil/mixin/debug/client/profiler/GameRendererMixin
+foundry/veil/mixin/dynamicbuffer/accessor/DynamicBufferGameRendererAccessor
+foundry/veil/mixin/dynamicbuffer/accessor/DynamicBufferProgramAccessor
+foundry/veil/mixin/dynamicbuffer/client/DynamicBufferGameRendererMixin
+foundry/veil/mixin/dynamicbuffer/client/DynamicBufferLevelRendererMixin
+foundry/veil/mixin/dynamicbuffer/client/DynamicBufferShaderInstanceMixin
+foundry/veil/mixin/fix/MemUtilMixin
+foundry/veil/mixin/fix/NativeImageMixin
+foundry/veil/mixin/fix/WindowMixin
+foundry/veil/mixin/framebuffer/accessor/FramebufferRenderTargetAccessor
+foundry/veil/mixin/necromancer/client/NecromancerClientLevelMixin
+foundry/veil/mixin/necromancer/client/NecromancerLevelRendererMixin
+foundry/veil/mixin/network/NetworkMinecraftServerMixin
+foundry/veil/mixin/network/NetworkServerLevelMixin
+foundry/veil/mixin/network/NetworkServerPlayerMixin
+foundry/veil/mixin/performance/client/PerformanceAbstractTextureMixin
+foundry/veil/mixin/performance/client/PerformanceLevelRendererMixin
+foundry/veil/mixin/performance/client/PerformanceRenderTargetMixin
+foundry/veil/mixin/performance/client/PerformanceScreenEffectRendererMixin
+foundry/veil/mixin/perspective/accessor/GameRendererAccessor
+foundry/veil/mixin/perspective/accessor/LevelRendererAccessor
+foundry/veil/mixin/perspective/client/FrustumMixin
+foundry/veil/mixin/pipeline/accessor/PipelineBufferSourceAccessor
+foundry/veil/mixin/pipeline/accessor/PipelineNativeImageAccessor
+foundry/veil/mixin/pipeline/accessor/PipelineReloadableResourceManagerAccessor
+foundry/veil/mixin/pipeline/client/PipelineAbstractTextureMixin
+foundry/veil/mixin/pipeline/client/PipelineAutoStorageIndexBufferMixin
+foundry/veil/mixin/pipeline/client/PipelineDebugScreenOverlayMixin
+foundry/veil/mixin/pipeline/client/PipelineFrustumMixin
+foundry/veil/mixin/pipeline/client/PipelineGameRendererMixin
+foundry/veil/mixin/pipeline/client/PipelineGlStateManagerMixin
+foundry/veil/mixin/pipeline/client/PipelineLevelRendererMixin
+foundry/veil/mixin/pipeline/client/PipelineMinecraftMixin
+foundry/veil/mixin/pipeline/client/PipelineParticleRenderTypeMixin
+foundry/veil/mixin/pipeline/client/PipelinePoseStackMixin
+foundry/veil/mixin/pipeline/client/PipelineRenderSystemMixin
+foundry/veil/mixin/pipeline/client/PipelineRenderTargetMixin
+foundry/veil/mixin/pipeline/client/PipelineShaderInstanceMixin
+foundry/veil/mixin/pipeline/client/PipelineTextureManagerMixin
+foundry/veil/mixin/pipeline/client/PipelineVertexBufferMixin
+foundry/veil/mixin/pipeline/client/PipelineWindowMixin
+foundry/veil/mixin/quasar/client/QuasarEntityMixin
+foundry/veil/mixin/quasar/client/QuasarParticleEngineMixin
+foundry/veil/mixin/registry/accessor/RegistryDataAccessor
+foundry/veil/mixin/rendertype/accessor/RenderStateShardAccessor
+foundry/veil/mixin/rendertype/accessor/RenderTypeAccessor
+foundry/veil/mixin/rendertype/accessor/RenderTypeBufferSourceAccessor
+foundry/veil/mixin/rendertype/client/CompositeStateBuilderMixin
+foundry/veil/mixin/rendertype/client/CompositeStateMixin
+foundry/veil/mixin/rendertype/client/RenderTypeMixin
+foundry/veil/mixin/resource/ResourceVanillaPackResourcesMixin
+foundry/veil/mixin/resource/accessor/ResourceAtlasSetAccessor
+foundry/veil/mixin/resource/accessor/ResourceModelManagerAccessor
+foundry/veil/mixin/resource/accessor/ResourceTextureAtlasAccessor
+foundry/veil/mixin/resource/client/ResourceTextureAtlasHolderMixin
+foundry/veil/mixin/resource/client/ResourceTextureAtlasMixin
+foundry/veil/mixin/scheduler/MinecraftServerMixin
+foundry/veil/mixin/shader/client/ShaderEffectInstanceMixin
+foundry/veil/mixin/shader/client/ShaderGameRendererMixin
+foundry/veil/mixin/shader/client/ShaderInstanceMixin
+foundry/veil/mixin/shader/client/ShaderProgramManagerMixin
+foundry/veil/platform/VeilClientPlatform
+foundry/veil/platform/VeilEventPlatform
+foundry/veil/platform/VeilPlatform
+foundry/veil/platform/registry/RegistrationProvider
+foundry/veil/platform/registry/RegistryObject

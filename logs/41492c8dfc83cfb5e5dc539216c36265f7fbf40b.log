@@ -1,0 +1,154 @@
+Downloading https://services.gradle.org/distributions/gradle-9.4.0-bin.zip
+.............10%.............20%.............30%.............40%.............50%.............60%..............70%.............80%.............90%.............100%
+
+Welcome to Gradle 9.4.0!
+
+Here are the highlights of this release:
+ - Java 26 support
+ - Non-class-based JVM tests
+ - Enhanced console progress bar
+
+For more details see https://docs.gradle.org/9.4.0/release-notes.html
+
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.4.0/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+
+> Configure project :common
+Creating Minecraft artifacts without recompilation.
+
+> Configure project :fabric
+Fabric Loom: 1.16.3
+The mixin annotation is no longer enabled by default, you should remove any loom.mixin configuration. If you wish to continue to use the mixin AP you can set useLegacyMixinAp = true.
+
+Cannot remap renderTargets because it does not exist in any of the targets [] or their parents.
+Cannot remap loadedShaders because it does not exist in any of the targets [] or their parents.
+Cannot remap renderSectionManager because it does not exist in any of the targets [] or their parents.
+Cannot remap chunkRenderer because it does not exist in any of the targets [] or their parents.
+Cannot remap sectionByPosition because it does not exist in any of the targets [] or their parents.
+Cannot remap lambda$reloadShaders$56 because it does not exist in any of the targets [net/minecraft/class_757]
+Cannot remap taskLists because it does not exist in any of the targets [] or their parents.
+Cannot remap renderLists because it does not exist in any of the targets [] or their parents.
+Cannot remap taskLists because it does not exist in any of the targets [] or their parents.
+
+> Configure project :neoforge
+Creating Minecraft artifacts without recompilation.
+
+> Task :common:createMinecraftArtifacts
+Loaded 93 artifacts from /home/runner/work/Smile_Protocol/Smile_Protocol/common/build/tmp/createMinecraftArtifacts/nfrt_artifact_manifest.properties
+[1m*** Started working on [4mdownloadJson[23;0m[23;0m
+  ↓ https://piston-meta.mojang.com/mc/game/version_manifest_v2.json
+  ↓ https://piston-meta.mojang.com/v1/packages/018296bcb207bea6fd25b05f08eee3942dcec406/1.21.1.json
+ [1m[92m✓[23;0m Completed [4mdownloadJson[23;0m in 0.34s
+[1m*** Started working on [4mdownloadClientMappings[23;0m[23;0m
+[1m*** Started working on [4mdownloadClient[23;0m[23;0m
+[1m*** Started working on [4mdownloadServer[23;0m[23;0m
+  ↓ https://piston-data.mojang.com/v1/objects/30c73b1c5da787909b2f73340419fdf13b9def88/client.jar
+  ↓ https://piston-data.mojang.com/v1/objects/59353fb40c36d304f2035d51e7d6e6baa98dc05c/server.jar
+  ↓ https://piston-data.mojang.com/v1/objects/2244b6f072256667bcd9a73df124d6c58de77992/client.txt
+ [1m[92m✓[23;0m Completed [4mdownloadClientMappings[23;0m in 0.34s
+[1m*** Started working on [4mmergeMappings[23;0m[23;0m
+ ↳ Running external tool net.neoforged.installertools:installertools:2.1.2:fatjar
+ [1m[92m✓[23;0m Completed [4mdownloadClient[23;0m in 0.48s
+[1m*** Started working on [4mstripClient[23;0m[23;0m
+ [1m[92m✓[23;0m Completed [4mdownloadServer[23;0m in 0.84s
+[1m*** Started working on [4mextractServer[23;0m[23;0m
+ ↳ Running external tool net.neoforged.installertools:installertools:2.1.2:fatjar
+ [1m[92m✓[23;0m Completed [4mextractServer[23;0m in 0.73s
+[1m*** Started working on [4mstripServer[23;0m[23;0m
+ [1m[92m✓[23;0m Completed [4mstripClient[23;0m in 2.33s
+ [1m[92m✓[23;0m Completed [4mmergeMappings[23;0m in 2.84s
+ [1m[92m✓[23;0m Completed [4mstripServer[23;0m in 1.56s
+[1m*** Started working on [4mmerge[23;0m[23;0m
+ ↳ Running external tool net.neoforged:mergetool:2.0.3:fatjar
+ [1m[92m✓[23;0m Completed [4mmerge[23;0m in 2.23s
+[1m*** Started working on [4mrename[23;0m[23;0m
+ ↳ Running external tool net.neoforged:AutoRenamingTool:2.0.3:all
+ [1m[92m✓[23;0m Completed [4mrename[23;0m in 4.24s
+Total runtime: 10.48s
+
+
+> Task :common:compileJava
+> Task :common:processResources
+> Task :common:classes
+> Task :common:jarJar NO-SOURCE
+> Task :common:jar
+> Task :common:sourcesJar
+> Task :common:assemble
+> Task :common:compileTestJava NO-SOURCE
+> Task :common:processTestResources NO-SOURCE
+> Task :common:testClasses UP-TO-DATE
+> Task :common:test NO-SOURCE
+> Task :common:check UP-TO-DATE
+> Task :common:build
+> Task :fabric:compileJava
+> Task :fabric:processResources
+> Task :fabric:classes
+> Task :fabric:jar
+> Task :fabric:processIncludeJars
+> Task :fabric:sourcesJar
+> Task :fabric:compileTestJava NO-SOURCE
+> Task :fabric:processTestResources NO-SOURCE
+> Task :fabric:testClasses UP-TO-DATE
+> Task :fabric:test NO-SOURCE
+> Task :fabric:validateAccessWidener NO-SOURCE
+> Task :fabric:check UP-TO-DATE
+> Task :fabric:remapSourcesJar
+> Task :fabric:remapJar
+
+> Task :neoforge:createMinecraftArtifacts
+Loaded 131 artifacts from /home/runner/work/Smile_Protocol/Smile_Protocol/neoforge/build/tmp/createMinecraftArtifacts/nfrt_artifact_manifest.properties
+[1m*** Started working on [4mdownloadJson[23;0m[23;0m
+ [1m[92m✓[23;0m Completed [4mdownloadJson[23;0m in 0.01s
+[1m*** Started working on [4mdownloadServer[23;0m[23;0m
+[1m*** Started working on [4mdownloadClientMappings[23;0m[23;0m
+[1m*** Started working on [4mdownloadClient[23;0m[23;0m
+ [1m[92m✓[23;0m Completed [4mdownloadClient[23;0m in 0.02s
+ [1m[92m✓[23;0m Completed [4mdownloadClientMappings[23;0m in 0.02s
+ [1m[92m✓[23;0m Completed [4mdownloadServer[23;0m in 0.02s
+[1m*** Started working on [4mstripClient[23;0m[23;0m
+ [1m[92m♻[23;0m Used cache of [4mstripClient[23;0m in 0.00s
+[1m*** Started working on [4mmergeMappings[23;0m[23;0m
+ [1m[92m♻[23;0m Used cache of [4mmergeMappings[23;0m in 0.00s
+[1m*** Started working on [4mextractServer[23;0m[23;0m
+ [1m[92m♻[23;0m Used cache of [4mextractServer[23;0m in 0.00s
+[1m*** Started working on [4mstripServer[23;0m[23;0m
+ [1m[92m♻[23;0m Used cache of [4mstripServer[23;0m in 0.00s
+[1m*** Started working on [4mmerge[23;0m[23;0m
+ [1m[92m♻[23;0m Used cache of [4mmerge[23;0m in 0.00s
+[1m*** Started working on [4mrename[23;0m[23;0m
+ [1m[92m♻[23;0m Used cache of [4mrename[23;0m in 0.00s
+[1m*** Started working on [4mbinaryPatch[23;0m[23;0m
+  [33mWARNING: [23;0mnet.neoforged.installertools:binarypatcher:2.1.2:fatjar is not present in the artifact manifest
+  ↓ https://maven.neoforged.net/releases/net/neoforged/installertools/binarypatcher/2.1.2/binarypatcher-2.1.2-fatjar.jar
+ ↳ Running external tool net.neoforged.installertools:binarypatcher:2.1.2:fatjar
+ [1m[92m✓[23;0m Completed [4mbinaryPatch[23;0m in 3.40s
+[1m*** Started working on [4mcopyUnpatchedClasses[23;0m[23;0m
+ [1m[92m✓[23;0m Completed [4mcopyUnpatchedClasses[23;0m in 1.18s
+[1m*** Started working on [4mapplyDevTransforms[23;0m[23;0m
+ ↳ Running external tool net.neoforged.installertools:installertools:4.0.12:fatjar
+ [1m[92m✓[23;0m Completed [4mapplyDevTransforms[23;0m in 1.45s
+[1m*** Started working on [4mbinaryWithNeoForge[23;0m[23;0m
+ [1m[92m✓[23;0m Completed [4mbinaryWithNeoForge[23;0m in 2.84s
+Total runtime: 9.52s
+
+
+> Task :fabric:assemble
+> Task :fabric:build
+> Task :neoforge:compileJava
+> Task :neoforge:processResources
+> Task :neoforge:classes
+> Task :neoforge:jarJar NO-SOURCE
+> Task :neoforge:jar
+> Task :neoforge:sourcesJar
+> Task :neoforge:assemble
+> Task :neoforge:compileTestJava NO-SOURCE
+> Task :neoforge:processTestResources NO-SOURCE
+> Task :neoforge:testClasses UP-TO-DATE
+> Task :neoforge:test NO-SOURCE
+> Task :neoforge:check UP-TO-DATE
+> Task :neoforge:build
+gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/__run-1793297037666.json
+
+BUILD SUCCESSFUL in 1m 30s
+17 actionable tasks: 17 executed
+Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.4.0/userguide/configuration_cache_enabling.html
