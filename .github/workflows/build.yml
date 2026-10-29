@@ -35,7 +35,8 @@ jobs:
         if: failure()
         shell: bash
         run: |
-          grep -nE "error:|What went wrong|Could not (resolve|find)|FAILED" build.log | head -40 | while IFS= read -r l; do echo "::error::${l//%/%25}"; done || true
+          grep -nE "error:|What went wrong|Could not (resolve|find)|FAILED" build.log | grep -vE "^\s*$" | head -40 | while IFS= read -r l; do echo "::error::${l//%/%25}"; done || true
+          grep -nA12 "What went wrong" build.log | head -60 | while IFS= read -r l; do echo "::error::${l//%/%25}"; done || true
 
       # Firmas de las librerias para escribir codigo contra su API exacta. Nunca hace fallar el job.
       - name: Inspeccionar librerias
@@ -80,7 +81,7 @@ jobs:
           cp "$GITHUB_WORKSPACE/build.log" "logs/${GITHUB_SHA}.log"
           cp "$GITHUB_WORKSPACE/build.log" latest.log
           [ -s "$GITHUB_WORKSPACE/libs.txt" ] && cp "$GITHUB_WORKSPACE/libs.txt" "logs/${GITHUB_SHA}-libs.txt"
-          jars=$(ls "$GITHUB_WORKSPACE"/fabric/build/libs/*.jar "$GITHUB_WORKSPACE"/neoforge/build/libs/*.jar 2>/dev/null | grep -v -- '-sources')
+          jars=$(ls "$GITHUB_WORKSPACE"/fabric/build/libs/*.jar "$GITHUB_WORKSPACE"/neoforge/build/libs/*.jar 2>/dev/null | grep -v -- '-sources' || true)
           if [ -n "$jars" ]; then
             mkdir -p jars && rm -f jars/*.jar
             cp $jars jars/
