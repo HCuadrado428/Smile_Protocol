@@ -78,7 +78,7 @@ public final class QTEManager {
 
     private static final Map<UUID, Session> SESSIONS = new HashMap<>();
     /** Distancia del mob a la que queda el jugador agarrado (donde estan las manos). */
-    public static final double GRAB_DISTANCE = 1.17;
+    public static final double GRAB_DISTANCE = 1.5;
     /** Ticks que tarda en arrastrar al jugador hasta las manos. */
     private static final int PULL_TICKS = 5;
 
@@ -109,7 +109,7 @@ public final class QTEManager {
             case HOLD -> Math.round(ticks * 0.45f);
         };
         Vec3 look = Vec3.directionFromRotation(0, mob.getYRot());
-        // Las manos del mob sujetan a la victima por los hombros a ~1,17 bloques delante del pecho
+        // Las manos del mob sujetan a la victima por los hombros a ~1,5 bloques delante del pecho
         // (animacion "grab"): el jugador es arrastrado hasta ahi en los primeros ticks.
         s.anchor = mob.position().add(look.scale(GRAB_DISTANCE));
         s.start = p.position();
