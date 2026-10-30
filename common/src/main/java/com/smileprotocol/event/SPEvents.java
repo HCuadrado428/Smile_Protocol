@@ -124,6 +124,7 @@ public final class SPEvents {
         com.smileprotocol.item.UseManager.tick(server);
         com.smileprotocol.downed.DeathManager.tick(server);
         com.smileprotocol.mechanism.ZoneElevators.tick(server);
+        com.smileprotocol.mission.MissionManager.tick(server);
         com.smileprotocol.motion.Flashlights.tick(server);
         LobbyManager.tick(server);
         if (server.getTickCount() % 20 == 0) SPDebug.tick(server);

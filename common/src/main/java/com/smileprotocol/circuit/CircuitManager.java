@@ -106,6 +106,7 @@ public final class CircuitManager {
         }
         SPDebug.log("circuito " + circuit + (powered ? " encendido" : " apagado") + " cerca de " + near.toShortString());
         com.smileprotocol.mechanism.ZoneElevators.onCircuit(level, near, circuit, powered);
+        com.smileprotocol.mission.MissionManager.onCircuit(level, near, circuit, powered);
     }
 
     private static Map<String, Boolean> cache(ServerLevel level, BlockPos pos) {

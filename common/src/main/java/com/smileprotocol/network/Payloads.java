@@ -315,6 +315,25 @@ public final class Payloads {
         @Override public Type<UseItem> type() { return TYPE; }
     }
 
+    /**
+     * S -> C: objetivo actual de la mision de la planta (README 19): texto, progreso y en que paso
+     * va. {@code active} false = no hay objetivo que mostrar.
+     */
+    public record SyncMission(boolean active, Component text, int progress, int total, int step, int steps)
+            implements CustomPacketPayload {
+        public static final Type<SyncMission> TYPE = typeOf("sync_mission");
+        public static final StreamCodec<RegistryFriendlyByteBuf, SyncMission> CODEC = StreamCodec.composite(
+                ByteBufCodecs.BOOL, SyncMission::active,
+                ComponentSerialization.TRUSTED_STREAM_CODEC, SyncMission::text,
+                ByteBufCodecs.VAR_INT, SyncMission::progress,
+                ByteBufCodecs.VAR_INT, SyncMission::total,
+                ByteBufCodecs.VAR_INT, SyncMission::step,
+                ByteBufCodecs.VAR_INT, SyncMission::steps,
+                SyncMission::new);
+
+        @Override public Type<SyncMission> type() { return TYPE; }
+    }
+
     /** S -> C: empieza el minijuego de escape (README 18). */
     public record StartQTE(int qteType, int ticks, long seed, int target, int difficulty) implements CustomPacketPayload {
         public static final Type<StartQTE> TYPE = typeOf("start_qte");

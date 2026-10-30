@@ -1,0 +1,42 @@
+{
+  "zone": "smileprotocol:final_room",
+  "steps": [
+    {
+      "type": "FIND_ITEM",
+      "item": "smileprotocol:keycard_3",
+      "text": "smileprotocol.mission.final.card"
+    },
+    {
+      "type": "OPEN_DOOR",
+      "door": "3",
+      "text": "smileprotocol.mission.final.door"
+    },
+    {
+      "type": "INSERT_FUSES",
+      "circuit": "exit",
+      "text": "smileprotocol.mission.final.power",
+      "on_complete": [
+        {
+          "type": "message",
+          "text": "smileprotocol.mission.final.awake"
+        },
+        {
+          "type": "sound",
+          "sound": "smileprotocol:berserker.roar"
+        },
+        {
+          "type": "spawn_mob",
+          "mob": "berserker"
+        }
+      ]
+    },
+    {
+      "type": "SURVIVE",
+      "seconds": 25,
+      "text": "smileprotocol.mission.final.survive"
+    },
+    {
+      "type": "ESCAPE"
+    }
+  ]
+}

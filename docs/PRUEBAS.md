@@ -171,6 +171,22 @@ Dámelos con `/spadmin give medkit|battery|flare|adrenaline|can|bottle`. En las 
 
 **Configuración nueva:** `noise_flare` (10) y `throw_cooldown` (ticks, 15). Las fichas están en `data/smileprotocol/consumables/*.json` (tiempo de uso, efecto y cantidad, ruido, gesto, sonido, si se puede derribado) y `data/smileprotocol/throwables/*.json` (ruido, si se rompe y fuerza).
 
+## Misiones (fase 14)
+
+Cada planta tiene su misión: una lista de objetivos que se muestran de uno en uno en una nota arriba a la izquierda («OBJETIVO 2/4: Abre el almacén cerrado con la llave roja»). Al cumplir uno suena una campanilla y la nota destella. Son del grupo entero y cooperativos.
+
+1. **Orden libre.** Si hacéis las cosas en otro orden (por ejemplo, poner los fusibles antes de abrir la puerta), los objetivos ya hechos se saltan solos.
+2. **El ascensor de salida espera a la misión.** Aunque tenga corriente, no arranca hasta que el único objetivo pendiente sea subir: en su panel pone «Faltan objetivos».
+3. **Plantas actuales:**
+   - Recepción: fusibles del ascensor → ascensor.
+   - Almacén: llave roja → puerta del almacén → fusibles → ascensor.
+   - Administración: tarjeta 1 → sala de seguridad → fusibles → ascensor.
+   - Morgue: llave azul → cámara → puerta atascada → fusibles → ascensor.
+   - Planta de energía: rueda de válvula → válvulas de vapor en orden (al terminar se apagan las luces) → circuito auxiliar → fusibles → ascensor.
+   - Invernadero: válvulas de niebla (entre dos) → tarjeta 2 → laboratorio sellado → fusibles → ascensor.
+   - Criogenización: tarjeta 3 → sala de criogenización → corriente a las cápsulas (se despierta un Berserker) → aguantar 25 s → ascensor.
+4. **Fichas:** `data/smileprotocol/missions/<planta>.json`. Tipos de objetivo: `FIND_ITEM`, `OPEN_DOOR` (o `forced` para las atascadas), `INSERT_FUSES`, `TURN_VALVES`, `POWER`, `REACH` (marcador), `SURVIVE` (segundos) y `ESCAPE`. Eventos al cumplirlos (`on_complete`): `message`, `sound`, `spawn_mob`, `lights_off`, `lights_on` y `power`. Una planta sin fichero usa «fusibles del ascensor → ascensor».
+
 ## Depuración
 
 - `/spadmin debug on`: muestra el panel de estado (sesión, mods, lobby y ascensores). Solo lo ven los operadores.

@@ -129,6 +129,18 @@ public final class ZoneElevators {
             s.countdown -= UPDATE_EVERY;
         }
 
+        // la mision de la planta tiene que estar hecha (solo queda escapar)
+        if (!com.smileprotocol.mission.MissionManager.readyToLeave(server, g)) {
+            s.countdown = -1;
+            Payloads.SyncReady wait = new Payloads.SyncReady(true, Component.translatable("smileprotocol.zone_elevator.title"),
+                    inside.size(), players.size(), 0, Component.translatable("smileprotocol.mission.pending"));
+            s.showing.clear();
+            for (ServerPlayer p : players) {
+                SPNetwork.sendTo(p, wait);
+                s.showing.add(p.getUUID());
+            }
+            return;
+        }
         boolean all = inside.size() >= players.size();
         int secs = Math.max(0, (s.countdown + 19) / 20);
         Component status = all ? Component.translatable("smileprotocol.zone_elevator.departing")
@@ -152,8 +164,13 @@ public final class ZoneElevators {
         return out;
     }
 
+    private static void depart0(MinecraftServer server, Group g) {
+        com.smileprotocol.mission.MissionManager.onDepart(server, g);
+    }
+
     private static void depart(MinecraftServer server, ServerLevel level, Group g, State s,
                                List<ServerPlayer> players, List<ServerPlayer> inside) {
+        depart0(server, g);
         ZonePlacement z = g.current();
         setDoors(level, z, s, false);
         s.insideAtDeparture.clear();

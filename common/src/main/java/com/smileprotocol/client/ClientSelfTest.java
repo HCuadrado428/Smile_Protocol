@@ -114,6 +114,11 @@ public final class ClientSelfTest {
         }
         // 1. Llegada, mirando hacia el vestibulo
         shot(mc, server, "01_llegada", e, 0f, 5f, 60);
+        SHOTS.add(() -> {
+            var m = ClientState.mission;
+            log((m != null ? "OK" : "FALLO") + " objetivo en el HUD: " + (m == null ? "-" : m.text().getString()
+                    + " " + m.progress() + "/" + m.total() + " paso " + (m.step() + 1) + "/" + m.steps()));
+        });
         // 2. Pasillo principal
         shot(mc, server, "02_pasillo", e.add(0, 0, 30), 0f, 5f, 40);
         shot(mc, server, "03_pasillo_transversal", e.add(0, 0, 33), -90f, 5f, 40);

@@ -1,0 +1,36 @@
+{
+  "zone": "smileprotocol:lab_generators",
+  "steps": [
+    {
+      "type": "FIND_ITEM",
+      "item": "smileprotocol:valve_wheel",
+      "text": "smileprotocol.mission.generators.wheel"
+    },
+    {
+      "type": "TURN_VALVES",
+      "group": "steam",
+      "text": "smileprotocol.mission.generators.steam",
+      "on_complete": [
+        {
+          "type": "lights_off"
+        },
+        {
+          "type": "message",
+          "text": "smileprotocol.mission.generators.lights"
+        }
+      ]
+    },
+    {
+      "type": "POWER",
+      "circuit": "aux",
+      "text": "smileprotocol.mission.generators.aux"
+    },
+    {
+      "type": "INSERT_FUSES",
+      "circuit": "exit"
+    },
+    {
+      "type": "ESCAPE"
+    }
+  ]
+}

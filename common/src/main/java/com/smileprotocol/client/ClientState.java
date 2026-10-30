@@ -24,6 +24,10 @@ public final class ClientState {
 
     public static List<String> debugLines = List.of();
     /** Derribado (fase 11, minimo) y cuanto le queda antes de desangrarse. */
+    /** Objetivo actual de la mision (README 19), o null. */
+    @javax.annotation.Nullable public static com.smileprotocol.network.Payloads.SyncMission mission;
+    /** Cuando cambio de paso (para el destello del HUD). */
+    public static long missionChanged;
     public static boolean downed;
     public static float bleed;
     /** Progreso de la reanimacion que recibe (0-1), o -1 si nadie lo reanima. */
@@ -101,6 +105,7 @@ public final class ClientState {
         debugLines = List.of();
         fadeAge = -1;
         downed = false;
+        mission = null;
         revive = -1f;
         dead = false;
     }

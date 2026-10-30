@@ -1,0 +1,12 @@
+{
+  "zone": "smileprotocol:start_corridor",
+  "steps": [
+    {
+      "type": "INSERT_FUSES",
+      "circuit": "exit"
+    },
+    {
+      "type": "ESCAPE"
+    }
+  ]
+}

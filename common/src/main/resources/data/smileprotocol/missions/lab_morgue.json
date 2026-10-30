@@ -1,0 +1,27 @@
+{
+  "zone": "smileprotocol:lab_morgue",
+  "steps": [
+    {
+      "type": "FIND_ITEM",
+      "item": "smileprotocol:key",
+      "text": "smileprotocol.mission.morgue.key"
+    },
+    {
+      "type": "OPEN_DOOR",
+      "door": "blue",
+      "text": "smileprotocol.mission.morgue.door"
+    },
+    {
+      "type": "OPEN_DOOR",
+      "door": "forced",
+      "text": "smileprotocol.mission.morgue.stuck"
+    },
+    {
+      "type": "INSERT_FUSES",
+      "circuit": "exit"
+    },
+    {
+      "type": "ESCAPE"
+    }
+  ]
+}

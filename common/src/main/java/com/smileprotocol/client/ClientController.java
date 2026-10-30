@@ -36,6 +36,11 @@ public final class ClientController {
             ClientState.dead = p.dead();
         });
         SPNetwork.setClientHandler(Payloads.StartSequence.TYPE, ClientSequence::start);
+        SPNetwork.setClientHandler(Payloads.SyncMission.TYPE, p -> {
+            Payloads.SyncMission old = ClientState.mission;
+            if (old == null || old.step() != p.step() || !old.text().equals(p.text())) ClientState.missionChanged = net.minecraft.Util.getMillis();
+            ClientState.mission = p.active() ? p : null;
+        });
         SPNetwork.setClientHandler(Payloads.SyncFlashlight.TYPE, p -> com.smileprotocol.client.light.Flashlight.sync(p.entityId(), p.on(), p.battery()));
         com.smileprotocol.interact.ClientInventoryView.setProvider(ClientState::slot);
     }

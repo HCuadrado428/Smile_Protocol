@@ -118,6 +118,7 @@ public final class HudOverlay {
                     renderCrosshair(g, w, h);
                     renderInteraction(g, font, w, h);
                 }
+                renderMission(g, font, w);
                 renderVitals(g, font, mc.player, h);
                 renderBattery(g, font, mc.player, h);
                 renderSlots(g, font, w, h);
@@ -427,6 +428,27 @@ public final class HudOverlay {
         if (kind.decap >= 0) black = Math.max(black, Mth.clamp((ClientSequence.age(pt) - kind.decap) / 5f, 0f, 1f));
         int a = Mth.clamp((int) (black * 255) + (int) (hit * 70), 0, 255);
         if (a > 0) g.fill(0, 0, w, h, a << 24 | (black < 0.5f ? 0x200000 : 0));
+    }
+
+    /**
+     * Objetivo actual (README 19): una nota de papel arriba a la izquierda, discreta. Al cambiar de
+     * paso, el texto destella un momento.
+     */
+    private static void renderMission(GuiGraphics g, Font font, int w) {
+        Payloads.SyncMission m = ClientState.mission;
+        if (m == null) return;
+        Component head = hud(Component.translatable("smileprotocol.mission.header", m.step() + 1, m.steps()));
+        Component text = hud(m.total() > 1 ? Component.translatable("smileprotocol.mission.count", m.text(), m.progress(), m.total()) : m.text());
+        int tw = Math.min(Math.max(font.width(head), font.width(text)), w / 2 - 20);
+        int x = 8, y = 8, pw = tw + 20, ph = 34;
+        long since = Util.getMillis() - ClientState.missionChanged;
+        float flash = since < 1500 ? (float) Math.exp(-since / 400.0) : 0f;
+        RenderSystem.setShaderColor(1f, 1f - 0.3f * flash, 1f - 0.4f * flash, 0.88f);
+        g.blitSprite(NOTE, x, y, pw, ph);
+        RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
+        g.drawString(font, head, x + 10, y + 7, 0xFF7A2018, false);
+        java.util.List<net.minecraft.util.FormattedCharSequence> lines = font.split(text, tw);
+        if (!lines.isEmpty()) g.drawString(font, lines.get(0), x + 10, y + 19, INK, false);
     }
 
     /** Muerto: rotulo y a quien se esta mirando (README 9.3). */

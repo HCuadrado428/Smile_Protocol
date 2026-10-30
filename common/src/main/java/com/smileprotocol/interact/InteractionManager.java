@@ -285,6 +285,8 @@ public final class InteractionManager {
                 if (SPInventoryOps.give(p, item.getItem())) {
                     item.discard();
                     p.serverLevel().playSound(null, p.blockPosition(), SoundEvents.ITEM_PICKUP, SoundSource.PLAYERS, 0.4f, 1.1f);
+                    com.smileprotocol.mechanism.LabEvents.fire(p.serverLevel(), item.blockPosition(), p, "item_picked",
+                            net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(item.getItem().getItem()).toString());
                 } else {
                     p.displayClientMessage(Component.translatable("smileprotocol.interact.full").withStyle(ChatFormatting.GOLD), true);
                     p.serverLevel().playSound(null, p.blockPosition(), SoundEvents.NOTE_BLOCK_BASS.value(), SoundSource.PLAYERS, 0.5f, 0.6f);

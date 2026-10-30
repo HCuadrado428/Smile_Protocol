@@ -1,0 +1,27 @@
+{
+  "zone": "smileprotocol:lab_greenhouse",
+  "steps": [
+    {
+      "type": "TURN_VALVES",
+      "group": "mist",
+      "text": "smileprotocol.mission.greenhouse.mist"
+    },
+    {
+      "type": "FIND_ITEM",
+      "item": "smileprotocol:keycard_2",
+      "text": "smileprotocol.mission.greenhouse.card"
+    },
+    {
+      "type": "OPEN_DOOR",
+      "door": "2",
+      "text": "smileprotocol.mission.greenhouse.door"
+    },
+    {
+      "type": "INSERT_FUSES",
+      "circuit": "exit"
+    },
+    {
+      "type": "ESCAPE"
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "zone": "smileprotocol:lab_offices",
+  "steps": [
+    {
+      "type": "FIND_ITEM",
+      "item": "smileprotocol:keycard_1",
+      "text": "smileprotocol.mission.offices.card"
+    },
+    {
+      "type": "OPEN_DOOR",
+      "door": "1",
+      "text": "smileprotocol.mission.offices.door"
+    },
+    {
+      "type": "INSERT_FUSES",
+      "circuit": "exit"
+    },
+    {
+      "type": "ESCAPE"
+    }
+  ]
+}

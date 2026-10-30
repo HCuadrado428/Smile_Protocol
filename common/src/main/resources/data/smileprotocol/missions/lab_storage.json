@@ -1,0 +1,22 @@
+{
+  "zone": "smileprotocol:lab_storage",
+  "steps": [
+    {
+      "type": "FIND_ITEM",
+      "item": "smileprotocol:key",
+      "text": "smileprotocol.mission.storage.key"
+    },
+    {
+      "type": "OPEN_DOOR",
+      "door": "red",
+      "text": "smileprotocol.mission.storage.door"
+    },
+    {
+      "type": "INSERT_FUSES",
+      "circuit": "exit"
+    },
+    {
+      "type": "ESCAPE"
+    }
+  ]
+}
