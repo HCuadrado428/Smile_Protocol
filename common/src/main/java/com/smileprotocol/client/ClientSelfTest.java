@@ -289,11 +289,16 @@ public final class ClientSelfTest {
 
         scene(server, level, sp, null, chest, P.add(-3.5, 0, 0), -90f, null);
         record(mc, "jugador_agachado", 60, k -> { o.keyUp.setDown(true); o.keyShift.setDown(true); });
+        SHOTS.add(() -> follow(-2, new Vec3(0, 0.55, 2.2), 0.5));
+        record(mc, "jugador_agachado_andar_lado", 30, k -> { o.keyUp.setDown(true); o.keyShift.setDown(true); });
+        SHOTS.add(() -> follow(-2, fSide, 0.9));
         SHOTS.add(() -> { o.keyUp.setDown(false); o.keyShift.setDown(false); });
 
         SHOTS.add(() -> follow(-2, fQ, 0.7));
         scene(server, level, sp, null, chest, P, -90f, null);
         record(mc, "jugador_agachado_quieto", 50, k -> o.keyShift.setDown(true));
+        SHOTS.add(() -> follow(-2, new Vec3(0, 0.55, 2.2), 0.5));
+        record(mc, "jugador_agachado_lado", 30, k -> o.keyShift.setDown(true));
         SHOTS.add(() -> { o.keyShift.setDown(false); follow(-2, fSide, 0.9); });
 
         scene(server, level, sp, null, chest, P.add(-3.5, 0, 0), -90f, () -> sp.setHealth(4f));
@@ -368,7 +373,10 @@ public final class ClientSelfTest {
                     BlockPos.containing(P.add(4, 0, 0)), level.random);
             if (tester[0] != null) tester[0].moveTo(P.x + 4, P.y, P.z, 90f, 0f);
         });
-        record(mc, "agarre_qte", 70, null);
+        record(mc, "agarre_qte", 55, null);
+        // de lado y cerca: las manos tienen que sujetar al jugador por los hombros
+        SHOTS.add(() -> placeCamera(P.add(0.6, 1.1, 3.2), P.add(0.6, 1.1, 0)));
+        record(mc, "agarre_lado", 20, null);
         SHOTS.add(() -> { if (tester[0] != null) follow(tester[0].getId(), new Vec3(1.8, 1.7, 3.2), 1.2); });
         record(mc, "smiler_aturdido", 40, k -> {
             if (k == 0) server.execute(() -> {
