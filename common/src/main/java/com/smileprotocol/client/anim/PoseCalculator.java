@@ -369,8 +369,8 @@ public final class PoseCalculator {
     }
 
     /**
-     * Reanimar a un companero (README 9.3), postura absoluta: de rodillas junto a el, inclinado
-     * encima con los brazos rectos sobre su espalda. Ciclo de 3 s: compresiones (todo el peso del
+     * Reanimar a un companero (README 9.3), postura absoluta: de rodillas junto a el, con la espalda
+     * inclinada y los brazos rectos apoyados en su espalda. Ciclo de 3 s: compresiones (todo el peso del
      * cuerpo baja y sube), y luego lo zarandea por los hombros mirando por encima del hombro por si
      * viene algo. Entra desde de pie en 8 ticks.
      */
@@ -386,20 +386,22 @@ public final class PoseCalculator {
         float glance = shake * Mth.clamp(Mth.sin((cyc - 0.66f) / 0.34f * PI) * 1.6f, 0f, 1f);
         float breath = Mth.sin(time * 0.15f);
 
-        // Caderas sobre las rodillas (rodillas en el suelo, espinillas hacia atras)
-        float hipY = 16.6f + 0.5f * press, hipZ = 0.5f;
-        float lean = 0.92f + 0.10f * press + 0.04f * breath * shake;
+        // Caderas sobre las rodillas (rodillas en el suelo, separadas; espinillas planas hacia atras)
+        float hipY = 16.2f + 0.7f * press, hipZ = 0.3f;
+        // espalda inclinada como en un masaje cardiaco: los hombros quedan encima de las manos
+        float lean = 0.42f + 0.12f * press + 0.12f * shake + 0.03f * breath * shake;
         float topY = hipY - 12f * Mth.cos(lean), topZ = hipZ - 12f * Mth.sin(lean);
+        float armY = topY + 2f * Mth.cos(lean), armZ = topZ + 2f * Mth.sin(lean);
+        // brazos rectos casi verticales (codos bloqueados al empujar); al zarandear, a los hombros
+        float armPitch = -0.28f - 0.08f * press - 0.35f * shake;
+        float armBend = (-0.25f * (1 - press)) * pump - 0.7f * shake;
         Key[] kneel = {
-                new Key(lean, 0.22f * glance, 0.08f * rock, 0.6f * rock, topY, topZ, 0),
-                new Key(0.65f - 0.75f * glance + 0.12f * press, 1.05f * glance, 0.1f * rock, 0.6f * rock, topY + 0.3f, topZ - 0.3f, 0),
-                // brazos rectos hacia abajo y algo adelante; al zarandear, a los hombros y doblados
-                new Key(-0.32f - 0.25f * shake + 0.06f * rock, -0.1f + 0.2f * glance, 0.12f + 0.1f * shake, -4.6f + 0.6f * rock,
-                        topY + 2f * Mth.cos(lean), topZ + 2f * Mth.sin(lean), -0.15f - 0.55f * shake + 0.2f * (1 - press) * pump),
-                new Key(-0.32f - 0.25f * shake - 0.06f * rock, 0.1f, -0.12f - 0.1f * shake, 4.6f + 0.6f * rock,
-                        topY + 2f * Mth.cos(lean), topZ + 2f * Mth.sin(lean), -0.15f - 0.55f * shake + 0.2f * (1 - press) * pump),
-                new Key(-0.22f, 0, 0.1f, -2.1f, hipY, hipZ, 1.78f),
-                new Key(-0.18f, 0, -0.1f, 2.1f, hipY, hipZ, 1.74f)};
+                new Key(lean, 0.25f * glance, 0.07f * rock, 0.5f * rock, topY, topZ, 0),
+                new Key(0.55f - 0.75f * glance + 0.15f * press, 1.1f * glance, 0.1f * rock, 0.5f * rock, topY, topZ, 0),
+                new Key(armPitch + 0.08f * rock, 0.18f + 0.15f * glance, 0.06f, -4.8f + 0.5f * rock, armY, armZ, armBend),
+                new Key(armPitch - 0.08f * rock, -0.18f, -0.06f, 4.8f + 0.5f * rock, armY, armZ, armBend),
+                new Key(-0.08f, 0.12f, 0.12f, -2.0f, hipY, hipZ, 1.62f),
+                new Key(-0.06f, -0.12f, -0.12f, 2.0f, hipY, hipZ, 1.6f)};
         for (int i = 0; i < PARTS.length; i++) STAND[i].lerp(kneel[i], k).apply(pose, PARTS[i]);
     }
 
