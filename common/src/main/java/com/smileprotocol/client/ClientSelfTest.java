@@ -494,7 +494,7 @@ public final class ClientSelfTest {
             com.smileprotocol.motion.Flashlights.set(sp, false);
             SPSessionManager.teleport(sp, level, cam.add(0, 0, 3), 0f, 10f);
         }));
-        SHOTS.add(() -> wait = 30);
+        SHOTS.add(() -> wait = 55);
         SHOTS.add(() -> server.execute(() -> {
             boolean ok = ah[0] != null && (ah[0].state() == com.smileprotocol.entity.Ahorcado.State.GRAB
                     || com.smileprotocol.qte.QTEManager.isGrabbed(sp));

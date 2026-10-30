@@ -129,7 +129,7 @@ public class Rastreador extends SmilerBase implements QTEManager.Grabber {
         if (cooldown > 0) cooldown--;
         // La vista manda: si ve a alguien (y no esta agarrando ni cansado), va a por el
         State s = state();
-        if (s != State.GRAB && s != State.STUNNED && s != State.TIRED && s != State.CHASE && cooldown == 0 && timer % 4 == 0) {
+        if (s != State.GRAB && s != State.STUNNED && s != State.TIRED && s != State.CHASE && cooldown == 0 && tickCount % 4 == 0) {
             ServerPlayer seen = see(level, def);
             if (seen != null) {
                 target = seen;
@@ -351,7 +351,7 @@ public class Rastreador extends SmilerBase implements QTEManager.Grabber {
                 this)).getType() == HitResult.Type.BLOCK) effective *= 0.6f;
         if (effective < def.minNoise() || getEyePosition().distanceTo(e.pos()) > effective) return;
         goal = e.pos();
-        setState(State.INVESTIGATE);
+        if (s != State.INVESTIGATE) setState(State.INVESTIGATE);
     }
 
     private void face(ServerPlayer p) {
