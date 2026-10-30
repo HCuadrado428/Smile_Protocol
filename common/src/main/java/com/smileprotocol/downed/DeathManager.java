@@ -48,6 +48,7 @@ public final class DeathManager {
         DownedManager.clear(p);
         com.smileprotocol.qte.QTEManager.clear(p);
         com.smileprotocol.interact.InteractionManager.stop(p, true);
+        com.smileprotocol.item.UseManager.stop(p, true);
         com.smileprotocol.hide.HideManager.forceExit(p, false);
         com.smileprotocol.sequence.SequenceManager.clear(p);
         com.smileprotocol.motion.MotionManager.setAction(p, com.smileprotocol.motion.Action.NONE, 0, false);

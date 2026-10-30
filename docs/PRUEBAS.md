@@ -156,6 +156,21 @@ Hacen falta **dos jugadores** para reanimar y ayudar. Comandos útiles: `/spadmi
 
 La jeringa de adrenalina (levantarse solo) es de la fase 13.
 
+## Objetos: consumibles y lanzables (fase 13)
+
+Dámelos con `/spadmin give medkit|battery|flare|adrenaline|can|bottle`. En las plantas también aparecen sueltos, al azar, en los sitios de fusibles que sobran (más latas y botellas que curas).
+
+1. **Prioridad del clic derecho:** si miras algo interactuable (puerta, fusible, compañero...), interactúas. Si no, se usa lo que tengas en la mano. El HUD lo indica («Usar: Botiquín», «Apuntar: Lata»).
+2. **Consumibles** (mantén clic derecho; barra de progreso; te quedas quieto mientras lo usas; se cancela si sueltas, cambias de hueco, te agarran o te derriban; hacen algo de ruido):
+   - **Botiquín** (2,5 s): cura 4 corazones. Te agachas y te vendas el brazo. Con la vida llena no deja usarlo.
+   - **Batería** (1,2 s): recarga la linterna entera. Con la linterna cargada no deja usarla.
+   - **Bengala** (0,8 s): la enciendes y la sueltas delante. Arde 40 s con luz roja (Veil), chispas y humo, y **cada 2 s hace ruido**: el Berserker va hacia ella. Sirve para alumbrar o para distraer.
+   - **Jeringa de adrenalina** (4 s): **solo derribado**. Te la clavas en el muslo y te levantas solo con el 20 % de la vida.
+3. **Lanzables** (lata, botella): mantén clic derecho para apuntar (levantas el brazo y aparece una trayectoria de puntos con una marca roja donde caerá); **clic izquierdo** lanza; soltar el clic derecho cancela sin gastarlo. No se puede corriendo. Al caer hace ruido en ese punto (lata 11, botella 15) con el sonido de la superficie: los mobs van a mirar. La **botella se rompe**; la **lata rebota y se queda en el suelo** para volver a cogerla. No hacen daño. 0,75 s de espera entre lanzamientos.
+4. **Soltar (G)** sigue funcionando con todo.
+
+**Configuración nueva:** `noise_flare` (10) y `throw_cooldown` (ticks, 15). Las fichas están en `data/smileprotocol/consumables/*.json` (tiempo de uso, efecto y cantidad, ruido, gesto, sonido, si se puede derribado) y `data/smileprotocol/throwables/*.json` (ruido, si se rompe y fuerza).
+
 ## Depuración
 
 - `/spadmin debug on`: muestra el panel de estado (sesión, mods, lobby y ascensores). Solo lo ven los operadores.

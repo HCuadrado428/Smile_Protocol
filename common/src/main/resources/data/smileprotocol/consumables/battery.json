@@ -1,0 +1,1 @@
+{ "item": "smileprotocol:battery", "use_time": 24, "effect": { "type": "BATTERY", "amount": 1.0 }, "noise": 1.5, "anim": "battery", "sound": "minecraft:block.iron_trapdoor.close", "usable_downed": false }

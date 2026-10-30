@@ -1,0 +1,1 @@
+{ "item": "smileprotocol:medkit", "use_time": 50, "effect": { "type": "HEAL", "amount": 8 }, "noise": 3, "anim": "medkit", "sound": "minecraft:item.armor.equip_leather", "usable_downed": false }

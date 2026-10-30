@@ -298,6 +298,23 @@ public final class Payloads {
         @Override public Type<StartSequence> type() { return TYPE; }
     }
 
+    /**
+     * C -> S: usar el objeto del hueco activo (README 10.1, 12.7): empezar o soltar un consumible,
+     * empezar o dejar de apuntar un lanzable, y lanzarlo hacia {@code yaw}/{@code pitch}.
+     */
+    public record UseItem(int kind, int slot, float yaw, float pitch) implements CustomPacketPayload {
+        public static final int START = 0, STOP = 1, AIM = 2, AIM_STOP = 3, THROW = 4;
+        public static final Type<UseItem> TYPE = typeOf("use_item");
+        public static final StreamCodec<ByteBuf, UseItem> CODEC = StreamCodec.composite(
+                ByteBufCodecs.VAR_INT, UseItem::kind,
+                ByteBufCodecs.VAR_INT, UseItem::slot,
+                ByteBufCodecs.FLOAT, UseItem::yaw,
+                ByteBufCodecs.FLOAT, UseItem::pitch,
+                UseItem::new);
+
+        @Override public Type<UseItem> type() { return TYPE; }
+    }
+
     /** S -> C: empieza el minijuego de escape (README 18). */
     public record StartQTE(int qteType, int ticks, long seed, int target, int difficulty) implements CustomPacketPayload {
         public static final Type<StartQTE> TYPE = typeOf("start_qte");

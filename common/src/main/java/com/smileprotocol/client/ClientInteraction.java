@@ -54,6 +54,7 @@ public final class ClientInteraction {
     }
 
     public static void reset() {
+        ClientItems.reset();
         target = null;
         spec = null;
         sent = null;
@@ -91,14 +92,31 @@ public final class ClientInteraction {
         prevLight = light;
 
         Action action = MotionStates.view(player).action();
-        if (action == Action.HIDDEN || action == Action.DIVE || action == Action.VAULT || action == Action.DOWNED || action == Action.GRABBED) {
+        if (action == Action.HIDDEN || action == Action.DIVE || action == Action.VAULT || action == Action.GRABBED
+                || action == Action.SEQUENCE || action == Action.GETUP) {
             if (sent != null) stop();
             target = null;
             spec = null;
+            ClientItems.tick(mc, player, false, false);
+            return;
+        }
+        if (action == Action.DOWNED) {
+            // derribado solo se puede usar lo que lo permita (la jeringa)
+            if (sent != null) stop();
+            target = null;
+            spec = ClientItems.prompt(true);
+            ClientItems.tick(mc, player, useDown && !needRelease, true);
             return;
         }
 
         findTarget(mc, player);
+        if (target == null && sent == null) {
+            // nada interactuable delante: el objeto de la mano (README 11.1)
+            spec = ClientItems.prompt(false);
+            ClientItems.tick(mc, player, useDown && !needRelease, false);
+            return;
+        }
+        ClientItems.tick(mc, player, false, false);
         boolean canStart = target != null && spec != null && !spec.blocked() && !needRelease;
         if (useDown && canStart) {
             if (sent == null || !sent.equals(target)) {

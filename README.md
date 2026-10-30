@@ -1293,7 +1293,7 @@ Opciones de **cliente** (menú propio del mod), pensadas para que el terror no e
 10. **Escondites:** tipos, aguante y vista.
 11. **Primer mob: el Berserker** (20.2), con oído, estados de IA y golpe de área, sobre `SmilerBase`. El **QTE** y la búsqueda de escondites se prueban con un mob de pruebas (`GRAB_QTE`) hasta definir el siguiente smiler.
 12. **Derribado, reanimación, remates y muertes instantáneas** (9.3 y 18.1), con sus animaciones. *Implementado:* reanimación cooperativa (6 s, el derribado no se desangra mientras tanto, se levanta con el 30 % y 3 s de protección), ayuda a un compañero agarrado, daño letal = derribo, secuencias dirigidas por el servidor (`SequenceManager`, `SequenceKind`: remate del Berserker, remate y muerte instantánea del smiler de pruebas) con cámara y HUD para la víctima, y muerte final como espectador de los compañeros vivos (estado `DEAD` del grupo). La jeringa de adrenalina queda para la fase 13 y la reaparición en la cabina para la 16.
-13. **Uso de objetos y consumibles** (10.1, 11.1) y **objetos lanzables** (12.7).
+13. **Uso de objetos y consumibles** (10.1, 11.1) y **objetos lanzables** (12.7). *Implementado:* botiquín, batería, bengala (luz Veil y ruido que atrae) y jeringa de adrenalina, definidos en JSON y usados con el click derecho mantenido (`UseManager`); lata y botella con apuntado, trayectoria, lanzamiento, ruido al caer según la superficie y la lata recuperable; animaciones de cada uso, de apuntar y de lanzar.
 14. **Misiones.**
 15. **Eventos de laboratorio y jumpscares** (14.7).
 16. **Zonas y ascensores de zona** (revivir, curar y retirar objetos, 6.5), **game over y espectadores** (6.7), **fase final** (6.6) y **fin de partida** (6.8).
@@ -1304,6 +1304,7 @@ Opciones de **cliente** (menú propio del mod), pensadas para que el terror no e
 21. **Resto de mobs** (definidos uno a uno, todos basados en Smiley), **Smiley como jefe y diseño del mapa** (lobby, pasillo, catálogo de zonas y sala final).
 22. **Accesibilidad** (24.2).
 23. **Pulido:** configuración, pruebas multijugador **con varios grupos a la vez**, **prueba de carga con el máximo de mini partidas y del mega a la vez (zonas, mobs y luces de Veil)**, rendimiento, textos (es/en).
+24. **Decoración y mobiliario registrable:** más bloques de decoración del laboratorio (escritorios, estanterías, archivadores, carros, monitores, material médico...) y **muebles que se abren y se registran** con la interacción mantenida (cajones, armarios, archivadores, taquillas, cajas): animación de abrir, ruido al registrar y un botín aleatorio por zona (consumibles, lanzables, a veces llaves o fusibles), sincronizado por instancia. Las zonas los colocan con marcadores.
 
 ---
 

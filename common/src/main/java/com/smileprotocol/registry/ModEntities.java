@@ -29,6 +29,18 @@ public final class ModEntities {
                     MobCategory.MONSTER).sized(0.9f, 1.95f).eyeHeight(1.75f).clientTrackingRange(10).fireImmune()
                     .build("smiler_kill"));
 
+    /** Bengala encendida (fase 13). */
+    public static final Supplier<EntityType<com.smileprotocol.entity.FlareEntity>> FLARE = Services.PLATFORM.register(
+            BuiltInRegistries.ENTITY_TYPE, "flare", () -> EntityType.Builder.<com.smileprotocol.entity.FlareEntity>of(
+                    com.smileprotocol.entity.FlareEntity::new, MobCategory.MISC).sized(0.25f, 0.25f).clientTrackingRange(10)
+                    .updateInterval(4).fireImmune().build("flare"));
+
+    /** Lata o botella lanzada (fase 13). */
+    public static final Supplier<EntityType<com.smileprotocol.entity.ThrownSPItem>> THROWN_ITEM = Services.PLATFORM.register(
+            BuiltInRegistries.ENTITY_TYPE, "thrown_item", () -> EntityType.Builder.<com.smileprotocol.entity.ThrownSPItem>of(
+                    com.smileprotocol.entity.ThrownSPItem::new, MobCategory.MISC).sized(0.25f, 0.25f).clientTrackingRange(8)
+                    .updateInterval(10).build("thrown_item"));
+
     private ModEntities() {}
 
     public static void init() {

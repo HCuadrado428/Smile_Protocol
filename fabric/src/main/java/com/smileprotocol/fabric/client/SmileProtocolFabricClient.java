@@ -50,6 +50,10 @@ public final class SmileProtocolFabricClient implements ClientModInitializer {
                 com.smileprotocol.registry.ModEntities.SMILER_TEST.get(), ctx -> new com.smileprotocol.client.BerserkerRenderer<>(ctx, "smiler_test"));
         net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(
                 com.smileprotocol.registry.ModEntities.SMILER_KILL.get(), ctx -> new com.smileprotocol.client.BerserkerRenderer<>(ctx, "smiler_kill"));
+        net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(
+                com.smileprotocol.registry.ModEntities.FLARE.get(), net.minecraft.client.renderer.entity.ThrownItemRenderer::new);
+        net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(
+                com.smileprotocol.registry.ModEntities.THROWN_ITEM.get(), net.minecraft.client.renderer.entity.ThrownItemRenderer::new);
         BlockRenderLayerMap.INSTANCE.putBlock(ModBlocks.ELEVATOR_BUTTON.get(), RenderType.cutout());
         BlockRenderLayerMap.INSTANCE.putBlocks(RenderType.cutout(), ModBlocks.LAB_DOOR.get(), ModBlocks.SECURITY_DOOR.get(),
                 ModBlocks.VALVE.get(), ModBlocks.GURNEY.get(), ModBlocks.CURTAIN.get(), ModBlocks.FUSE_BOX.get(),

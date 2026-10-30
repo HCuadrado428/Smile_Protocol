@@ -374,9 +374,23 @@ public final class HudOverlay {
         bar(g, BAR_BLOOD, 100, 8, bx, by, bw, 7, ClientState.bleed);
         Component hint = hud(Component.translatable("smileprotocol.downed.hint"));
         g.drawString(font, hint, cx - font.width(hint) / 2, by + 12, BONE_DIM, true);
+        // usar la jeringa derribado
+        Payloads.InteractState use = ClientInteraction.state();
+        com.smileprotocol.interact.InteractionSpec item = ClientInteraction.spec();
+        if (use.active()) {
+            int uy = by + 24;
+            Component u = hud(use.prompt());
+            g.drawString(font, u, cx - font.width(u) / 2, uy, BONE, true);
+            float k = use.total() <= 0 ? 1f : Mth.clamp(use.progress() / (float) use.total(), 0f, 1f);
+            g.blitSprite(BAR_LIGHT_EMPTY, bx + 20, uy + 11, bw - 40, 5);
+            bar(g, BAR_LIGHT, 64, 6, bx + 20, uy + 11, bw - 40, 5, k);
+        } else if (item != null && !item.blocked()) {
+            Component u = hud(Component.translatable("smileprotocol.interact.hold").append(" ").append(item.prompt()));
+            g.drawString(font, u, cx - font.width(u) / 2, by + 24, BONE_DIM, true);
+        }
         if (ClientState.revive >= 0f) {
             // un companero le esta reanimando
-            int ry = by + 30;
+            int ry = by + 46;
             Component r = hud(Component.translatable("smileprotocol.downed.being_revived"));
             g.drawString(font, r, cx - font.width(r) / 2, ry, READY, true);
             g.blitSprite(BAR_LIGHT_EMPTY, bx + 20, ry + 11, bw - 40, 5);

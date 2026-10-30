@@ -110,6 +110,16 @@ public final class ZoneSetup {
             used.add(p);
         }
 
+        // Objetos sueltos en los sitios que sobran (README 10.1, 12.7): consumibles y lanzables al azar,
+        // mas lanzables que curas. Hasta que lleguen los muebles registrables (fase 24).
+        String[] loot = {"can", "bottle", "can", "bottle", "battery", "medkit", "flare", "can", "adrenaline"};
+        int extra = Math.min(spots.size() - used.size(), 2 + rnd.nextInt(3));
+        for (int i = 0; i < extra; i++) {
+            BlockPos p = spots.get(used.size());
+            spawn(level, p, itemFor(loot[rnd.nextInt(loot.length)]));
+            used.add(p);
+        }
+
         // Objetos de los marcadores sp:item
         for (Map.Entry<String, List<BlockPos>> e : markers.entrySet()) {
             if (!e.getKey().startsWith("item:")) continue;
@@ -136,6 +146,12 @@ public final class ZoneSetup {
             case "fuse" -> arg.isEmpty() ? new ItemStack(ModItems.FUSE.get())
                     : SPItems.withString(new ItemStack(ModItems.FUSE.get()), FuseItem.TYPE, arg);
             case "fuse_blown" -> new ItemStack(ModItems.FUSE_BLOWN.get());
+            case "medkit" -> new ItemStack(ModItems.MEDKIT.get());
+            case "battery" -> new ItemStack(ModItems.BATTERY.get());
+            case "flare" -> new ItemStack(ModItems.FLARE.get());
+            case "adrenaline", "syringe" -> new ItemStack(ModItems.ADRENALINE.get());
+            case "can" -> new ItemStack(ModItems.CAN.get());
+            case "bottle" -> new ItemStack(ModItems.BOTTLE.get());
             default -> ItemStack.EMPTY;
         };
     }

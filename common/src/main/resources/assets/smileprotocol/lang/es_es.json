@@ -265,5 +265,20 @@
   "subtitles.smileprotocol.mob.bite": "Mordisco",
   "subtitles.smileprotocol.player.revive": "Alguien recupera el aliento",
   "subtitles.smileprotocol.mob.tear": "Carne que se desgarra",
-  "subtitles.smileprotocol.mob.squelch": "Chorro de sangre"
+  "subtitles.smileprotocol.mob.squelch": "Chorro de sangre",
+  "item.smileprotocol.medkit": "Botiquín",
+  "item.smileprotocol.battery": "Batería",
+  "item.smileprotocol.flare": "Bengala",
+  "item.smileprotocol.adrenaline": "Jeringa de adrenalina",
+  "item.smileprotocol.can": "Lata",
+  "item.smileprotocol.bottle": "Botella",
+  "smileprotocol.use.prompt": "Usar: %s",
+  "smileprotocol.use.aim": "Apuntar: %s (clic izquierdo para lanzar)",
+  "smileprotocol.use.using": "Usando: %s",
+  "smileprotocol.use.only_downed": "Solo sirve si estás derribado",
+  "smileprotocol.use.full_health": "Ya tienes la vida al máximo",
+  "smileprotocol.use.full_battery": "La linterna ya está cargada",
+  "entity.smileprotocol.flare": "Bengala",
+  "entity.smileprotocol.thrown_item": "Objeto lanzado",
+  "subtitles.smileprotocol.flare.burn": "Bengala ardiendo"
 }

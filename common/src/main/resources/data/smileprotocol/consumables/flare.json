@@ -1,0 +1,1 @@
+{ "item": "smileprotocol:flare", "use_time": 16, "effect": { "type": "FLARE", "amount": 800 }, "noise": 6, "anim": "flare", "sound": "minecraft:item.flintandsteel.use", "usable_downed": false }

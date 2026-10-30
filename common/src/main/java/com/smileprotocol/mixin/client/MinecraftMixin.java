@@ -21,8 +21,11 @@ public abstract class MinecraftMixin {
 
     @Inject(method = "startAttack", at = @At("HEAD"), cancellable = true)
     private void smileprotocol$startAttack(CallbackInfoReturnable<Boolean> cir) {
-        // El click izquierdo para lanzar llega en la fase 13
-        if (ClientState.inSmileProtocol()) cir.setReturnValue(false);
+        // Dentro, el click izquierdo solo lanza el objeto que se esta apuntando (README 12.7)
+        if (ClientState.inSmileProtocol()) {
+            com.smileprotocol.client.ClientItems.tryThrow();
+            cir.setReturnValue(false);
+        }
     }
 
     @Inject(method = "continueAttack", at = @At("HEAD"), cancellable = true)

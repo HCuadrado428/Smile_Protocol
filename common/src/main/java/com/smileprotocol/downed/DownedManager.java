@@ -69,6 +69,7 @@ public final class DownedManager {
         HideManager.forceExit(p, true);
         com.smileprotocol.qte.QTEManager.clear(p);
         com.smileprotocol.interact.InteractionManager.stop(p, true);
+        com.smileprotocol.item.UseManager.stop(p, true);
         int total = SPConfig.get().bleed_out_time * 20;
         State s = new State(total);
         s.groan = SPConfig.get().downed_noise_interval / 2;
@@ -109,6 +110,13 @@ public final class DownedManager {
         s.revive = progress;
         s.reviveStale = 0;
         if (start) SPNetwork.sendTo(p, new Payloads.SyncRevive(progress, false));
+    }
+
+    /** Jeringa de adrenalina (README 10.1): se levanta solo, con poca vida. */
+    public static void selfRevive(ServerPlayer p, float healthPercent) {
+        if (!isDowned(p)) return;
+        revive(p, null);
+        p.setHealth(Math.max(1f, p.getMaxHealth() * healthPercent / 100f));
     }
 
     /** Reanimado: se levanta con parte de la vida y queda protegido un momento. */

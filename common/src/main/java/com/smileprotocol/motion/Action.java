@@ -10,7 +10,13 @@ public enum Action {
     /** Levantandose tras ser reanimado ({@code detail} 1 = con ayuda). */
     GETUP,
     /** Secuencia de remate o de muerte ({@code detail} = {@code SequenceKind}). */
-    SEQUENCE;
+    SEQUENCE,
+    /** Usando un consumible ({@code detail} = gesto, {@code PoseCalculator.USE_*}). */
+    USE,
+    /** Apuntando un lanzable. */
+    AIM,
+    /** Acaba de lanzar (unos ticks). */
+    THROW;
 
     private static final Action[] VALUES = values();
 

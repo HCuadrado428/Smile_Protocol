@@ -100,6 +100,7 @@ public final class QTEManager {
         }
         HideManager.forceExit(p, true);
         com.smileprotocol.interact.InteractionManager.stop(p, true);
+        com.smileprotocol.item.UseManager.stop(p, true);
         Group g = RunManager.groupOf(p);
         int ticks = g != null ? g.difficulty().scaleQte(baseTicks) : baseTicks;
         int difficulty = g != null ? Math.max(0, 4 - g.difficulty().groupSize()) : 1;

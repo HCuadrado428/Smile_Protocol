@@ -76,6 +76,7 @@ public final class SPEvents {
         com.smileprotocol.downed.DownedManager.clear(player);
         com.smileprotocol.qte.QTEManager.clear(player);
         com.smileprotocol.sequence.SequenceManager.clear(player);
+        com.smileprotocol.item.UseManager.onLogout(player);
         com.smileprotocol.motion.MotionManager.onLogout(player);
     }
 
@@ -120,6 +121,7 @@ public final class SPEvents {
         com.smileprotocol.downed.DownedManager.tick(server);
         com.smileprotocol.qte.QTEManager.tick(server);
         com.smileprotocol.sequence.SequenceManager.tick(server);
+        com.smileprotocol.item.UseManager.tick(server);
         com.smileprotocol.downed.DeathManager.tick(server);
         com.smileprotocol.mechanism.ZoneElevators.tick(server);
         com.smileprotocol.motion.Flashlights.tick(server);

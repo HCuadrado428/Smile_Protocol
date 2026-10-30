@@ -94,6 +94,7 @@ public final class SPSessionManager {
         com.smileprotocol.downed.DownedManager.clear(player);
         com.smileprotocol.qte.QTEManager.clear(player);
         com.smileprotocol.interact.InteractionManager.stop(player, true);
+        com.smileprotocol.item.UseManager.stop(player, true);
 
         data.setInSP(false);
         data.setGroupId(null);

@@ -91,6 +91,7 @@ public final class SequenceManager {
         com.smileprotocol.hide.HideManager.forceExit(p, true);
         com.smileprotocol.qte.QTEManager.clear(p);
         com.smileprotocol.interact.InteractionManager.stop(p, true);
+        com.smileprotocol.item.UseManager.stop(p, true);
 
         // El mob se gira hacia la victima y la victima queda a su distancia, delante
         float yaw = (float) Math.toDegrees(Math.atan2(-(p.getX() - mob.getX()), p.getZ() - mob.getZ()));

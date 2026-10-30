@@ -106,7 +106,7 @@ public final class ClientMotion {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null) return false;
         Action a = MotionStates.view(mc.player).action();
-        return a == Action.HIDDEN || a == Action.GRABBED || a == Action.SEQUENCE || a == Action.GETUP;
+        return a == Action.HIDDEN || a == Action.GRABBED || a == Action.SEQUENCE || a == Action.GETUP || a == Action.USE;
     }
 
     // Teclas ---------------------------------------------------------------------------------

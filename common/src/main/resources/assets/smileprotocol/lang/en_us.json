@@ -265,5 +265,20 @@
   "subtitles.smileprotocol.mob.bite": "Bite",
   "subtitles.smileprotocol.player.revive": "Someone gasps for air",
   "subtitles.smileprotocol.mob.tear": "Flesh tearing",
-  "subtitles.smileprotocol.mob.squelch": "Blood gushing"
+  "subtitles.smileprotocol.mob.squelch": "Blood gushing",
+  "item.smileprotocol.medkit": "Medkit",
+  "item.smileprotocol.battery": "Battery",
+  "item.smileprotocol.flare": "Flare",
+  "item.smileprotocol.adrenaline": "Adrenaline syringe",
+  "item.smileprotocol.can": "Can",
+  "item.smileprotocol.bottle": "Bottle",
+  "smileprotocol.use.prompt": "Use: %s",
+  "smileprotocol.use.aim": "Aim: %s (left click to throw)",
+  "smileprotocol.use.using": "Using: %s",
+  "smileprotocol.use.only_downed": "Only works while downed",
+  "smileprotocol.use.full_health": "Your health is already full",
+  "smileprotocol.use.full_battery": "The flashlight is already charged",
+  "entity.smileprotocol.flare": "Flare",
+  "entity.smileprotocol.thrown_item": "Thrown item",
+  "subtitles.smileprotocol.flare.burn": "Flare burning"
 }

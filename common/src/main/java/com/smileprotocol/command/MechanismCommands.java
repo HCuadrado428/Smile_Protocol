@@ -47,7 +47,7 @@ final class MechanismCommands {
     static final SuggestionProvider<CommandSourceStack> HIDE_TYPES = (c, b) ->
             SharedSuggestionProvider.suggest(new String[]{"locker", "wardrobe", "container", "gurney", "curtain"}, b);
     static final SuggestionProvider<CommandSourceStack> GIVE_ITEMS = (c, b) ->
-            SharedSuggestionProvider.suggest(new String[]{"fuse", "fuse_blown", "key", "keycard", "wheel"}, b);
+            SharedSuggestionProvider.suggest(new String[]{"fuse", "fuse_blown", "key", "keycard", "wheel", "medkit", "battery", "flare", "adrenaline", "can", "bottle"}, b);
 
     private static final Map<String, Supplier<HideBlock>> HIDES = Map.of(
             "locker", ModBlocks.LOCKER, "wardrobe", ModBlocks.WARDROBE, "container", ModBlocks.WASTE_CONTAINER,

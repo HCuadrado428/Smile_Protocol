@@ -202,6 +202,62 @@ public final class ClientSelfTest {
         }));
         SHOTS.add(() -> wait = 50);
         SHOTS.add(() -> grab(mc, "19_agarre_qte"));
+        // 8b. Fase 13: botiquin, bengala, lata lanzada y jeringa derribado
+        SHOTS.add(() -> server.execute(() -> {
+            for (var m : level.getEntitiesOfClass(com.smileprotocol.entity.SPMonster.class,
+                    new net.minecraft.world.phys.AABB(cam, cam).inflate(40))) m.discard();
+            com.smileprotocol.qte.QTEManager.clear(sp);
+            com.smileprotocol.downed.DownedManager.clear(sp);
+            SPSessionManager.teleport(sp, level, cam, 0f, 0f);
+            sp.setHealth(8f);
+            use(sp, com.smileprotocol.registry.ModItems.MEDKIT.get(), com.smileprotocol.network.Payloads.UseItem.START);
+        }));
+        SHOTS.add(() -> wait = 20);
+        SHOTS.add(() -> grab(mc, "23_botiquin"));
+        SHOTS.add(() -> wait = 45);
+        SHOTS.add(() -> server.execute(() -> {
+            boolean ok = sp.getHealth() > 15f && com.smileprotocol.interact.SPInventoryOps.find(sp,
+                    st -> st.is(com.smileprotocol.registry.ModItems.MEDKIT.get())) < 0;
+            log((ok ? "OK" : "FALLO") + " botiquin: vida " + sp.getHealth());
+            use(sp, com.smileprotocol.registry.ModItems.FLARE.get(), com.smileprotocol.network.Payloads.UseItem.START);
+        }));
+        SHOTS.add(() -> wait = 30);
+        SHOTS.add(() -> server.execute(() -> {
+            boolean ok = !level.getEntitiesOfClass(com.smileprotocol.entity.FlareEntity.class,
+                    sp.getBoundingBox().inflate(4)).isEmpty();
+            log((ok ? "OK" : "FALLO") + " bengala encendida");
+            com.smileprotocol.motion.Flashlights.set(sp, false);
+            SPSessionManager.teleport(sp, level, sp.position(), sp.getYRot() + 180f, 30f);
+        }));
+        SHOTS.add(() -> wait = 15);
+        SHOTS.add(() -> grab(mc, "24_bengala"));
+        SHOTS.add(() -> server.execute(() -> {
+            SPSessionManager.teleport(sp, level, cam, 0f, -10f);
+            use(sp, com.smileprotocol.registry.ModItems.CAN.get(), com.smileprotocol.network.Payloads.UseItem.AIM);
+        }));
+        SHOTS.add(() -> wait = 6);
+        SHOTS.add(() -> server.execute(() -> {
+            int slot = com.smileprotocol.interact.SPInventoryOps.find(sp, st -> st.is(com.smileprotocol.registry.ModItems.CAN.get()));
+            com.smileprotocol.item.UseManager.onInput(new com.smileprotocol.network.Payloads.UseItem(
+                    com.smileprotocol.network.Payloads.UseItem.THROW, slot, sp.getYRot(), sp.getXRot()), sp);
+            log((com.smileprotocol.interact.SPInventoryOps.find(sp, st -> st.is(com.smileprotocol.registry.ModItems.CAN.get())) < 0
+                    ? "OK" : "FALLO") + " lata lanzada");
+        }));
+        SHOTS.add(() -> wait = 40);
+        SHOTS.add(() -> server.execute(() -> {
+            boolean ok = level.getEntitiesOfClass(net.minecraft.world.entity.item.ItemEntity.class, sp.getBoundingBox().inflate(30),
+                    e -> e.getItem().is(com.smileprotocol.registry.ModItems.CAN.get())).size() > 0;
+            log((ok ? "OK" : "FALLO") + " la lata cae y se puede recoger");
+            com.smileprotocol.downed.DownedManager.down(sp, "prueba");
+            use(sp, com.smileprotocol.registry.ModItems.ADRENALINE.get(), com.smileprotocol.network.Payloads.UseItem.START);
+        }));
+        SHOTS.add(() -> wait = 95);
+        SHOTS.add(() -> server.execute(() -> {
+            boolean ok = !com.smileprotocol.downed.DownedManager.isDowned(sp) && sp.getHealth() <= sp.getMaxHealth() * 0.25f;
+            log((ok ? "OK" : "FALLO") + " jeringa: se levanta solo con vida " + sp.getHealth());
+            sp.setHealth(sp.getMaxHealth());
+        }));
+        SHOTS.add(() -> wait = 30);
         // 9. Fase 12: levantarse tras la reanimacion, muerte instantanea en primera persona y muerte final
         SHOTS.add(() -> server.execute(() -> {
             com.smileprotocol.qte.QTEManager.clear(sp);
@@ -583,6 +639,60 @@ public final class ClientSelfTest {
         });
         SHOTS.add(() -> server.execute(() -> { if (ex[0] != null) ex[0].discard(); }));
         SHOTS.add(() -> com.smileprotocol.sequence.SequenceManager.TEST_NO_KILL = false);
+
+        // Fase 13: usar consumibles, apuntar y lanzar ------------------------------------------------
+        SHOTS.add(() -> {
+            mc.options.hideGui = true;
+            mc.options.setCameraType(net.minecraft.client.CameraType.THIRD_PERSON_BACK);
+        });
+        SHOTS.add(() -> follow(-2, new Vec3(1.8, 1.4, 2.8), 0.8));
+        String[] useNames = {"jugador_botiquin", "jugador_bateria", "jugador_bengala"};
+        net.minecraft.world.item.Item[] useItems = {com.smileprotocol.registry.ModItems.MEDKIT.get(),
+                com.smileprotocol.registry.ModItems.BATTERY.get(), com.smileprotocol.registry.ModItems.FLARE.get()};
+        for (int i = 0; i < useNames.length; i++) {
+            net.minecraft.world.item.Item it = useItems[i];
+            scene(server, level, sp, null, chest, P, -90f, () -> {
+                sp.setHealth(6f);
+                com.smileprotocol.motion.Flashlights.recharge(sp, -0.6f);
+                use(sp, it, com.smileprotocol.network.Payloads.UseItem.START);
+            });
+            record(mc, useNames[i], 50, null);
+        }
+        record(mc, "bengala_suelo", 40, null);
+        SHOTS.add(() -> follow(-2, new Vec3(-1.6, 1.4, 2.6), 0.9));
+        scene(server, level, sp, null, chest, P.add(-3, 0, 0), -90f, () ->
+                use(sp, com.smileprotocol.registry.ModItems.BOTTLE.get(), com.smileprotocol.network.Payloads.UseItem.AIM));
+        record(mc, "jugador_apuntar_lanzar", 45, k -> {
+            if (k == 25) server.execute(() -> {
+                int slot = com.smileprotocol.interact.SPInventoryOps.find(sp, st -> st.is(com.smileprotocol.registry.ModItems.BOTTLE.get()));
+                com.smileprotocol.item.UseManager.onInput(new com.smileprotocol.network.Payloads.UseItem(
+                        com.smileprotocol.network.Payloads.UseItem.THROW, slot, sp.getYRot(), -15f), sp);
+            });
+        });
+        SHOTS.add(() -> follow(-2, new Vec3(1.6, 1.3, 2.6), 0.4));
+        scene(server, level, sp, null, chest, P, -90f, () -> {
+            com.smileprotocol.downed.DownedManager.down(sp, "grabacion");
+            use(sp, com.smileprotocol.registry.ModItems.ADRENALINE.get(), com.smileprotocol.network.Payloads.UseItem.START);
+        });
+        record(mc, "jugador_jeringa_derribado", 110, null);
+        SHOTS.add(() -> {
+            TEST_CAM_POS = null;
+            TEST_FOLLOW_ID = -1;
+            mc.options.hideGui = false;
+        });
+    }
+
+    /** Da el objeto, lo pone en la mano y empieza a usarlo (o a apuntarlo). */
+    private static void use(ServerPlayer sp, net.minecraft.world.item.Item item, int kind) {
+        com.smileprotocol.interact.SPInventoryOps.give(sp, new net.minecraft.world.item.ItemStack(item));
+        int slot = com.smileprotocol.interact.SPInventoryOps.find(sp, st -> st.is(item));
+        if (slot < 0) {
+            log("FALLO: no cabe " + item);
+            return;
+        }
+        com.smileprotocol.player.SPPlayerData.of(sp).getSPInventory().setSelected(slot);
+        SPSessionManager.sync(sp);
+        com.smileprotocol.item.UseManager.onInput(new com.smileprotocol.network.Payloads.UseItem(kind, slot, sp.getYRot(), sp.getXRot()), sp);
     }
 
     /**

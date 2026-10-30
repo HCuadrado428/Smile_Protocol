@@ -34,6 +34,9 @@ public final class PoseCalculator {
     public static final int INTERACT_GENERIC = 0, INTERACT_VALVE = 1, INTERACT_FUSE = 2, INTERACT_PICKUP = 3,
             INTERACT_DOOR = 4, INTERACT_CARD = 5, INTERACT_REVIVE = 6, INTERACT_PULL = 7;
 
+    /** Gestos de los consumibles ({@code Action.USE}, README 10.1). */
+    public static final int USE_MEDKIT = 0, USE_BATTERY = 1, USE_FLARE = 2, USE_SYRINGE = 3;
+
     private static final float PI = Mth.PI;
 
     /**
@@ -149,7 +152,13 @@ public final class PoseCalculator {
             case VAULT -> vault(pose, age);
             case INTERACT -> interact(pose, m.detail(), time, age);
             case GRABBED -> grabbed(pose, time);
-            case DOWNED -> downed(pose, time, speed, phase, age);
+            case DOWNED -> {
+                downed(pose, time, speed, phase, age);
+                if (m.detail() == 1) syringeDowned(pose, time, age);
+            }
+            case USE -> use(pose, m.detail(), time, age);
+            case AIM -> aim(pose, time, age);
+            case THROW -> throwPose(pose, age);
             case GETUP -> getup(pose, m.detail() == 1, age);
             case SEQUENCE -> sequence(pose, com.smileprotocol.sequence.SequenceKind.of(m.detail()), age, time);
             case HIDDEN -> { }
@@ -317,6 +326,94 @@ public final class PoseCalculator {
             pose.bend(RIGHT_LEG, 0, 0.8f * fall);
             pose.bend(LEFT_LEG, 0, 0.6f * fall);
         }
+    }
+
+    /** Derribado pinchandose la jeringa: levanta el brazo y se la clava en el muslo, una y otra vez. */
+    private static void syringeDowned(Pose pose, float time, float age) {
+        float in = Mth.clamp(age / 6f, 0f, 1f);
+        float stab = Math.max(0f, Mth.sin(time * 0.5f));
+        pose.setRot(RIGHT_ARM, Mth.lerp(in, -2.3f, -0.4f + 0.5f * stab), 0.4f * in, Mth.lerp(in, 0.35f, 0.9f));
+        pose.bend(RIGHT_ARM, 0, -1.2f * in * (1 - stab));
+        pose.setRot(HEAD, -0.3f, -0.6f * in, 0.2f * in);
+        pose.rot(RIGHT_LEG, -0.2f * in, 0, 0.1f * in);
+    }
+
+    // Objetos (README 10.1, 12.7) ---------------------------------------------------------------
+
+    private static void use(Pose pose, int kind, float time, float age) {
+        float in = Mth.clamp(age / 5f, 0f, 1f);
+        switch (kind) {
+            case USE_BATTERY -> {
+                // linterna en la izquierda, desenrosca, saca la pila y mete la nueva con la derecha
+                float twist = Mth.sin(time * 0.7f);
+                pose.rot(LEFT_ARM, -1.25f * in, 0.45f * in, 0);
+                pose.bend(LEFT_ARM, 0, -0.9f * in);
+                pose.rot(RIGHT_ARM, (-1.1f + 0.15f * twist) * in, (-0.5f + 0.25f * twist) * in, 0.1f * twist * in);
+                pose.bend(RIGHT_ARM, 0, -1.1f * in);
+                pose.rot(HEAD, 0.45f * in, 0, 0);
+                pose.rot(TORSO, 0.1f * in, 0, 0);
+            }
+            case USE_FLARE -> {
+                // quita el capuchon y raspa la bengala con fuerza: tirones del brazo derecho
+                float strike = Mth.clamp(Mth.sin(time * 0.9f) * 2f, -1f, 1f);
+                pose.rot(LEFT_ARM, -1.2f * in, 0.3f * in, 0);
+                pose.bend(LEFT_ARM, 0, -0.7f * in);
+                pose.rot(RIGHT_ARM, (-1.0f - 0.35f * strike) * in, (-0.6f + 0.3f * strike) * in, 0);
+                pose.bend(RIGHT_ARM, 0, (-0.8f + 0.3f * strike) * in);
+                pose.rot(HEAD, 0.35f * in, -0.1f * in, 0);
+                pose.rot(TORSO, 0.12f * in, -0.1f * strike * in, 0);
+            }
+            case USE_SYRINGE -> {
+                // de pie: se la clava en el muslo
+                float stab = Math.max(0f, Mth.sin(time * 0.5f));
+                pose.rot(RIGHT_ARM, (-0.3f + 0.25f * stab) * in, 0.25f * in, 0.2f * in);
+                pose.bend(RIGHT_ARM, 0, -1.0f * in * (1 - stab));
+                pose.rot(HEAD, 0.5f * in, -0.3f * in, 0);
+                pose.rot(TORSO, 0.25f * in, 0, 0);
+            }
+            default -> {
+                // botiquin: se agacha sobre una rodilla, sujeta la caja y se venda el brazo izquierdo
+                float wrap = time * 0.45f;
+                pose.rot(TORSO, 0.35f * in, 0.15f * in, 0);
+                pose.rot(HEAD, 0.55f * in, 0.3f * in, 0);
+                pose.rot(LEFT_ARM, -0.9f * in, -0.35f * in, 0);
+                pose.bend(LEFT_ARM, 0, -0.5f * in);
+                pose.rot(RIGHT_ARM, (-1.0f + 0.25f * Mth.sin(wrap)) * in, (0.35f + 0.25f * Mth.cos(wrap)) * in, 0);
+                pose.bend(RIGHT_ARM, 0, (-1.0f - 0.3f * Mth.cos(wrap)) * in);
+                pose.rot(RIGHT_LEG, -1.25f * in, 0, 0.08f * in);
+                pose.rot(LEFT_LEG, -0.25f * in, 0, -0.08f * in);
+                pose.bend(RIGHT_LEG, 0, 1.35f * in);
+                pose.bend(LEFT_LEG, 0, 1.5f * in);
+                bodyPx(pose, 0, 4.5f * in, 0);
+            }
+        }
+    }
+
+    /** Apuntar un lanzable: brazo derecho atras por encima del hombro, el izquierdo marca la direccion. */
+    private static void aim(Pose pose, float time, float age) {
+        float in = Mth.clamp(age / 5f, 0f, 1f);
+        float sway = Mth.sin(time * 0.12f) * 0.04f;
+        pose.rot(RIGHT_ARM, (-2.7f + sway) * in, 0.3f * in, 0.35f * in);
+        pose.bend(RIGHT_ARM, 0, -1.1f * in);
+        pose.rot(LEFT_ARM, -1.35f * in, 0.35f * in, -0.1f * in);
+        pose.bend(LEFT_ARM, 0, -0.2f * in);
+        pose.rot(TORSO, -0.05f * in, 0.35f * in, 0);
+        pose.rot(HEAD, 0, -0.3f * in, 0);
+        pose.rot(RIGHT_LEG, 0.25f * in, 0, 0.05f * in);
+        pose.rot(LEFT_LEG, -0.3f * in, 0, -0.05f * in);
+    }
+
+    /** Lanzar: el brazo baja de atras hacia delante y el torso gira. */
+    private static void throwPose(Pose pose, float age) {
+        float t = Mth.clamp(age / com.smileprotocol.item.UseManager.THROW_TICKS, 0f, 1f);
+        float swing = Mth.sin(Mth.clamp(t * 1.6f, 0f, 1f) * PI / 2);
+        float out = 1f - Mth.clamp((t - 0.6f) / 0.4f, 0f, 1f);
+        pose.rot(RIGHT_ARM, Mth.lerp(swing, -2.7f, -1.1f) * out, Mth.lerp(swing, 0.3f, -0.3f) * out, 0.2f * out);
+        pose.bend(RIGHT_ARM, 0, Mth.lerp(swing, -1.1f, -0.1f) * out);
+        pose.rot(LEFT_ARM, Mth.lerp(swing, -1.35f, -0.3f) * out, 0, -0.2f * out);
+        pose.rot(TORSO, 0.2f * swing * out, Mth.lerp(swing, 0.35f, -0.35f) * out, 0);
+        pose.rot(RIGHT_LEG, -0.3f * swing * out, 0, 0);
+        pose.rot(LEFT_LEG, 0.25f * swing * out, 0, 0);
     }
 
     // Levantarse ---------------------------------------------------------------------------------

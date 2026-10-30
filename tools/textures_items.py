@@ -232,6 +232,158 @@ def valve_wheel():
     return cv
 
 
+def medkit():
+    """Botiquin de metal abollado, cruz roja medio borrada, cierre y sangre seca."""
+    r = R(40)
+    cv = Canvas(S, S, (0, 0, 0), 0.0)
+    x0, y0, x1, y1 = 4, 9, 27, 26
+    cv.a[y0:y1 + 1, x0:x1 + 1] = 1
+    for x, y in ((x0, y0), (x1, y0), (x0, y1), (x1, y1)):
+        cv.a[y, x] = 0
+    yy, xx = np.mgrid[0:S, 0:S]
+    cv.c[:] = (196, 192, 178)
+    cv.c *= (1.15 - 0.02 * (yy - y0))[..., None].clip(0.6, 1.3)
+    cv.c[y0:y0 + 2, x0:x1 + 1] *= 1.08
+    cv.c[y1 - 1:y1 + 1, x0:x1 + 1] *= 0.7
+    # asa
+    cv.rect(12, 5, 19, 6, (60, 58, 54))
+    cv.rect(12, 6, 13, 8, (60, 58, 54))
+    cv.rect(18, 6, 19, 8, (60, 58, 54))
+    # cruz roja
+    cross = ((np.abs(xx - 15.5) <= 1.6) & (np.abs(yy - 17.5) <= 5.5)) | ((np.abs(yy - 17.5) <= 1.6) & (np.abs(xx - 15.5) <= 5.5))
+    cv.c[cross] = (176, 26, 24)
+    n = fbm(S, S, r, base=5, octaves=3, periodic=False)
+    cv.mix((196, 190, 176), cross * smoothstep(0.62, 0.8, n) * 0.9)     # pintura saltada
+    cv.rect(x0, 16, x0 + 1, 18, (90, 88, 82))                             # bisagra
+    cv.rect(x1 - 1, 16, x1, 18, (120, 116, 108))                          # cierre
+    grime(cv, r, 0.5)
+    m = splat_mask(S, S, r, 8, 23, 2.4, drops=5)
+    apply_blood(cv, r, m * cv.a, age=0.7)
+    outline(cv)
+    return cv
+
+
+def battery():
+    """Pila grande de linterna, etiqueta despegada y polo oxidado."""
+    r = R(41)
+    cv = Canvas(S, S, (0, 0, 0), 0.0)
+    ang = -math.pi / 4
+    yy, xx = np.mgrid[0:S, 0:S]
+    t = (xx - 16) * math.cos(ang) + (yy - 16) * math.sin(ang)
+    s = -(xx - 16) * math.sin(ang) + (yy - 16) * math.cos(ang)
+    body = (np.abs(t) <= 10) & (np.abs(s) <= 5.5)
+    tip = (t > 10) & (t <= 12) & (np.abs(s) <= 2)
+    cv.a = (body | tip).astype(float)
+    shade = (1.25 - 0.08 * s).clip(0.5, 1.5)[..., None]
+    cv.c[:] = (36, 34, 32)
+    cv.c[body & (t > 2)] = (190, 150, 40)                                  # etiqueta amarilla
+    cv.c[body & (t > 6)] = (40, 38, 34)
+    cv.c *= shade
+    cv.c[tip] = (170, 170, 166)
+    stencil_text(cv, 12, 13, "+", (20, 18, 16), 0.9)
+    n = fbm(S, S, r, base=4, octaves=3, periodic=False)
+    cv.mix((110, 70, 30), (body & (t < -7)) * smoothstep(0.45, 0.8, n) * 0.8)   # oxido en el polo
+    cv.mix((60, 54, 40), body * smoothstep(0.6, 0.9, n) * 0.4)
+    outline(cv)
+    return cv
+
+
+def flare():
+    """Bengala de emergencia: tubo rojo con capuchon y mecha."""
+    r = R(42)
+    cv = Canvas(S, S, (0, 0, 0), 0.0)
+    ang = -math.pi / 4
+    yy, xx = np.mgrid[0:S, 0:S]
+    t = (xx - 16) * math.cos(ang) + (yy - 16) * math.sin(ang)
+    s = -(xx - 16) * math.sin(ang) + (yy - 16) * math.cos(ang)
+    body = (np.abs(t) <= 12) & (np.abs(s) <= 3)
+    cv.a = body.astype(float)
+    cv.c[:] = (190, 30, 26)
+    cv.c[body & (t > 7)] = (60, 56, 52)                                    # capuchon
+    cv.c[body & (t < -10.5)] = (150, 140, 120)                             # mecha
+    cv.c *= (1.3 - 0.14 * s).clip(0.5, 1.6)[..., None]
+    for k in (-5, 0, 4):                                                   # bandas
+        cv.mix((230, 220, 200), (body & (np.abs(t - k) < 0.7)) * 0.7)
+    grime(cv, r, 0.35)
+    outline(cv)
+    return cv
+
+
+def syringe():
+    """Jeringa de adrenalina: liquido ambar, embolo y aguja; cinta con letras."""
+    r = R(43)
+    cv = Canvas(S, S, (0, 0, 0), 0.0)
+    ang = -math.pi / 4
+    yy, xx = np.mgrid[0:S, 0:S]
+    t = (xx - 16) * math.cos(ang) + (yy - 16) * math.sin(ang)
+    s = -(xx - 16) * math.sin(ang) + (yy - 16) * math.cos(ang)
+    barrel = (np.abs(t) <= 7) & (np.abs(s) <= 3.2)
+    plunger = (t < -7) & (t >= -12) & (np.abs(s) <= 1)
+    cap = (t < -12) & (t >= -13.5) & (np.abs(s) <= 3.2)
+    needle = (t > 7) & (t <= 14) & (np.abs(s) <= 0.55)
+    cv.a = (barrel | plunger | cap | needle).astype(float)
+    cv.c[barrel] = (210, 214, 210)
+    cv.c[barrel & (t > -2)] = (220, 140, 30)                               # adrenalina
+    cv.c[barrel & (np.abs(s) > 2.6)] *= 0.75
+    cv.c[plunger | cap] = (70, 72, 76)
+    cv.c[needle] = (200, 204, 210)
+    cv.c[barrel & (s < -1.8)] = (250, 250, 240)                            # reflejo
+    for k in (-5, -3, -1, 1, 3, 5):
+        cv.mix((40, 40, 40), (barrel & (np.abs(t - k) < 0.4) & (s > 1.5)) * 0.9)   # marcas
+    outline(cv)
+    return cv
+
+
+def can():
+    """Lata de conserva vacia, abollada y sin etiqueta casi."""
+    r = R(44)
+    cv = Canvas(S, S, (0, 0, 0), 0.0)
+    yy, xx = np.mgrid[0:S, 0:S]
+    body = (np.abs(xx - 15.5) <= 7) & (yy >= 8) & (yy <= 26)
+    top = ((xx - 15.5) / 7.2) ** 2 + ((yy - 8) / 2.4) ** 2 <= 1
+    cv.a = (body | top).astype(float)
+    shade = (1.35 - np.abs(xx - 12) * 0.07).clip(0.5, 1.5)[..., None]
+    cv.c[:] = (170, 172, 168)
+    cv.c[body & (yy > 12) & (yy < 22)] = (150, 40, 34)                    # restos de etiqueta
+    cv.c *= shade
+    cv.c[top] = (120, 122, 118)
+    cv.c[((xx - 15.5) / 5.5) ** 2 + ((yy - 8) / 1.6) ** 2 <= 1] = (60, 60, 58)
+    for y in (10, 24):
+        cv.c[y, :] *= 0.75
+    n = fbm(S, S, r, base=4, octaves=3, periodic=False)
+    cv.mix((200, 196, 190), body * (yy > 12) * (yy < 22) * smoothstep(0.55, 0.8, n) * 0.8)
+    cv.mix((110, 70, 40), smoothstep(0.7, 0.9, n) * 0.6 * cv.a)
+    cv.c[16:19, 19:22] *= 0.6                                              # abolladura
+    outline(cv)
+    return cv
+
+
+def bottle():
+    """Botella de cristal verde sucio con tapon."""
+    r = R(45)
+    cv = Canvas(S, S, (0, 0, 0), 0.0)
+
+    def b(d, n):
+        d.rounded_rectangle([10 * n, 13 * n, 21 * n, 29 * n], radius=3 * n, fill=255)
+        d.polygon([(10 * n, 15 * n), (13.5 * n, 8 * n), (17.5 * n, 8 * n), (21 * n, 15 * n)], fill=255)
+        d.rectangle([13.5 * n, 3 * n, 17.5 * n, 9 * n], fill=255)
+    m = shape(b)
+    cv.a = (m > 0.5).astype(float) * 0.92
+    yy, xx = np.mgrid[0:S, 0:S]
+    cv.c[:] = (52, 100, 56)
+    cv.c *= (1.3 - np.abs(xx - 13) * 0.06).clip(0.5, 1.5)[..., None]
+    cv.c[(xx >= 12) & (xx <= 13) & (yy > 14) & (yy < 27) & (m > 0.5)] = (170, 210, 170)   # brillo
+    cv.c[(yy <= 4) & (m > 0.5)] = (120, 90, 60)                                           # tapon de corcho
+    cv.rect(10, 18, 21, 23, (180, 170, 140))                                              # etiqueta
+    stencil_text(cv, 11, 19, "XX", (60, 20, 16), 0.8)
+    n = fbm(S, S, r, base=4, octaves=3, periodic=False)
+    cv.mix((60, 54, 40), (m > 0.5) * smoothstep(0.55, 0.85, n) * 0.5)
+    cv.a[(yy <= 4) & (m > 0.5)] = 1
+    cv.a[(yy >= 18) & (yy <= 23) & (xx >= 10) & (xx <= 21)] = 1
+    outline(cv)
+    return cv
+
+
 def main():
     out = {}
     out["flashlight"] = flashlight()
@@ -241,6 +393,12 @@ def main():
     out["fuse"] = fuse(False)
     out["fuse_blown"] = fuse(True)
     out["valve_wheel"] = valve_wheel()
+    out["medkit"] = medkit()
+    out["battery"] = battery()
+    out["flare"] = flare()
+    out["adrenaline"] = syringe()
+    out["can"] = can()
+    out["bottle"] = bottle()
     for name, kw in (("lab_door", {}), ("security_door", {}), ("locker", {"yaw": -145}),
                      ("wardrobe", {"yaw": -145}), ("waste_container", {"yaw": -145}), ("gurney", {"yaw": 145}),
                      ("curtain", {"yaw": -150}), ("valve", {"yaw": -145}), ("fuse_box", {"yaw": -150, "skip": ("lamp_on",)})):

@@ -49,6 +49,7 @@ public final class SPNetwork {
             new Def<>(Payloads.SyncDowned.TYPE, Payloads.SyncDowned.CODEC, true, null),
             new Def<>(Payloads.StartQTE.TYPE, Payloads.StartQTE.CODEC, true, null),
             new Def<>(Payloads.SyncRevive.TYPE, Payloads.SyncRevive.CODEC, true, null),
+            new Def<>(Payloads.UseItem.TYPE, Payloads.UseItem.CODEC, false, com.smileprotocol.item.UseManager::onInput),
             new Def<>(Payloads.StartSequence.TYPE, Payloads.StartSequence.CODEC, true, null),
             new Def<>(Payloads.QTEState.TYPE, Payloads.QTEState.CODEC, true, null),
             new Def<>(Payloads.QTEEnd.TYPE, Payloads.QTEEnd.CODEC, true, null),
@@ -82,6 +83,7 @@ public final class SPNetwork {
         if (p.slot() < 0 || p.slot() >= SPInventory.SIZE) return;
         SPPlayerData data = SPPlayerData.of(player);
         if (data.inSP()) {
+            if (data.getSPInventory().getSelected() != p.slot()) com.smileprotocol.item.UseManager.stop(player, true);
             data.getSPInventory().setSelected(p.slot());
             com.smileprotocol.session.SPSessionManager.sync(player);
         }

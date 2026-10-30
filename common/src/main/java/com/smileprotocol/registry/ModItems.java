@@ -47,6 +47,13 @@ public final class ModItems {
     public static final Supplier<KeycardItem> KEYCARD_3 = item("keycard_3", () -> new KeycardItem(one(), 3));
     public static final Supplier<Item> VALVE_WHEEL = item("valve_wheel", () -> new Item(one()));
     public static final Supplier<Item> FLASHLIGHT = item("flashlight", () -> new Item(one()));
+    // Consumibles y lanzables (fase 13)
+    public static final Supplier<Item> MEDKIT = item("medkit", () -> new com.smileprotocol.item.ConsumableItem(one()));
+    public static final Supplier<Item> BATTERY = item("battery", () -> new com.smileprotocol.item.ConsumableItem(one()));
+    public static final Supplier<Item> FLARE = item("flare", () -> new com.smileprotocol.item.ConsumableItem(one()));
+    public static final Supplier<Item> ADRENALINE = item("adrenaline", () -> new com.smileprotocol.item.ConsumableItem(one()));
+    public static final Supplier<Item> CAN = item("can", () -> new com.smileprotocol.item.ThrowableItem(one()));
+    public static final Supplier<Item> BOTTLE = item("bottle", () -> new com.smileprotocol.item.ThrowableItem(one()));
 
     static {
         for (String n : ModBlocks.BUILDING_NAMES) block(n, ModBlocks.BUILDING.get(n));

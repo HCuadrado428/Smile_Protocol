@@ -118,6 +118,12 @@ public final class SPConfig {
         /** Ticks de interaccion mantenida para liberar a un companero agarrado (README 18). */
         public int qte_help_time = 40;
 
+        // Objetos (README 10.1, 12.7)
+        /** Ruido de una bengala encendida, cada 2 s. */
+        public float noise_flare = 10;
+        /** Espera entre lanzamientos (ticks). */
+        public int throw_cooldown = 15;
+
         // Mobs (README 20)
         /** Berserkers por planta segun la dificultad de la zona (0, 1, 2, 3, 4...), antes de escalar por el grupo. */
         public java.util.List<Integer> berserkers_by_difficulty = new java.util.ArrayList<>(java.util.List.of(1, 2, 2, 3, 3));

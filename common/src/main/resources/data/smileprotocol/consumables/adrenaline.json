@@ -1,0 +1,1 @@
+{ "item": "smileprotocol:adrenaline", "use_time": 80, "effect": { "type": "ADRENALINE", "amount": 20 }, "noise": 3, "anim": "syringe", "sound": "minecraft:entity.player.hurt_sweet_berry_bush", "usable_downed": true, "only_downed": true }

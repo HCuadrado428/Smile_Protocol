@@ -54,6 +54,7 @@ public final class ClientController {
         ClientSequence.reset();
         com.smileprotocol.client.light.Flashlight.reset();
         com.smileprotocol.client.light.DynamicLights.clear();
+        com.smileprotocol.client.light.FlareLights.clear();
     }
 
     public static void tick(Minecraft mc) {
@@ -64,6 +65,7 @@ public final class ClientController {
         ClientInteraction.tick(mc);
         ClientQTE.tick(mc);
         ClientSequence.tick(mc);
+        com.smileprotocol.client.light.FlareLights.tick(mc);
         if (mc.player == null || !ClientState.inSmileProtocol()) return;
         // Muerto: click izquierdo / derecho cambia de companero al que mira (README 9.3)
         if (ClientState.dead && mc.player.isSpectator()) {
