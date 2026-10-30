@@ -144,29 +144,36 @@ public final class ClientSelfTest {
         SHOTS.add(() -> server.execute(() -> sp.setHealth(4f)));
         lookAt(mc, server, level, z, "14_vida_baja_camilla", be -> be instanceof HideBlockEntity h && h.modelName().equals("gurney"));
         SHOTS.add(() -> server.execute(() -> sp.setHealth(sp.getMaxHealth())));
-        // 7. Berserker (fase 11): de frente, de lado, golpeando donde sono un ruido y el derribo
+        // 7. Berserker (fase 11): de frente, en diagonal, golpeando donde sono un ruido y el derribo
         Vec3 cam = e.add(0, 0, 30);
         Vec3 mobAt = cam.add(0, 0, 4);
+        com.smileprotocol.entity.Berserker[] mob = {null};
         SHOTS.add(() -> server.execute(() -> {
             com.smileprotocol.entity.Berserker b = com.smileprotocol.entity.MobManager.spawn(level,
                     com.smileprotocol.registry.ModEntities.BERSERKER.get(), BlockPos.containing(mobAt), level.random);
             if (b != null) {
+                b.setNoAi(true);
                 b.setYRot(180f);
                 b.setYBodyRot(180f);
                 b.setYHeadRot(180f);
+                mob[0] = b;
             }
             SPSessionManager.teleport(sp, level, cam, 0f, 0f);
         }));
-        SHOTS.add(() -> wait = 50);
+        SHOTS.add(() -> wait = 40);
         SHOTS.add(() -> grab(mc, "15_berserker"));
-        shot(mc, server, "16_berserker_lado", mobAt.add(4, 0, 0), 90f, 0f, 30);
+        Vec3 diag = mobAt.add(0.9, 0.2, -2.4);
+        float dyaw = (float) Math.toDegrees(-Math.atan2(mobAt.x - diag.x, mobAt.z - diag.z));
+        shot(mc, server, "16_berserker_cerca", diag, dyaw, 10f, 20);
         SHOTS.add(() -> server.execute(() -> {
             SPSessionManager.teleport(sp, level, cam, 0f, 0f);
-            com.smileprotocol.noise.NoiseSystem.emit(level, mobAt.add(0, 0, -2), 12f, com.smileprotocol.noise.NoiseType.TEST, null);
+            if (mob[0] != null) mob[0].setNoAi(false);
         }));
+        SHOTS.add(() -> wait = 25);
+        SHOTS.add(() -> server.execute(() ->
+                com.smileprotocol.noise.NoiseSystem.emit(level, mobAt.add(0, 0, -2), 12f, com.smileprotocol.noise.NoiseType.TEST, null)));
         SHOTS.add(() -> wait = 14);
         SHOTS.add(() -> grab(mc, "17_berserker_golpe"));
-        SHOTS.add(() -> server.execute(() -> com.smileprotocol.downed.DownedManager.down(sp, "prueba")));
         SHOTS.add(() -> wait = 30);
         SHOTS.add(() -> grab(mc, "18_derribado"));
     }

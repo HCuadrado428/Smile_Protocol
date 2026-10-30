@@ -11,8 +11,6 @@ import com.smileprotocol.network.SPNetwork;
 import com.smileprotocol.noise.NoiseSystem;
 import com.smileprotocol.noise.NoiseType;
 import com.smileprotocol.player.SPPlayerData;
-import net.minecraft.ChatFormatting;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
@@ -71,7 +69,6 @@ public final class DownedManager {
         modifiers(p, true);
         MotionManager.setAction(p, Action.DOWNED, 0, true);
         p.serverLevel().playSound(null, p.blockPosition(), SoundEvents.PLAYER_HURT, SoundSource.PLAYERS, 1f, 0.6f);
-        p.displayClientMessage(Component.translatable("smileprotocol.downed.title").withStyle(ChatFormatting.DARK_RED), true);
         sync(p, s);
         SPDebug.log(p.getGameProfile().getName() + " derribado" + (cause != null ? " por " + cause : ""));
     }
