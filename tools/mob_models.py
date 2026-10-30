@@ -12,6 +12,7 @@ rotacion X positiva inclina hacia delante (torso), negativa levanta los brazos h
     python3 tools/mob_models.py [preview.png]
 """
 import json
+import zlib
 import math
 import sys
 from pathlib import Path
@@ -28,6 +29,59 @@ ROOT = gm.ROOT
 # ojos, costuras) siguen su rejilla de 2 px por unidad
 gm.SCALE = 4
 ART = 2
+
+
+def art_at(f, rows, ox, oy):
+    """Celda de un dibujo de pixel art (ART celdas por unidad) colocado en (ox, oy) de la cara; '.' fuera."""
+    px = np.floor(f.U * ART).astype(int) - ox
+    py = np.floor(f.V * ART).astype(int) - oy
+    H, W = len(rows), len(rows[0])
+    inside = (px >= 0) & (px < W) & (py >= 0) & (py < H)
+    arr = np.array([list(r) for r in rows])
+    out = np.full(px.shape, ".", dtype="<U1")
+    out[inside] = arr[py[inside], px[inside]]
+    return out
+
+
+def paint(c, ch, colors):
+    for k, col in colors.items():
+        c = np.where((ch == k)[..., None], np.array(col), c)
+    return c
+
+
+# Sonrisas: cada smiler la suya, todas rojas y tetricas ------------------------------------------------------
+
+# Berserker: sonrisa de Glasgow, la boca rajada hasta las orejas (una comisura mas alta que la otra),
+# grapas cruzando los cortes y sangre que gotea
+BERSERKER_SMILE = [
+    "R...............",
+    ".R.............R",
+    ".RS...........R.",
+    "..R..........SR.",
+    "..RR........RR..",
+    "...RTTTTTTTTR...",
+    "...RKKKKKKKKR...",
+    "...RKTKKTKTKR...",
+    "....RRRRRRRR....",
+    "......D...D.....",
+]
+# Rastreador: sin labios, una calavera que sonrie: encias en carne viva y dientes torcidos
+RASTREADOR_SMILE = [
+    "R........R",
+    "GR......RG",
+    "GGGGGGGGGG",
+    "TtTTtTTTtT",
+    "tTTtTTtTTt",
+]
+# Ahorcado: la sonrisa cosida con hilo rojo, reventada por el medio (asoma el relleno)
+DOLL_SMILE = [
+    "R..........R",
+    "XR.X.X.X..RX",
+    ".RRRRKKKRRR.",
+    "...X.YKY.X..",
+]
+SMILE_COLORS = {"R": (200, 16, 20), "T": (226, 206, 186), "t": (176, 150, 100), "K": (4, 0, 1), "S": (150, 146, 140),
+                "D": (96, 8, 10), "G": (206, 20, 26), "X": (230, 40, 36), "Y": (222, 212, 192)}
 
 
 # Materiales de los smilers -----------------------------------------------------------------------------
@@ -78,25 +132,20 @@ def face():
     def smile_mask(f):
         if f.face != "north":
             return np.zeros((f.h, f.w))
-        u, v = f.U, f.V
-        w, h = f.w / gm.SCALE, f.h / gm.SCALE
-        # curva de oreja a oreja: centro bajo, extremos que suben
-        x = (u - w / 2) / (w / 2)
-        mid = h * 0.66
-        top = mid - (x ** 2) * h * 0.34
-        thick = 0.7 + 1.1 * (1 - x ** 2)
-        m = (v > top - thick * 0.35) & (v < top + thick) & (np.abs(x) < 0.97)
-        return m.astype(float)
+        ch = art_at(f, BERSERKER_SMILE, 0, 8)
+        return np.isin(ch, ["R", "T"]).astype(float)
 
     def mat(f):
         c, a = sk(f)
         if f.face != "north":
             return c, a
-        sm = smile_mask(f)
-        c = np.where(sm[..., None] > 0, np.array([206, 18, 22]), c)
-        # dientes: lineas oscuras verticales dentro de la sonrisa
-        teeth = (sm > 0) & (np.floor(f.U * ART) % 3 == 0)
-        c = np.where(teeth[..., None], np.array([70, 6, 8]), c)
+        ch = art_at(f, BERSERKER_SMILE, 0, 8)
+        # piel abierta y amoratada alrededor de los cortes
+        near = np.zeros(ch.shape, bool)
+        for dx in (-1, 0, 1):
+            near |= np.isin(art_at(f, BERSERKER_SMILE, dx, 8), ["R", "S"])
+        c = np.where((near & (ch == "."))[..., None], c * 0.6 + np.array([40, 8, 14]) * 0.4, c)
+        c = paint(c, ch, SMILE_COLORS)
         # ojo derecho (lado +X, a la izquierda de quien lo mira): cosido, rojo apagado, no brilla
         w, h = f.w / gm.SCALE, f.h / gm.SCALE
         ex, ey = w * 0.27, h * 0.36
@@ -331,7 +380,8 @@ def muscle(base=(92, 26, 38)):
     """El Rastreador: sin piel. Fibras de musculo morado y rojo oscuro, humedas, con tendones palidos."""
     def m(f):
         ax = f.Y if not f.side else f.Y + 0.3 * f.X
-        fib = 0.75 + 0.25 * np.sin((f.X + f.Z) * 7 + noise3(f.X, f.Y * 0.3, f.Z, 0.7, 401) * 5)
+        fib = 0.8 + 0.12 * np.sin((f.X + f.Z) * 5 + noise3(f.X, f.Y * 0.3, f.Z, 0.7, 401) * 8) \
+            + 0.08 * np.sin((f.X - f.Z) * 13 + noise3(f.X * 2, f.Y * 0.5, f.Z * 2, 1.0, 409) * 6)
         c = np.zeros((f.h, f.w, 3)) + base
         c *= fib[..., None]
         c = c * (0.8 + 0.35 * f.n(0.5, 3, 402))[..., None]
@@ -368,25 +418,19 @@ def rastreador_head():
     """Cabeza: craneo sin piel, sin ojos, encias rojas que brillan sobre la mandibula partida."""
     mu = muscle((80, 22, 34))
 
+    def at(f):
+        return art_at(f, RASTREADOR_SMILE, 0, 3)
+
     def gum(f):
         if f.face != "north":
             return np.zeros((f.h, f.w))
-        px = np.floor(f.U * ART).astype(int)
-        py = np.floor(f.V * ART).astype(int)
-        H = int(round(f.h / gm.SCALE * ART))
-        return ((py >= H - 3) & (py <= H - 2) & (px >= 1) & (px <= int(round(f.w / gm.SCALE * ART)) - 2)).astype(float)
+        return np.isin(at(f), ["G", "R"]).astype(float)
 
     def mat(f):
         c, a = mu(f)
         if f.face != "north":
             return c, a
-        px = np.floor(f.U * ART).astype(int)
-        py = np.floor(f.V * ART).astype(int)
-        H = int(round(f.h / gm.SCALE * ART))
-        # dientes de arriba: hilera de agujas palidas bajo las encias
-        teeth = (py == H - 1) & (px % 2 == 1)
-        c = np.where(teeth[..., None], np.array([216, 204, 184]), c)
-        c = np.where(gum(f)[..., None] > 0, np.array([206, 20, 26]), c)
+        c = paint(c, at(f), SMILE_COLORS)
         # cuencas vacias, solo carne
         for fx in (0.3, 0.7):
             d = np.hypot((f.U - f.w / gm.SCALE * fx) / 0.9, (f.V - f.h / gm.SCALE * 0.35) / 0.6)
@@ -542,9 +586,7 @@ def doll_face():
         W, H = int(round(f.w / gm.SCALE * ART)), int(round(f.h / gm.SCALE * ART))
         ex, ey = int(W * 0.28), int(H * 0.36)
         button = (np.abs(px - ex) <= 1) & (np.abs(py - ey) <= 1)
-        sy = int(H * 0.7)
-        smile = ((py == sy) & (px >= 1) & (px <= W - 2)) | ((py == sy - 1) & ((px == 1) | (px == W - 2)))
-        thread = smile | ((np.abs(py - sy) == 1) & (px % 2 == 0) & (px >= 2) & (px <= W - 3))
+        thread = np.isin(art_at(f, DOLL_SMILE, 0, 4), ["R", "X"])
         return (button | thread).astype(float)
 
     def mat(f):
@@ -556,6 +598,7 @@ def doll_face():
         W, H = int(round(f.w / gm.SCALE * ART)), int(round(f.h / gm.SCALE * ART))
         g = glow(f)
         c = np.where(g[..., None] > 0, np.array([214, 22, 26]), c)
+        c = paint(c, art_at(f, DOLL_SMILE, 0, 4), {"K": (8, 2, 2), "Y": (222, 212, 192)})
         # agujeros del boton y la otra cuenca: una X cosida
         ex, ey = int(W * 0.28), int(H * 0.36)
         c = np.where(((px == ex) & (py == ey))[..., None], np.array([60, 0, 0]), c)
@@ -632,12 +675,12 @@ ASH_FACE = [
     "R......R....R.",
     "RR..........RR",
     "..............",
-    ".RTRTRTRTRTRT.",
-    "..RKKKKKKKKR..",
-    "...RTRTRTRTR..",
-    "....RRRRRR....",
-    "..............",
-    "..............",
+    "R............R",
+    ".R..........R.",
+    ".TR...RR...RT.",
+    "..RT.RTTR.RT..",
+    "...RTR..RTR...",
+    "....R....R....",
 ]
 
 
@@ -727,17 +770,17 @@ def apagon():
 
 GRIN = [
     "R................R",
-    "RR..............RR",
-    ".RRRRRRRRRRRRRRRR.",
-    ".RTTKTTKTTKTTKTTR.",
-    "..RTKKTKKTKKTKKR..",
-    "..RKKKKKKKKKKKKR..",
-    "...RKTKKTKKTKKR...",
-    "...RTTKTTKTTKTR...",
+    "R................R",
+    ".R..............R.",
+    ".RR............RR.",
+    "..RRRRRRRRRRRRRR..",
+    "..RVKVKVKVKVKVKR..",
+    "...VKVKVKVKVKVK...",
+    "...KKKKKKKKKKKK...",
+    "...RVKVKVKVKVKR...",
     "....RRRRRRRRRR....",
-    "......RRRRRR......",
 ]
-GRIN_COLORS = {"R": (205, 16, 22), "T": (228, 70, 62), "K": (4, 0, 1)}
+GRIN_COLORS = {"R": (205, 16, 22), "T": (228, 70, 62), "K": (4, 0, 1), "V": (236, 224, 204)}
 
 
 def grin():
@@ -752,7 +795,7 @@ def grin():
         if f.face != "north":
             return np.zeros((f.h, f.w))
         ch = cells(f)
-        return ((ch == "R") | (ch == "T")).astype(float)
+        return ((ch == "R") | (ch == "T") | (ch == "V")).astype(float)
 
     def mat(f):
         if f.face != "north":
@@ -981,7 +1024,7 @@ def enrich(A, bones):
                 bb[t] = {"rotation": kf(multi(L, [0, 0, 0], [amp * fast, 0, amp * 0.6 * fast],
                                              [int(t[-1]) * 0.8, 0, int(t[-1]) * 0.8 + 1]))}
         # falanges: siguen al dedo (70 %) y se crispan un poco
-        for b in have:
+        for b in sorted(have):
             if not b.endswith("_tip") or b in bb:
                 continue
             parent = b[:-4]
@@ -989,7 +1032,7 @@ def enrich(A, bones):
             if src:
                 bb[b] = {"rotation": {t: [round(v * 0.7, 2) if j == 0 else 0 for j, v in enumerate(val)] for t, val in src.items()}}
             else:
-                bb[b] = {"rotation": kf(wave(L, [12, 0, 0], 8, hash(b) % 6, 8))}
+                bb[b] = {"rotation": kf(wave(L, [12, 0, 0], 8, zlib.crc32(b.encode()) % 6, 8))}
     return A
 
 

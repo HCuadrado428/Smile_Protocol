@@ -156,67 +156,114 @@ def bar(name, seed, w, h, color, dry=False, empty=False):
     return save(cv, name)
 
 
+def _hires(col, alpha, S):
+    from PIL import Image as _I
+    img = np.dstack([np.clip(col, 0, 255), np.clip(alpha, 0, 1) * 255]).astype(np.uint8)
+    im = _I.fromarray(img, "RGBA").resize((S, S), _I.LANCZOS)
+    arr = np.asarray(im, dtype=float)
+    cv = Canvas(S, S, (0, 0, 0), 0)
+    cv.c, cv.a = arr[..., :3], arr[..., 3] / 255
+    return cv
+
+
+def _outline(alpha, px):
+    from PIL import Image as _I, ImageFilter
+    m = _I.fromarray((np.clip(alpha, 0, 1) * 255).astype(np.uint8)).filter(ImageFilter.MaxFilter(px * 2 + 1))
+    return np.asarray(m, dtype=float) / 255
+
+
 def heart():
-    """Corazon anatomico de 16x16: auriculas, aorta y venas, en rojo oscuro."""
+    """Corazon anatomico (64 px, se dibuja a 16): ventriculos carnosos con relieve, auricula, aorta
+    y pulmonar cortadas, grasa amarillenta en el surco, coronarias y brillo humedo."""
     r = R(5)
-    S = 16
-    n = 6
-    im = Image.new("L", (S * n, S * n), 0)
-    d = ImageDraw.Draw(im)
-    d.ellipse([2.5 * n, 5 * n, 13.5 * n, 15 * n], fill=255)
-    d.polygon([(3 * n, 10 * n), (8.5 * n, 15.8 * n), (13 * n, 9 * n)], fill=255)
-    d.ellipse([2 * n, 3.5 * n, 7.5 * n, 9 * n], fill=255)                 # auricula
-    d.rectangle([7 * n, 0.5 * n, 10 * n, 6 * n], fill=255)                # aorta
-    d.rectangle([10.5 * n, 1.5 * n, 12.5 * n, 6.5 * n], fill=255)         # pulmonar
-    d.rectangle([4 * n, 1.5 * n, 6 * n, 5 * n], fill=255)
-    m = np.asarray(im.resize((S, S), Image.BOX), dtype=float) / 255
-    cv = Canvas(S, S, (120, 16, 20), 0)
-    cv.a = (m > 0.45).astype(float)
-    yy, xx = np.mgrid[0:S, 0:S].astype(float)
-    cv.c *= (1.25 - 0.05 * (xx + yy - 10))[..., None].clip(0.5, 1.5)
-    # venas coronarias oscuras y brillo humedo
-    for (x0, y0), (x1, y1) in (((8, 7), (6, 14)), ((9, 7), (12, 12)), ((7, 9), (4, 11))):
-        for t in np.linspace(0, 1, 12):
-            x, y = int(round(x0 + (x1 - x0) * t + math.sin(t * 6) * 0.6)), int(round(y0 + (y1 - y0) * t))
-            if 0 <= x < S and 0 <= y < S and cv.a[y, x]:
-                cv.c[y, x] = (60, 10, 30)
-    cv.c[6, 4:6] = (230, 120, 120)
-    cv.c[7, 4] = (200, 90, 90)
-    cv.c[1:4, 7:10] = (150, 60, 60)
-    cv.c[1, 7:10] = (190, 110, 100)
-    # contorno
-    a = cv.a > 0.5
-    ring = np.zeros_like(a)
-    for dy, dx in ((1, 0), (-1, 0), (0, 1), (0, -1)):
-        ring |= np.roll(np.roll(a, dy, 0), dx, 1)
-    ring &= ~a
-    cv.c[ring] = (20, 4, 4)
-    cv.a[ring] = 1
-    return save(cv, "heart")
+    S, W = 64, 256
+    yy, xx = np.mgrid[0:W, 0:W].astype(float) / W
+    n = fbm(W, W, r, base=8, octaves=4, periodic=False)
+
+    def blob(cx, cy, rx, ry, rot=0.0):
+        c, s_ = math.cos(rot), math.sin(rot)
+        dx, dy = xx - cx, yy - cy
+        u, v = dx * c + dy * s_, -dx * s_ + dy * c
+        return np.hypot(u / rx, v / ry)
+
+    vent = np.minimum(blob(0.52, 0.6, 0.3, 0.3, 0.5), blob(0.5, 0.78, 0.14, 0.17, 0.3) * 1.05)
+    atr = blob(0.28, 0.36, 0.14, 0.12, -0.3)
+    aorta = (np.abs(xx - 0.5 - 0.06 * np.sin((yy - 0.05) * 6)) < 0.075) & (yy > 0.04) & (yy < 0.42)
+    arch = (blob(0.6, 0.12, 0.14, 0.09) < 1) & (blob(0.6, 0.12, 0.07, 0.035) > 1) & (yy < 0.16)
+    pulm = (np.abs(xx - 0.72) < 0.06) & (yy > 0.12) & (yy < 0.42)
+    vena = (np.abs(xx - 0.3) < 0.045) & (yy > 0.08) & (yy < 0.3)
+    body = (vent < 1) | (atr < 1)
+    vessels = aorta | arch | pulm | vena
+    alpha = (body | vessels).astype(float)
+    # color de musculo con relieve (luz arriba a la izquierda)
+    shade = np.clip(1.25 - 1.1 * np.maximum(vent - 0.2, 0) - 0.5 * (xx + yy - 0.8), 0.35, 1.4)
+    col = np.zeros((W, W, 3)) + (128, 18, 24)
+    col *= (shade * (0.8 + 0.4 * n))[..., None]
+    col = np.where((atr < 1)[..., None] & ~(vent < 1)[..., None], col * 0.8 + np.array([20, 0, 10]), col)
+    # vasos: palidos y rosados, con el corte abierto arriba
+    vcol = np.array([170, 70, 74]) * (0.8 + 0.4 * n[..., None])
+    col = np.where(vessels[..., None], vcol, col)
+    pulm_c = np.array([84, 40, 70])
+    col = np.where((pulm | vena)[..., None], pulm_c * (0.8 + 0.4 * n[..., None]), col)
+    for (cx, cy, rx) in ((0.5, 0.05, 0.075), (0.72, 0.12, 0.06), (0.3, 0.08, 0.045)):
+        hole = blob(cx, cy, rx * 0.8, 0.025) < 1
+        col = np.where(hole[..., None], np.array([30, 0, 4]), col)
+    # grasa en el surco y coronarias
+    groove = np.abs(blob(0.3, 0.3, 0.35, 0.3, -0.2) - 1) < 0.07
+    fat = groove & body & (fbm(W, W, r, base=16, octaves=2, periodic=False) > 0.45)
+    col = np.where(fat[..., None], np.array([206, 176, 96]) * (0.8 + 0.3 * n[..., None]), col)
+    for (x0, y0, x1, y1, wv) in ((0.46, 0.38, 0.62, 0.92, 0.012), (0.5, 0.4, 0.3, 0.75, 0.01), (0.55, 0.45, 0.78, 0.7, 0.009)):
+        t = np.clip(((xx - x0) * (x1 - x0) + (yy - y0) * (y1 - y0)) / ((x1 - x0) ** 2 + (y1 - y0) ** 2), 0, 1)
+        px_, py_ = x0 + (x1 - x0) * t + 0.02 * np.sin(t * 9), y0 + (y1 - y0) * t
+        line = (np.hypot(xx - px_, yy - py_) < wv * (1.2 - t * 0.6)) & body
+        col = np.where(line[..., None], np.array([54, 8, 40]), col)
+    # brillo humedo
+    gl = np.exp(-(((xx - 0.4) / 0.045) ** 2 + ((yy - 0.47) / 0.025) ** 2)) * body
+    col += gl[..., None] * np.array([120, 90, 90])
+    col += (smoothstep(0.7, 0.85, n) * body * 30)[..., None]
+    # contorno oscuro para que se lea sobre cualquier fondo
+    ring = _outline(alpha, 6) * (1 - alpha)
+    col = col * alpha[..., None] + np.array([12, 4, 4]) * ring[..., None]
+    return save(_hires(col, np.maximum(alpha, ring * 0.9), S), "heart")
 
 
 def bulb():
-    """Icono de bombilla (bateria de la linterna), 12x12."""
-    S = 12
-    cv = Canvas(S, S, (210, 190, 120), 0)
-    yy, xx = np.mgrid[0:S, 0:S].astype(float)
-    glass = np.hypot(xx - 5.5, yy - 4.5) <= 4.3
-    base = (yy >= 8) & (yy <= 10) & (np.abs(xx - 5.5) <= 2)
-    cv.a = (glass | base).astype(float)
-    cv.c[glass] = np.array([220, 200, 130]) * (1.2 - 0.05 * (xx + yy)[glass])[:, None].clip(0.6, 1.3)
-    cv.c[base] = (120, 116, 106)
-    cv.c[9, 3:9] = (70, 66, 60)
-    for x, y in ((4, 4), (5, 5), (6, 4), (7, 5)):
-        cv.c[y, x] = (130, 90, 40)                                         # filamento
-    cv.c[2, 3:5] = (255, 250, 220)
-    a = cv.a > 0.5
-    ring = np.zeros_like(a)
-    for dy, dx in ((1, 0), (-1, 0), (0, 1), (0, -1)):
-        ring |= np.roll(np.roll(a, dy, 0), dx, 1)
-    ring &= ~a
-    cv.c[ring] = (10, 8, 6)
-    cv.a[ring] = 0.9
-    return save(cv, "bulb")
+    """Icono de bombilla (bateria de la linterna), 48 px (se dibuja a 12): cristal sucio con reflejo,
+    filamento encendido, casquillo de rosca."""
+    S, W = 48, 192
+    yy, xx = np.mgrid[0:W, 0:W].astype(float) / W
+    r = R(9)
+    n = fbm(W, W, r, base=6, octaves=3, periodic=False)
+    glass_d = np.hypot((xx - 0.5) / 0.36, (yy - 0.38) / 0.34)
+    neck = (np.abs(xx - 0.5) < 0.2 - 0.12 * np.clip((yy - 0.55) / 0.15, 0, 1)) & (yy > 0.5) & (yy < 0.7)
+    glass = (glass_d < 1) | neck
+    base = (np.abs(xx - 0.5) < 0.17) & (yy >= 0.68) & (yy < 0.92)
+    tip = (np.hypot((xx - 0.5) / 0.08, (yy - 0.93) / 0.04) < 1)
+    alpha = (glass | base | tip).astype(float)
+    col = np.zeros((W, W, 3)) + (196, 176, 108)
+    col *= (1.15 - 0.45 * np.clip(glass_d, 0, 1) ** 2)[..., None]
+    col *= (0.85 + 0.25 * n)[..., None]
+    # suciedad en el cristal
+    col = np.where((glass & (n > 0.62))[..., None], col * 0.75 + np.array([50, 40, 20]) * 0.25, col)
+    # filamento en zigzag que brilla
+    fy = 0.38 + 0.04 * np.sign(np.sin((xx - 0.36) * 2 * math.pi / 0.07))
+    fil = (np.abs(yy - fy) < 0.03) & (np.abs(xx - 0.5) < 0.14)
+    posts = (np.abs(np.abs(xx - 0.5) - 0.14) < 0.02) & (yy > 0.38) & (yy < 0.62)
+    halo = np.exp(-(((xx - 0.5) / 0.2) ** 2 + ((yy - 0.38) / 0.12) ** 2))
+    col += (halo * glass)[..., None] * np.array([90, 70, 20])
+    col = np.where(fil[..., None], np.array([255, 236, 170]), col)
+    col = np.where(posts[..., None], np.array([90, 80, 60]), col)
+    # rosca del casquillo
+    thread = 0.5 + 0.5 * np.sin((yy - 0.68) * 2 * math.pi / 0.055 + (xx - 0.5) * 3)
+    bcol = np.array([150, 144, 132]) * (0.55 + 0.5 * thread)[..., None] * (1.2 - 1.5 * np.abs(xx - 0.45))[..., None]
+    col = np.where(base[..., None], bcol, col)
+    col = np.where(tip[..., None], np.array([60, 56, 50]), col)
+    # reflejo
+    refl = np.exp(-(((xx - 0.36) / 0.05) ** 2 + ((yy - 0.24) / 0.08) ** 2)) * glass
+    col += refl[..., None] * 140
+    ring = _outline(alpha, 5) * (1 - alpha)
+    col = col * alpha[..., None] + np.array([10, 8, 6]) * ring[..., None]
+    return save(_hires(col, np.maximum(alpha, ring * 0.9), S), "bulb")
 
 
 def slot(selected):
@@ -348,39 +395,154 @@ def splatter(i):
 
 
 def scare_face():
-    """Susto: la cara de Smiley pegada a la pantalla. Negro con una sonrisa roja enorme y un ojo."""
+    """Susto: la cara de Smiley pegada a la pantalla (512 px). Piel negra con brillo aceitoso y venas,
+    pelo lacio enmarcando la cara, el ojo derecho enorme, inyectado en sangre y brillando, la cuenca
+    del otro vacia, y la sonrisa de oreja a oreja con dientes irregulares, encias en carne viva, babas y
+    sangre. Todo lo rojo lleva un halo, como si quemara la retina."""
+    from PIL import ImageFilter
     r = R(77)
-    S = 256
+    S, K = 512, 2                       # se pinta al doble y se reduce (bordes suaves)
+    W = S * K
+    yy, xx = np.mgrid[0:W, 0:W].astype(float)
+    cx = W / 2
+    n1 = fbm(W, W, r, base=4, octaves=5, periodic=False)
+    n2 = fbm(W, W, r, base=14, octaves=4, periodic=False)
+    # cabeza alargada, mas ancha en los pomulos, que se sale por abajo
+    d = np.hypot((xx - cx) / (W * 0.43), (yy - W * 0.56) / (W * 0.66))
+    head = smoothstep(1.02, 0.94, d + (n1 - 0.5) * 0.12)
+    col = np.zeros((W, W, 3)) + (10, 8, 10)
+    col *= (0.6 + 0.8 * n2)[..., None]
+    # relieve: pomulos, frente y menton cogen algo de luz fria
+    for (px, py, rx, ry, g) in ((0.3, 0.5, 0.12, 0.08, 16), (0.7, 0.5, 0.12, 0.08, 16), (0.5, 0.2, 0.25, 0.1, 10),
+                                (0.5, 0.9, 0.15, 0.06, 8)):
+        b = np.exp(-(((xx - W * px) / (W * rx)) ** 2 + ((yy - W * py) / (W * ry)) ** 2))
+        col += b[..., None] * np.array([g, g, g * 1.3])
+    sheen = smoothstep(0.62, 0.8, fbm(W, W, r, base=6, octaves=3, periodic=False)) * 22
+    col += sheen[..., None] * np.array([0.8, 0.9, 1.2])
+    # venas algo mas claras
+    v = np.abs(fbm(W, W, r, base=9, octaves=3, periodic=False) - 0.5)
+    col += (smoothstep(0.02, 0.0, v) * 14)[..., None]
+    glow = np.zeros((W, W))                    # cuanto brilla cada punto (para el halo)
+    glowcol = np.zeros((W, W, 3))
+
+    def put(mask, c, g=0.0):
+        nonlocal col
+        m = mask[..., None]
+        col = col * (1 - m) + np.array(c) * m
+        if g:
+            glow[:] = np.maximum(glow, mask * g)
+            glowcol[:] = glowcol * (1 - m) + np.array(c) * m
+
+    # cuenca vacia (lado izquierdo de la imagen es el ojo derecho de Smiley... el ojo va a la izquierda)
+    ex, ey = W * 0.33, W * 0.36
+    hx, hy = W * 0.69, W * 0.37
+    hollow = smoothstep(1.0, 0.6, np.hypot((xx - hx) / (W * 0.1), (yy - hy) / (W * 0.065)))
+    col *= (1 - 0.8 * hollow)[..., None]
+    socket = smoothstep(1.0, 0.7, np.hypot((xx - ex) / (W * 0.13), (yy - ey) / (W * 0.095)))
+    col *= (1 - 0.6 * socket)[..., None]
+    # el ojo: esclerotica roja con venas, iris encendido, pupila diminuta
+    eyed = np.hypot((xx - ex) / (W * 0.105), (yy - ey) / (W * 0.075))
+    eye = smoothstep(1.0, 0.94, eyed)
+    ang = np.arctan2(yy - ey, xx - ex)
+    rays = 0.5 + 0.5 * np.sin(ang * 23 + fbm(W, W, r, base=20, octaves=2, periodic=False) * 9)
+    sclera = np.array([150, 14, 18]) * (0.7 + 0.5 * rays[..., None] * smoothstep(0.3, 1, eyed)[..., None])
+    put(eye, (0, 0, 0))
+    col += eye[..., None] * sclera
+    glow[:] = np.maximum(glow, eye * 0.7)
+    glowcol[:] = glowcol * (1 - eye[..., None]) + eye[..., None] * np.array([255, 40, 30])
+    iris = smoothstep(0.5, 0.44, eyed)
+    put(iris, (255, 70, 40), 1.0)
+    put(smoothstep(0.32, 0.26, eyed), (255, 214, 170), 1.0)
+    put(smoothstep(0.1, 0.07, np.hypot((xx - ex) / (W * 0.012), (yy - ey) / (W * 0.03))), (10, 0, 0))
+    # regueros bajo el ojo
+    for k in range(4):
+        x0 = ex + (k - 1.5) * W * 0.03 + r.uniform(-8, 8)
+        ln = r.uniform(0.08, 0.2) * W
+        wav = x0 + 6 * np.sin(yy / 23 + k)
+        band = (np.abs(xx - wav) < (4 + 3 * (1 - (yy - ey) / ln))) & (yy > ey + W * 0.06) & (yy < ey + W * 0.06 + ln)
+        put(band.astype(float) * 0.9, (70, 4, 8))
+    # sonrisa: media luna de oreja a oreja que sube hasta los ojos
+    my = W * 0.68
+    up = lambda x: my - ((x - cx) / (W * 0.4)) ** 2 * W * 0.2
+    top = up(xx)
+    low = my + W * 0.09 * (1 - ((xx - cx) / (W * 0.4)) ** 2) - ((xx - cx) / (W * 0.4)) ** 2 * W * 0.13
+    inx = np.abs(xx - cx) < W * 0.41
+    mouth = (yy > top) & (yy < low) & inx
+    lips = ((yy > top - 9) & (yy < low + 9) & inx) & ~mouth
+    put(lips.astype(float), (190, 14, 20), 0.9)
+    put(mouth.astype(float), (6, 0, 1))
+    # encias
+    gum_t = mouth & (yy < top + W * 0.025)
+    gum_b = mouth & (yy > low - W * 0.022)
+    put((gum_t | gum_b).astype(float), (176, 18, 26), 0.8)
+    # dientes irregulares: arriba cuelgan, abajo suben, todos afilados y de distinto tamano
+    nt = 17
+    for row in (0, 1):
+        for k in range(nt + row):
+            t = (k + 0.5 + 0.5 * row) / (nt + row)
+            x = cx + (t - 0.5) * 2 * W * 0.39 + r.uniform(-5, 5)
+            wd = W * (0.017 + 0.008 * r.random()) * (1 - 0.4 * abs(t - 0.5) * 2)
+            if row == 0:
+                y0 = up(x) + W * 0.02
+                ln = W * (0.05 + 0.035 * r.random()) * (1 - 0.5 * abs(t - 0.5) * 2)
+                tooth = (yy > y0) & (yy < y0 + ln) & (np.abs(xx - x) < wd * (1 - (yy - y0) / ln))
+            else:
+                yb = my + W * 0.09 * (1 - ((x - cx) / (W * 0.4)) ** 2) - ((x - cx) / (W * 0.4)) ** 2 * W * 0.13 - W * 0.018
+                ln = W * (0.04 + 0.03 * r.random()) * (1 - 0.5 * abs(t - 0.5) * 2)
+                tooth = (yy < yb) & (yy > yb - ln) & (np.abs(xx - x) < wd * (1 - (yb - yy) / ln))
+            shade = 0.75 + 0.25 * r.random()
+            yel = r.random() * 0.3
+            put(tooth.astype(float), (232 * shade, (214 - 50 * yel) * shade, (196 - 90 * yel) * shade), 0.35)
+    # babas y sangre entre los dientes
+    for k in range(9):
+        x0 = cx + r.uniform(-0.3, 0.3) * W
+        y0 = up(x0) + W * 0.06
+        y1 = y0 + r.uniform(0.03, 0.09) * W
+        sag = (yy - y0) / max(1, y1 - y0)
+        strand = (np.abs(xx - x0 - 4 * np.sin(sag * 3)) < 2.2) & (yy > y0) & (yy < y1)
+        put(strand.astype(float) * 0.8, (150, 20, 28) if k % 2 else (90, 80, 84), 0.2 if k % 2 else 0)
+    for k in range(10):
+        x0 = cx + r.uniform(-0.36, 0.36) * W
+        y0 = my + W * 0.09 * (1 - ((x0 - cx) / (W * 0.4)) ** 2) - ((x0 - cx) / (W * 0.4)) ** 2 * W * 0.13 + 6
+        ln = r.uniform(0.05, 0.25) * W
+        wd = r.uniform(3, 7)
+        drip = (np.abs(xx - x0) < wd * (1 - 0.4 * (yy - y0) / ln)) & (yy > y0) & (yy < y0 + ln)
+        tipd = np.hypot(xx - x0, yy - y0 - ln) < wd * 1.2
+        put((drip | tipd).astype(float) * head, (120, 6, 10))
+    # pelo: mechones negros que caen por los lados y por la frente, sobre la cuenca vacia
+    hair = np.zeros((W, W))
+    for k in range(40):
+        side = -1 if k % 2 else 1
+        x0 = cx + side * W * r.uniform(0.25, 0.47)
+        if k % 5 == 0:
+            x0 = cx + W * r.uniform(0.1, 0.34)                          # flequillo sobre la cuenca
+        y1 = r.uniform(0.3, 0.75) * W if k % 5 else r.uniform(0.32, 0.46) * W
+        wd = r.uniform(6, 16)
+        curve = x0 + side * 0.00005 * (yy - 0) ** 2 * (0.5 + r.random())
+        taper = np.clip(1 - yy / y1, 0, 1) ** 0.4
+        hair = np.maximum(hair, ((np.abs(xx - curve) < wd * taper) & (yy < y1)).astype(float))
+    cap = smoothstep(0.75, 0.72, np.hypot((xx - cx) / (W * 0.47), (yy - W * 0.3) / (W * 0.36))) * (yy < W * 0.2)
+    hair = np.maximum(hair, cap)
+    strands = 0.5 + 0.5 * np.sin(xx * 0.35 + fbm(W, W, r, base=12, octaves=2, periodic=False) * 10)
+    hc = np.zeros((W, W, 3)) + 6
+    hc += (strands * 14)[..., None] * np.array([0.8, 0.9, 1.2])
+    col = col * (1 - hair[..., None]) + hc * hair[..., None]
+    glow *= (1 - hair)
+    alpha = np.maximum(head, hair * smoothstep(0.0, 0.05, 1 - yy / W))
+    # halo rojo de lo que brilla
+    gl = Image.fromarray(np.clip(glowcol * glow[..., None], 0, 255).astype(np.uint8))
+    halo = np.asarray(gl.filter(ImageFilter.GaussianBlur(W * 0.025)), dtype=float)
+    halo2 = np.asarray(gl.filter(ImageFilter.GaussianBlur(W * 0.07)), dtype=float)
+    col = col + halo * 0.9 + halo2 * 0.6
+    alpha = np.clip(np.maximum(alpha, (halo2.max(axis=2) / 255) * 1.4), 0, 1)
+    # grano
+    col += (r.random((W, W)) - 0.5)[..., None] * 10
+    img = np.dstack([np.clip(col, 0, 255), np.clip(alpha, 0, 1) * 255]).astype(np.uint8)
+    im = Image.fromarray(img, "RGBA").resize((S, S), Image.LANCZOS)
     cv = Canvas(S, S, (0, 0, 0), 0)
-    yy, xx = np.mgrid[0:S, 0:S].astype(float)
-    n = fbm(S, S, r, base=5, octaves=5, periodic=False)
-    # cabeza alargada y deforme que se sale por los bordes
-    d = np.hypot((xx - S / 2) / (S * 0.46), (yy - S * 0.55) / (S * 0.62))
-    head = smoothstep(1.05, 0.9, d + (n - 0.5) * 0.25)
-    cv.a = head
-    cv.c[:] = (8, 6, 7)
-    cv.c = cv.c + (n[..., None] - 0.5) * 18
-    # sonrisa: arco ancho de dientes rojos
-    cy = S * 0.66
-    smile = (np.abs((yy - cy) + 0.0028 * (xx - S / 2) ** 2) < 16) & (np.abs(xx - S / 2) < S * 0.36)
-    teeth = smile & (((xx // 11) % 2) == 0)
-    cv.c[smile] = (90, 4, 6)
-    cv.c[teeth] = (225, 30, 26)
-    gums = smile & (np.abs((yy - cy) + 0.0028 * (xx - S / 2) ** 2) > 11)
-    cv.c[gums] = (150, 10, 14)
-    # un ojo abierto, rojo y brillante; el otro, una rendija
-    eye = np.hypot((xx - S * 0.36) / 15, (yy - S * 0.4) / 11) < 1
-    cv.c[eye] = (255, 50, 40)
-    cv.c[np.hypot((xx - S * 0.36) / 5, (yy - S * 0.4) / 5) < 1] = (40, 0, 0)
-    slit = (np.abs(yy - S * 0.41) < 2) & (np.abs(xx - S * 0.65) < 16)
-    cv.c[slit] = (160, 20, 18)
-    # chorretones de sangre desde la boca
-    for i in range(7):
-        x0 = S / 2 + r.uniform(-S * 0.3, S * 0.3)
-        y0 = cy - 0.0028 * (x0 - S / 2) ** 2 + 8
-        ln = r.uniform(20, 70)
-        band = (np.abs(xx - x0) < r.uniform(1.5, 3.5)) & (yy > y0) & (yy < y0 + ln)
-        cv.c[band & (head > 0.5)] = (120, 6, 8)
+    arr = np.asarray(im, dtype=float)
+    cv.c = arr[..., :3]
+    cv.a = arr[..., 3] / 255
     return save(cv, "scare_face")
 
 
