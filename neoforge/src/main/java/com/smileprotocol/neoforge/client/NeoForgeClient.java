@@ -43,6 +43,7 @@ public final class NeoForgeClient {
         @SubscribeEvent
         public static void onSetup(FMLClientSetupEvent event) {
             ClientController.init();
+            if (PAL) PalBridge.init();
         }
 
         @SubscribeEvent
@@ -70,7 +71,6 @@ public final class NeoForgeClient {
         @SubscribeEvent
         public static void onTick(ClientTickEvent.Post event) {
             ClientController.tick(Minecraft.getInstance());
-            if (PAL) PalBridge.tick(Minecraft.getInstance());
         }
 
         @SubscribeEvent

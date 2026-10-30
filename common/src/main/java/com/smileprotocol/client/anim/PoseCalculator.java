@@ -117,6 +117,14 @@ public final class PoseCalculator {
 
     private PoseCalculator() {}
 
+    /**
+     * Mueve el cuerpo entero en pixeles del modelo (Y hacia abajo). PlayerAnimator aplica la
+     * posicion de {@code body} en bloques y con Y hacia arriba: aqui se convierte.
+     */
+    private static void bodyPx(Pose pose, float x, float yDown, float z) {
+        pose.pos(BODY, x / 16f, -yDown / 16f, z / 16f);
+    }
+
     public static void compute(Player player, float pt, Pose pose) {
         pose.clear();
         if (!ClientState.inSmileProtocol()) return;
@@ -188,7 +196,7 @@ public final class PoseCalculator {
         float sw = Mth.sin(phase) * speed;
         pose.rot(TORSO, 0.06f * speed, -0.1f * sw, 0.03f * sw);
         pose.rot(HEAD, -0.04f * speed, 0.08f * sw, 0);
-        pose.pos(BODY, 0, -0.6f * Math.abs(Mth.cos(phase)) * speed, 0);
+        bodyPx(pose, 0, -0.6f * Math.abs(Mth.cos(phase)) * speed, 0);
         pose.bend(RIGHT_LEG, 0, 0.35f * Math.max(0, Mth.cos(phase)) * speed);
         pose.bend(LEFT_LEG, 0, 0.35f * Math.max(0, -Mth.cos(phase)) * speed);
         // Poca vida: cojea de la pierna derecha y se sujeta el costado
@@ -207,7 +215,7 @@ public final class PoseCalculator {
         float c = Mth.cos(phase);
         pose.rot(TORSO, 0.32f, -0.14f * Mth.sin(phase) * speed, 0);
         pose.rot(HEAD, -0.28f, 0.1f * Mth.sin(phase) * speed, 0);
-        pose.pos(BODY, 0, 0.5f - 1.0f * Math.abs(c) * speed, -0.8f);
+        bodyPx(pose, 0, 0.5f - 1.0f * Math.abs(c) * speed, -0.8f);
         // los brazos de la vanilla ya oscilan; se exagera y se doblan los codos
         pose.rot(RIGHT_ARM, 0.55f * Mth.cos(phase + PI) * speed - 0.25f, 0, 0.12f);
         pose.rot(LEFT_ARM, 0.55f * Mth.cos(phase) * speed - 0.25f, 0, -0.12f);
@@ -300,7 +308,7 @@ public final class PoseCalculator {
         pose.rot(LEFT_LEG, -0.1f - b * 0.35f, 0, -0.05f);
         pose.bend(RIGHT_LEG, 0, 0.6f + 0.4f * Math.max(0, b));
         pose.bend(LEFT_LEG, 0, 0.6f + 0.4f * Math.max(0, -b));
-        pose.pos(BODY, 0, 0, 0.6f * a);
+        bodyPx(pose, 0, 0, 0.6f * a);
     }
 
     /** Derribado (tumbado boca abajo): tira de un brazo y luego del otro, las piernas se arrastran. */
@@ -360,7 +368,7 @@ public final class PoseCalculator {
                 pose.rot(LEFT_LEG, -0.25f * k, 0, -0.05f * k);
                 pose.bend(RIGHT_LEG, 0, 1.2f * k);
                 pose.bend(LEFT_LEG, 0, 0.9f * k);
-                pose.pos(BODY, 0, 3.5f * k, 0);
+                bodyPx(pose, 0, 3.5f * k, 0);
             }
             case INTERACT_DOOR -> {
                 // Hombro contra la puerta y las dos manos empujando
@@ -395,7 +403,7 @@ public final class PoseCalculator {
                 pose.rot(LEFT_LEG, -0.3f * in, 0, -0.1f * in);
                 pose.bend(RIGHT_LEG, 0, 1.5f * in);
                 pose.bend(LEFT_LEG, 0, 1.4f * in);
-                pose.pos(BODY, 0, 5f * in, 0);
+                bodyPx(pose, 0, 5f * in, 0);
             }
             default -> {
                 pose.rot(RIGHT_ARM, (-1.2f + Mth.sin(time * 0.3f) * 0.08f) * in, -0.1f * in, 0);

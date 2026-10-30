@@ -33,7 +33,7 @@ public final class SmileProtocolFabricClient implements ClientModInitializer {
         ClientTickEvents.END_CLIENT_TICK.register(ClientController::tick);
         // Animaciones del jugador (README 13): solo con PlayerAnimator instalado
         if (Services.PLATFORM.isModLoaded("playeranimator") || Services.PLATFORM.isModLoaded("player-animator")) {
-            ClientTickEvents.END_CLIENT_TICK.register(PalBridge::tick);
+            PalBridge.init();
         }
         HudRenderCallback.EVENT.register((graphics, delta) ->
                 HudOverlay.INSTANCE.render(graphics, delta.getGameTimeDeltaPartialTick(true)));

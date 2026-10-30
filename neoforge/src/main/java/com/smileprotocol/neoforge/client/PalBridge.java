@@ -4,13 +4,9 @@ import com.smileprotocol.client.anim.PoseCalculator;
 import dev.kosmx.playerAnim.api.TransformType;
 import dev.kosmx.playerAnim.api.layered.IAnimation;
 import dev.kosmx.playerAnim.core.util.Vec3f;
-import dev.kosmx.playerAnim.minecraftApi.PlayerAnimationAccess;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.AbstractClientPlayer;
-import net.minecraft.world.entity.player.Player;
 
-import java.util.Map;
-import java.util.WeakHashMap;
 
 /**
  * Puente con PlayerAnimator (README 13.2): anade a cada jugador una capa que suma la pose de
@@ -19,24 +15,21 @@ import java.util.WeakHashMap;
 public final class PalBridge {
 
     private static final int PRIORITY = 1100;
-    private static final Map<AbstractClientPlayer, Boolean> ATTACHED = new WeakHashMap<>();
 
     private PalBridge() {}
 
+    /**
+     * Registra la capa con la fabrica de PlayerAnimator: se anade a cada jugador del cliente al
+     * crearse (tambien al cambiar de dimension, cuando el juego crea un jugador nuevo).
+     */
+    public static void init() {
+        dev.kosmx.playerAnim.minecraftApi.PlayerAnimationFactory.ANIMATION_DATA_FACTORY.registerFactory(
+                com.smileprotocol.SmileProtocol.id("pose"), PRIORITY, Layer::new);
+        com.smileprotocol.SmileProtocol.LOGGER.info("PlayerAnimator: capa de poses registrada");
+    }
+
+    /** Ya no hace falta: la fabrica anade la capa sola. */
     public static void tick(Minecraft mc) {
-        if (mc.level == null) return;
-        for (Player p : mc.level.players()) {
-            if (!(p instanceof AbstractClientPlayer acp) || ATTACHED.containsKey(acp)) continue;
-            ATTACHED.put(acp, Boolean.TRUE);
-            try {
-                PlayerAnimationAccess.getPlayerAnimLayer(acp).addAnimLayer(PRIORITY, new Layer(acp));
-                com.smileprotocol.SmileProtocol.LOGGER.info("PlayerAnimator: capa anadida a {}", acp.getGameProfile().getName());
-            } catch (RuntimeException | LinkageError e) {
-                // Jugador sin soporte de animaciones: se deja la pose vanilla
-                com.smileprotocol.SmileProtocol.LOGGER.warn("PlayerAnimator: no se pudo anadir la capa a {}: {}",
-                        acp.getGameProfile().getName(), e.toString());
-            }
-        }
     }
 
     /** Capa aditiva sobre la pose vanilla. */
