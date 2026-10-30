@@ -515,11 +515,11 @@ public final class ClientSelfTest {
 
         // Remates y muerte instantanea: el mob en P mirando al este; la victima queda delante
         com.smileprotocol.entity.SPMonster[] ex = {null};
-        String[] names = {"remate_berserker", "remate_smiler", "muerte_instantanea"};
-        com.smileprotocol.sequence.SequenceKind[] kinds = {com.smileprotocol.sequence.SequenceKind.BERSERKER_EXECUTION,
+        String[] seqNames = {"remate_berserker", "remate_smiler", "muerte_instantanea"};
+        com.smileprotocol.sequence.SequenceKind[] seqKinds = {com.smileprotocol.sequence.SequenceKind.BERSERKER_EXECUTION,
                 com.smileprotocol.sequence.SequenceKind.SMILER_EXECUTION, com.smileprotocol.sequence.SequenceKind.SMILER_KILL};
-        for (int i = 0; i < kinds.length; i++) {
-            com.smileprotocol.sequence.SequenceKind kind = kinds[i];
+        for (int i = 0; i < seqKinds.length; i++) {
+            com.smileprotocol.sequence.SequenceKind kind = seqKinds[i];
             int idx = i;
             SHOTS.add(() -> server.execute(() -> {
                 com.smileprotocol.downed.DownedManager.clear(sp);
@@ -539,12 +539,12 @@ public final class ClientSelfTest {
             }));
             SHOTS.add(() -> wait = 12);
             SHOTS.add(() -> placeCamera(P.add(1.0, 1.5, 4.6), P.add(1.0, 0.8, 0)));
-            record(mc, names[i], kind.ticks + 8, k -> {
+            record(mc, seqNames[i], kind.ticks + 8, k -> {
                 if (k == 0) server.execute(() -> { if (ex[0] != null) com.smileprotocol.sequence.SequenceManager.start(ex[0], sp, kind); });
             });
             // de frente / en diagonal, la misma secuencia otra vez
             SHOTS.add(() -> placeCamera(P.add(4.2, 1.6, 2.6), P.add(1.0, 0.8, 0)));
-            record(mc, names[i] + "_diagonal", kind.ticks + 8, k -> {
+            record(mc, seqNames[i] + "_diagonal", kind.ticks + 8, k -> {
                 if (k == 0) server.execute(() -> {
                     if (kind.execution) com.smileprotocol.downed.DownedManager.down(sp, "grabacion");
                     if (ex[0] != null) com.smileprotocol.sequence.SequenceManager.start(ex[0], sp, kind);
