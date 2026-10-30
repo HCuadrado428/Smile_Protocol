@@ -97,15 +97,26 @@ def smiley():
     g.cube("smile", (-5, 53.8, -4.25), (10, 4, 0.2), "smiley_smile")              # mas ancha que la cara
     g.bone("eye", "head", (2.35, 59.55, -4.1))
     g.cube("eye", (0.6, 58.3, -4.2), (3.5, 2.5, 0.2), "smiley_eye")               # ojo derecho
-    # pelo largo y lacio que le tapa media cara (la izquierda, la del ojo que no tiene)
+    # melena lacia por los hombros, en mechones desiguales que se afinan en la punta; el flequillo
+    # cae sobre el lado izquierdo (el del ojo que no tiene) y deja ver el ojo
     g.bone("hair", "head", (0, 62.5, -0.5))
     g.cube("hair", (-3.8, 62, -4.4), (7.6, 1.4, 7.8), "void_hair")
-    for k, ln in enumerate((22, 26.5, 24, 27, 23, 20)):
-        g.cube("hair", (-3.9 + k * 1.3, 62.5 - ln, 2.8 + (k % 2) * 0.25), (1.3, ln, 1.0), "void_hair")   # mechones de la espalda
-    g.cube("hair", (-4.1, 42, -4.2), (0.8, 20.5, 7.2), "void_hair")
-    g.cube("hair", (3.3, 46, -4.2), (0.8, 16.5, 7.2), "void_hair")
-    for x, ln in ((-3.6, 12), (-2.2, 9), (-0.9, 5)):
-        g.cube("hair", (x, 62.5 - ln, -4.75), (1.3, ln, 0.4), "void_hair")              # flequillo sobre el lado izquierdo
+    g.cube("hair", (-3.2, 63.2, -3.4), (6.4, 0.6, 6.0), "void_hair")                  # coronilla
+
+    def strand(x, z, ln, w, d, back=0.0):
+        top = ln * 0.62
+        g.cube("hair", (x, 62.5 - top, z), (w, top, d), "void_hair")
+        g.cube("hair", (x + w * 0.2, 62.5 - ln, z + back), (w * 0.6, ln - top + 0.2, d * 0.7), "void_hair")
+
+    for k, ln in enumerate((11, 13.5, 12, 14, 12.5, 10)):
+        strand(-3.9 + k * 1.3, 2.8 + (k % 2) * 0.25, ln, 1.3, 1.0, 0.25)               # espalda
+    for k, (z, ln) in enumerate(((-4.2, 9), (-1.8, 11.5), (0.6, 10.5))):
+        strand(-4.1, z, ln, 0.8, 2.4, 0.3)                                              # lado izquierdo
+    for k, (z, ln) in enumerate(((-4.2, 5.5), (-1.8, 8), (0.6, 9))):
+        strand(3.3, z, ln, 0.8, 2.4, 0.3)                                               # lado derecho, corto delante del ojo
+    for x, ln in ((-3.6, 6), (-2.4, 4.5), (-1.3, 2.8)):
+        g.cube("hair", (x, 62.5 - ln, -4.75), (1.2, ln, 0.4), "void_hair")              # flequillo
+        g.cube("hair", (x + 0.3, 62.5 - ln - 1.2, -4.7), (0.6, 1.3, 0.3), "void_hair")
 
     for side, sx in (("r", 1), ("l", -1)):
         g.bone(f"arm_{side}", "torso", (sx * 4.6, 46, 0))
@@ -134,9 +145,9 @@ def smiley():
         mm.reparent(g, b, "chest")
     split(g, "head", "jaw", (0, 53, 0.5), lambda c: abs(c["origin"][1] - 51.5) < 0.01)
     split(g, "hair", "hair_back", (0, 62.5, 2.8), lambda c: c["origin"][2] > 2.7)
-    split(g, "hair", "hair_l", (-3.8, 62.5, -1), lambda c: abs(c["origin"][0] + 4.1) < 0.01)
-    split(g, "hair", "hair_r", (3.8, 62.5, -1), lambda c: abs(c["origin"][0] - 3.3) < 0.01)
-    split(g, "hair", "hair_front", (-2, 62.5, -4.6), lambda c: abs(c["origin"][2] + 4.75) < 0.01)
+    split(g, "hair", "hair_l", (-3.8, 62.5, -1), lambda c: c["origin"][0] < -3.85 and c["origin"][1] < 62)
+    split(g, "hair", "hair_r", (3.8, 62.5, -1), lambda c: c["origin"][0] > 3.25 and c["origin"][1] < 62)
+    split(g, "hair", "hair_front", (-1, 62.5, -4.6), lambda c: c["origin"][2] < -4.6)
     finger_tips(g, tip_mat="nail")
     return g.save()
 
