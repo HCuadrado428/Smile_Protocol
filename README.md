@@ -1088,8 +1088,9 @@ Estados de IA típicos: `PATROL → INVESTIGATE (ruido) → CHASE → SEARCH (es
 | **Ojo** | **Un solo ojo rojo**, en el lado del **ojo derecho**. Al otro lado no hay ojo |
 | **Boca** | **Sonrisa roja** |
 
-**Reglas para todos los smilers:**
-- Mantienen **la silueta negra y la sonrisa roja**. Es lo que los hace de la familia.
+**Reglas para todos los smilers** *(revisadas en la fase 21)*:
+- **Smiley es el único que es una silueta negra pura.** Así se le reconoce en cuanto aparece.
+- Lo común a toda la familia es **lo rojo que brilla: la sonrisa y/o el ojo**. Todo lo demás (piel, materiales, anatomía, tamaño) es libre, y cada smiler debe ser **un monstruo distinto y grotesco**, con un aspecto que cuente su comportamiento.
 - Cada smiler **varía** a partir de Smiley: más bajo o encorvado, otras proporciones, el pelo, las manos, y sobre todo **el ojo** (apagado, cerrado, ausente...). La variación debe tener sentido con su comportamiento.
 - **El rojo es lo único que brilla.** El ojo y la sonrisa usan una **capa emisiva** (GeckoLib, **verificar** cómo se hace en 4.x) y no una luz dinámica de Veil, para no gastar el presupuesto de luces (21.1).
 - Los modelos comparten un **esqueleto base** (mismos nombres de huesos para cabeza, torso, brazos, dedos y piernas) para poder **reutilizar animaciones** entre smilers. *Propuesta.*

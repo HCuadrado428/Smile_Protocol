@@ -144,6 +144,116 @@ def face_blind():
     return mat
 
 
+def plaster(base=(128, 124, 116)):
+    """Piel del Paciente: escayola palida y sucia, agrietada como una estatua, con manchas de humedad
+    y vetas oscuras que bajan desde las grietas."""
+    def m(f):
+        n = f.n(0.5, 4, 301)
+        c = np.zeros((f.h, f.w, 3)) + base
+        c *= (0.8 + 0.35 * n)[..., None]
+        c = c * (1 - 0.25 * sstep(0.55, 0.85, f.n(0.25, 3, 302)))[..., None]          # humedad
+        cr = np.abs(noise3(f.X * 0.9, f.Y * 0.6, f.Z * 0.9, 1.0, 303) - 0.5)
+        crack = (cr < 0.011) & (f.n(0.3, 2, 305) > 0.5)
+        c = np.where(crack[..., None], np.array([34, 30, 28]), c)                   # grietas
+        streak = sstep(0.62, 0.95, noise3(f.X * 4, f.Y * 0.4, f.Z * 4, 1.0, 304))
+        c = c * (1 - 0.35 * streak)[..., None]
+        c += (f.white()[..., None] - 0.5) * 8
+        return c, np.ones((f.h, f.w))
+    return m
+
+
+def autopsy():
+    """Pecho del Paciente: escayola con la incision de autopsia en Y cosida con hilo negro grueso."""
+    pl = plaster()
+
+    def m(f):
+        c, a = pl(f)
+        if f.face != "north":
+            return c, a
+        w, h = f.w / gm.SCALE, f.h / gm.SCALE
+        u, v = f.U, f.V
+        stem = (np.abs(u - w / 2) < 0.28) & (v > h * 0.35)
+        arm = np.abs((v - h * 0.38) - np.abs(u - w / 2) * -0.55 - 0.0) < 0.28
+        arm = arm & (v < h * 0.42) & (np.abs(u - w / 2) < w * 0.48)
+        cut = stem | arm
+        c = np.where(cut[..., None], np.array([92, 20, 18]), c)
+        edge = (stem & (np.abs(u - w / 2) > 0.14))
+        c = np.where(edge[..., None], np.array([150, 60, 52]), c)
+        st = (np.floor(v * gm.SCALE) % 2 == 0) & (np.abs(u - w / 2) < 0.6) & (v > h * 0.36)
+        c = np.where(st[..., None], np.array([18, 16, 16]), c)
+        return c, a
+    return m
+
+
+def bandage():
+    """Gasas sucias enrolladas: bandas claras con sangre seca y amarillo de suero."""
+    def m(f):
+        c = np.zeros((f.h, f.w, 3)) + (196, 188, 168)
+        band = 0.85 + 0.15 * np.sin(f.Y * 9 + f.X * 2)
+        c *= band[..., None]
+        c = c * (1 - 0.3 * sstep(0.5, 0.8, f.n(0.6, 3, 311)))[..., None]
+        blood = sstep(0.62, 0.8, f.n(0.45, 3, 312))
+        c = c * (1 - blood[..., None]) + np.array([88, 18, 14]) * blood[..., None]
+        ooze = sstep(0.7, 0.9, f.n(0.7, 2, 313)) * (1 - blood)
+        c = c * (1 - 0.6 * ooze[..., None]) + np.array([150, 130, 60]) * 0.6 * ooze[..., None]
+        return c, np.ones((f.h, f.w))
+    return m
+
+
+def wristband():
+    def m(f):
+        c = np.zeros((f.h, f.w, 3)) + (210, 210, 200)
+        c = np.where((np.floor(f.U * gm.SCALE * 2) % 3 == 0)[..., None] & (f.face in ("north", "south")), np.array([60, 60, 70]), c)
+        return c, np.ones((f.h, f.w))
+    return m
+
+
+def tube():
+    def m(f):
+        c = np.zeros((f.h, f.w, 3)) + (170, 176, 172)
+        c = c * (0.85 + 0.2 * f.n(1.0, 2, 321))[..., None]
+        clot = sstep(0.6, 0.8, f.n(0.8, 2, 322))
+        c = c * (1 - clot[..., None]) + np.array([96, 16, 14]) * clot[..., None]
+        return c, np.ones((f.h, f.w))
+    return m
+
+
+def face_plaster():
+    """Cara del Paciente: escayola agrietada, las cuencas tapadas con gasa manchada (eso lo pone el
+    hueso de la venda) y la sonrisa finisima como un corte."""
+    sk = plaster((134, 129, 120))
+
+    def smile_mask(f):
+        if f.face != "north":
+            return np.zeros((f.h, f.w))
+        px = np.floor(f.U * gm.SCALE).astype(int)
+        py = np.floor(f.V * gm.SCALE).astype(int)
+        m = ((py == 11) & (px >= 2) & (px <= 9)) | ((py == 10) & ((px == 1) | (px == 10)))
+        return m.astype(float)
+
+    def mat(f):
+        c, a = sk(f)
+        if f.face != "north":
+            return c, a
+        w, h = f.w / gm.SCALE, f.h / gm.SCALE
+        # labios agrietados y oscuros alrededor del corte; regueros secos desde las comisuras
+        px = np.floor(f.U * gm.SCALE).astype(int)
+        py = np.floor(f.V * gm.SCALE).astype(int)
+        around = (np.abs(py - 11) <= 1) & (px >= 1) & (px <= 10)
+        c = np.where(around[..., None], c * 0.55, c)
+        drip = ((px == 2) | (px == 9)) & (py >= 12) & (py <= 14)
+        c = np.where(drip[..., None], np.array([90, 16, 14]), c)
+        c = np.where(smile_mask(f)[..., None] > 0, np.array([210, 18, 22]), c)
+        return c, a
+
+    mat.glowmask = smile_mask
+    return mat
+
+
+MAT.update({"plaster": plaster(), "plaster_hi": plaster((142, 137, 128)), "bandage": bandage(),
+            "wristband": wristband(), "tube": tube(), "face_plaster": face_plaster(), "autopsy": autopsy()})
+
+
 GRIN = [
     "R................R",
     "RR..............RR",
@@ -197,33 +307,35 @@ MAT.update({"skin": skin(), "skin_hi": skin((22, 20, 21)), "hair": hair(), "claw
 # salta de pose en pose cuando nadie lo mira, asi que sus animaciones son poses quietas.
 
 def paciente():
-    g = Geo("paciente", 91, folder="entity", glow=("face_blind", "grin"), ao=False)
+    g = Geo("paciente", 91, folder="entity", glow=("face_plaster", "grin"), ao=False)
     g.bone("root")
     g.bone("hips", "root", (0, 28, 0))
-    g.cube("hips", (-2.8, 26.5, -1.7), (5.6, 3.5, 3.4), "skin")
+    g.cube("hips", (-2.8, 26.5, -1.7), (5.6, 3.5, 3.4), "plaster")
     for sx in (1, -1):
-        g.cube("hips", (sx * 2.6 - 0.6, 27.8, -1.2), (1.2, 1.4, 2.2), "skin_hi")             # crestas de la cadera
+        g.cube("hips", (sx * 2.6 - 0.6, 27.8, -1.2), (1.2, 1.4, 2.2), "plaster_hi")             # crestas de la cadera
     g.bone("torso", "hips", (0, 30, 0))
-    g.cube("torso", (-1.8, 30, -1.3), (3.6, 5.5, 2.6), "skin")                              # cintura de avispa
-    g.cube("torso", (-3.2, 35, -1.9), (6.4, 6, 3.8), "skin")                                # caja toracica
-    g.cube("torso", (-3.6, 40.5, -2), (7.2, 3.5, 4), "skin")
+    g.cube("torso", (-1.8, 30, -1.3), (3.6, 5.5, 2.6), "plaster")                              # cintura de avispa
+    g.cube("torso", (-3.2, 35, -1.9), (6.4, 6, 3.8), "autopsy")                                # caja toracica
+    g.cube("torso", (-3.6, 40.5, -2), (7.2, 3.5, 4), "autopsy")
     for i in range(4):
         w = 6.6 - abs(i - 1.5) * 0.6
-        g.cube("torso", (-w / 2, 36 + i * 1.7, -2.25), (w, 0.6, 0.4), "skin_hi")            # costillas
+        g.cube("torso", (-w / 2, 36 + i * 1.7, -2.25), (w, 0.6, 0.4), "plaster_hi")            # costillas
     for i in range(6):
-        g.cube("torso", (-0.5, 31 + i * 2.1, 1.3), (1, 1, 0.7), "skin_hi")                  # espinazo
+        g.cube("torso", (-0.5, 31 + i * 2.1, 1.3), (1, 1, 0.7), "plaster_hi")                  # espinazo
     for sx in (1, -1):
-        g.cube("torso", (sx * 2.4 - 1.6, 43.3, -1.3), (3.2, 1.2, 2.6), "skin", rotation=(0, 0, sx * -18),
+        g.cube("torso", (sx * 2.4 - 1.6, 43.3, -1.3), (3.2, 1.2, 2.6), "plaster", rotation=(0, 0, sx * -18),
                pivot=(sx * 0.6, 44, 0))                                                    # clavicula caida
     g.bone("neck", "torso", (0, 44.5, -0.3), rotation=(12, 0, 0))
-    g.cube("neck", (-0.8, 44.5, -1.1), (1.6, 7.5, 1.6), "skin")                             # cuello larguisimo
-    g.cube("neck", (-0.5, 46, -1.25), (1, 4.5, 0.3), "skin_hi")                             # tendones
+    g.cube("neck", (-0.8, 44.5, -1.1), (1.6, 7.5, 1.6), "plaster")                             # cuello larguisimo
+    g.cube("neck", (-0.5, 46, -1.25), (1, 4.5, 0.3), "plaster_hi")                             # tendones
     g.bone("head", "neck", (0, 51.8, -0.6), rotation=(8, 0, 0))
-    g.cube("head", (-3, 52, -3.6), (6, 8, 6), "face_blind")                                 # cara alargada
-    g.cube("head", (-2.3, 50.6, -3.3), (4.6, 1.6, 4.8), "skin")                             # menton estrecho
-    g.cube("head", (-2.6, 59.8, -3.2), (5.2, 1.3, 5.2), "skin")                             # craneo alto
-    g.bone("grin", "head", (0, 56.4, -3.66))
-    g.cube("grin", (-4.5, 53.9, -3.66), (9, 5, 0.02), "grin", skip=("south", "east", "west", "up", "down"), blood=False)
+    g.cube("head", (-3, 52, -3.6), (6, 8, 6), "face_plaster")                                 # cara alargada
+    g.cube("head", (-2.3, 50.6, -3.3), (4.6, 1.6, 4.8), "plaster")                             # menton estrecho
+    g.cube("head", (-2.6, 59.8, -3.2), (5.2, 1.3, 5.2), "plaster")                             # craneo alto
+    g.cube("head", (-3.15, 56.1, -3.75), (6.3, 2.2, 6.3), "bandage")                        # venda sobre las cuencas
+    g.cube("head", (2.0, 54.6, -3.85), (0.8, 1.6, 0.4), "bandage")                          # cabo suelto que cuelga
+    g.bone("grin", "head", (0, 54.6, -3.9))
+    g.cube("grin", (-4.5, 52.1, -3.9), (9, 5, 0.02), "grin", skip=("south", "east", "west", "up", "down"), blood=False)
     # pelo: mechones sueltos de largos distintos, con huecos; dos caen por delante de la cara
     g.bone("hair", "head", (0, 61, -0.6))
     g.cube("hair", (-3.3, 60.6, -3.9), (6.6, 1.2, 6.6), "hair")
@@ -243,30 +355,35 @@ def paciente():
     # brazos: huesudos, codos y munecas marcados, manos estrechas y dedos de dos falanges
     for side, sx in (("r", 1), ("l", -1)):
         g.bone(f"arm_{side}", "torso", (sx * 4.2, 43.2, 0))
-        g.cube(f"arm_{side}", (sx * 4.2 - 0.85, 31, -0.85), (1.7, 12.5, 1.7), "skin")
-        g.cube(f"arm_{side}", (sx * 4.2 - 1.05, 40.5, -1.05), (2.1, 3, 2.1), "skin")          # hombro
+        g.cube(f"arm_{side}", (sx * 4.2 - 0.85, 31, -0.85), (1.7, 12.5, 1.7), "plaster")
+        g.cube(f"arm_{side}", (sx * 4.2 - 1.05, 40.5, -1.05), (2.1, 3, 2.1), "plaster")          # hombro
         g.bone(f"forearm_{side}", f"arm_{side}", (sx * 4.2, 31.3, 0))
-        g.cube(f"forearm_{side}", (sx * 4.2 - 1.05, 29.8, -1.05), (2.1, 2, 2.1), "skin_hi")   # codo
-        g.cube(f"forearm_{side}", (sx * 4.2 - 0.7, 17.5, -0.7), (1.4, 12.5, 1.4), "skin")
+        g.cube(f"forearm_{side}", (sx * 4.2 - 1.05, 29.8, -1.05), (2.1, 2, 2.1), "plaster_hi")   # codo
+        g.cube(f"forearm_{side}", (sx * 4.2 - 0.7, 17.5, -0.7), (1.4, 12.5, 1.4), "plaster")
+        if side == "r":
+            g.cube(f"forearm_{side}", (sx * 4.2 - 0.85, 18.6, -0.85), (1.7, 1.1, 1.7), "wristband")  # pulsera de hospital
+        else:
+            g.cube(f"forearm_{side}", (sx * 4.2 - 0.85, 23.5, -0.85), (1.7, 1.4, 1.7), "bandage")     # esparadrapo de la via
+            g.cube(f"forearm_{side}", (sx * 4.2 - 1.1, 12, -0.3), (0.3, 12.5, 0.3), "tube")           # via que cuelga suelta
         g.bone(f"hand_{side}", f"forearm_{side}", (sx * 4.2, 17.8, 0))
-        g.cube(f"hand_{side}", (sx * 4.2 - 0.6, 14.2, -1.4), (1.2, 3.8, 2.8), "skin")
+        g.cube(f"hand_{side}", (sx * 4.2 - 0.6, 14.2, -1.4), (1.2, 3.8, 2.8), "plaster")
         for i, z in enumerate((-1.25, -0.45, 0.35, 1.1)):
             ln = (7, 8.2, 7.8, 6)[i]
             g.bone(f"finger{i}_{side}", f"hand_{side}", (sx * 4.2, 14.4, z + 0.2))
-            g.cube(f"finger{i}_{side}", (sx * 4.2 - 0.25, 14.4 - ln * 0.5, z), (0.5, ln * 0.5, 0.45), "skin")
-            g.cube(f"finger{i}_{side}", (sx * 4.2 - 0.32, 14.4 - ln * 0.5 - 0.35, z - 0.05), (0.64, 0.7, 0.55), "skin_hi")
+            g.cube(f"finger{i}_{side}", (sx * 4.2 - 0.25, 14.4 - ln * 0.5, z), (0.5, ln * 0.5, 0.45), "plaster")
+            g.cube(f"finger{i}_{side}", (sx * 4.2 - 0.32, 14.4 - ln * 0.5 - 0.35, z - 0.05), (0.64, 0.7, 0.55), "plaster_hi")
             g.cube(f"finger{i}_{side}", (sx * 4.2 - 0.2, 14.4 - ln, z + 0.03), (0.4, ln * 0.5, 0.4), "claw")
         g.cube(f"hand_{side}", (sx * 4.2 - 0.25, 13.2, -1.75), (0.5, 3.2, 0.5), "claw")          # pulgar
     for side, sx in (("r", 1), ("l", -1)):
         g.bone(f"thigh_{side}", "hips", (sx * 1.6, 27, 0))
-        g.cube(f"thigh_{side}", (sx * 1.6 - 1.1, 15.5, -1.1), (2.2, 12, 2.2), "skin")
+        g.cube(f"thigh_{side}", (sx * 1.6 - 1.1, 15.5, -1.1), (2.2, 12, 2.2), "plaster")
         g.bone(f"shin_{side}", f"thigh_{side}", (sx * 1.6, 15.5, 0))
-        g.cube(f"shin_{side}", (sx * 1.6 - 1.25, 14, -1.4), (2.5, 2.2, 2.6), "skin_hi")      # rodilla huesuda
-        g.cube(f"shin_{side}", (sx * 1.6 - 0.8, 1, -0.8), (1.6, 13.5, 1.6), "skin")
-        g.cube(f"shin_{side}", (sx * 1.6 - 0.95, 7.5, -0.6), (1.9, 4.5, 1.7), "skin")        # gemelo
+        g.cube(f"shin_{side}", (sx * 1.6 - 1.25, 14, -1.4), (2.5, 2.2, 2.6), "plaster_hi")      # rodilla huesuda
+        g.cube(f"shin_{side}", (sx * 1.6 - 0.8, 1, -0.8), (1.6, 13.5, 1.6), "plaster")
+        g.cube(f"shin_{side}", (sx * 1.6 - 0.95, 7.5, -0.6), (1.9, 4.5, 1.7), "plaster")        # gemelo
         g.bone(f"foot_{side}", f"shin_{side}", (sx * 1.6, 1, 0))
-        g.cube(f"foot_{side}", (sx * 1.6 - 0.9, 0, -2.2), (1.8, 1, 3.4), "skin")
-        g.cube(f"foot_{side}", (sx * 1.6 - 0.6, 0, -4.4), (1.2, 0.7, 2.3), "skin")          # pie largo y puntiagudo
+        g.cube(f"foot_{side}", (sx * 1.6 - 0.9, 0, -2.2), (1.8, 1, 3.4), "plaster")
+        g.cube(f"foot_{side}", (sx * 1.6 - 0.6, 0, -4.4), (1.2, 0.7, 2.3), "plaster")          # pie largo y puntiagudo
     return g.save()
 
 
@@ -704,7 +821,7 @@ def sample(channel, t):
     return keys[-1][1]
 
 
-def render_pose(anim, t, size=420, yaw=200, pitch=-12, name="berserker", height=60):
+def render_pose(anim, t, size=420, yaw=200, pitch=-12, name="berserker", height=60, bright=2.2, lift=18):
     geo = json.loads((ROOT / f"geo/entity/{name}.geo.json").read_text())["minecraft:geometry"][0]
     tex = np.asarray(Image.open(ROOT / f"textures/entity/{name}.png").convert("RGBA"))
     bones = {b["name"]: b for b in geo["bones"]}
@@ -758,7 +875,7 @@ def render_pose(anim, t, size=420, yaw=200, pitch=-12, name="berserker", height=
                             pts.append(cam @ (M @ q + T))
                         z = np.mean([q[2] for q in pts])
                         lum = 1.0 if px[0] > 150 and px[1] < 60 else shade      # la sonrisa no se sombrea
-                        col = tuple(int(min(255, k * lum * 2.2 + 18)) for k in px[:3])
+                        col = tuple(int(min(255, k * lum * bright + lift)) for k in px[:3])
                         quads.append((z, [(-q[0], -q[1]) for q in pts], col))
     quads.sort(key=lambda q: -q[0])
     img = Image.new("RGB", (size, size), (70, 74, 78))
