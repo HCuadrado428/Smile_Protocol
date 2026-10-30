@@ -340,53 +340,92 @@ public final class PoseCalculator {
 
     // Objetos (README 10.1, 12.7) ---------------------------------------------------------------
 
+    /** Fase de un gesto: 0 antes de {@code from}, 1 despues de {@code to}, suave entre medias. */
+    private static float phase(float t, float from, float to) {
+        float k = Mth.clamp((t - from) / (to - from), 0f, 1f);
+        return k * k * (3 - 2 * k);
+    }
+
+    /**
+     * Gestos de los consumibles (README 10.1). La duracion de cada uno es la de su ficha por
+     * defecto (botiquin 50 ticks, bateria 24, bengala 16); los demas jugadores la ven igual.
+     */
     private static void use(Pose pose, int kind, float time, float age) {
         float in = Mth.clamp(age / 5f, 0f, 1f);
         switch (kind) {
             case USE_BATTERY -> {
-                // linterna en la izquierda, desenrosca, saca la pila y mete la nueva con la derecha
-                float twist = Mth.sin(time * 0.7f);
-                pose.rot(LEFT_ARM, -1.25f * in, 0.45f * in, 0);
-                pose.bend(LEFT_ARM, 0, -0.9f * in);
-                pose.rot(RIGHT_ARM, (-1.1f + 0.15f * twist) * in, (-0.5f + 0.25f * twist) * in, 0.1f * twist * in);
-                pose.bend(RIGHT_ARM, 0, -1.1f * in);
-                pose.rot(HEAD, 0.45f * in, 0, 0);
-                pose.rot(TORSO, 0.1f * in, 0, 0);
+                // linterna en la izquierda a la altura del pecho: desenrosca la tapa, saca la pila
+                // vieja y la tira, mete la nueva, enrosca y da un golpecito para que encienda
+                float t = age / 24f;
+                float unscrew = 1 - phase(t, 0.3f, 0.4f);
+                float out = phase(t, 0.3f, 0.45f) * (1 - phase(t, 0.5f, 0.6f));
+                float screw = phase(t, 0.62f, 0.7f) * (1 - phase(t, 0.88f, 0.95f));
+                float tap = phase(t, 0.9f, 0.95f) * (1 - phase(t, 0.95f, 1f));
+                float twist = Mth.sin(time * 1.4f) * Math.max(unscrew * (1 - phase(t, 0.25f, 0.3f)), screw);
+                pose.rot(LEFT_ARM, (-1.3f + 0.35f * tap) * in, 0.5f * in, 0.05f * in);
+                pose.bend(LEFT_ARM, 0, (-1.0f + 0.3f * tap) * in);
+                pose.rot(RIGHT_ARM, (-1.2f + 0.9f * out + 0.15f * twist) * in, (-0.55f + 0.35f * twist - 0.4f * out) * in,
+                        (0.2f * twist + 0.6f * out) * in);
+                pose.bend(RIGHT_ARM, 0, (-1.15f + 0.8f * out) * in);
+                pose.rot(HEAD, (0.5f - 0.15f * out) * in, (0.1f + 0.3f * out) * in, 0);
+                pose.rot(TORSO, 0.12f * in, (0.08f * twist + 0.12f * out) * in, 0);
             }
             case USE_FLARE -> {
-                // quita el capuchon y raspa la bengala con fuerza: tirones del brazo derecho
-                float strike = Mth.clamp(Mth.sin(time * 0.9f) * 2f, -1f, 1f);
-                pose.rot(LEFT_ARM, -1.2f * in, 0.3f * in, 0);
-                pose.bend(LEFT_ARM, 0, -0.7f * in);
-                pose.rot(RIGHT_ARM, (-1.0f - 0.35f * strike) * in, (-0.6f + 0.3f * strike) * in, 0);
-                pose.bend(RIGHT_ARM, 0, (-0.8f + 0.3f * strike) * in);
-                pose.rot(HEAD, 0.35f * in, -0.1f * in, 0);
-                pose.rot(TORSO, 0.12f * in, -0.1f * strike * in, 0);
+                // tira del capuchon con las dos manos, raspa de golpe hacia fuera y levanta la bengala
+                float t = age / 16f;
+                float pull = phase(t, 0f, 0.3f) * (1 - phase(t, 0.35f, 0.45f));
+                float strike = phase(t, 0.45f, 0.6f);
+                float raise = phase(t, 0.65f, 0.85f);
+                float shake = Mth.sin(time * 2.2f) * pull * 0.1f;
+                pose.rot(LEFT_ARM, (-1.25f + 0.6f * strike + shake) * in, (0.3f - 0.3f * pull) * in, -0.1f * strike * in);
+                pose.bend(LEFT_ARM, 0, (-0.8f + 0.5f * strike) * in);
+                pose.rot(RIGHT_ARM, (-1.2f - 0.25f * strike * (1 - raise) - 1.3f * raise - shake) * in,
+                        (-0.25f - 0.25f * pull + 0.9f * strike * (1 - raise)) * in, (0.4f * strike * (1 - raise) + 0.15f * raise) * in);
+                pose.bend(RIGHT_ARM, 0, (-0.9f + 0.7f * strike) * in);
+                pose.rot(HEAD, (0.35f - 0.6f * raise) * in, (-0.3f * strike * (1 - raise)) * in, 0);
+                pose.rot(TORSO, (0.1f - 0.1f * raise) * in, (-0.2f * strike * (1 - raise)) * in, 0);
             }
             case USE_SYRINGE -> {
-                // de pie: se la clava en el muslo
+                // de pie: se la clava en el muslo y empuja el embolo con el pulgar
                 float stab = Math.max(0f, Mth.sin(time * 0.5f));
                 pose.rot(RIGHT_ARM, (-0.3f + 0.25f * stab) * in, 0.25f * in, 0.2f * in);
                 pose.bend(RIGHT_ARM, 0, -1.0f * in * (1 - stab));
                 pose.rot(HEAD, 0.5f * in, -0.3f * in, 0);
                 pose.rot(TORSO, 0.25f * in, 0, 0);
             }
-            default -> {
-                // botiquin: se agacha sobre una rodilla, sujeta la caja y se venda el brazo izquierdo
-                float wrap = time * 0.45f;
-                pose.rot(TORSO, 0.35f * in, 0.15f * in, 0);
-                pose.rot(HEAD, 0.55f * in, 0.3f * in, 0);
-                pose.rot(LEFT_ARM, -0.9f * in, -0.35f * in, 0);
-                pose.bend(LEFT_ARM, 0, -0.5f * in);
-                pose.rot(RIGHT_ARM, (-1.0f + 0.25f * Mth.sin(wrap)) * in, (0.35f + 0.25f * Mth.cos(wrap)) * in, 0);
-                pose.bend(RIGHT_ARM, 0, (-1.0f - 0.3f * Mth.cos(wrap)) * in);
-                pose.rot(RIGHT_LEG, -1.25f * in, 0, 0.08f * in);
-                pose.rot(LEFT_LEG, -0.25f * in, 0, -0.08f * in);
-                pose.bend(RIGHT_LEG, 0, 1.35f * in);
-                pose.bend(LEFT_LEG, 0, 1.5f * in);
-                bodyPx(pose, 0, 4.5f * in, 0);
-            }
+            default -> medkit(pose, time, age);
         }
+    }
+
+    /**
+     * Botiquin (50 ticks), postura absoluta: hinca una rodilla, abre la caja en el suelo, saca la
+     * venda, se la enrolla al antebrazo izquierdo dando vueltas y tira del extremo con los dientes.
+     */
+    private static void medkit(Pose pose, float time, float age) {
+        float t = age / 50f;
+        float k = phase(age, 0f, 7f);
+        float open = phase(t, 0.08f, 0.2f) * (1 - phase(t, 0.24f, 0.32f));
+        float wrap = phase(t, 0.3f, 0.36f) * (1 - phase(t, 0.82f, 0.88f));
+        float bite = phase(t, 0.86f, 0.9f) * (1 - phase(t, 0.97f, 1f));
+        float circ = time * 0.75f;
+        float breath = Mth.sin(time * 0.2f);
+        // rodilla derecha en el suelo, pie izquierdo delante; espalda algo inclinada
+        float hipY = 17.2f, hipZ = 0.5f;
+        float lean = 0.32f + 0.25f * open + 0.03f * breath;
+        float topY = hipY - 12f * Mth.cos(lean), topZ = hipZ - 12f * Mth.sin(lean);
+        float armY = topY + 2f * Mth.cos(lean), armZ = topZ + 2f * Mth.sin(lean);
+        // antebrazo izquierdo delante del pecho; la mano derecha da vueltas alrededor
+        float lPitch = Mth.lerp(open, -0.85f, -0.35f) - 0.1f * bite;
+        float rPitch = Mth.lerp(open, -1.0f, -0.35f) + wrap * (0.25f * Mth.sin(circ)) - 0.2f * bite;
+        float rYaw = 0.35f * wrap + 0.3f * Mth.cos(circ) * wrap + 0.4f * bite;
+        Key[] kneel = {
+                new Key(lean, 0.12f * wrap, 0, 0, topY, topZ, 0),
+                new Key(Mth.lerp(open, 0.6f, 0.75f) + 0.15f * bite, 0.35f * wrap + 0.55f * bite, 0.2f * bite, 0, topY, topZ, 0),
+                new Key(rPitch, rYaw, 0.1f, -4.8f, armY, armZ, -0.9f - 0.4f * wrap * Mth.cos(circ) * 0.5f - 0.6f * bite),
+                new Key(lPitch, -0.45f * (1 - open) - 0.2f * bite, -0.1f, 4.8f, armY, armZ, -1.2f * (1 - open) - 0.4f * open + 0.3f * bite),
+                new Key(-0.05f, 0, 0.06f, -1.9f, hipY, hipZ, 1.55f),
+                new Key(-1.45f, -0.1f, -0.06f, 1.9f, hipY, hipZ, 1.45f)};
+        for (int i = 0; i < PARTS.length; i++) STAND[i].lerp(kneel[i], k).apply(pose, PARTS[i]);
     }
 
     /** Apuntar un lanzable: brazo derecho atras por encima del hombro, el izquierdo marca la direccion. */
