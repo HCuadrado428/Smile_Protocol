@@ -12,6 +12,8 @@ import net.minecraft.client.Minecraft;
 /** Logica de cliente que llaman los loaders: arranque, conexion y tick (README 8). */
 public final class ClientController {
 
+    private static boolean prevAccessKey;
+
     private ClientController() {}
 
     /** Al arrancar el cliente: manejadores de los paquetes que llegan del servidor. */
@@ -56,6 +58,7 @@ public final class ClientController {
     /** Al entrar en un servidor: capa 2 del aislamiento, la lista de mods (README 7.1). */
     public static void onJoin() {
         SPNetwork.sendToServer(new Payloads.Handshake(Services.PLATFORM.topLevelModIds()));
+        SPNetwork.sendToServer(new Payloads.SetAccessibility(SPConfig.get().qte_assist));
     }
 
     public static void onLeave() {
@@ -70,6 +73,7 @@ public final class ClientController {
         ClientWalkie.reset();
         ClientTension.reset();
         ClientAmbience.reset();
+        ClientCaptions.reset();
         com.smileprotocol.client.light.Flashlight.reset();
         com.smileprotocol.client.light.DynamicLights.clear();
         com.smileprotocol.client.light.FlareLights.clear();
@@ -77,6 +81,12 @@ public final class ClientController {
 
     public static void tick(Minecraft mc) {
         ClientSelfTest.tick(mc);
+        ClientCaptions.register(mc);
+        // Menu de accesibilidad (README 24.2)
+        boolean accessKey = mc.screen == null && ClientMotion.isDown(SPConfig.get().key_accessibility);
+        if (accessKey && !prevAccessKey) mc.setScreen(new AccessibilityScreen(null));
+        prevAccessKey = accessKey;
+        ScareWarningScreen.maybeShow(mc);
         ClientState.tickFade();
         ClientMotion.tick(mc);
         ClientHide.tick(mc);

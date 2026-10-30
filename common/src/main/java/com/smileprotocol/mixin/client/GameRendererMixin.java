@@ -24,7 +24,7 @@ public abstract class GameRendererMixin {
     @Inject(method = "bobHurt", at = @At("TAIL"))
     private void smileprotocol$roll(PoseStack pose, float pt, CallbackInfo ci) {
         if (!ClientState.inSmileProtocol()) return;
-        float roll = ClientMotion.cameraRoll(pt);
+        float roll = ClientMotion.cameraRoll(pt) * com.smileprotocol.config.SPConfig.get().camera_shake;
         if (roll != 0) pose.mulPose(Axis.ZP.rotationDegrees(roll));
     }
 }

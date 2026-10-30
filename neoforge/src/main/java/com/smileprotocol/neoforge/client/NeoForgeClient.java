@@ -43,6 +43,10 @@ public final class NeoForgeClient {
         @SubscribeEvent
         public static void onSetup(FMLClientSetupEvent event) {
             ClientController.init();
+            // Menu de accesibilidad en la lista de mods (README 24.2)
+            net.neoforged.fml.ModList.get().getModContainerById(SmileProtocol.MODID).ifPresent(c -> c.registerExtensionPoint(
+                    net.neoforged.neoforge.client.gui.IConfigScreenFactory.class,
+                    (mc, parent) -> new com.smileprotocol.client.AccessibilityScreen(parent)));
             if (PAL) PalBridge.init();
         }
 

@@ -61,6 +61,9 @@ public final class ClientInteraction {
         state = Payloads.InteractState.idle();
     }
 
+    private static boolean prevRawUse;
+    private static boolean useToggled;
+
     public static void tick(Minecraft mc) {
         LocalPlayer player = mc.player;
         if (player == null || !ClientState.inSmileProtocol()) {
@@ -69,8 +72,17 @@ public final class ClientInteraction {
             spec = null;
             return;
         }
-        boolean useDown = mc.options.keyUse.isDown() && mc.screen == null;
-        if (!useDown) needRelease = false;
+        boolean rawUse = mc.options.keyUse.isDown() && mc.screen == null;
+        boolean useDown = rawUse;
+        // Pulsar en vez de mantener (accesibilidad, README 24.2): cada pulsacion empieza o corta
+        if (SPConfig.get().hold_toggle) {
+            if (rawUse && !prevRawUse) useToggled = !useToggled;
+            if (needRelease) useToggled = false;
+            useDown = useToggled;
+        }
+        prevRawUse = rawUse;
+        if (!rawUse && !SPConfig.get().hold_toggle) needRelease = false;
+        if (!rawUse && SPConfig.get().hold_toggle && !useToggled) needRelease = false;
 
         // Soltar el objeto activo (G)
         boolean drop = ClientMotion.isDown(SPConfig.get().key_drop);

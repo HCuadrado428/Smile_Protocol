@@ -44,6 +44,8 @@ public final class SPNetwork {
             new Def<>(Payloads.DropItem.TYPE, Payloads.DropItem.CODEC, false, com.smileprotocol.interact.InteractionManager::onDrop),
             new Def<>(Payloads.SyncHide.TYPE, Payloads.SyncHide.CODEC, true, null),
             new Def<>(Payloads.HideInput.TYPE, Payloads.HideInput.CODEC, false, com.smileprotocol.hide.HideManager::onInput),
+            new Def<>(Payloads.SetAccessibility.TYPE, Payloads.SetAccessibility.CODEC, false,
+                    (p, player) -> com.smileprotocol.qte.QTEManager.setAssist(player, p.qteAssist())),
             new Def<>(Payloads.ToggleFlashlight.TYPE, Payloads.ToggleFlashlight.CODEC, false, com.smileprotocol.motion.Flashlights::onToggle),
             new Def<>(Payloads.SyncFlashlight.TYPE, Payloads.SyncFlashlight.CODEC, true, null),
             new Def<>(Payloads.SyncDowned.TYPE, Payloads.SyncDowned.CODEC, true, null),

@@ -104,6 +104,16 @@ public final class HudOverlay {
         }
 
         if (!mc.options.hideGui) {
+            // Tamano de la HUD (accesibilidad, README 24.2)
+            float hs = com.smileprotocol.config.SPConfig.get().hud_scale;
+            int fw = w, fh = h;
+            g.pose().pushPose();
+            if (hs != 1f) {
+                g.pose().scale(hs, hs, 1f);
+                w = Math.round(w / hs);
+                h = Math.round(h / hs);
+            }
+            if (inGame) ClientCaptions.render(g, font, w, h);
             if (inGame && ClientState.dead) {
                 renderDead(g, font, w, h);
                 ClientWalkie.render(g, font, w, h);
@@ -131,6 +141,9 @@ public final class HudOverlay {
             Payloads.SyncReady ready = ClientState.ready;
             if (ready != null) renderReady(g, font, ready, w);
             renderDebug(g, font);
+            g.pose().popPose();
+            w = fw;
+            h = fh;
         }
 
         if (inGame) renderScare(g, w, h, partialTick);
@@ -313,7 +326,7 @@ public final class HudOverlay {
                 g.fill(zx0, ty - 1, zx1, ty + 11, 0xA0C9BFA6);
                 int cur = tx + Math.round(com.smileprotocol.qte.QTEType.timingCursor(t) * tw);
                 g.fill(cur - 1, ty - 4, cur + 1, ty + 14, BLOOD_BRIGHT);
-                pips(g, cx, ty + 18, com.smileprotocol.qte.QTEType.TIMING_HITS, ClientQTE.progress());
+                pips(g, cx, ty + 18, ClientQTE.target(), ClientQTE.progress());
                 int misses = Math.round(ClientQTE.extra());
                 for (int i = 0; i < com.smileprotocol.qte.QTEType.TIMING_MISSES; i++) {
                     Component x = hud(i < misses ? "X" : "·");
@@ -322,7 +335,7 @@ public final class HudOverlay {
             }
             case SEQUENCE -> {
                 String[] names = {"W", "A", "S", "D"};
-                int n = com.smileprotocol.qte.QTEType.SEQUENCE_LENGTH, kw = 18, gap = 6;
+                int n = ClientQTE.target(), kw = 18, gap = 6;
                 int x0 = cx - (n * kw + (n - 1) * gap) / 2;
                 for (int i = 0; i < n; i++) {
                     int k = com.smileprotocol.qte.QTEType.sequenceKey(ClientQTE.seed(), i);
@@ -484,6 +497,16 @@ public final class HudOverlay {
     private static void renderScare(GuiGraphics g, int w, int h, float pt) {
         float flash = ClientScare.flash(pt);
         float face = ClientScare.face(pt);
+        var cfg = com.smileprotocol.config.SPConfig.get();
+        if (face > 0f && (cfg.soft_scares || cfg.reduce_flashes)) {
+            // sin la cara ni el destello: un fundido a oscuras suave
+            g.fill(0, 0, w, h, ((int) (face * (cfg.soft_scares ? 120 : 170)) << 24) | 0x100004);
+            return;
+        }
+        if (cfg.reduce_flashes && flash > 0f) {
+            g.fill(0, 0, w, h, ((int) (Math.min(flash, 0.5f) * 140) << 24) | 0x0A0606);
+            return;
+        }
         if (face > 0f) {
             float t = ClientScare.time(pt);
             int size = (int) (Math.max(w, h) * ClientScare.faceScale(pt));

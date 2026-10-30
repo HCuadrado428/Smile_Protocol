@@ -147,7 +147,7 @@ public final class ClientSequence {
         pitch = Mth.lerp(k, startPitch, pitch);
         float t = age(pt);
         float hit = impact(pt);
-        float tremble = 0.6f + 5.5f * hit;
+        float tremble = (0.6f + 5.5f * hit) * com.smileprotocol.config.SPConfig.get().camera_shake;
         yaw += (Mth.sin(t * 2.3f) + 0.6f * Mth.sin(t * 4.1f + 1f)) * tremble;
         pitch += (Mth.cos(t * 2.9f) + 0.5f * Mth.sin(t * 3.7f)) * tremble * 0.8f;
         // al acabar, la cabeza (camara) cae

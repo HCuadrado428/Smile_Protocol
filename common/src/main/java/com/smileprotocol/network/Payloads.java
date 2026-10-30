@@ -237,6 +237,14 @@ public final class Payloads {
         @Override public Type<HideInput> type() { return TYPE; }
     }
 
+    /** C -> S: opciones de accesibilidad que valida el servidor (README 24.2): minijuego asistido. */
+    public record SetAccessibility(boolean qteAssist) implements CustomPacketPayload {
+        public static final Type<SetAccessibility> TYPE = typeOf("set_accessibility");
+        public static final StreamCodec<ByteBuf, SetAccessibility> CODEC = ByteBufCodecs.BOOL.map(SetAccessibility::new, SetAccessibility::qteAssist);
+
+        @Override public Type<SetAccessibility> type() { return TYPE; }
+    }
+
     /** C -> S: encender o apagar la linterna (tecla F). */
     public record ToggleFlashlight(boolean on) implements CustomPacketPayload {
         public static final Type<ToggleFlashlight> TYPE = typeOf("toggle_flashlight");

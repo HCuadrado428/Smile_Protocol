@@ -182,7 +182,8 @@ public final class ClientMarkers {
             float pop = Mth.clamp((m.duration - left_ + pt) / 6f, 0f, 1f);
             float alpha = fade * (edge ? 0.75f : 1f);
             int size = (int) ((edge ? 12 : 16) * (0.6f + 0.4f * pop) * (m.kind == MarkerManager.HELP && (tick / 6) % 2 == 0 ? 1.15f : 1f));
-            float r = ((m.color >> 16) & 255) / 255f, gg = ((m.color >> 8) & 255) / 255f, b = (m.color & 255) / 255f;
+            int mc0 = display(m.color);
+            float r = ((mc0 >> 16) & 255) / 255f, gg = ((mc0 >> 8) & 255) / 255f, b = (mc0 & 255) / 255f;
             RenderSystem.enableBlend();
             RenderSystem.setShaderColor(r, gg, b, alpha);
             g.blitSprite(icon(m.kind), (int) sx - size / 2, (int) sy - size / 2, size, size);
@@ -193,7 +194,7 @@ public final class ClientMarkers {
             g.drawString(font, dc, (int) sx - font.width(dc) / 2, (int) sy + size / 2 + 1, a | 0xC9BFA6, true);
             if (!m.self && !edge) {
                 Component nc = HudOverlay.hud(m.name);
-                g.drawString(font, nc, (int) sx - font.width(nc) / 2, (int) sy - size / 2 - 10, a | (m.color & 0xFFFFFF), true);
+                g.drawString(font, nc, (int) sx - font.width(nc) / 2, (int) sy - size / 2 - 10, a | (display(m.color) & 0xFFFFFF), true);
             }
         }
         if (wheel) renderWheel(g, font, w, h);
@@ -218,5 +219,17 @@ public final class ClientMarkers {
                 g.drawString(font, label, x - font.width(label) / 2, ly, 0xFFE0D6BC, true);
             }
         }
+    }
+
+    /** Daltonismo (README 24.2): el color de cada companero se cambia por uno de una paleta distinguible. */
+    public static int display(int color) {
+        String mode = com.smileprotocol.config.SPConfig.get().colorblind;
+        if (mode == null || mode.equals("OFF")) return color;
+        int[] base = com.smileprotocol.marker.MarkerManager.COLORS;
+        int[] pal = mode.equals("TRITANOPIA")
+                ? new int[]{0xFF6B6B, 0x6BE0FF, 0xE8E8E8, 0xFF9EC8, 0x2EC4B6, 0xB0B0B0, 0xFF3030, 0x8888FF}
+                : new int[]{0xF0E442, 0x56B4E9, 0xE69F00, 0x0072B2, 0xCC79A7, 0xD55E00, 0xFFFFFF, 0xAAAAAA};
+        for (int i = 0; i < base.length; i++) if ((base[i] & 0xFFFFFF) == (color & 0xFFFFFF)) return pal[i % pal.length];
+        return color;
     }
 }

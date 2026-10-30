@@ -74,6 +74,7 @@ public final class ClientSelfTest {
             case 0 -> {
                 // El lobby (README 5.2): se construye en el cielo del mundo de prueba y se mira
                 log("en el mundo, construyendo el lobby");
+                com.smileprotocol.config.SPConfig.get().scare_warning = false;
                 server.execute(() -> {
                     ServerPlayer sp = server.getPlayerList().getPlayers().get(0);
                     BlockPos spawn = BlockPos.containing(sp.getX(), 180, sp.getZ());
@@ -743,6 +744,22 @@ public final class ClientSelfTest {
         }));
         SHOTS.add(() -> wait = 15);
         SHOTS.add(() -> grab(mc, "50_mueble_abierto"));
+        // 8m. Fase 22: accesibilidad (minijuego asistido validado en el servidor, colores de daltonismo)
+        SHOTS.add(() -> server.execute(() -> {
+            com.smileprotocol.qte.QTEManager.setAssist(sp, true);
+            boolean on = com.smileprotocol.qte.QTEManager.assisted(sp);
+            com.smileprotocol.qte.QTEManager.setAssist(sp, false);
+            boolean off = !com.smileprotocol.qte.QTEManager.assisted(sp);
+            log((on && off ? "OK" : "FALLO") + " accesibilidad: minijuego asistido segun el jugador");
+        }));
+        SHOTS.add(() -> {
+            var cfg = com.smileprotocol.config.SPConfig.get();
+            int c0 = com.smileprotocol.marker.MarkerManager.COLORS[1];
+            cfg.colorblind = "DEUTERANOPIA";
+            int c1 = ClientMarkers.display(c0);
+            cfg.colorblind = "OFF";
+            log((c1 != c0 && ClientMarkers.display(c0) == c0 ? "OK" : "FALLO") + " accesibilidad: paleta para daltonismo");
+        });
         // 9. Fase 12: levantarse tras la reanimacion, muerte instantanea en primera persona y muerte final
         SHOTS.add(() -> server.execute(() -> {
             com.smileprotocol.qte.QTEManager.clear(sp);

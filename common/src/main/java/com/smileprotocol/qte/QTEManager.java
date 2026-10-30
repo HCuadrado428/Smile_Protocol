@@ -79,6 +79,17 @@ public final class QTEManager {
     }
 
     private static final Map<UUID, Session> SESSIONS = new HashMap<>();
+    /** Jugadores con el minijuego asistido (README 24.2): mas tiempo y menos pulsaciones. */
+    private static final java.util.Set<UUID> ASSIST = new java.util.HashSet<>();
+
+    public static void setAssist(net.minecraft.server.level.ServerPlayer p, boolean on) {
+        if (on) ASSIST.add(p.getUUID());
+        else ASSIST.remove(p.getUUID());
+    }
+
+    public static boolean assisted(net.minecraft.server.level.ServerPlayer p) {
+        return ASSIST.contains(p.getUUID()) && com.smileprotocol.config.SPConfig.get().allow_qte_assist;
+    }
     /** Distancia del mob a la que queda el jugador agarrado (donde estan las manos). */
     public static final double GRAB_DISTANCE = 1.5;
     /** Ticks que tarda en arrastrar al jugador hasta las manos. */
@@ -103,14 +114,16 @@ public final class QTEManager {
         com.smileprotocol.item.UseManager.stop(p, true);
         Group g = RunManager.groupOf(p);
         int ticks = g != null ? g.difficulty().scaleQte(baseTicks) : baseTicks;
+        boolean assist = assisted(p);
+        if (assist) ticks = Math.round(ticks * 1.5f);
         int difficulty = g != null ? Math.max(0, 4 - g.difficulty().groupSize()) : 1;
         long seed = p.getRandom().nextLong();
         Session s = new Session(mob.getUUID(), type, ticks, seed, difficulty, fail);
         s.target = switch (type) {
-            case MASH -> 16 + difficulty * 3;
-            case TIMING -> QTEType.TIMING_HITS;
-            case SEQUENCE -> QTEType.SEQUENCE_LENGTH;
-            case HOLD -> Math.round(ticks * 0.45f);
+            case MASH -> assist ? 9 + difficulty * 2 : 16 + difficulty * 3;
+            case TIMING -> assist ? QTEType.TIMING_HITS - 1 : QTEType.TIMING_HITS;
+            case SEQUENCE -> assist ? QTEType.SEQUENCE_LENGTH - 2 : QTEType.SEQUENCE_LENGTH;
+            case HOLD -> Math.round(ticks * (assist ? 0.28f : 0.45f));
         };
         Vec3 look = Vec3.directionFromRotation(0, mob.getYRot());
         // Las manos del mob sujetan a la victima por los hombros a ~1,5 bloques delante del pecho

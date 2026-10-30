@@ -38,7 +38,7 @@ public final class MarkerManager {
     public static final int ATTENTION = 0, DANGER = 1, GO = 2, HELP = 3, CLEAR = 4;
     public static final String[] NAMES = {"attention", "danger", "go", "help", "clear"};
     /** Colores de los jugadores del grupo (por orden de llegada). */
-    private static final int[] COLORS = {0xE8C547, 0x5FB8E8, 0xE86A5F, 0x8FD16A, 0xC07AE8, 0xF0A040, 0x6AE0C8, 0xE8E8E8};
+    public static final int[] COLORS = {0xE8C547, 0x5FB8E8, 0xE86A5F, 0x8FD16A, 0xC07AE8, 0xF0A040, 0x6AE0C8, 0xE8E8E8};
 
     private record Marker(int id, UUID owner, String name, int kind, Vec3 pos, long created, long expires,
                           @Nullable UUID onPlayer, int color) {}

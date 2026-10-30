@@ -87,6 +87,29 @@ public final class SPConfig {
         public boolean vault_any_obstacle = true;
         public boolean look_back_toggle = false;
         public boolean lean_toggle = false;
+
+        // Accesibilidad (README 24.2): opciones del cliente, en su menu (tecla key_accessibility)
+        /** Subtitulos direccionales de los ruidos importantes. */
+        public boolean subtitles = true;
+        /** Paleta de colores: OFF, DEUTERANOPIA, PROTANOPIA o TRITANOPIA (los marcadores ya tienen forma). */
+        public String colorblind = "OFF";
+        /** Cuanto tiembla y se inclina la camara (0 a 1). */
+        public float camera_shake = 1f;
+        /** Sin destellos: los sustos y los fogonazos se cambian por un fundido suave. */
+        public boolean reduce_flashes = false;
+        /** Aviso de sustos al entrar en la primera partida. */
+        public boolean scare_warning = true;
+        /** Sustos suaves: sin la cara a pantalla completa y con menos volumen. */
+        public boolean soft_scares = false;
+        /** Pulsar en vez de mantener la interaccion y el apuntado (mirar atras y asomarse tienen la suya). */
+        public boolean hold_toggle = false;
+        /** Minijuego asistido: mas tiempo y menos pulsaciones (si el servidor lo permite). */
+        public boolean qte_assist = false;
+        /** Servidor: deja usar el minijuego asistido. */
+        public boolean allow_qte_assist = true;
+        /** Tamano de la HUD (0,75 a 1,5). */
+        public float hud_scale = 1f;
+        public String key_accessibility = "key.keyboard.f7";
         public float noise_crouch_walk = 3;
         /** Multiplicador del ruido de gatear dentro de un conducto de chapa (README 12.9). */
         public float noise_vent_mult = 1.6f;
@@ -252,6 +275,10 @@ public final class SPConfig {
             intermediate_zones = Math.max(0, intermediate_zones);
             if (start_zone == null) start_zone = "";
             if (final_zone == null) final_zone = "";
+            camera_shake = Math.max(0f, Math.min(1f, camera_shake));
+            hud_scale = Math.max(0.75f, Math.min(1.5f, hud_scale));
+            if (colorblind == null) colorblind = "OFF";
+            if (key_accessibility == null) key_accessibility = "key.keyboard.f7";
             // la sala final era final_room hasta que llego el Laboratorio Cero (ahora es intermedia)
             if (final_zone.equals("smileprotocol:final_room")) final_zone = "smileprotocol:smiley_lab";
             if (smiley_speed == null || smiley_speed.isEmpty()) smiley_speed = new java.util.ArrayList<>(java.util.List.of(0.55, 0.8, 1.15));
@@ -281,6 +308,20 @@ public final class SPConfig {
         }
         values = loaded != null ? loaded : new Values();
         values.sanitize();
+        try {
+            Files.createDirectories(file.getParent());
+            try (Writer w = Files.newBufferedWriter(file, StandardCharsets.UTF_8)) {
+                GSON.toJson(values, w);
+            }
+        } catch (IOException e) {
+            SmileProtocol.LOGGER.warn("No se pudo escribir {}", file, e);
+        }
+    }
+
+    /** Guarda los valores actuales (menu de accesibilidad). */
+    public static void save() {
+        values.sanitize();
+        Path file = Services.PLATFORM.configDir().resolve("smileprotocol.json");
         try {
             Files.createDirectories(file.getParent());
             try (Writer w = Files.newBufferedWriter(file, StandardCharsets.UTF_8)) {
