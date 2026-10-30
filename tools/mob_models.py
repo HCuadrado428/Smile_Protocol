@@ -316,6 +316,26 @@ def animations():
         "finger1_r": {"rotation": kf(wave(L, [15, 0, 0], 18, 1.0, 12))},
         "finger3_l": {"rotation": kf(wave(L, [15, 0, 0], 18, 2.0, 12))},
     }))
+    # GRAB (mob de pruebas): los brazos sujetan a alguien delante y lo sacuden
+    L = 0.8
+    A["grab"] = loop_anim(L, pose_bones({
+        "torso": {"rotation": kf(wave(L, [HUNCH - 10, 0, 0], 4))},
+        "arm_r": {"rotation": kf(wave(L, [-HUNCH - 55, 15, -10], 8))},
+        "arm_l": {"rotation": kf(wave(L, [-HUNCH - 55, -15, 10], 8, math.pi))},
+        "forearm_r": {"rotation": kf([(0, [-35, 0, 0])])},
+        "forearm_l": {"rotation": kf([(0, [-35, 0, 0])])},
+        "head": {"rotation": kf(multi(L, [-20, 0, 0], [6, 10, 8], [0, 1.3, 2.1], 8))},
+        "finger0_r": {"rotation": kf([(0, [45, 0, 0])])}, "finger1_r": {"rotation": kf([(0, [50, 0, 0])])},
+        "finger0_l": {"rotation": kf([(0, [45, 0, 0])])}, "finger1_l": {"rotation": kf([(0, [50, 0, 0])])},
+    }))
+    # STUNNED: se tambalea hacia atras con la cabeza dando sacudidas
+    L = 1.2
+    A["stunned"] = loop_anim(L, pose_bones({
+        "torso": {"rotation": kf(multi(L, [HUNCH - 25, 0, 0], [6, 12, 10], [0, 0.7, 1.9], 8))},
+        "head": {"rotation": kf(multi(L, [-30, 0, 0], [10, 25, 20], [0.5, 2.0, 1.1], 8))},
+        "arm_r": {"rotation": kf(wave(L, [ARM_HANG + 20, 0, -25], 15))},
+        "arm_l": {"rotation": kf(wave(L, [ARM_HANG + 20, 0, 25], 15, math.pi))},
+    }))
     out = {"format_version": "1.8.0", "animations": A}
     p = ROOT / "animations/entity/berserker.animation.json"
     p.parent.mkdir(parents=True, exist_ok=True)
@@ -415,8 +435,30 @@ def render_pose(anim, t, size=420, yaw=200, pitch=-12):
     return img
 
 
+def smiler_test():
+    """Variante del mob de pruebas: mismo modelo, el ojo derecho abierto y brillando."""
+    geo = json.loads((ROOT / "geo/entity/berserker.geo.json").read_text())["minecraft:geometry"][0]
+    head = next(b for b in geo["bones"] if b["name"] == "head")["cubes"][0]
+    u, v = head["uv"]["north"]["uv"]
+    w, h = head["uv"]["north"]["uv_size"]
+    S = gm.SCALE
+    for name in ("berserker", "berserker_glowmask"):
+        im = Image.open(ROOT / f"textures/entity/{name}.png").convert("RGBA")
+        px = im.load()
+        ex, ey = u + w * 0.27, v + h * 0.36
+        for y in range(int((ey - 1.2) * S), int((ey + 1.2) * S) + 1):
+            for x in range(int((ex - 1.5) * S), int((ex + 1.5) * S) + 1):
+                d = math.hypot((x / S - ex) / 1.5, (y / S - ey) / 1.1)
+                if d <= 1:
+                    px[x, y] = (255, 40, 30, 255) if d < 0.45 else (190, 14, 18, 255)
+                elif name == "berserker_glowmask" and d <= 1.2:
+                    pass
+        im.save(ROOT / f"textures/entity/{name.replace('berserker', 'smiler_test')}.png")
+
+
 def main():
     tw, th, nf = berserker()
+    smiler_test()
     A = animations()
     print(f"berserker textura {tw * gm.SCALE}x{th * gm.SCALE} caras={nf} animaciones={list(A)}")
     if len(sys.argv) > 1:

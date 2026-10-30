@@ -267,4 +267,59 @@ public final class Payloads {
 
         @Override public Type<SyncDowned> type() { return TYPE; }
     }
+
+    /** S -> C: empieza el minijuego de escape (README 18). */
+    public record StartQTE(int type, int ticks, long seed, int target, int difficulty) implements CustomPacketPayload {
+        public static final Type<StartQTE> TYPE = typeOf("start_qte");
+        public static final StreamCodec<ByteBuf, StartQTE> CODEC = new StreamCodec<>() {
+            @Override
+            public StartQTE decode(ByteBuf b) {
+                return new StartQTE(b.readByte(), b.readInt(), b.readLong(), b.readInt(), b.readByte());
+            }
+
+            @Override
+            public void encode(ByteBuf b, StartQTE p) {
+                b.writeByte(p.type());
+                b.writeInt(p.ticks());
+                b.writeLong(p.seed());
+                b.writeInt(p.target());
+                b.writeByte(p.difficulty());
+            }
+        };
+
+        @Override public Type<StartQTE> type() { return TYPE; }
+    }
+
+    /** S -> C: estado autoritativo del minijuego (tick, progreso y aguja o fallos). */
+    public record QTEState(int elapsed, int progress, float extra) implements CustomPacketPayload {
+        public static final Type<QTEState> TYPE = typeOf("qte_state");
+        public static final StreamCodec<ByteBuf, QTEState> CODEC = StreamCodec.composite(
+                ByteBufCodecs.VAR_INT, QTEState::elapsed,
+                ByteBufCodecs.VAR_INT, QTEState::progress,
+                ByteBufCodecs.FLOAT, QTEState::extra,
+                QTEState::new);
+
+        @Override public Type<QTEState> type() { return TYPE; }
+    }
+
+    /** S -> C: fin del minijuego. */
+    public record QTEEnd(boolean success) implements CustomPacketPayload {
+        public static final Type<QTEEnd> TYPE = typeOf("qte_end");
+        public static final StreamCodec<ByteBuf, QTEEnd> CODEC = StreamCodec.composite(ByteBufCodecs.BOOL, QTEEnd::success, QTEEnd::new);
+
+        @Override public Type<QTEEnd> type() { return TYPE; }
+    }
+
+    /** C -> S: pulsacion (con la tecla en {@code value}) o cambio de mantener. */
+    public record QTEInput(int kind, int value) implements CustomPacketPayload {
+        public static final int PRESS = 0;
+        public static final int HOLD = 1;
+        public static final Type<QTEInput> TYPE = typeOf("qte_input");
+        public static final StreamCodec<ByteBuf, QTEInput> CODEC = StreamCodec.composite(
+                ByteBufCodecs.VAR_INT, QTEInput::kind,
+                ByteBufCodecs.VAR_INT, QTEInput::value,
+                QTEInput::new);
+
+        @Override public Type<QTEInput> type() { return TYPE; }
+    }
 }

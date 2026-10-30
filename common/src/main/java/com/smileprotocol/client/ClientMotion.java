@@ -104,7 +104,9 @@ public final class ClientMotion {
         if (!ClientState.inSmileProtocol()) return false;
         if (vaultTicks >= 0) return true;
         Minecraft mc = Minecraft.getInstance();
-        return mc.player != null && MotionStates.view(mc.player).action() == Action.HIDDEN;
+        if (mc.player == null) return false;
+        Action a = MotionStates.view(mc.player).action();
+        return a == Action.HIDDEN || a == Action.GRABBED;
     }
 
     // Teclas ---------------------------------------------------------------------------------

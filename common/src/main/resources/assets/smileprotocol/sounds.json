@@ -1,0 +1,61 @@
+{
+  "berserker.step": {
+    "subtitle": "subtitles.smileprotocol.berserker.step",
+    "sounds": [
+      "smileprotocol:berserker/step1",
+      "smileprotocol:berserker/step2",
+      "smileprotocol:berserker/step3"
+    ]
+  },
+  "berserker.breath": {
+    "subtitle": "subtitles.smileprotocol.berserker.breath",
+    "sounds": [
+      "smileprotocol:berserker/breath1",
+      "smileprotocol:berserker/breath2"
+    ]
+  },
+  "berserker.listen": {
+    "subtitle": "subtitles.smileprotocol.berserker.listen",
+    "sounds": [
+      "smileprotocol:berserker/listen"
+    ]
+  },
+  "berserker.sniff": {
+    "subtitle": "subtitles.smileprotocol.berserker.sniff",
+    "sounds": [
+      "smileprotocol:berserker/sniff1",
+      "smileprotocol:berserker/sniff2"
+    ]
+  },
+  "berserker.roar": {
+    "subtitle": "subtitles.smileprotocol.berserker.roar",
+    "sounds": [
+      "smileprotocol:berserker/roar"
+    ]
+  },
+  "berserker.impact": {
+    "subtitle": "subtitles.smileprotocol.berserker.impact",
+    "sounds": [
+      "smileprotocol:berserker/impact"
+    ]
+  },
+  "player.groan": {
+    "subtitle": "subtitles.smileprotocol.player.groan",
+    "sounds": [
+      "smileprotocol:player/groan1",
+      "smileprotocol:player/groan2"
+    ]
+  },
+  "player.heartbeat": {
+    "subtitle": "subtitles.smileprotocol.player.heartbeat",
+    "sounds": [
+      "smileprotocol:player/heartbeat"
+    ]
+  },
+  "mob.grab": {
+    "subtitle": "subtitles.smileprotocol.mob.grab",
+    "sounds": [
+      "smileprotocol:mob/grab"
+    ]
+  }
+}

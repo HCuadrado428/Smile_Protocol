@@ -6,7 +6,7 @@ package com.smileprotocol.motion;
  * combinan con andar.
  */
 public enum Action {
-    NONE, DIVE, VAULT, HIDDEN, INTERACT, DOWNED;
+    NONE, DIVE, VAULT, HIDDEN, INTERACT, DOWNED, GRABBED;
 
     private static final Action[] VALUES = values();
 

@@ -17,9 +17,16 @@ public final class ModEntities {
                     .sized(0.9f, 1.95f).eyeHeight(1.75f).clientTrackingRange(10).fireImmune()
                     .build("berserker"));
 
+    /** Mob de pruebas del agarre y el QTE (fase 11). */
+    public static final Supplier<EntityType<com.smileprotocol.entity.SmilerTest>> SMILER_TEST = Services.PLATFORM.register(
+            BuiltInRegistries.ENTITY_TYPE, "smiler_test", () -> EntityType.Builder.of(com.smileprotocol.entity.SmilerTest::new,
+                    MobCategory.MONSTER).sized(0.9f, 1.95f).eyeHeight(1.75f).clientTrackingRange(10).fireImmune()
+                    .build("smiler_test"));
+
     private ModEntities() {}
 
     public static void init() {
         Services.PLATFORM.registerAttributes(BERSERKER, Berserker::attributes);
+        Services.PLATFORM.registerAttributes(SMILER_TEST, com.smileprotocol.entity.SmilerTest::attributes);
     }
 }

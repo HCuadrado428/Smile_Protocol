@@ -91,7 +91,7 @@ public final class ClientInteraction {
         prevLight = light;
 
         Action action = MotionStates.view(player).action();
-        if (action == Action.HIDDEN || action == Action.DIVE || action == Action.VAULT || action == Action.DOWNED) {
+        if (action == Action.HIDDEN || action == Action.DIVE || action == Action.VAULT || action == Action.DOWNED || action == Action.GRABBED) {
             if (sent != null) stop();
             target = null;
             spec = null;

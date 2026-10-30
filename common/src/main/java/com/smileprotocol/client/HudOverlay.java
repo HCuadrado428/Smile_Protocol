@@ -103,7 +103,9 @@ public final class HudOverlay {
 
         if (!mc.options.hideGui) {
             if (inGame) {
-                if (ClientState.downed) {
+                if (ClientQTE.active()) {
+                    renderQTE(g, font, w, h);
+                } else if (ClientState.downed) {
                     renderDowned(g, font, w, h);
                 } else if (ClientHide.hidden()) {
                     renderHide(g, font, w, h, partialTick);
@@ -253,6 +255,97 @@ public final class HudOverlay {
         }
         Component hint = hud(Component.translatable(st.partial() ? "smileprotocol.hud.hide_hint_partial" : "smileprotocol.hud.hide_hint"));
         g.drawString(font, hint, cx - font.width(hint) / 2, y + 10, BONE_DIM, true);
+    }
+
+    /** Minijuego de escape (README 18): titulo garabateado, tiempo en sangre y el control de cada tipo. */
+    private static void renderQTE(GuiGraphics g, Font font, int w, int h) {
+        com.smileprotocol.qte.QTEType type = ClientQTE.type();
+        float t = ClientQTE.time();
+        long ms = Util.getMillis();
+        // pantalla: latido rojo en los bordes y un temblor leve
+        float beat = (float) Math.exp(-Math.pow(((ms / 1000.0 * 2.2) % 1.0 - 0.3) * 10, 2));
+        RenderSystem.setShaderColor(1f, 1f, 1f, 0.35f + 0.3f * beat);
+        g.blitSprite(BLOOD_VIGNETTE, -8, -8, w + 16, h + 16);
+        RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
+        int shake = ClientQTE.sincePress() < 90 ? RNG.nextInt(3) - 1 : 0;
+        int cx = w / 2 + shake, y = h / 2 - 54;
+        String key = type.name().toLowerCase(java.util.Locale.ROOT);
+        Component title = scrawl(Component.translatable("smileprotocol.qte." + key));
+        g.pose().pushPose();
+        g.pose().translate(cx, y, 0);
+        g.pose().scale(1.5f, 1.5f, 1f);
+        g.drawString(font, title, -font.width(title) / 2, 0, 0xFFC01A1E, false);
+        g.pose().popPose();
+        // tiempo restante
+        int bw = 170, bx = cx - bw / 2, by = y + 26;
+        g.blitSprite(BAR_EMPTY, bx, by, bw, 5);
+        bar(g, BAR_BLOOD, 100, 8, bx, by, bw, 5, ClientQTE.remaining());
+        int wy = by + 14;
+        switch (type) {
+            case MASH -> {
+                float k = ClientQTE.progress() / (float) ClientQTE.target();
+                g.blitSprite(BAR_LIGHT_EMPTY, bx, wy, bw, 9);
+                bar(g, BAR_LIGHT, 64, 6, bx, wy, bw, 9, k);
+                Component sp = hud(Component.translatable("smileprotocol.qte.key_space"));
+                int kw = font.width(sp) + 12, kx = cx - kw / 2 + (ClientQTE.sincePress() < 80 ? 0 : 0);
+                int ky = wy + 16 + (ClientQTE.sincePress() < 80 ? 1 : 0);
+                g.blitSprite(TAPE, kx, ky, kw, 14);
+                g.drawString(font, sp, kx + 6, ky + 3, INK, false);
+            }
+            case TIMING -> {
+                int tw = bw, tx = bx, ty = wy;
+                g.blitSprite(BAR_LIGHT_EMPTY, tx, ty, tw, 10);
+                float zone = com.smileprotocol.qte.QTEType.timingZone(ClientQTE.seed(), ClientQTE.progress());
+                float zw = com.smileprotocol.qte.QTEType.timingWidth(ClientQTE.difficulty());
+                int zx0 = tx + Math.round((zone - zw / 2) * tw), zx1 = tx + Math.round((zone + zw / 2) * tw);
+                g.fill(zx0, ty - 1, zx1, ty + 11, 0xA0C9BFA6);
+                int cur = tx + Math.round(com.smileprotocol.qte.QTEType.timingCursor(t) * tw);
+                g.fill(cur - 1, ty - 4, cur + 1, ty + 14, BLOOD_BRIGHT);
+                pips(g, cx, ty + 18, com.smileprotocol.qte.QTEType.TIMING_HITS, ClientQTE.progress());
+                int misses = Math.round(ClientQTE.extra());
+                for (int i = 0; i < com.smileprotocol.qte.QTEType.TIMING_MISSES; i++) {
+                    Component x = hud(i < misses ? "X" : "·");
+                    g.drawString(font, x, cx - 8 + i * 12, ty + 30, i < misses ? BLOOD_BRIGHT : BONE_DIM, false);
+                }
+            }
+            case SEQUENCE -> {
+                String[] names = {"W", "A", "S", "D"};
+                int n = com.smileprotocol.qte.QTEType.SEQUENCE_LENGTH, kw = 18, gap = 6;
+                int x0 = cx - (n * kw + (n - 1) * gap) / 2;
+                for (int i = 0; i < n; i++) {
+                    int k = com.smileprotocol.qte.QTEType.sequenceKey(ClientQTE.seed(), i);
+                    boolean done = i < ClientQTE.progress(), cur = i == ClientQTE.progress();
+                    int kx = x0 + i * (kw + gap), ky = wy + (cur ? -2 : 0);
+                    if (!done) {
+                        RenderSystem.setShaderColor(1f, 1f, 1f, cur ? 1f : 0.55f);
+                        g.blitSprite(TAPE, kx, ky, kw, 16);
+                        RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
+                    }
+                    Component c = hud(names[k]);
+                    g.drawString(font, c, kx + (kw - font.width(c)) / 2, ky + 4, done ? 0x60C9BFA6 : cur ? 0xFF8A1010 : INK, false);
+                    if (done) g.fill(kx + 2, ky + 8, kx + kw - 2, ky + 9, BLOOD);
+                }
+            }
+            case HOLD -> {
+                int tw = bw, tx = bx, ty = wy;
+                g.blitSprite(BAR_LIGHT_EMPTY, tx, ty, tw, 10);
+                float zone = com.smileprotocol.qte.QTEType.holdZone(ClientQTE.seed(), t);
+                float zw = com.smileprotocol.qte.QTEType.HOLD_ZONE;
+                g.fill(tx + Math.round((zone - zw / 2) * tw), ty - 1, tx + Math.round((zone + zw / 2) * tw), ty + 11, 0xA0C9BFA6);
+                int nx = tx + Math.round(ClientQTE.extra() * tw);
+                g.fill(nx - 1, ty - 4, nx + 1, ty + 14, BLOOD_BRIGHT);
+                float k = ClientQTE.progress() / (float) ClientQTE.target();
+                g.blitSprite(BAR_EMPTY, bx + 30, ty + 18, bw - 60, 5);
+                bar(g, BAR_BLOOD, 100, 8, bx + 30, ty + 18, bw - 60, 5, k);
+            }
+        }
+        Component hint = hud(Component.translatable("smileprotocol.qte." + key + "_hint"));
+        g.drawString(font, hint, cx - font.width(hint) / 2, wy + 44, BONE, true);
+    }
+
+    private static void pips(GuiGraphics g, int cx, int y, int n, int on) {
+        int pw = n * 10 - 3;
+        for (int i = 0; i < n; i++) g.blitSprite(i < on ? PIP_ON : PIP_OFF, cx - pw / 2 + i * 10, y, 7, 7);
     }
 
     /** Derribado: todo se oscurece y enrojece, y una barra marca lo que queda antes de desangrarse. */

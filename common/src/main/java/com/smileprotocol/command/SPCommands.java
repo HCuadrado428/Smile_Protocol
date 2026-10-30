@@ -424,7 +424,7 @@ public final class SPCommands {
         // Mobs (fase 11): aparecer uno, quitar los de alrededor y derribarse para probar
         root.then(Commands.literal("mob")
                 .then(Commands.literal("spawn").then(Commands.argument("type", StringArgumentType.word())
-                        .suggests((c, b) -> net.minecraft.commands.SharedSuggestionProvider.suggest(new String[]{"berserker"}, b))
+                        .suggests((c, b) -> net.minecraft.commands.SharedSuggestionProvider.suggest(new String[]{"berserker", "smiler_test"}, b))
                         .executes(MechanismCommands::mobSpawn)))
                 .then(Commands.literal("clear").executes(MechanismCommands::mobClear))
                 .then(Commands.literal("down").executes(MechanismCommands::selfDown)));

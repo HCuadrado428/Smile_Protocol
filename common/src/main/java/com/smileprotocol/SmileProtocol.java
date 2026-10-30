@@ -29,6 +29,7 @@ public final class SmileProtocol {
         ModBlocks.init();
         ModItems.init();
         ModBlockEntities.init();
+        com.smileprotocol.registry.ModSounds.init();
         com.smileprotocol.registry.ModEntities.init();
         com.smileprotocol.entity.MobManager.init();
         ModCreativeTabs.init();

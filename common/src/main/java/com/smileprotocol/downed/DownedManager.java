@@ -61,6 +61,7 @@ public final class DownedManager {
     public static void down(ServerPlayer p, @Nullable String cause) {
         if (!SPPlayerData.inSP(p) || p.isSpectator() || p.isCreative() || isDowned(p)) return;
         HideManager.forceExit(p, true);
+        com.smileprotocol.qte.QTEManager.clear(p);
         int total = SPConfig.get().bleed_out_time * 20;
         State s = new State(total);
         s.groan = SPConfig.get().downed_noise_interval / 2;
@@ -96,7 +97,7 @@ public final class DownedManager {
             if (--s.groan <= 0) {
                 s.groan = SPConfig.get().downed_noise_interval;
                 NoiseSystem.emit(p.serverLevel(), p.position(), SPConfig.get().noise_groan, NoiseType.GROAN, p);
-                p.serverLevel().playSound(null, p.blockPosition(), SoundEvents.PLAYER_BREATH, SoundSource.PLAYERS, 0.9f, 0.6f);
+                p.serverLevel().playSound(null, p.blockPosition(), com.smileprotocol.registry.ModSounds.PLAYER_GROAN.get(), SoundSource.PLAYERS, 0.9f, 1.0f);
             }
             if (++s.sinceSync >= 10) {
                 s.sinceSync = 0;

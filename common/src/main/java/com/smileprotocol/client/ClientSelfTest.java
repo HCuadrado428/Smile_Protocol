@@ -183,6 +183,18 @@ public final class ClientSelfTest {
         SHOTS.add(() -> grab(mc, "17_berserker_golpe"));
         SHOTS.add(() -> wait = 30);
         SHOTS.add(() -> grab(mc, "18_derribado"));
+        // 8. Agarre y QTE con el mob de pruebas
+        SHOTS.add(() -> server.execute(() -> {
+            com.smileprotocol.downed.DownedManager.clear(sp);
+            sp.setHealth(sp.getMaxHealth());
+            for (var m : level.getEntitiesOfClass(com.smileprotocol.entity.SPMonster.class,
+                    new net.minecraft.world.phys.AABB(cam, cam).inflate(40))) m.discard();
+            SPSessionManager.teleport(sp, level, cam, 0f, 0f);
+            com.smileprotocol.entity.MobManager.spawn(level, com.smileprotocol.registry.ModEntities.SMILER_TEST.get(),
+                    BlockPos.containing(cam.add(0, 0, 4)), level.random);
+        }));
+        SHOTS.add(() -> wait = 50);
+        SHOTS.add(() -> grab(mc, "19_agarre_qte"));
     }
 
     private static void shot(Minecraft mc, MinecraftServer server, String name, Vec3 pos, float yaw, float pitch, int delay) {

@@ -59,7 +59,9 @@ public final class NeoForgeClient {
             event.registerBlockEntityRenderer(ModBlockEntities.FUSE_BOX.get(), com.smileprotocol.client.SPGeoRenderer::new);
             event.registerBlockEntityRenderer(ModBlockEntities.LAB_DOOR.get(), com.smileprotocol.client.SPGeoRenderer::new);
             event.registerBlockEntityRenderer(ModBlockEntities.HIDE.get(), com.smileprotocol.client.SPGeoRenderer::new);
-            event.registerEntityRenderer(com.smileprotocol.registry.ModEntities.BERSERKER.get(), com.smileprotocol.client.BerserkerRenderer::new);
+            event.registerEntityRenderer(com.smileprotocol.registry.ModEntities.BERSERKER.get(), ctx -> new com.smileprotocol.client.BerserkerRenderer<>(ctx, "berserker"));
+            event.registerEntityRenderer(com.smileprotocol.registry.ModEntities.SMILER_TEST.get(),
+                    ctx -> new com.smileprotocol.client.BerserkerRenderer<>(ctx, "smiler_test"));
         }
     }
 

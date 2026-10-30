@@ -1,0 +1,229 @@
+#!/usr/bin/env python3
+"""
+Sonidos provisionales generados por sintesis (README 20.2, fase 11): pasos, respiracion,
+chasquidos de escucha, olfateo, el grito del aviso y el golpe del Berserker, mas el quejido del
+derribado y el agarre. Mono a 44,1 kHz (Minecraft solo posiciona los sonidos mono) en .ogg.
+
+    python3 tools/sounds.py          # necesita ffmpeg con libvorbis
+"""
+import subprocess
+import tempfile
+import wave
+from pathlib import Path
+
+import numpy as np
+
+SR = 44100
+OUT = Path(__file__).resolve().parent.parent / "common/src/main/resources/assets/smileprotocol/sounds"
+
+
+def t(sec):
+    return np.arange(int(SR * sec)) / SR
+
+
+def env(n, a=0.005, d=0.3, curve=3.0):
+    """Envolvente de ataque rapido y caida exponencial."""
+    x = np.arange(n) / SR
+    att = np.clip(x / max(a, 1e-4), 0, 1)
+    return att * np.exp(-x / max(d, 1e-4) * curve / 3)
+
+
+def lowpass(x, fc):
+    a = np.exp(-2 * np.pi * fc / SR)
+    y = np.zeros_like(x)
+    acc = 0.0
+    for i in range(len(x)):
+        acc = (1 - a) * x[i] + a * acc
+        y[i] = acc
+    return y
+
+
+def highpass(x, fc):
+    return x - lowpass(x, fc)
+
+
+def bandpass(x, f0, q=4.0):
+    """Biquad pasa banda (RBJ)."""
+    w = 2 * np.pi * f0 / SR
+    al = np.sin(w) / (2 * q)
+    b0, b1, b2 = al, 0, -al
+    a0, a1, a2 = 1 + al, -2 * np.cos(w), 1 - al
+    y = np.zeros_like(x)
+    x1 = x2 = y1 = y2 = 0.0
+    for i in range(len(x)):
+        v = (b0 * x[i] + b1 * x1 + b2 * x2 - a1 * y1 - a2 * y2) / a0
+        x2, x1, y2, y1 = x1, x[i], y1, v
+        y[i] = v
+    return y
+
+
+def noise(n, rng):
+    return rng.uniform(-1, 1, n)
+
+
+def norm(x, peak=0.9):
+    m = np.max(np.abs(x)) + 1e-9
+    return x / m * peak
+
+
+def save(name, x):
+    OUT.joinpath(name).parent.mkdir(parents=True, exist_ok=True)
+    x = norm(x)
+    # fundidos para que no chasquee
+    f = min(len(x) // 10, int(SR * 0.01))
+    x[:f] *= np.linspace(0, 1, f)
+    x[-f:] *= np.linspace(1, 0, f)
+    pcm = (x * 32767).astype(np.int16)
+    with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as tmp:
+        with wave.open(tmp.name, "wb") as w:
+            w.setnchannels(1)
+            w.setsampwidth(2)
+            w.setframerate(SR)
+            w.writeframes(pcm.tobytes())
+        subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", tmp.name, "-c:a", "libvorbis", "-q:a", "4",
+                        str(OUT / f"{name}.ogg")], check=True)
+        Path(tmp.name).unlink()
+
+
+# Sonidos ---------------------------------------------------------------------------------------------
+
+def step(seed):
+    """Pisada pesada y descalza: golpe sordo, carne y un crujido de hueso."""
+    r = np.random.default_rng(seed)
+    n = int(SR * 0.45)
+    tt = np.arange(n) / SR
+    thud = np.sin(2 * np.pi * (48 + r.uniform(-6, 6)) * tt * (1 - 0.3 * tt)) * env(n, 0.003, 0.12)
+    flesh = lowpass(noise(n, r), 900) * env(n, 0.001, 0.05) * 1.2
+    crack = np.zeros(n)
+    k = int(SR * r.uniform(0.02, 0.06))
+    crack[k:k + 400] = highpass(noise(400, r), 2500) * np.linspace(1, 0, 400) * 0.6
+    return thud * 1.4 + flesh + crack
+
+
+def breath(seed):
+    """Respiracion humeda y ronca: inspira, pausa, espira con gorgoteo."""
+    r = np.random.default_rng(seed)
+    out = []
+    for dur, gain, f0 in ((1.1, 0.7, 700), (0.25, 0.0, 500), (1.4, 1.0, 420)):
+        n = int(SR * dur)
+        e = np.sin(np.linspace(0, np.pi, n)) ** 1.5 * gain
+        air = bandpass(noise(n, r), f0, 1.2)
+        tt = np.arange(n) / SR
+        growl = np.sign(np.sin(2 * np.pi * (62 + 6 * np.sin(tt * 7)) * tt)) * 0.12 * gain
+        wet = (np.sin(2 * np.pi * 13 * tt) > 0.6) * bandpass(noise(n, r), 300, 3) * 0.4
+        out.append((air + lowpass(growl, 400) + wet) * e)
+    return np.concatenate(out)
+
+
+def listen():
+    """Chasquidos de dientes, como si escuchara: click-click... click."""
+    r = np.random.default_rng(31)
+    x = np.zeros(int(SR * 1.6))
+    times = [0.0, 0.09, 0.18, 0.55, 0.62, 1.1, 1.17, 1.24, 1.31]
+    for tt in times:
+        k = int(tt * SR)
+        n = 900
+        c = bandpass(noise(n, r), r.uniform(1800, 2600), 6) * env(n, 0.0005, 0.01)
+        x[k:k + n] += c
+    tt = np.arange(len(x)) / SR
+    x += lowpass(noise(len(x), r), 120) * 0.15 * (0.5 + 0.5 * np.sin(tt * 4))
+    return x
+
+
+def sniff(seed):
+    r = np.random.default_rng(seed)
+    x = np.zeros(int(SR * 1.2))
+    for i, tt in enumerate((0.0, 0.18, 0.36)):
+        n = int(SR * 0.14)
+        k = int(tt * SR)
+        s = bandpass(noise(n, r), 1400 + i * 200, 1.5) * np.sin(np.linspace(0, np.pi, n)) ** 2
+        x[k:k + n] += s
+    return x
+
+
+def roar():
+    """El aviso del golpe: chillido que sube, ronco y distorsionado."""
+    r = np.random.default_rng(41)
+    n = int(SR * 0.9)
+    tt = np.arange(n) / SR
+    f = 110 + 260 * (tt / tt[-1]) ** 0.7 + 8 * np.sin(2 * np.pi * 9 * tt)
+    ph = 2 * np.pi * np.cumsum(f) / SR
+    saw = 2 * ((ph / (2 * np.pi)) % 1) - 1
+    voice = sum(bandpass(saw, fm, 5) * g for fm, g in ((700, 1.0), (1150, 0.7), (2600, 0.35)))
+    rasp = bandpass(noise(n, r), 1600, 0.8) * 0.5
+    e = np.clip(tt / 0.08, 0, 1) * np.clip((tt[-1] - tt) / 0.15, 0, 1)
+    x = (voice + rasp) * e
+    return np.tanh(norm(x) * 3.0)
+
+
+def impact():
+    """Golpe contra el suelo: estampido grave, polvo y cascotes."""
+    r = np.random.default_rng(51)
+    n = int(SR * 1.4)
+    tt = np.arange(n) / SR
+    boom = np.sin(2 * np.pi * (60 * np.exp(-tt * 3) + 28) * tt) * env(n, 0.002, 0.45)
+    hit = lowpass(noise(n, r), 2500) * env(n, 0.001, 0.08) * 1.5
+    debris = np.zeros(n)
+    for _ in range(26):
+        k = int(r.uniform(0.05, 1.0) * SR)
+        m = 600
+        if k + m < n:
+            debris[k:k + m] += highpass(noise(m, r), 3000) * env(m, 0.0005, 0.01) * r.uniform(0.1, 0.4)
+    return np.tanh((boom * 1.6 + hit + debris) * 1.5)
+
+
+def groan(seed):
+    """Quejido del derribado: voz grave entrecortada."""
+    r = np.random.default_rng(seed)
+    n = int(SR * 1.3)
+    tt = np.arange(n) / SR
+    f = 105 - 20 * tt + 3 * np.sin(2 * np.pi * 5 * tt)
+    ph = 2 * np.pi * np.cumsum(f) / SR
+    pulse = (np.sin(ph) > 0.7).astype(float) - 0.2
+    voice = bandpass(pulse, 500, 3) + bandpass(pulse, 900, 4) * 0.6 + bandpass(noise(n, r), 700, 1) * 0.15
+    e = np.sin(np.linspace(0, np.pi, n)) ** 0.8 * (0.7 + 0.3 * np.sin(2 * np.pi * 3 * tt))
+    return voice * e
+
+
+def grab():
+    """Agarre: golpe seco y un gruñido corto encima."""
+    r = np.random.default_rng(61)
+    n = int(SR * 0.7)
+    tt = np.arange(n) / SR
+    hit = lowpass(noise(n, r), 1800) * env(n, 0.001, 0.06) * 1.5
+    g = np.sign(np.sin(2 * np.pi * (80 + 40 * tt) * tt)) * env(n, 0.02, 0.4) * 0.5
+    return hit + lowpass(g, 700)
+
+
+def heartbeat():
+    """Latido fuerte (derribado y QTE)."""
+    n = int(SR * 0.9)
+    tt = np.arange(n) / SR
+    x = np.zeros(n)
+    for k0, g in ((0.0, 1.0), (0.22, 0.7)):
+        k = int(k0 * SR)
+        m = int(SR * 0.2)
+        tm = np.arange(m) / SR
+        x[k:k + m] += np.sin(2 * np.pi * 45 * tm) * env(m, 0.004, 0.08) * g
+    return lowpass(x, 300)
+
+
+def main():
+    for i in range(3):
+        save(f"berserker/step{i + 1}", step(10 + i))
+    for i in range(2):
+        save(f"berserker/breath{i + 1}", breath(20 + i))
+    save("berserker/listen", listen())
+    for i in range(2):
+        save(f"berserker/sniff{i + 1}", sniff(30 + i))
+    save("berserker/roar", roar())
+    save("berserker/impact", impact())
+    for i in range(2):
+        save(f"player/groan{i + 1}", groan(70 + i))
+    save("player/heartbeat", heartbeat())
+    save("mob/grab", grab())
+    print("sonidos escritos en", OUT)
+
+
+if __name__ == "__main__":
+    main()

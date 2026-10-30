@@ -24,6 +24,9 @@ public final class ClientController {
         SPNetwork.setClientHandler(Payloads.SyncMotion.TYPE, ClientMotion::onSync);
         SPNetwork.setClientHandler(Payloads.InteractState.TYPE, ClientInteraction::onState);
         SPNetwork.setClientHandler(Payloads.SyncHide.TYPE, ClientHide::onSync);
+        SPNetwork.setClientHandler(Payloads.StartQTE.TYPE, ClientQTE::start);
+        SPNetwork.setClientHandler(Payloads.QTEState.TYPE, ClientQTE::state);
+        SPNetwork.setClientHandler(Payloads.QTEEnd.TYPE, ClientQTE::end);
         SPNetwork.setClientHandler(Payloads.SyncDowned.TYPE, p -> {
             ClientState.downed = p.downed();
             ClientState.bleed = p.bleed();
@@ -42,6 +45,7 @@ public final class ClientController {
         ClientMotion.reset();
         ClientInteraction.reset();
         ClientHide.reset();
+        ClientQTE.reset();
         com.smileprotocol.client.light.Flashlight.reset();
         com.smileprotocol.client.light.DynamicLights.clear();
     }
@@ -52,6 +56,7 @@ public final class ClientController {
         ClientMotion.tick(mc);
         ClientHide.tick(mc);
         ClientInteraction.tick(mc);
+        ClientQTE.tick(mc);
         if (mc.player == null || !ClientState.inSmileProtocol()) return;
 
         // F3 y F5 (README 8.2)

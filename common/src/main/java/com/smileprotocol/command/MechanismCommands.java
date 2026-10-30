@@ -183,12 +183,15 @@ final class MechanismCommands {
     static int mobSpawn(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         String type = StringArgumentType.getString(ctx, "type");
         ServerLevel level = ctx.getSource().getLevel();
-        if (!type.equals("berserker")) {
-            ctx.getSource().sendFailure(Component.translatable("smileprotocol.command.mob.unknown", type));
-            return 0;
-        }
         BlockPos pos = BlockPos.containing(ctx.getSource().getPosition());
-        com.smileprotocol.entity.MobManager.spawn(level, com.smileprotocol.registry.ModEntities.BERSERKER.get(), pos, level.random);
+        switch (type) {
+            case "berserker" -> com.smileprotocol.entity.MobManager.spawn(level, com.smileprotocol.registry.ModEntities.BERSERKER.get(), pos, level.random);
+            case "smiler_test" -> com.smileprotocol.entity.MobManager.spawn(level, com.smileprotocol.registry.ModEntities.SMILER_TEST.get(), pos, level.random);
+            default -> {
+                ctx.getSource().sendFailure(Component.translatable("smileprotocol.command.mob.unknown", type));
+                return 0;
+            }
+        }
         ctx.getSource().sendSuccess(() -> Component.translatable("smileprotocol.command.mob.spawned", type), true);
         return 1;
     }

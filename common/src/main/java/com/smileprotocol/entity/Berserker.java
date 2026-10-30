@@ -10,6 +10,7 @@ import com.smileprotocol.noise.NoiseEvent;
 import com.smileprotocol.noise.NoiseSystem;
 import com.smileprotocol.noise.NoiseType;
 import com.smileprotocol.player.SPPlayerData;
+import com.smileprotocol.registry.ModSounds;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
@@ -149,7 +150,7 @@ public class Berserker extends SmilerBase {
         target = e.pos();
         targetLoudness = loudness;
         if (s != State.INVESTIGATE) {
-            playSound(SoundEvents.WARDEN_LISTENING, 1.6f, 0.7f);
+            playSound(ModSounds.BERSERKER_LISTEN.get(), 1.6f, 1.0f);
         }
         setState(State.INVESTIGATE);
         SPDebug.log("berserker oye " + e.type() + " r=" + e.radius() + " ef=" + String.format("%.1f", effective));
@@ -173,7 +174,7 @@ public class Berserker extends SmilerBase {
         timer++;
         if (--ambientCooldown <= 0) {
             ambientCooldown = 120 + random.nextInt(160);
-            playSound(SoundEvents.WARDEN_AMBIENT, 1.2f, 0.55f + random.nextFloat() * 0.1f);
+            playSound(ModSounds.BERSERKER_BREATH.get(), 1.2f, 0.9f + random.nextFloat() * 0.2f);
         }
         openDoorsAhead(level, def);
         switch (state()) {
@@ -182,7 +183,7 @@ public class Berserker extends SmilerBase {
             case STRIKE -> {
                 getNavigation().stop();
                 if (target != null) getLookControl().setLookAt(target.x, target.y + 0.5, target.z);
-                if (timer == 1) playSound(SoundEvents.WARDEN_ROAR, 1.4f, 1.3f);
+                if (timer == 1) playSound(ModSounds.BERSERKER_ROAR.get(), 1.6f, 1.0f);
                 if (timer >= def.windup()) {
                     impact(level, def);
                     setState(State.RECOVER);
@@ -192,7 +193,7 @@ public class Berserker extends SmilerBase {
                 getNavigation().stop();
                 if (timer >= def.recovery()) {
                     setState(State.SEARCH);
-                    playSound(SoundEvents.WARDEN_SNIFF, 1.4f, 0.8f);
+                    playSound(ModSounds.BERSERKER_SNIFF.get(), 1.4f, 1.0f);
                 }
             }
             case SEARCH -> {
@@ -201,7 +202,7 @@ public class Berserker extends SmilerBase {
                 float yaw = getYRot() + Mth.sin(timer * 0.08f) * 70f;
                 Vec3 look = getEyePosition().add(Vec3.directionFromRotation(10f, yaw).scale(3));
                 getLookControl().setLookAt(look.x, look.y, look.z);
-                if (timer % 40 == 20) playSound(SoundEvents.WARDEN_SNIFF, 1.2f, 0.75f);
+                if (timer % 40 == 20) playSound(ModSounds.BERSERKER_SNIFF.get(), 1.2f, 0.9f);
                 if (timer >= def.searchTime()) setState(State.PATROL);
             }
         }
@@ -251,7 +252,7 @@ public class Berserker extends SmilerBase {
         Vec3 c = target != null && target.distanceTo(position()) <= def.strikeRadius() + 2
                 ? target : position().add(getLookAngle().multiply(1, 0, 1).normalize().scale(1.5));
         double r = def.strikeRadius();
-        playSound(SoundEvents.WARDEN_ATTACK_IMPACT, 1.6f, 0.7f);
+        playSound(ModSounds.BERSERKER_IMPACT.get(), 2.0f, 1.0f);
         level.playSound(null, BlockPos.containing(c), SoundEvents.ZOMBIE_ATTACK_WOODEN_DOOR, SoundSource.HOSTILE, 1.0f, 0.6f);
         BlockState floor = level.getBlockState(BlockPos.containing(c).below());
         level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, floor), c.x, c.y + 0.1, c.z, 40, r * 0.4, 0.1, r * 0.4, 0.15);
@@ -302,8 +303,8 @@ public class Berserker extends SmilerBase {
         super.tick();
         // Pasos pesados (se oyen, pero no generan ruido para los mobs)
         if (level().isClientSide && onGround() && walkAnimation.speed() > 0.1f && tickCount % (entityData.get(MOVING_FAST) ? 6 : 11) == 0) {
-            level().playLocalSound(getX(), getY(), getZ(), SoundEvents.WARDEN_STEP, SoundSource.HOSTILE,
-                    entityData.get(MOVING_FAST) ? 1.0f : 0.6f, 0.75f + random.nextFloat() * 0.1f, false);
+            level().playLocalSound(getX(), getY(), getZ(), ModSounds.BERSERKER_STEP.get(), SoundSource.HOSTILE,
+                    entityData.get(MOVING_FAST) ? 1.0f : 0.6f, 0.9f + random.nextFloat() * 0.2f, false);
         }
     }
 

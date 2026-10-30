@@ -19,19 +19,25 @@ import com.google.gson.JsonObject;
  * @param onCatch           DOWN, GRAB_QTE o INSTANT_KILL
  * @param execution         remata a los derribados
  * @param opensDoors        abre las puertas normales del laboratorio
+ * @param qteType           minijuego al agarrar: MASH, TIMING, SEQUENCE o HOLD (README 18)
+ * @param qteTicks          duracion base del minijuego (se escala por el grupo)
+ * @param qteFail           DOWN o DEATH si se falla
+ * @param sightRange        alcance de la vista (0 = ciego)
  */
 public record MobDef(String id, float hearingMultiplier, float minNoise, String idleBehavior, float retargetRatio,
                      int searchTime, int windup, float strikeRadius, int recovery, double walkSpeed, double runSpeed,
-                     String onCatch, boolean execution, boolean opensDoors, boolean checksHidingSpots) {
+                     String onCatch, boolean execution, boolean opensDoors, boolean checksHidingSpots,
+                     String qteType, int qteTicks, String qteFail, float sightRange) {
 
     public static MobDef berserkerDefaults() {
-        return new MobDef("berserker", 1.5f, 5f, "WANDER", 1.5f, 120, 12, 2.5f, 30, 0.55, 1.35, "DOWN", true, true, false);
+        return new MobDef("berserker", 1.5f, 5f, "WANDER", 1.5f, 120, 12, 2.5f, 30, 0.55, 1.35, "DOWN", true, true, false,
+                "MASH", 100, "DOWN", 0f);
     }
 
     static MobDef parse(String id, JsonObject o) {
         MobDef d = berserkerDefaults();
         JsonObject senses = obj(o, "senses"), hearing = obj(senses, "hearing"), ai = obj(o, "ai"),
-                strike = obj(o, "strike"), speed = obj(o, "speed");
+                strike = obj(o, "strike"), speed = obj(o, "speed"), qte = obj(o, "qte"), vision = obj(senses, "vision");
         return new MobDef(id,
                 f(hearing, "multiplier", d.hearingMultiplier), f(hearing, "min_noise", d.minNoise),
                 s(ai, "idle_behavior", d.idleBehavior), f(ai, "retarget_loudness_ratio", d.retargetRatio),
@@ -39,7 +45,9 @@ public record MobDef(String id, float hearingMultiplier, float minNoise, String 
                 i(strike, "windup_ticks", d.windup), f(strike, "radius", d.strikeRadius), i(strike, "recovery_ticks", d.recovery),
                 f(speed, "walk", (float) d.walkSpeed), f(speed, "run", (float) d.runSpeed),
                 s(o, "on_catch", d.onCatch), b(o, "execution", d.execution), b(ai, "opens_doors", d.opensDoors),
-                b(ai, "checks_hiding_spots", d.checksHidingSpots));
+                b(ai, "checks_hiding_spots", d.checksHidingSpots),
+                s(qte, "type", d.qteType), i(qte, "ticks", d.qteTicks), s(o, "qte_fail_result", d.qteFail),
+                b(vision, "enabled", false) ? f(vision, "range", 20f) : 0f);
     }
 
     private static JsonObject obj(JsonObject o, String k) {
