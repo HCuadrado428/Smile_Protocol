@@ -6,24 +6,7 @@ Creating Minecraft artifacts without recompilation.
 
 > Configure project :fabric
 Fabric Loom: 1.16.3
-Previous process has disowned the lock due to abrupt termination.
-Found existing cache lock file (ACQUIRED_PREVIOUS_OWNER_DISOWNED), rebuilding loom cache. This may have been caused by a failed or canceled build.
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Using of the official minecraft mappings is at your own risk!
-Please make sure to read and understand the following license:
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# (c) 2020 Microsoft Corporation. These mappings are provided "as-is" and you bear the risk of using them. You may copy and use the mappings for development purposes, but you may not redistribute the mappings complete and unmodified. Microsoft makes no warranties, express or implied, with respect to the mappings provided here.  Use and modification of this document or the source code (in any form) of Minecraft: Java Edition is governed by the Minecraft End User License Agreement available at https://account.mojang.com/documents/minecraft_eula.
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Cannot remap renderSectionManager because it does not exist in any of the targets [] or their parents.
-Cannot remap lambda$reloadShaders$56 because it does not exist in any of the targets [net/minecraft/class_757]
-Cannot remap taskLists because it does not exist in any of the targets [] or their parents.
-Cannot remap renderLists because it does not exist in any of the targets [] or their parents.
-Cannot remap taskLists because it does not exist in any of the targets [] or their parents.
-Cannot remap renderTargets because it does not exist in any of the targets [] or their parents.
-Cannot remap loadedShaders because it does not exist in any of the targets [] or their parents.
-Cannot remap chunkRenderer because it does not exist in any of the targets [] or their parents.
-Cannot remap sectionByPosition because it does not exist in any of the targets [] or their parents.
 Cannot remap renderSectionManager because it does not exist in any of the targets [] or their parents.
 Cannot remap lambda$reloadShaders$56 because it does not exist in any of the targets [net/minecraft/class_757]
 Cannot remap taskLists because it does not exist in any of the targets [] or their parents.
@@ -41,14 +24,14 @@ Creating Minecraft artifacts without recompilation.
 Loaded 93 artifacts from /home/runner/work/Smile_Protocol/Smile_Protocol/common/build/tmp/createMinecraftArtifacts/nfrt_artifact_manifest.properties
 [1m*** Started working on [4mdownloadJson[23;0m[23;0m
  [1m[92m✓[23;0m Completed [4mdownloadJson[23;0m in 0.02s
-[1m*** Started working on [4mdownloadServer[23;0m[23;0m
-[1m*** Started working on [4mdownloadClientMappings[23;0m[23;0m
 [1m*** Started working on [4mdownloadClient[23;0m[23;0m
- [1m[92m✓[23;0m Completed [4mdownloadClientMappings[23;0m in 0.04s
- [1m[92m✓[23;0m Completed [4mdownloadServer[23;0m in 0.04s
+[1m*** Started working on [4mdownloadClientMappings[23;0m[23;0m
+[1m*** Started working on [4mdownloadServer[23;0m[23;0m
  [1m[92m✓[23;0m Completed [4mdownloadClient[23;0m in 0.04s
+ [1m[92m✓[23;0m Completed [4mdownloadServer[23;0m in 0.04s
+ [1m[92m✓[23;0m Completed [4mdownloadClientMappings[23;0m in 0.04s
 [1m*** Started working on [4mstripClient[23;0m[23;0m
- [1m[92m♻[23;0m Used cache of [4mstripClient[23;0m in 0.00s
+ [1m[92m♻[23;0m Used cache of [4mstripClient[23;0m in 0.01s
 [1m*** Started working on [4mmergeMappings[23;0m[23;0m
  [1m[92m♻[23;0m Used cache of [4mmergeMappings[23;0m in 0.00s
 [1m*** Started working on [4mextractServer[23;0m[23;0m
@@ -59,26 +42,24 @@ Loaded 93 artifacts from /home/runner/work/Smile_Protocol/Smile_Protocol/common/
  [1m[92m♻[23;0m Used cache of [4mmerge[23;0m in 0.00s
 [1m*** Started working on [4mrename[23;0m[23;0m
  [1m[92m♻[23;0m Used cache of [4mrename[23;0m in 0.00s
-Total runtime: 0.79s
+Total runtime: 0.78s
 
 
 > Task :common:compileJava
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/voice/SPVoicePlugin.java:43: error: cannot find symbol
-        return SmileProtocol.MOD_ID;
-                            ^
-  symbol:   variable MOD_ID
-  location: class SmileProtocol
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/voice/SPVoicePlugin.java:95: error: cannot find symbol
-            e.getPacket().setOpusEncodedData(enc.encode(out));
-                         ^
-  symbol:   method setOpusEncodedData(byte[])
-  location: interface MicrophonePacket
-Note: /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/client/light/Flashlight.java uses or overrides a deprecated API.
-Note: Recompile with -Xlint:deprecation for details.
-2 errors
+/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/voice/SPVoicePlugin.java:99: error: unnamed classes are a preview feature and are disabled by default.
+    static double decibels(short[] pcm) {
+           ^
+  (use --enable-preview to enable unnamed classes)
+/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/voice/SPVoicePlugin.java:218: error: class, interface, enum, or record expected
+}
+^
+/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/voice/SPVoicePlugin.java:1: error: unnamed class should not have package declaration
+package com.smileprotocol.voice;
+^
+3 errors
 
 > Task :common:compileJava FAILED
-gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/__run-1793372506124.json
+gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/__run-1793372900031.json
 
 [Incubating] Problems report is available at: file:///home/runner/work/Smile_Protocol/Smile_Protocol/build/reports/problems/problems-report.html
 
@@ -87,19 +68,17 @@ FAILURE: Build failed with an exception.
 * What went wrong:
 Execution failed for task ':common:compileJava'.
 > Compilation failed; see the compiler output below.
-  Note: /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/client/light/Flashlight.java uses or overrides a deprecated API.
-  Note: Recompile with -Xlint:deprecation for details.
-  /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/voice/SPVoicePlugin.java:43: error: cannot find symbol
-          return SmileProtocol.MOD_ID;
-                              ^
-    symbol:   variable MOD_ID
-    location: class SmileProtocol
-  /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/voice/SPVoicePlugin.java:95: error: cannot find symbol
-              e.getPacket().setOpusEncodedData(enc.encode(out));
-                           ^
-    symbol:   method setOpusEncodedData(byte[])
-    location: interface MicrophonePacket
-  2 errors
+  /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/voice/SPVoicePlugin.java:99: error: unnamed classes are a preview feature and are disabled by default.
+      static double decibels(short[] pcm) {
+             ^
+    (use --enable-preview to enable unnamed classes)
+  /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/voice/SPVoicePlugin.java:218: error: class, interface, enum, or record expected
+  }
+  ^
+  /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/voice/SPVoicePlugin.java:1: error: unnamed class should not have package declaration
+  package com.smileprotocol.voice;
+  ^
+  3 errors
 
 * Try:
 > Check your code and dependencies to fix the compilation error(s)
@@ -141,19 +120,17 @@ org.gradle.api.tasks.TaskExecutionException: Execution failed for task ':common:
 	at org.gradle.internal.concurrent.ExecutorPolicy$CatchAndRecordFailures.onExecute(ExecutorPolicy.java:64)
 	at org.gradle.internal.concurrent.AbstractManagedExecutor$1.run(AbstractManagedExecutor.java:47)
 Caused by: org.gradle.api.internal.tasks.compile.CompilationFailedException: Compilation failed; see the compiler output below.
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/voice/SPVoicePlugin.java:43: error: cannot find symbol
-        return SmileProtocol.MOD_ID;
-                            ^
-  symbol:   variable MOD_ID
-  location: class SmileProtocol
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/voice/SPVoicePlugin.java:95: error: cannot find symbol
-            e.getPacket().setOpusEncodedData(enc.encode(out));
-                         ^
-  symbol:   method setOpusEncodedData(byte[])
-  location: interface MicrophonePacket
-Note: /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/client/light/Flashlight.java uses or overrides a deprecated API.
-Note: Recompile with -Xlint:deprecation for details.
-2 errors
+/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/voice/SPVoicePlugin.java:99: error: unnamed classes are a preview feature and are disabled by default.
+    static double decibels(short[] pcm) {
+           ^
+  (use --enable-preview to enable unnamed classes)
+/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/voice/SPVoicePlugin.java:218: error: class, interface, enum, or record expected
+}
+^
+/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/voice/SPVoicePlugin.java:1: error: unnamed class should not have package declaration
+package com.smileprotocol.voice;
+^
+3 errors
 	at org.gradle.api.internal.tasks.compile.JdkJavaCompiler.execute(JdkJavaCompiler.java:89)
 	at org.gradle.api.internal.tasks.compile.JdkJavaCompiler.execute(JdkJavaCompiler.java:50)
 	at org.gradle.api.internal.tasks.compile.NormalizingJavaCompiler.delegateAndHandleErrors(NormalizingJavaCompiler.java:98)
@@ -288,5 +265,5 @@ Note: Recompile with -Xlint:deprecation for details.
 	... 30 more
 
 
-BUILD FAILED in 51s
+BUILD FAILED in 31s
 2 actionable tasks: 2 executed
