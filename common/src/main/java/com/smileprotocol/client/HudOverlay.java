@@ -98,7 +98,7 @@ public final class HudOverlay {
         boolean inGame = ClientState.inSmileProtocol() && mc.player != null;
         if (inGame) {
             renderVignette(g, mc.player, w, h);
-            renderGrain(g, w, h);
+            if (!ClientSelfTest.recording()) renderGrain(g, w, h);
         }
 
         if (!mc.options.hideGui) {

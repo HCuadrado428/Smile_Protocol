@@ -29,6 +29,13 @@ public abstract class CameraMixin {
 
     @Inject(method = "setup", at = @At("TAIL"))
     private void smileprotocol$setup(BlockGetter level, Entity entity, boolean detached, boolean reverse, float pt, CallbackInfo ci) {
+        Vec3 testCam = com.smileprotocol.client.ClientSelfTest.TEST_CAM_POS;
+        if (testCam != null) {
+            // Grabacion de animaciones: camara fija mirando al jugador o al mob
+            setPosition(testCam);
+            setRotation(com.smileprotocol.client.ClientSelfTest.TEST_CAM_YAW, com.smileprotocol.client.ClientSelfTest.TEST_CAM_PITCH);
+            return;
+        }
         com.smileprotocol.client.light.Flashlight.update((Camera) (Object) this, pt);
         if (this.detached) return;
         float yawOffset = ClientMotion.cameraYawOffset(entity, pt);

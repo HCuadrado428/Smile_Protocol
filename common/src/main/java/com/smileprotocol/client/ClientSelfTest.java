@@ -205,7 +205,13 @@ public final class ClientSelfTest {
 
     // Grabacion de animaciones -------------------------------------------------------------------
 
-    private static int cameraId = -1;
+    /** Camara fija de la grabacion (la lee CameraMixin). */
+    public static volatile Vec3 TEST_CAM_POS;
+    public static volatile float TEST_CAM_YAW, TEST_CAM_PITCH;
+
+    public static boolean recording() {
+        return TEST_CAM_POS != null;
+    }
 
     /**
      * Estudio flotante encima de la planta, con luz y una pared de fondo. La camara es un soporte
@@ -231,18 +237,12 @@ public final class ClientSelfTest {
             com.smileprotocol.motion.Flashlights.set(sp, false);
             for (var m : level.getEntitiesOfClass(com.smileprotocol.entity.SPMonster.class, new net.minecraft.world.phys.AABB(P, P).inflate(60))) m.discard();
             SPSessionManager.teleport(sp, level, P, -90f, 0f);
-            net.minecraft.world.entity.decoration.ArmorStand cam = new net.minecraft.world.entity.decoration.ArmorStand(level, P.x, P.y, P.z + 4);
-            cam.setInvisible(true);
-            cam.setNoGravity(true);
-            cam.setInvulnerable(true);
-            level.addFreshEntity(cam);
-            cameraId = cam.getId();
         }));
         SHOTS.add(() -> wait = 20);
         SHOTS.add(() -> {
             mc.options.hideGui = true;
-            if (mc.level != null && mc.level.getEntity(cameraId) != null) mc.setCameraEntity(mc.level.getEntity(cameraId));
-            else log("FALLO: sin camara");
+            com.smileprotocol.config.SPConfig.get().force_first_person = false;
+            mc.options.setCameraType(net.minecraft.client.CameraType.THIRD_PERSON_BACK);
         });
         Vec3 chest = P.add(0, 0.95, 0);
         Vec3 side = P.add(0, 1.0, 5.2);
@@ -365,7 +365,7 @@ public final class ClientSelfTest {
         mobScene(server, level, bz, bQ, bChest, P, com.smileprotocol.entity.Berserker.State.SEARCH, false, null, 0);
         record(mc, "berserker_escuchar", 80, null);
         SHOTS.add(() -> {
-            mc.setCameraEntity(mc.player);
+            TEST_CAM_POS = null;
             mc.options.hideGui = false;
         });
     }
@@ -373,18 +373,20 @@ public final class ClientSelfTest {
     /** Coloca la camara (mirando a {@code look}) y al jugador; {@code extra} corre en el servidor. */
     private static void scene(MinecraftServer server, ServerLevel level, ServerPlayer sp, Vec3 cam, Vec3 look, Vec3 at, float yaw,
                               Runnable extra) {
-        SHOTS.add(() -> server.execute(() -> {
-            placeCamera(level, cam, look);
-            SPSessionManager.teleport(sp, level, at, yaw, 0f);
-            if (extra != null) extra.run();
-        }));
+        SHOTS.add(() -> {
+            placeCamera(cam, look);
+            server.execute(() -> {
+                SPSessionManager.teleport(sp, level, at, yaw, 0f);
+                if (extra != null) extra.run();
+            });
+        });
         SHOTS.add(() -> wait = 8);
     }
 
     private static void mobScene(MinecraftServer server, ServerLevel level, com.smileprotocol.entity.Berserker[] bz, Vec3 cam, Vec3 look,
                                  Vec3 at, com.smileprotocol.entity.Berserker.State st, boolean fast, Vec3 to, double speed) {
+        SHOTS.add(() -> placeCamera(cam, look));
         SHOTS.add(() -> server.execute(() -> {
-            placeCamera(level, cam, look);
             if (bz[0] == null) return;
             bz[0].moveTo(at.x, at.y, at.z, -90f, 0f);
             bz[0].setYBodyRot(-90f);
@@ -394,15 +396,11 @@ public final class ClientSelfTest {
         SHOTS.add(() -> wait = 10);
     }
 
-    private static void placeCamera(ServerLevel level, Vec3 cam, Vec3 look) {
-        if (!(level.getEntity(cameraId) instanceof net.minecraft.world.entity.decoration.ArmorStand as)) return;
+    private static void placeCamera(Vec3 cam, Vec3 look) {
         double dx = look.x - cam.x, dy = look.y - cam.y, dz = look.z - cam.z;
-        float yaw = (float) Math.toDegrees(Math.atan2(-dx, dz));
-        float pitch = (float) -Math.toDegrees(Math.atan2(dy, Math.sqrt(dx * dx + dz * dz)));
-        // el ojo del soporte esta a 1,7 sobre sus pies
-        as.moveTo(cam.x, cam.y - as.getEyeHeight(), cam.z, yaw, pitch);
-        as.setYHeadRot(yaw);
-        as.setYBodyRot(yaw);
+        TEST_CAM_YAW = (float) Math.toDegrees(Math.atan2(-dx, dz));
+        TEST_CAM_PITCH = (float) -Math.toDegrees(Math.atan2(dy, Math.sqrt(dx * dx + dz * dz)));
+        TEST_CAM_POS = cam;
     }
 
     private static void record(Minecraft mc, String name, int frames, java.util.function.IntConsumer perTick) {
