@@ -498,6 +498,123 @@ def ahorcado():
     return g.save()
 
 
+def ash(base=(58, 56, 58), fray=0.0):
+    """Apagon: ceniza y humo gris oscuro, con brasas apagadas; los bordes se deshacen (alfa)."""
+    def m(f):
+        n = f.n(0.6, 4, 601)
+        c = np.zeros((f.h, f.w, 3)) + base
+        c *= (0.6 + 0.6 * n)[..., None]
+        swirl = 0.5 + 0.5 * np.sin(f.Y * 2.5 + noise3(f.X, f.Y, f.Z, 0.8, 602) * 7)
+        c *= (0.8 + 0.3 * swirl)[..., None]
+        flake = sstep(0.8, 0.95, f.n(1.6, 2, 603))
+        c = c + flake[..., None] * 40
+        a = np.ones((f.h, f.w))
+        if fray > 0:
+            hole = f.n(1.2, 3, 604) < fray
+            a = np.where(hole, 0, a)
+        return c, a
+    return m
+
+
+ASH_FACE = [
+    "..............",
+    ".R.......R....",
+    ".RR......RR..R",
+    "..R...R...R..R",
+    "......RR......",
+    "R......R....R.",
+    "RR..........RR",
+    "..............",
+    ".RTRTRTRTRTRT.",
+    "..RKKKKKKKKR..",
+    "...RTRTRTRTR..",
+    "....RRRRRR....",
+    "..............",
+    "..............",
+]
+
+
+def ash_face():
+    """Cara de humo: ojos rojos rasgados y desiguales por toda la cara (alguno doble) y una boca
+    dentada torcida. Todo lo rojo brilla; el resto es ceniza."""
+    asf = ash((40, 38, 40))
+
+    def cells(f):
+        px = np.clip(np.floor(f.U * gm.SCALE).astype(int), 0, len(ASH_FACE[0]) - 1)
+        py = np.clip(np.floor(f.V * gm.SCALE).astype(int), 0, len(ASH_FACE) - 1)
+        return np.vectorize(lambda x, y: ASH_FACE[y][x])(px, py)
+
+    def glow(f):
+        if f.face != "north":
+            return np.zeros((f.h, f.w))
+        ch = cells(f)
+        return ((ch == "R") | (ch == "T")).astype(float)
+
+    def mat(f):
+        c, a = asf(f)
+        if f.face != "north":
+            return c, a
+        ch = cells(f)
+        c = np.where((ch == "R")[..., None], np.array([226, 24, 26]), c)
+        c = np.where((ch == "T")[..., None], np.array([240, 120, 100]), c)
+        c = np.where((ch == "K")[..., None], np.array([4, 0, 0]), c)
+        return c, a
+
+    mat.glowmask = glow
+    return mat
+
+
+def shadow():
+    def m(f):
+        c = np.zeros((f.h, f.w, 3)) + (10, 9, 11)
+        c *= (0.7 + 0.5 * f.n(0.8, 3, 611))[..., None]
+        return c, np.ones((f.h, f.w))
+    return m
+
+
+def red_eye():
+    def m(f):
+        c = np.zeros((f.h, f.w, 3)) + (235, 30, 28)
+        return c, np.ones((f.h, f.w))
+    return m
+
+
+MAT.update({"ash": ash(), "ash_fray": ash((50, 48, 50), 0.32), "ash_face": ash_face(), "shadow": shadow(),
+            "red_eye": red_eye()})
+
+
+def apagon():
+    """Apagon (docs/SMILERS.md): torso y cabeza de humo y ceniza que se deshacen hacia abajo en una
+    cola (flota, sin piernas), brazos de sombra larguisimos y ojos rojos por toda la cabeza y el pecho.
+    El juego lo escala: pequeno a la luz y enorme a oscuras."""
+    g = Geo("apagon", 81, folder="entity", glow=("ash_face", "red_eye"), ao=False)
+    g.bone("root")
+    g.bone("tail", "root", (0, 14, 0))
+    for k, (w, y0, h) in enumerate(((5.5, 10, 4.5), (4.2, 6, 4.2), (3, 2.5, 3.8), (1.8, 0, 2.6))):
+        g.cube("tail", (-w / 2, y0, -w / 2.6), (w, h, w / 1.3), "ash_fray" if k else "ash")
+    g.bone("torso", "root", (0, 14.5, 0))
+    g.cube("torso", (-3.5, 14.5, -2.4), (7, 9, 4.8), "ash")
+    g.cube("torso", (-4.6, 22.5, -2.8), (9.2, 5.5, 5.6), "ash")
+    g.cube("torso", (-5, 18, -3.2), (10, 10, 6.4), "ash_fray", skip=("up",))                 # humo que lo envuelve
+    for k, (x, y) in enumerate(((-2, 25), (1.6, 23.5), (-0.4, 20))):
+        g.bone(f"eye_t{k}", "torso", (x, y, -3.0))
+        g.cube(f"eye_t{k}", (x - 0.7, y - 0.45, -3.1), (1.4, 0.9, 0.2), "red_eye")
+    g.bone("head", "torso", (0, 28, -0.6))
+    g.cube("head", (-3.6, 28, -4), (7.2, 7.5, 6.6), "ash_face")
+    g.cube("head", (-4.3, 30, -3.6), (8.6, 7.5, 6.4), "ash_fray", skip=("north",))           # humo alrededor
+    for side, sx in (("r", 1), ("l", -1)):
+        g.bone(f"arm_{side}", "torso", (sx * 4.6, 26.5, 0))
+        g.cube(f"arm_{side}", (sx * 4.6 - 0.8, 12, -0.8), (1.6, 15, 1.6), "shadow")
+        g.bone(f"forearm_{side}", f"arm_{side}", (sx * 4.6, 12.5, 0))
+        g.cube(f"forearm_{side}", (sx * 4.6 - 0.6, -3, -0.6), (1.2, 16, 1.2), "shadow")
+        g.bone(f"hand_{side}", f"forearm_{side}", (sx * 4.6, -2.5, 0))
+        g.cube(f"hand_{side}", (sx * 4.6 - 0.9, -5, -1.2), (1.8, 2.6, 2.4), "shadow")
+        for i, z in enumerate((-1, 0, 1)):
+            g.bone(f"finger{i}_{side}", f"hand_{side}", (sx * 4.6, -4.8, z * 0.8))
+            g.cube(f"finger{i}_{side}", (sx * 4.6 - 0.2, -13, z * 0.8 - 0.2), (0.4, 8.4, 0.4), "shadow")
+    return g.save()
+
+
 GRIN = [
     "R................R",
     "RR..............RR",
@@ -1226,6 +1343,56 @@ def ahorcado_animations():
     return A
 
 
+def apagon_animations():
+    A = {}
+    blink = lambda L, ph: {"scale": kf([(0, [1, 1, 1]), (L * ph, [1, 1, 1]), (L * ph + 0.08, [1, 0.05, 1]),
+                                          (L * ph + 0.2, [1, 1, 1]), (L, [1, 1, 1])])}
+    L = 3.0
+    A["float"] = loop_anim(L, {
+        "root": {"position": kf(wave(L, [0, 3, 0], 0.8, 0, 8, 1))},
+        "tail": {"rotation": kf(multi(L, [0, 0, 0], [8, 0, 10], [0, 0, 1.4]))},
+        "torso": {"rotation": kf(multi(L, [8, 0, 0], [3, 6, 2], [0.5, 1.5, 2.5]))},
+        "head": {"rotation": kf(multi(L, [10, 0, 0], [4, 10, 6], [1, 2, 0]))},
+        "arm_r": {"rotation": kf(wave(L, [-8, 0, -6], 6, 0.3))}, "arm_l": {"rotation": kf(wave(L, [-8, 0, 6], 6, 2.1))},
+        "forearm_r": {"rotation": kf(wave(L, [-10, 0, 0], 8, 1))}, "forearm_l": {"rotation": kf(wave(L, [-10, 0, 0], 8, 2))},
+        **{f"finger{i}_{s_}": {"rotation": kf(wave(L, [12, 0, 0], 16, i + (0 if s_ == "r" else 2)))} for i in range(3) for s_ in "rl"},
+        "eye_t0": blink(L, 0.2), "eye_t1": blink(L, 0.55), "eye_t2": blink(L, 0.8),
+    })
+    # MOVE: se inclina hacia delante, los brazos se arrastran por detras
+    L = 1.6
+    A["move"] = loop_anim(L, {
+        "root": {"position": kf(wave(L, [0, 3, 0], 0.5, 0, 8, 1))},
+        "tail": {"rotation": kf(multi(L, [-30, 0, 0], [6, 0, 12], [0, 0, 1]))},
+        "torso": {"rotation": kf(wave(L, [28, 0, 0], 4))},
+        "head": {"rotation": kf(wave(L, [-12, 0, 0], 4, 1))},
+        "arm_r": {"rotation": kf(wave(L, [-12, 0, -10], 8))}, "arm_l": {"rotation": kf(wave(L, [-12, 0, 10], 8, 1.5))},
+        "forearm_r": {"rotation": kf([(0, [12, 0, 0])])}, "forearm_l": {"rotation": kf([(0, [12, 0, 0])])},
+        "eye_t0": blink(L, 0.3), "eye_t1": blink(L, 0.7),
+    })
+    # RECOIL: la luz le da: se tapa la cara con los brazos y se encoge hacia atras
+    L = 0.6
+    A["recoil"] = loop_anim(L, {
+        "torso": {"rotation": kf(wave(L, [-22, 0, 0], 4))},
+        "head": {"rotation": kf(multi(L, [-20, 0, 0], [6, 14, 10], [0, 1, 2]))},
+        "arm_r": {"rotation": kf([(0, [-150, -30, 10])])}, "arm_l": {"rotation": kf([(0, [-150, 30, -10])])},
+        "forearm_r": {"rotation": kf(wave(L, [-90, 0, 0], 10))}, "forearm_l": {"rotation": kf(wave(L, [-90, 0, 0], 10, 1))},
+        "tail": {"rotation": kf(wave(L, [25, 0, 0], 8))},
+        **{f"eye_t{k}": {"scale": kf([(0, [1, 0.05, 1])])} for k in range(3)},
+    })
+    # GRAB: los brazos de sombra envuelven a la victima y la acercan a la cara
+    L = 0.8
+    A["grab"] = loop_anim(L, {
+        "torso": {"rotation": kf(wave(L, [20, 0, 0], 4))},
+        "head": {"rotation": kf(multi(L, [10, 0, 0], [6, 10, 8], [0, 1, 2]))},
+        "arm_r": {"rotation": kf(wave(L, [-70, -30, -10], 6))}, "arm_l": {"rotation": kf(wave(L, [-70, 30, 10], 6, 1))},
+        "forearm_r": {"rotation": kf([(0, [-80, 0, 0])])}, "forearm_l": {"rotation": kf([(0, [-80, 0, 0])])},
+        **{f"finger{i}_{s_}": {"rotation": kf([(0, [70, 0, 0])])} for i in range(3) for s_ in "rl"},
+    })
+    out = {"format_version": "1.8.0", "animations": A}
+    (ROOT / "animations/entity/apagon.animation.json").write_text(json.dumps(out, indent=1) + "\n", encoding="utf-8")
+    return A
+
+
 # Vista previa con huesos y animacion ---------------------------------------------------------------
 
 def _rot(rx, ry, rz):
@@ -1349,6 +1516,8 @@ def main():
     rastreador_animations()
     ahorcado()
     ahorcado_animations()
+    apagon()
+    apagon_animations()
     print(f"paciente textura {pw * gm.SCALE}x{ph * gm.SCALE} caras={pn} animaciones={list(P)}")
     if len(sys.argv) > 2:
         frames = [("pose0", 200), ("pose0", 110), ("pose1", 160), ("pose2", 130), ("pose3", 200), ("pose4", 160)]
