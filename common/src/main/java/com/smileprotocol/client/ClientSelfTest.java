@@ -449,7 +449,7 @@ public final class ClientSelfTest {
         record(mc, "agarre_qte", 55, null);
         // de lado y cerca: las manos tienen que sujetar al jugador por los hombros
         SHOTS.add(() -> placeCamera(P.add(0.6, 1.1, 3.2), P.add(0.6, 1.1, 0)));
-        record(mc, "agarre_lado", 20, null);
+        record(mc, "agarre_lado", 20, k -> { if (k % 5 == 0 && tester[0] != null) probe("GRAB t=" + k, tester[0].getId(), sp.getId()); });
         SHOTS.add(() -> { if (tester[0] != null) follow(tester[0].getId(), new Vec3(1.8, 1.7, 3.2), 1.2); });
         record(mc, "smiler_aturdido", 40, k -> {
             if (k == 0) server.execute(() -> {
@@ -538,12 +538,14 @@ public final class ClientSelfTest {
                 if (kind.execution) com.smileprotocol.downed.DownedManager.down(sp, "grabacion");
             }));
             SHOTS.add(() -> wait = 12);
-            SHOTS.add(() -> placeCamera(P.add(1.0, 1.5, 4.6), P.add(1.0, 0.8, 0)));
+            SHOTS.add(() -> placeCamera(P.add(1.2, 2.0, 6.4), P.add(1.2, 1.0, 0)));
             record(mc, seqNames[i], kind.ticks + 8, k -> {
                 if (k == 0) server.execute(() -> { if (ex[0] != null) com.smileprotocol.sequence.SequenceManager.start(ex[0], sp, kind); });
+                // donde quedan las manos y la cabeza del mob respecto a la victima (para ajustar distancias)
+                if (k % 4 == 0 && ex[0] != null) probe(kind.name() + " t=" + k, ex[0].getId(), sp.getId());
             });
             // de frente / en diagonal, la misma secuencia otra vez
-            SHOTS.add(() -> placeCamera(P.add(4.2, 1.6, 2.6), P.add(1.0, 0.8, 0)));
+            SHOTS.add(() -> placeCamera(P.add(5.0, 2.0, 3.6), P.add(1.0, 0.9, 0)));
             record(mc, seqNames[i] + "_diagonal", kind.ticks + 8, k -> {
                 if (k == 0) server.execute(() -> {
                     if (kind.execution) com.smileprotocol.downed.DownedManager.down(sp, "grabacion");
@@ -578,6 +580,32 @@ public final class ClientSelfTest {
         });
         SHOTS.add(() -> server.execute(() -> { if (ex[0] != null) ex[0].discard(); }));
         SHOTS.add(() -> com.smileprotocol.sequence.SequenceManager.TEST_NO_KILL = false);
+    }
+
+    /**
+     * Registra donde estan las manos y la cabeza del mob (huesos de GeckoLib en el mundo) respecto
+     * al mob y a la victima: distancia hacia delante y altura, en bloques.
+     */
+    private static void probe(String label, int mobId, int victimId) {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.level == null) return;
+        net.minecraft.world.entity.Entity e = mc.level.getEntity(mobId);
+        net.minecraft.world.entity.Entity v = mc.level.getEntity(victimId);
+        if (!(e instanceof com.smileprotocol.entity.SPMonster m) || v == null) return;
+        if (!(mc.getEntityRenderDispatcher().getRenderer(m) instanceof software.bernie.geckolib.renderer.GeoEntityRenderer<?> r)) return;
+        float yaw = m.yBodyRot * net.minecraft.util.Mth.DEG_TO_RAD;
+        double fx = -net.minecraft.util.Mth.sin(yaw), fz = net.minecraft.util.Mth.cos(yaw);
+        StringBuilder sb = new StringBuilder("HUESOS " + label + String.format(" victima=%.2f/%.2f", 
+                (v.getX() - m.getX()) * fx + (v.getZ() - m.getZ()) * fz, v.getY() - m.getY()));
+        for (String b : new String[]{"hand_r", "hand_l", "head"}) {
+            r.getGeoModel().getBone(b).ifPresent(bone -> {
+                bone.setTrackingMatrices(true);
+                org.joml.Vector3d w = bone.getWorldPosition();
+                double dx = w.x - m.getX(), dz = w.z - m.getZ();
+                sb.append(String.format(" %s=%.2f/%.2f", b, dx * fx + dz * fz, w.y - m.getY()));
+            });
+        }
+        log(sb.toString());
     }
 
     /** Coloca la camara (mirando a {@code look}) y al jugador; {@code extra} corre en el servidor. */
