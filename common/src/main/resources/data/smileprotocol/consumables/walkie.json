@@ -1,0 +1,1 @@
+{ "item": "smileprotocol:walkie", "use_time": 8, "effect": { "type": "WALKIE" }, "noise": 0.5, "anim": "battery", "sound": "smileprotocol:walkie.click", "usable_downed": true, "consume": false }

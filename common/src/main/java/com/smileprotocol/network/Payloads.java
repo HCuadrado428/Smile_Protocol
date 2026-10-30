@@ -436,4 +436,47 @@ public final class Payloads {
 
         @Override public Type<QTEInput> type() { return TYPE; }
     }
+
+    /** C -> S: marcador de equipo (README 8.4). El servidor calcula a donde se mira. */
+    public record PlaceMarker(int kind) implements CustomPacketPayload {
+        public static final Type<PlaceMarker> TYPE = typeOf("place_marker");
+        public static final StreamCodec<ByteBuf, PlaceMarker> CODEC = ByteBufCodecs.VAR_INT.map(PlaceMarker::new, PlaceMarker::kind);
+
+        @Override public Type<PlaceMarker> type() { return TYPE; }
+    }
+
+    /** S -> C: marcadores vivos del grupo ({@code MarkerManager.write}). */
+    public record SyncMarkers(net.minecraft.nbt.CompoundTag data) implements CustomPacketPayload {
+        public static final Type<SyncMarkers> TYPE = typeOf("sync_markers");
+        public static final StreamCodec<ByteBuf, SyncMarkers> CODEC = ByteBufCodecs.COMPOUND_TAG.map(SyncMarkers::new, SyncMarkers::data);
+
+        @Override public Type<SyncMarkers> type() { return TYPE; }
+    }
+
+    /** C -> S: tecla del walkie pulsada o soltada (README 17.3). */
+    public record WalkieInput(boolean talk) implements CustomPacketPayload {
+        public static final Type<WalkieInput> TYPE = typeOf("walkie_input");
+        public static final StreamCodec<ByteBuf, WalkieInput> CODEC = ByteBufCodecs.BOOL.map(WalkieInput::new, WalkieInput::talk);
+
+        @Override public Type<WalkieInput> type() { return TYPE; }
+    }
+
+    /**
+     * S -> C: estado del walkie del jugador: si lo lleva y esta encendido, si transmite, quien
+     * se oye ({@code rx}, vacio = nadie) y si hay interferencias.
+     */
+    public record SyncWalkie(boolean has, boolean on, boolean tx, String rx, boolean interference) implements CustomPacketPayload {
+        public static final Type<SyncWalkie> TYPE = typeOf("sync_walkie");
+        public static final StreamCodec<ByteBuf, SyncWalkie> CODEC = StreamCodec.composite(
+                ByteBufCodecs.BOOL, SyncWalkie::has,
+                ByteBufCodecs.BOOL, SyncWalkie::on,
+                ByteBufCodecs.BOOL, SyncWalkie::tx,
+                ByteBufCodecs.STRING_UTF8, SyncWalkie::rx,
+                ByteBufCodecs.BOOL, SyncWalkie::interference,
+                SyncWalkie::new);
+
+        public static final SyncWalkie NONE = new SyncWalkie(false, false, false, "", false);
+
+        @Override public Type<SyncWalkie> type() { return TYPE; }
+    }
 }

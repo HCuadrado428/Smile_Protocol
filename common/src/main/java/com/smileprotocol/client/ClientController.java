@@ -47,6 +47,8 @@ public final class ClientController {
             if (old == null || old.step() != p.step() || !old.text().equals(p.text())) ClientState.missionChanged = net.minecraft.Util.getMillis();
             ClientState.mission = p.active() ? p : null;
         });
+        SPNetwork.setClientHandler(Payloads.SyncMarkers.TYPE, ClientMarkers::onSync);
+        SPNetwork.setClientHandler(Payloads.SyncWalkie.TYPE, ClientWalkie::onSync);
         SPNetwork.setClientHandler(Payloads.SyncFlashlight.TYPE, p -> com.smileprotocol.client.light.Flashlight.sync(p.entityId(), p.on(), p.battery()));
         com.smileprotocol.interact.ClientInventoryView.setProvider(ClientState::slot);
     }
@@ -64,6 +66,8 @@ public final class ClientController {
         ClientQTE.reset();
         ClientSequence.reset();
         ClientScare.reset();
+        ClientMarkers.reset();
+        ClientWalkie.reset();
         com.smileprotocol.client.light.Flashlight.reset();
         com.smileprotocol.client.light.DynamicLights.clear();
         com.smileprotocol.client.light.FlareLights.clear();
@@ -75,6 +79,8 @@ public final class ClientController {
         ClientMotion.tick(mc);
         ClientHide.tick(mc);
         ClientInteraction.tick(mc);
+        ClientMarkers.tick(mc);
+        ClientWalkie.tick(mc);
         ClientQTE.tick(mc);
         ClientSequence.tick(mc);
         ClientScare.tick();

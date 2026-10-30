@@ -51,6 +51,10 @@ public final class ClientItems {
     @Nullable
     public static InteractionSpec prompt(boolean downed) {
         ItemStack st = ClientState.slot(ClientState.selected());
+        if (st.is(com.smileprotocol.registry.ModItems.WALKIE.get())) {
+            return InteractionSpec.of(Component.translatable(ClientWalkie.state().on() ? "smileprotocol.walkie.turn_off"
+                    : "smileprotocol.walkie.turn_on"), 1, 0, 0);
+        }
         if (st.getItem() instanceof ConsumableItem) {
             return InteractionSpec.of(Component.translatable("smileprotocol.use.prompt", st.getHoverName()), 1, 0, 0);
         }

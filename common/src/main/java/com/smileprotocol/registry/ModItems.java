@@ -52,6 +52,8 @@ public final class ModItems {
     public static final Supplier<Item> BATTERY = item("battery", () -> new com.smileprotocol.item.ConsumableItem(one()));
     public static final Supplier<Item> FLARE = item("flare", () -> new com.smileprotocol.item.ConsumableItem(one()));
     public static final Supplier<Item> ADRENALINE = item("adrenaline", () -> new com.smileprotocol.item.ConsumableItem(one()));
+    /** Walkie (README 17.3): se usa como consumible que no se gasta (encender y apagar). */
+    public static final Supplier<Item> WALKIE = item("walkie", () -> new com.smileprotocol.item.ConsumableItem(one()));
     public static final Supplier<Item> CAN = item("can", () -> new com.smileprotocol.item.ThrowableItem(one()));
     public static final Supplier<Item> BOTTLE = item("bottle", () -> new com.smileprotocol.item.ThrowableItem(one()));
 

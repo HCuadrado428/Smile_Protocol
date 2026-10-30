@@ -25,15 +25,18 @@ import com.google.gson.JsonObject;
  * @param sightRange        alcance de la vista (0 = ciego)
  * @param executionSeq      secuencia de remate ({@code SequenceKind}, README 9.3)
  * @param killSeq           secuencia de muerte instantanea
+ * @param canEnterVents     cabe por los conductos (README 12.9)
+ * @param causesInterference distorsiona los walkies cercanos (README 17.3)
  */
 public record MobDef(String id, float hearingMultiplier, float minNoise, String idleBehavior, float retargetRatio,
                      int searchTime, int windup, float strikeRadius, int recovery, double walkSpeed, double runSpeed,
                      String onCatch, boolean execution, boolean opensDoors, boolean checksHidingSpots,
-                     String qteType, int qteTicks, String qteFail, float sightRange, String executionSeq, String killSeq) {
+                     String qteType, int qteTicks, String qteFail, float sightRange, String executionSeq, String killSeq,
+                     boolean canEnterVents, boolean causesInterference) {
 
     public static MobDef berserkerDefaults() {
         return new MobDef("berserker", 1.5f, 5f, "WANDER", 1.5f, 120, 12, 2.5f, 30, 0.55, 1.35, "DOWN", true, true, false,
-                "MASH", 100, "DOWN", 0f, "BERSERKER_EXECUTION", "SMILER_KILL");
+                "MASH", 100, "DOWN", 0f, "BERSERKER_EXECUTION", "SMILER_KILL", false, false);
     }
 
     static MobDef parse(String id, JsonObject o) {
@@ -51,7 +54,8 @@ public record MobDef(String id, float hearingMultiplier, float minNoise, String 
                 b(ai, "checks_hiding_spots", d.checksHidingSpots),
                 s(qte, "type", d.qteType), i(qte, "ticks", d.qteTicks), s(o, "qte_fail_result", d.qteFail),
                 b(vision, "enabled", false) ? f(vision, "range", 20f) : 0f,
-                s(seq, "execution", d.executionSeq), s(seq, "kill", d.killSeq));
+                s(seq, "execution", d.executionSeq), s(seq, "kill", d.killSeq),
+                b(o, "can_enter_vents", d.canEnterVents), b(o, "causes_interference", d.causesInterference));
     }
 
     public com.smileprotocol.sequence.SequenceKind executionSequence() {

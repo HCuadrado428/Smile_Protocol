@@ -80,6 +80,8 @@ public final class SPSessionManager {
         feed(player);
         // 6. Teletransporte y sincronizacion
         teleport(player, target, pos, yaw, 0f);
+        // Equipo inicial: con voz, un walkie (README 6.2, 17.3)
+        com.smileprotocol.voice.WalkieManager.giveStarter(player);
         sync(player);
         SPDebug.log("enter " + player.getGameProfile().getName() + " -> " + target.dimension().location() + " " + BlockPos.containing(pos));
     }

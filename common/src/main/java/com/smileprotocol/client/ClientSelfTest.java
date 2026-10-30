@@ -119,6 +119,12 @@ public final class ClientSelfTest {
             log((m != null ? "OK" : "FALLO") + " objetivo en el HUD: " + (m == null ? "-" : m.text().getString()
                     + " " + m.progress() + "/" + m.total() + " paso " + (m.step() + 1) + "/" + m.steps()));
         });
+        SHOTS.add(() -> server.execute(() -> {
+            // Fase 19: con voz se entrega un walkie; se guarda para no ocupar hueco hasta su prueba
+            int slot = com.smileprotocol.interact.SPInventoryOps.find(sp, com.smileprotocol.voice.WalkieManager::isWalkie);
+            if (com.smileprotocol.voice.WalkieManager.enabled()) log((slot >= 0 ? "OK" : "FALLO") + " walkie en el equipo inicial");
+            if (slot >= 0) com.smileprotocol.interact.SPInventoryOps.take(sp, slot);
+        }));
         // 2. Pasillo principal
         shot(mc, server, "02_pasillo", e.add(0, 0, 30), 0f, 5f, 40);
         shot(mc, server, "03_pasillo_transversal", e.add(0, 0, 33), -90f, 5f, 40);
@@ -326,6 +332,48 @@ public final class ClientSelfTest {
                     .anyMatch(n -> n.type() == com.smileprotocol.noise.NoiseType.VOICE && n.radius() > 15);
             log((heard ? "OK" : "FALLO") + " la voz hace ruido (grito)");
             log("INFO Simple Voice Chat " + (com.smileprotocol.voice.VoiceManager.available() ? "cargado (plugin activo)" : "no instalado"));
+        }));
+        // 8f. Fase 19: marcador de peligro y walkie
+        SHOTS.add(() -> server.execute(() -> {
+            SPSessionManager.teleport(sp, level, cam, 0f, 8f);
+        }));
+        SHOTS.add(() -> wait = 12);
+        SHOTS.add(() -> server.execute(() -> com.smileprotocol.marker.MarkerManager.onInput(
+                new com.smileprotocol.network.Payloads.PlaceMarker(com.smileprotocol.marker.MarkerManager.DANGER), sp)));
+        SHOTS.add(() -> wait = 8);
+        SHOTS.add(() -> log((ClientMarkers.markers().stream().anyMatch(m -> m.kind() == com.smileprotocol.marker.MarkerManager.DANGER)
+                ? "OK" : "FALLO") + " marcador de peligro visible para el grupo (" + ClientMarkers.markers().size() + ")"));
+        SHOTS.add(() -> grab(mc, "33_marcador"));
+        SHOTS.add(() -> server.execute(() -> {
+            if (!com.smileprotocol.voice.WalkieManager.enabled()) {
+                log("INFO walkie: sin Simple Voice Chat no se entrega");
+                return;
+            }
+            com.smileprotocol.interact.SPInventoryOps.give(sp, new net.minecraft.world.item.ItemStack(com.smileprotocol.registry.ModItems.WALKIE.get()));
+            int slot = com.smileprotocol.interact.SPInventoryOps.find(sp, com.smileprotocol.voice.WalkieManager::isWalkie);
+            if (slot < 0) {
+                log("FALLO walkie: no cabe");
+                return;
+            }
+            com.smileprotocol.player.SPPlayerData.of(sp).getSPInventory().setSelected(slot);
+            SPSessionManager.sync(sp);
+            com.smileprotocol.voice.WalkieManager.onInput(new com.smileprotocol.network.Payloads.WalkieInput(true), sp);
+            log((com.smileprotocol.voice.WalkieManager.transmitting(sp.getUUID()) ? "OK" : "FALLO") + " walkie: transmite con B");
+        }));
+        SHOTS.add(() -> wait = 12);
+        SHOTS.add(() -> grab(mc, "34_walkie"));
+        SHOTS.add(() -> server.execute(() -> {
+            if (!com.smileprotocol.voice.WalkieManager.enabled()) return;
+            com.smileprotocol.voice.WalkieManager.onInput(new com.smileprotocol.network.Payloads.WalkieInput(false), sp);
+            com.smileprotocol.voice.WalkieManager.toggle(sp);
+            boolean off = !com.smileprotocol.voice.WalkieManager.isOn(sp);
+            com.smileprotocol.voice.WalkieManager.onInput(new com.smileprotocol.network.Payloads.WalkieInput(true), sp);
+            log((off && !com.smileprotocol.voice.WalkieManager.transmitting(sp.getUUID()) ? "OK" : "FALLO")
+                    + " walkie apagado: no transmite");
+            com.smileprotocol.voice.WalkieManager.toggle(sp);
+            // que no ocupe hueco en las pruebas siguientes
+            int slot = com.smileprotocol.interact.SPInventoryOps.find(sp, com.smileprotocol.voice.WalkieManager::isWalkie);
+            if (slot >= 0) com.smileprotocol.interact.SPInventoryOps.take(sp, slot);
         }));
         // 9. Fase 12: levantarse tras la reanimacion, muerte instantanea en primera persona y muerte final
         SHOTS.add(() -> server.execute(() -> {

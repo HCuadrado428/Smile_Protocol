@@ -106,6 +106,7 @@ public final class HudOverlay {
         if (!mc.options.hideGui) {
             if (inGame && ClientState.dead) {
                 renderDead(g, font, w, h);
+                ClientWalkie.render(g, font, w, h);
             } else if (inGame && ClientSequence.active()) {
                 renderSequence(g, w, h, partialTick);
             } else if (inGame) {
@@ -119,7 +120,9 @@ public final class HudOverlay {
                     renderCrosshair(g, w, h);
                     renderInteraction(g, font, w, h);
                 }
+                ClientMarkers.render(g, font, w, h, partialTick);
                 renderMission(g, font, w);
+                ClientWalkie.render(g, font, w, h);
                 renderVitals(g, font, mc.player, h);
                 renderBattery(g, font, mc.player, h);
                 renderSlots(g, font, w, h);

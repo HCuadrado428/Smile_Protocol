@@ -357,6 +357,40 @@ def revive():
     return air + out + voice
 
 
+def walkie_click():
+    """Clic del boton del walkie y un pitido corto de cortesia."""
+    r = np.random.default_rng(171)
+    n = int(SR * 0.18)
+    tt = np.arange(n) / SR
+    click = highpass(noise(n, r), 2000) * env(n, 0.0005, 0.008)
+    beep = np.sin(2 * np.pi * 1850 * tt) * (tt > 0.03) * (tt < 0.11) * 0.35
+    return click + bandpass(beep, 1850, 3) * 3
+
+
+def walkie_crackle():
+    """Crujido de radio al recibir: rafaga de estatica filtrada con chasquidos."""
+    r = np.random.default_rng(181)
+    n = int(SR * 0.55)
+    tt = np.arange(n) / SR
+    hiss = bandpass(noise(n, r), 2200, 0.9) * (0.6 + 0.4 * np.sin(2 * np.pi * 13 * tt))
+    pops = np.zeros(n)
+    for k in r.integers(0, n - 200, 14):
+        pops[k:k + 120] += highpass(noise(120, r), 3000) * r.uniform(0.5, 1.3)
+    e = np.clip(tt / 0.02, 0, 1) * np.clip((0.55 - tt) / 0.2, 0, 1)
+    return (hiss * 0.7 + pops) * e
+
+
+def marker_ping():
+    """Marcador de equipo: dos notas suaves y apagadas, discretas."""
+    n = int(SR * 0.4)
+    tt = np.arange(n) / SR
+    a = np.sin(2 * np.pi * 660 * tt) * env(n, 0.003, 0.12)
+    k = int(SR * 0.09)
+    b = np.zeros(n)
+    b[k:] = np.sin(2 * np.pi * 880 * tt[:n - k]) * env(n - k, 0.003, 0.15)
+    return lowpass(a + b * 0.8, 2500)
+
+
 def main():
     for i in range(3):
         save(f"berserker/step{i + 1}", step(10 + i))
@@ -384,6 +418,13 @@ def main():
         save(f"event/sting{i + 1}", sting(160 + i))
     save("event/knock", knock())
     save("event/scream", scream())
+    save_new()
+
+
+def save_new():
+    save("walkie/click", walkie_click())
+    save("walkie/crackle", walkie_crackle())
+    save("ui/marker", marker_ping())
     print("sonidos escritos en", OUT)
 
 

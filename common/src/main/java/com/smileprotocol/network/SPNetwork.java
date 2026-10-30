@@ -62,7 +62,11 @@ public final class SPNetwork {
             new Def<>(Payloads.StartSequence.TYPE, Payloads.StartSequence.CODEC, true, null),
             new Def<>(Payloads.QTEState.TYPE, Payloads.QTEState.CODEC, true, null),
             new Def<>(Payloads.QTEEnd.TYPE, Payloads.QTEEnd.CODEC, true, null),
-            new Def<>(Payloads.QTEInput.TYPE, Payloads.QTEInput.CODEC, false, com.smileprotocol.qte.QTEManager::onInput)
+            new Def<>(Payloads.QTEInput.TYPE, Payloads.QTEInput.CODEC, false, com.smileprotocol.qte.QTEManager::onInput),
+            new Def<>(Payloads.PlaceMarker.TYPE, Payloads.PlaceMarker.CODEC, false, com.smileprotocol.marker.MarkerManager::onInput),
+            new Def<>(Payloads.SyncMarkers.TYPE, Payloads.SyncMarkers.CODEC, true, null),
+            new Def<>(Payloads.WalkieInput.TYPE, Payloads.WalkieInput.CODEC, false, com.smileprotocol.voice.WalkieManager::onInput),
+            new Def<>(Payloads.SyncWalkie.TYPE, Payloads.SyncWalkie.CODEC, true, null)
     );
 
     private static final Map<CustomPacketPayload.Type<?>, Consumer<CustomPacketPayload>> CLIENT_HANDLERS = new HashMap<>();

@@ -17,6 +17,9 @@ public interface VoiceBridge {
     /** Partida del grupo de espectadores en el que esta (null si no esta en ninguno nuestro). */
     @Nullable String spectatorRun(ServerPlayer player);
 
+    /** Fin de una transmision de walkie: cierra los canales de radio del emisor. */
+    void walkieEnd(java.util.UUID sender);
+
     /** Tiene el mod de voz instalado y conectado. */
     boolean connected(ServerPlayer player);
 }

@@ -332,5 +332,22 @@
   "block.smileprotocol.vent_grille": "Rejilla de ventilación",
   "block.smileprotocol.vent_fan": "Ventilador del conducto",
   "smileprotocol.vent.open": "Retirar rejilla",
-  "smileprotocol.vent.sealed": "Sellada: sin corriente"
+  "smileprotocol.vent.sealed": "Sellada: sin corriente",
+  "item.smileprotocol.walkie": "Walkie-talkie",
+  "smileprotocol.walkie.on": "Walkie encendido",
+  "smileprotocol.walkie.off": "Walkie apagado",
+  "smileprotocol.walkie.turn_on": "Encender el walkie",
+  "smileprotocol.walkie.turn_off": "Apagar el walkie",
+  "smileprotocol.hud.walkie_tx": "TRANSMITIENDO",
+  "smileprotocol.hud.walkie_rx": "Se oye: %s",
+  "smileprotocol.hud.walkie_on": "Walkie [B]",
+  "smileprotocol.hud.walkie_off": "Walkie apagado",
+  "smileprotocol.marker.attention": "Atención",
+  "smileprotocol.marker.danger": "Peligro",
+  "smileprotocol.marker.go": "Ir allí",
+  "smileprotocol.marker.help": "Necesito ayuda",
+  "smileprotocol.marker.clear": "Despejado",
+  "subtitles.smileprotocol.walkie.click": "Clic del walkie",
+  "subtitles.smileprotocol.walkie.crackle": "Crujido de radio",
+  "subtitles.smileprotocol.ui.marker": "Marcador de equipo"
 }

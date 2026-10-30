@@ -7,6 +7,7 @@ import de.maxhenkel.voicechat.api.VoicechatApi;
 import de.maxhenkel.voicechat.api.VoicechatConnection;
 import de.maxhenkel.voicechat.api.VoicechatPlugin;
 import de.maxhenkel.voicechat.api.VoicechatServerApi;
+import de.maxhenkel.voicechat.api.audiochannel.StaticAudioChannel;
 import de.maxhenkel.voicechat.api.events.EventRegistration;
 import de.maxhenkel.voicechat.api.events.GroupEvent;
 import de.maxhenkel.voicechat.api.events.JoinGroupEvent;
@@ -40,7 +41,7 @@ public class SPVoicePlugin implements VoicechatPlugin, VoiceBridge {
 
     @Override
     public String getPluginId() {
-        return SmileProtocol.MOD_ID;
+        return SmileProtocol.MODID;
     }
 
     @Override
@@ -88,12 +89,10 @@ public class SPVoicePlugin implements VoicechatPlugin, VoiceBridge {
         short[] pcm = decoder.decode(data);
         if (pcm == null || pcm.length == 0) return;
         VoiceManager.onVoice(id, decibels(pcm), e.getPacket().isWhispering());
-        // Agarrado o en una secuencia: la voz sale ahogada
-        if (VoiceManager.muffled(id)) {
-            short[] out = muffle(pcm);
-            OpusEncoder enc = encoders.computeIfAbsent(id, k -> api.createEncoder());
-            e.getPacket().setOpusEncodedData(enc.encode(out));
-        }
+        // Walkie (README 17.3): la voz, con filtro de radio, a los receptores del grupo
+        java.util.List<WalkieManager.Rx> rx = WalkieManager.routes(id);
+        if (rx != null && !rx.isEmpty()) sendRadio(id, pcm, rx);
+    }
     }
 
     /** Nivel RMS en dBFS (0 = maximo, -127 = silencio). */
@@ -107,15 +106,69 @@ public class SPVoicePlugin implements VoicechatPlugin, VoiceBridge {
         return rms <= 1e-7 ? -127 : 20 * Math.log10(rms);
     }
 
-    /** Pasa-bajos sencillo y menos volumen: como hablar con una mano en la boca. */
-    private static short[] muffle(short[] pcm) {
+    private final Map<String, StaticAudioChannel> radioChannels = new ConcurrentHashMap<>();
+    private final Map<UUID, OpusEncoder> radioNoisy = new ConcurrentHashMap<>();
+    private final java.util.Random rng = new java.util.Random();
+
+    private void sendRadio(UUID sender, short[] pcm, java.util.List<WalkieManager.Rx> rx) {
+        if (api == null) return;
+        net.minecraft.server.MinecraftServer server = com.smileprotocol.ServerRef.get();
+        if (server == null) return;
+        byte[] clean = null, noisy = null;
+        for (WalkieManager.Rx r : rx) {
+            VoicechatConnection c = api.getConnectionOf(r.player());
+            ServerPlayer target = server.getPlayerList().getPlayer(r.player());
+            if (c == null || target == null) continue;
+            if (r.interference()) {
+                if (noisy == null) noisy = radioNoisy.computeIfAbsent(sender, k -> api.createEncoder()).encode(radio(pcm, true));
+            } else if (clean == null) {
+                clean = encoders.computeIfAbsent(sender, k -> api.createEncoder()).encode(radio(pcm, false));
+            }
+            String key = sender + ">" + r.player();
+            StaticAudioChannel ch = radioChannels.get(key);
+            if (ch == null || ch.isClosed()) {
+                ch = api.createStaticAudioChannel(UUID.nameUUIDFromBytes(key.getBytes(java.nio.charset.StandardCharsets.UTF_8)),
+                        api.fromServerLevel(target.serverLevel()), c);
+                if (ch == null) continue;
+                radioChannels.put(key, ch);
+            }
+            ch.send(r.interference() ? noisy : clean);
+        }
+    }
+
+    /** Filtro de radio: banda de 300 a 3000 Hz, saturacion, siseo; con interferencias, cortes y estatica. */
+    private short[] radio(short[] pcm, boolean interference) {
         short[] out = new short[pcm.length];
-        double y = 0;
+        double lp = 0, hpIn = 0, hpOut = 0;
+        boolean drop = false;
         for (int i = 0; i < pcm.length; i++) {
-            y += 0.18 * (pcm[i] - y);
-            out[i] = (short) Math.max(Short.MIN_VALUE, Math.min(Short.MAX_VALUE, y * 0.55));
+            double x = pcm[i] / 32768.0;
+            lp += 0.33 * (x - lp);                       // ~3 kHz a 48 kHz
+            hpOut = 0.96 * (hpOut + lp - hpIn);          // ~300 Hz
+            hpIn = lp;
+            double y = Math.tanh(hpOut * 2.6) * 0.7;
+            y += (rng.nextDouble() - 0.5) * 0.012;
+            if (interference) {
+                if (i % 240 == 0) drop = rng.nextFloat() < 0.22f;
+                y = drop ? (rng.nextDouble() - 0.5) * 0.25 : Math.round(y * 12) / 12.0 + (rng.nextDouble() - 0.5) * 0.08;
+            }
+            out[i] = (short) Math.max(Short.MIN_VALUE, Math.min(Short.MAX_VALUE, y * 32767));
         }
         return out;
+    }
+
+    @Override
+    public void walkieEnd(UUID sender) {
+        String prefix = sender + ">";
+        radioChannels.entrySet().removeIf(e -> {
+            if (!e.getKey().startsWith(prefix)) return false;
+            e.getValue().flush();
+            return true;
+        });
+        OpusEncoder a = encoders.get(sender);
+        if (a != null) a.resetState();
+        OpusEncoder b = radioNoisy.remove(sender);
+        if (b != null) b.close();
     }
 
     private void onGroupChange(GroupEvent e) {

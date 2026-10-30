@@ -332,5 +332,22 @@
   "block.smileprotocol.vent_grille": "Vent grille",
   "block.smileprotocol.vent_fan": "Duct fan",
   "smileprotocol.vent.open": "Remove grille",
-  "smileprotocol.vent.sealed": "Sealed: no power"
+  "smileprotocol.vent.sealed": "Sealed: no power",
+  "item.smileprotocol.walkie": "Walkie-talkie",
+  "smileprotocol.walkie.on": "Walkie on",
+  "smileprotocol.walkie.off": "Walkie off",
+  "smileprotocol.walkie.turn_on": "Turn walkie on",
+  "smileprotocol.walkie.turn_off": "Turn walkie off",
+  "smileprotocol.hud.walkie_tx": "TRANSMITTING",
+  "smileprotocol.hud.walkie_rx": "Hearing: %s",
+  "smileprotocol.hud.walkie_on": "Walkie [B]",
+  "smileprotocol.hud.walkie_off": "Walkie off",
+  "smileprotocol.marker.attention": "Attention",
+  "smileprotocol.marker.danger": "Danger",
+  "smileprotocol.marker.go": "Go there",
+  "smileprotocol.marker.help": "Need help",
+  "smileprotocol.marker.clear": "Clear",
+  "subtitles.smileprotocol.walkie.click": "Walkie clicks",
+  "subtitles.smileprotocol.walkie.crackle": "Radio crackles",
+  "subtitles.smileprotocol.ui.marker": "Team marker"
 }

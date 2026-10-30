@@ -71,6 +71,7 @@ public final class SPEvents {
         // El estado ya esta en los datos del jugador: no se pierde nada
         ModCheck.onLogout(player);
         com.smileprotocol.voice.VoiceManager.onLogout(player);
+        com.smileprotocol.marker.MarkerManager.onLogout(player);
         LobbyManager.onLogout(player);
         com.smileprotocol.interact.InteractionManager.onLogout(player);
         com.smileprotocol.hide.HideManager.onLogout(player);
@@ -126,6 +127,7 @@ public final class SPEvents {
         com.smileprotocol.item.UseManager.tick(server);
         com.smileprotocol.downed.DeathManager.tick(server);
         com.smileprotocol.voice.VoiceManager.tick(server);
+        com.smileprotocol.marker.MarkerManager.tick(server);
         com.smileprotocol.mechanism.ZoneElevators.tick(server);
         com.smileprotocol.mission.MissionManager.tick(server);
         com.smileprotocol.labevent.LabEventManager.tick(server);

@@ -121,5 +121,23 @@
     "sounds": [
       "smileprotocol:event/scream"
     ]
+  },
+  "walkie.click": {
+    "subtitle": "subtitles.smileprotocol.walkie.click",
+    "sounds": [
+      "smileprotocol:walkie/click"
+    ]
+  },
+  "walkie.crackle": {
+    "subtitle": "subtitles.smileprotocol.walkie.crackle",
+    "sounds": [
+      "smileprotocol:walkie/crackle"
+    ]
+  },
+  "ui.marker": {
+    "subtitle": "subtitles.smileprotocol.ui.marker",
+    "sounds": [
+      "smileprotocol:ui/marker"
+    ]
   }
 }

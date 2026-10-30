@@ -27,7 +27,6 @@ import java.util.concurrent.ConcurrentHashMap;
  *   vivos ni los vivos a ellos. Al volver en el ascensor salen del grupo.</li>
  *   <li>Dentro de la partida no se puede entrar ni salir de grupos de voz a mano (seria hablar a
  *   distancia sin walkie).</li>
- *   <li>La voz de un jugador agarrado o en una secuencia sale amortiguada.</li>
  * </ul>
  */
 public final class VoiceManager {
@@ -44,6 +43,11 @@ public final class VoiceManager {
     public static void setBridge(@Nullable VoiceBridge b) {
         bridge = b;
         SPDebug.log("Simple Voice Chat " + (b != null ? "detectado" : "no disponible"));
+    }
+
+    @Nullable
+    static VoiceBridge bridge() {
+        return bridge;
     }
 
     public static boolean available() {
@@ -90,15 +94,6 @@ public final class VoiceManager {
         return LAST_DB.getOrDefault(player, -127f);
     }
 
-    /** Si la voz del jugador debe salir amortiguada (agarrado, en una secuencia). Hilo de la voz. */
-    public static boolean muffled(UUID player) {
-        MinecraftServer server = ServerRef.get();
-        if (server == null) return false;
-        ServerPlayer p = server.getPlayerList().getPlayer(player);
-        return p != null && SPPlayerData.inSP(p) && (com.smileprotocol.qte.QTEManager.isGrabbed(p)
-                || com.smileprotocol.sequence.SequenceManager.inSequence(p));
-    }
-
     /** Si se deja al jugador cambiar de grupo de voz por su cuenta. */
     public static boolean allowGroupChange(UUID player) {
         if (internalChange) return true;
@@ -110,6 +105,7 @@ public final class VoiceManager {
 
     /** Cada segundo: los muertos de una partida, a su grupo de espectadores; los demas, fuera. */
     public static void tick(MinecraftServer server) {
+        WalkieManager.tick(server);
         if (bridge == null || server.getTickCount() % 20 != 0) return;
         for (ServerPlayer p : server.getPlayerList().getPlayers()) {
             String want = null;
@@ -138,5 +134,6 @@ public final class VoiceManager {
     public static void onLogout(ServerPlayer p) {
         LAST_NOISE.remove(p.getUUID());
         LAST_DB.remove(p.getUUID());
+        WalkieManager.onLogout(p);
     }
 }

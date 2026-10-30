@@ -384,13 +384,57 @@ def scare_face():
     return save(cv, "scare_face")
 
 
+def markers():
+    """Marcadores de equipo (README 8.4): cada tipo con su forma (no solo color, 24.2). Blancos con
+    borde negro para tenirlos con el color del jugador."""
+    made = []
+    for name, draw in (
+            ("marker_attention", lambda d, n: (d.ellipse([5 * n, 5 * n, 27 * n, 27 * n], fill=255),
+                                              d.rectangle([14 * n, 9 * n, 18 * n, 19 * n], fill=0),
+                                              d.rectangle([14 * n, 21 * n, 18 * n, 24 * n], fill=0))),
+            ("marker_danger", lambda d, n: (d.polygon([(16 * n, 3 * n), (30 * n, 28 * n), (2 * n, 28 * n)], fill=255),
+                                           d.rectangle([14 * n, 11 * n, 18 * n, 20 * n], fill=0),
+                                           d.rectangle([14 * n, 22 * n, 18 * n, 25 * n], fill=0))),
+            ("marker_go", lambda d, n: d.polygon([(4 * n, 12 * n), (17 * n, 12 * n), (17 * n, 5 * n), (29 * n, 16 * n),
+                                                 (17 * n, 27 * n), (17 * n, 20 * n), (4 * n, 20 * n)], fill=255)),
+            ("marker_help", lambda d, n: (d.rectangle([12 * n, 3 * n, 20 * n, 29 * n], fill=255),
+                                         d.rectangle([3 * n, 12 * n, 29 * n, 20 * n], fill=255))),
+            ("marker_clear", lambda d, n: d.line([(5 * n, 17 * n), (13 * n, 25 * n), (27 * n, 7 * n)], fill=255, width=6 * n)),
+    ):
+        n = 4
+        im = Image.new("L", (32 * n, 32 * n), 0)
+        draw(ImageDraw.Draw(im), n)
+        m = np.asarray(im.resize((32, 32), Image.BOX), dtype=float) / 255
+        ring = blur(m, 2, periodic=False)
+        cv = Canvas(32, 32, (0, 0, 0), 0)
+        cv.a = np.clip(np.maximum(m, (ring > 0.04) * 0.85), 0, 1)
+        cv.c[:] = (0, 0, 0)
+        cv.c[m > 0.5] = (255, 255, 255)
+        made.append(save(cv, name))
+    # walkie en la HUD: altavoz con ondas
+    n = 4
+    im = Image.new("L", (32 * n, 32 * n), 0)
+    d = ImageDraw.Draw(im)
+    d.rounded_rectangle([9 * n, 8 * n, 19 * n, 28 * n], radius=2 * n, fill=255)
+    d.rectangle([16 * n, 2 * n, 18 * n, 9 * n], fill=255)
+    for k, rr in enumerate((6, 10)):
+        d.arc([(19 - rr) * n, (17 - rr) * n, (19 + rr) * n, (17 + rr) * n], -50, 50, fill=255, width=2 * n)
+    m = np.asarray(im.resize((32, 32), Image.BOX), dtype=float) / 255
+    cv = Canvas(32, 32, (0, 0, 0), 0)
+    cv.a = np.clip(np.maximum(m, (blur(m, 1, periodic=False) > 0.05) * 0.8), 0, 1)
+    cv.c[:] = (0, 0, 0)
+    cv.c[m > 0.5] = (255, 255, 255)
+    made.append(save(cv, "walkie"))
+    return made
+
+
 def main():
     ROOT.mkdir(parents=True, exist_ok=True)
     made = [vignette(), blood_vignette(), grain(), smear("smear", 20), smear("smear_small", 21, 64, 24, border=8),
             bar("bar_blood", 30, 100, 8, (120, 8, 10)), bar("bar_empty", 31, 100, 8, (40, 14, 12), empty=True),
             bar("bar_light", 32, 64, 6, (196, 180, 104)), bar("bar_light_empty", 33, 64, 6, (40, 38, 30), empty=True),
             heart(), bulb(), slot(False), slot(True), tape(), note(), panel("panel", 0), panel("panel_alert", 1),
-            splatter(0), splatter(1), splatter(2), splatter(3), scare_face()]
+            splatter(0), splatter(1), splatter(2), splatter(3), scare_face()] + markers()
     pips()
     print(len(made) + 2, "sprites")
     if len(sys.argv) > 1:

@@ -29,6 +29,9 @@ public final class ModSounds {
     public static final Supplier<SoundEvent> EVENT_STING = register("event.sting");
     public static final Supplier<SoundEvent> EVENT_KNOCK = register("event.knock");
     public static final Supplier<SoundEvent> EVENT_SCREAM = register("event.scream");
+    public static final Supplier<SoundEvent> WALKIE_CLICK = register("walkie.click");
+    public static final Supplier<SoundEvent> WALKIE_CRACKLE = register("walkie.crackle");
+    public static final Supplier<SoundEvent> UI_MARKER = register("ui.marker");
 
     private ModSounds() {}
 

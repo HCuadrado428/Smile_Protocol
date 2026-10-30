@@ -164,7 +164,7 @@ public final class UseManager {
 
     private static void finish(ServerPlayer p, Use u) {
         USES.remove(p.getUUID());
-        SPInventoryOps.take(p, u.slot);
+        if (u.def.consume()) SPInventoryOps.take(p, u.slot);
         SPNetwork.sendTo(p, Payloads.InteractState.idle());
         if (u.def.sound() != null) {
             SoundEvent snd = BuiltInRegistries.SOUND_EVENT.get(u.def.sound());
@@ -185,6 +185,7 @@ public final class UseManager {
                     p.serverLevel().playSound(null, p.blockPosition(), SoundEvents.FIRECHARGE_USE, SoundSource.PLAYERS, 0.8f, 1.3f);
                 }
             }
+            case "WALKIE" -> com.smileprotocol.voice.WalkieManager.toggle(p);
             case "ADRENALINE" -> {
                 if (DownedManager.isDowned(p)) DownedManager.selfRevive(p, u.def.amount());
             }

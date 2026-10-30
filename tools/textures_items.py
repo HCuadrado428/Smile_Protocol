@@ -384,8 +384,30 @@ def bottle():
     return cv
 
 
+def walkie():
+    """Walkie-talkie militar: cuerpo negro rozado, antena, rejilla del altavoz y piloto verde."""
+    r = R(53)
+    cv = Canvas(S, S, (0, 0, 0), 0.0)
+    m = shape(lambda d, n: (d.rounded_rectangle([9 * n, 9 * n, 22 * n, 30 * n], radius=2 * n, fill=255),
+                            d.rectangle([18 * n, 1 * n, 20 * n, 10 * n], fill=255),
+                            d.rectangle([12 * n, 6 * n, 14 * n, 9 * n], fill=255)))
+    cv.a = (m > 0.5).astype(float)
+    yy, xx = np.mgrid[0:S, 0:S]
+    cv.c[:] = (34, 34, 32)
+    cv.c *= (1.25 - 0.03 * (xx - 9)).clip(0.6, 1.4)[..., None]
+    grille = (xx >= 11) & (xx <= 20) & (yy >= 19) & (yy <= 27) & ((yy % 2) == 0)
+    cv.c[grille & (cv.a > 0)] = (14, 14, 13)
+    cv.c[(yy >= 12) & (yy <= 16) & (xx >= 11) & (xx <= 20)] = (70, 86, 64)        # pantallita
+    cv.c[(yy == 11) & (xx >= 11) & (xx <= 12)] = (90, 230, 90)                    # piloto
+    cv.c[(xx >= 18) & (xx <= 20) & (yy < 10)] = (24, 24, 22)                      # antena
+    grime(cv, r, 0.5, (90, 84, 70))
+    outline(cv)
+    return cv
+
+
 def main():
     out = {}
+    out["walkie"] = walkie()
     out["flashlight"] = flashlight()
     out["key"] = key()
     for lvl in (1, 2, 3):

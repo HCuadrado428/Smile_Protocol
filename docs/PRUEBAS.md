@@ -230,7 +230,14 @@ Hace falta Simple Voice Chat en el servidor y en los clientes (es opcional: sin 
 1. **Hablar hace ruido.** Con la depuración activa (`/spadmin debug`), habla cerca de un mob: aparece el anillo de ruido. Susurrando (tecla de susurro de Simple Voice Chat) el radio es pequeño; hablando normal, medio; gritando, grande (`noise_voice_whisper`, `noise_voice`, `noise_voice_shout`).
 2. **Espectadores.** Al morir del todo pasas a un grupo de voz oculto «Espectadores …»: solo te oyen los otros muertos de tu partida y ya no oyes a los vivos. Al volver en el ascensor sales del grupo.
 3. **Sin grupos a mano.** Dentro de la partida, intentar entrar o salir de un grupo desde el menú de Simple Voice Chat no hace nada (en el lobby sí).
-4. **Voz ahogada.** Si un mob te agarra (o durante un remate) tus compañeros te oyen amortiguado.
+
+## Marcadores y walkies (fase 19)
+
+1. **Marcador rápido.** Pulsa **R** mirando a un sitio: aparece un círculo con «!» y la distancia, del color de tu jugador, para todo tu grupo (a través de las paredes). Los compañeros oyen un aviso suave. Desaparece a los 20 s (`marker_duration`).
+2. **Rueda.** Mantén **R** y mueve el ratón: arriba **Peligro** (triángulo), derecha **Ir allí** (flecha), abajo **Despejado** (✓), izquierda **Necesito ayuda** (cruz). Suelta para ponerlo. La vista no se mueve mientras eliges.
+3. **Límites.** Como mucho 3 marcadores tuyos (`marker_max`); uno nuevo del mismo tipo sustituye al anterior. Agarrado o en un remate no se puede marcar. Derribado, R pone **Necesito ayuda** encima de ti y sigue contigo hasta que te levantan.
+4. **Fuera de la pantalla.** Si el marcador queda detrás o fuera, se ve más pequeño pegado al borde.
+5. **Walkie** (con Simple Voice Chat). Empiezas con uno. Con él en la mano y sin nada delante, mantén el clic derecho para encenderlo o apagarlo. Con él en la mano y encendido, mantén **B** para hablar: la HUD pone «TRANSMITIENDO» y tus compañeros con el walkie encendido (en cualquier hueco) te oyen con sonido de radio, estén donde estén; a ellos les sale «Se oye: tu nombre» y su walkie cruje (eso hace ruido). Los muertos del grupo también lo oyen. Cerca de un mob con `causes_interference` el sonido se corta y chisporrotea.
 
 ## Depuración
 

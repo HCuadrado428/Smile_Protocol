@@ -32,9 +32,10 @@ public final class ItemDefs {
      * @param anim     gesto ({@code PoseCalculator.USE_*})
      * @param downed   se puede usar derribado
      * @param onlyDowned solo sirve derribado (la jeringa)
+     * @param consume  se gasta al usarlo (el walkie no: se enciende o se apaga)
      */
     public record Consumable(Item item, int useTime, String effect, float amount, float noise, int anim,
-                             boolean downed, boolean onlyDowned, @Nullable ResourceLocation sound) {}
+                             boolean downed, boolean onlyDowned, @Nullable ResourceLocation sound, boolean consume) {}
 
     /**
      * @param noise  radio del ruido al caer
@@ -76,7 +77,8 @@ public final class ItemDefs {
                 c.put(item, new Consumable(item, i(o, "use_time", 40), s(eff, "type", "HEAL").toUpperCase(java.util.Locale.ROOT),
                         f(eff, "amount", 1f), f(o, "noise", 2f), anim(s(o, "anim", "")),
                         b(o, "usable_downed", false), b(o, "only_downed", false),
-                        o.has("sound") ? ResourceLocation.parse(o.get("sound").getAsString()) : null));
+                        o.has("sound") ? ResourceLocation.parse(o.get("sound").getAsString()) : null,
+                        b(o, "consume", true)));
             } catch (Exception ex) {
                 SmileProtocol.LOGGER.error("Consumible {} no valido: {}", e.getKey(), ex.toString());
             }

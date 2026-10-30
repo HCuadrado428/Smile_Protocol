@@ -139,6 +139,19 @@ public final class SPConfig {
         /** Ticks minimos entre dos ruidos de voz del mismo jugador. */
         public int voice_noise_interval = 10;
 
+        // Walkies (README 17.3) y marcadores (8.4)
+        public boolean walkie_enabled = true;
+        /** Ruido del crujido del walkie al recibir, alrededor del que lo lleva. */
+        public float noise_walkie_receive = 5;
+        /** Distancia a un mob con interferencias que distorsiona el walkie. */
+        public float walkie_interference_radius = 12;
+        public String key_walkie = "key.keyboard.b";
+        public String key_marker = "key.keyboard.r";
+        public int marker_range = 64;
+        public int marker_duration = 400;
+        public int marker_max = 3;
+        public int marker_cooldown = 10;
+
         // Eventos de laboratorio (README 14.7)
         /** Segundos minimos entre dos sustos para el mismo jugador. */
         public int jumpscare_cooldown = 20;
