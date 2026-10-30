@@ -1,0 +1,23 @@
+{
+  "id": "vent_scratch",
+  "trigger": {
+    "type": "vent_entered"
+  },
+  "conditions": {
+    "cooldown": 1200,
+    "chance": 0.35
+  },
+  "delay_ticks": 50,
+  "scope": "trigger_player",
+  "actions": [
+    {
+      "type": "sound",
+      "id": "smileprotocol:event.knock",
+      "volume": 0.7
+    },
+    {
+      "type": "camera_effect",
+      "strength": 0.4
+    }
+  ]
+}

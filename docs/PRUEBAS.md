@@ -214,6 +214,15 @@ Disparadores: `fuse_inserted`, `fuse_removed`, `fuse_moved`, `circuit_powered`, 
 
 La **batalla final contra Smiley** sigue pendiente de diseño (README 27); de momento la sala final acaba con su misión (despertar al Berserker y aguantar).
 
+## Conductos de ventilación (fase 17)
+
+1. **Rejillas.** En cada planta hay al menos un conducto con dos rejillas en el suelo de dos salas alejadas. Mantén el clic derecho sobre una rejilla 2 s: hace ruido y queda abierta (un agujero de un bloque).
+2. **Entrar.** Baja al agujero y avanza: te tumbas a gatas solo (pose de gateo de vanilla). Dentro no puedes correr, hacer dive, vault, asomarte ni apuntar lanzables; la linterna y los consumibles sí funcionan.
+3. **Ruido.** Gatear sobre la chapa hace más ruido que gatear normal (`noise_vent_mult`, 1,6 por defecto). Al entrar puede sonar algo arañando la chapa (`vent_scratch`).
+4. **Salir.** Al llegar a la otra rejilla, quítala desde abajo mirando hacia arriba, levántate y sube de un salto.
+5. **Sellada (morgue).** Una de las rejillas pone «Sellada: sin corriente»; mete un fusible en la caja del circuito `vent` y ya se puede retirar.
+6. **Ventilador (planta de energía).** A mitad del conducto hay un ventilador girando que no deja pasar; se para al dar corriente al circuito auxiliar (`aux`).
+
 ## Depuración
 
 - `/spadmin debug on`: muestra el panel de estado (sesión, mods, lobby y ascensores). Solo lo ven los operadores.

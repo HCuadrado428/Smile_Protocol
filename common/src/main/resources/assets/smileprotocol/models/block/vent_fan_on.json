@@ -1,0 +1,71 @@
+{
+  "parent": "block/block",
+  "render_type": "cutout",
+  "textures": {
+    "fan": "smileprotocol:block/vent_fan_spin",
+    "d": "smileprotocol:block/lab_vent_duct",
+    "particle": "smileprotocol:block/lab_vent_duct"
+  },
+  "elements": [
+    {
+      "from": [
+        0,
+        0,
+        7
+      ],
+      "to": [
+        16,
+        16,
+        9
+      ],
+      "faces": {
+        "north": {
+          "texture": "#fan"
+        },
+        "south": {
+          "texture": "#fan"
+        }
+      }
+    },
+    {
+      "from": [
+        0,
+        0,
+        0
+      ],
+      "to": [
+        1,
+        16,
+        16
+      ],
+      "faces": {
+        "east": {
+          "texture": "#d"
+        },
+        "west": {
+          "texture": "#d"
+        }
+      }
+    },
+    {
+      "from": [
+        15,
+        0,
+        0
+      ],
+      "to": [
+        16,
+        16,
+        16
+      ],
+      "faces": {
+        "east": {
+          "texture": "#d"
+        },
+        "west": {
+          "texture": "#d"
+        }
+      }
+    }
+  ]
+}

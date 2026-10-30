@@ -15,6 +15,9 @@ MOD = "smileprotocol"
 FACING_Y = {"south": 0, "west": 90, "north": 180, "east": 270}
 
 NAMES = {
+    "lab_vent_duct": ("Conducto de ventilación", "Ventilation duct"),
+    "vent_grille": ("Rejilla de ventilación", "Vent grille"),
+    "vent_fan": ("Ventilador del conducto", "Duct fan"),
     "lab_tile_floor": ("Baldosa sucia", "Dirty floor tile"),
     "lab_tile_floor_dark": ("Baldosa de damero", "Checkered floor tile"),
     "lab_linoleum": ("Linóleo gastado", "Worn linoleum"),
@@ -150,6 +153,51 @@ def decals():
     write(ROOT / "models/item/wall_writing.json", {"parent": "item/generated", "textures": {"layer0": f"{MOD}:block/wall_writing_0"}})
 
 
+def vents():
+    """Rejilla del suelo (cerrada: chapa arriba; abierta: colgando dentro del hueco) y ventilador."""
+    g = f"{MOD}:block/vent_grille"
+    write(ROOT / "models/block/vent_grille_closed.json", {
+        "parent": "block/block", "render_type": "cutout", "textures": {"g": g, "particle": g},
+        "elements": [{"from": [0, 13, 0], "to": [16, 16, 16], "faces": {
+            "up": {"texture": "#g"}, "down": {"texture": "#g"},
+            "north": {"texture": "#g", "uv": [0, 0, 16, 3]}, "south": {"texture": "#g", "uv": [0, 0, 16, 3]},
+            "east": {"texture": "#g", "uv": [0, 0, 16, 3]}, "west": {"texture": "#g", "uv": [0, 0, 16, 3]}}}]})
+    write(ROOT / "models/block/vent_grille_open.json", {
+        "parent": "block/block", "render_type": "cutout", "textures": {"g": g, "particle": g},
+        "elements": [{"from": [0, 0, 0], "to": [16, 16, 3], "faces": {
+            "north": {"texture": "#g"}, "south": {"texture": "#g"},
+            "up": {"texture": "#g", "uv": [0, 0, 16, 3]}, "down": {"texture": "#g", "uv": [0, 0, 16, 3]},
+            "east": {"texture": "#g", "uv": [0, 0, 3, 16]}, "west": {"texture": "#g", "uv": [0, 0, 3, 16]}}}]})
+    bs = {}
+    for f, y in (("north", 0), ("east", 90), ("south", 180), ("west", 270)):
+        for o in ("true", "false"):
+            for sealed in ("true", "false"):
+                e = {"model": f"{MOD}:block/vent_grille_{'open' if o == 'true' else 'closed'}"}
+                if y:
+                    e["y"] = y
+                bs[f"facing={f},open={o},sealed={sealed}"] = e
+    write(ROOT / "blockstates/vent_grille.json", {"variants": bs})
+    write(ROOT / "models/item/vent_grille.json", {"parent": "item/generated", "textures": {"layer0": g}})
+    d = f"{MOD}:block/lab_vent_duct"
+    for run in (False, True):
+        fan = f"{MOD}:block/vent_fan{'_spin' if run else ''}"
+        write(ROOT / f"models/block/vent_fan{'_on' if run else '_off'}.json", {
+            "parent": "block/block", "render_type": "cutout", "textures": {"fan": fan, "d": d, "particle": d},
+            "elements": [
+                {"from": [0, 0, 7], "to": [16, 16, 9], "faces": {"north": {"texture": "#fan"}, "south": {"texture": "#fan"}}},
+                {"from": [0, 0, 0], "to": [1, 16, 16], "faces": {"east": {"texture": "#d"}, "west": {"texture": "#d"}}},
+                {"from": [15, 0, 0], "to": [16, 16, 16], "faces": {"east": {"texture": "#d"}, "west": {"texture": "#d"}}}]})
+    bs = {}
+    for f, y in (("north", 0), ("east", 90), ("south", 180), ("west", 270)):
+        for run in ("true", "false"):
+            e = {"model": f"{MOD}:block/vent_fan_{'on' if run == 'true' else 'off'}"}
+            if y:
+                e["y"] = y
+            bs[f"facing={f},running={run}"] = e
+    write(ROOT / "blockstates/vent_fan.json", {"variants": bs})
+    write(ROOT / "models/item/vent_fan.json", {"parent": f"{MOD}:block/vent_fan_on"})
+
+
 def lang():
     for fn, idx in (("es_es.json", 0), ("en_us.json", 1)):
         p = ROOT / "lang" / fn
@@ -165,6 +213,7 @@ def main():
             building(name)
     debris()
     decals()
+    vents()
     lang()
     print("ok")
 

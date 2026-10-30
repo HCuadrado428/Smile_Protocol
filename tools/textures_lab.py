@@ -296,6 +296,71 @@ def metal_panels(seed, base=(88, 92, 86), paint=(140, 122, 52)):
     return cv
 
 
+def vent_duct(seed):
+    """Chapa galvanizada de los conductos: costillas horizontales, remaches y oxido en las juntas."""
+    r = R(seed)
+    cv = Canvas(S, S, (150, 152, 150))
+    yy, xx = np.mgrid[0:S, 0:S]
+    spangle = fbm(S, S, r, base=8, octaves=2)
+    cv.mul(0.82 + 0.3 * spangle)
+    rib = (yy % 8)
+    cv.mul(np.where(rib == 0, 0.62, np.where(rib == 1, 1.18, np.where(rib == 7, 0.85, 1.0))))
+    cv.c[:, 0] *= 0.6
+    cv.c[:, 31] *= 0.75
+    for y in (4, 20):
+        for x in (2, 29):
+            cv.px(x, y, (80, 80, 78), 1)
+            cv.px(x - 1, y - 1, (210, 210, 205), 0.6)
+    rust(cv, r, 0.35, base=3, bias=np.clip(1 - np.minimum(xx, 31 - xx) / 5, 0, 1))
+    grime(cv, r, 0.35)
+    jitter(cv, r, 3, 1)
+    return cv
+
+
+def vent_grille(seed):
+    """Rejilla de ventilacion: marco y lamas inclinadas con huecos (se ve la oscuridad del conducto)."""
+    r = R(seed)
+    cv = Canvas(S, S, (120, 122, 118))
+    yy, xx = np.mgrid[0:S, 0:S]
+    frame = (xx < 3) | (xx > 28) | (yy < 3) | (yy > 28)
+    slat = ((yy - 3) % 5) < 3
+    cv.c[slat] = (128, 130, 126)
+    cv.mul(np.where(((yy - 3) % 5) == 0, 1.25, np.where(((yy - 3) % 5) == 2, 0.7, 1.0)))
+    cv.c[frame] = (96, 98, 94)
+    cv.mul(np.where(frame & ((xx == 1) | (yy == 1)), 1.2, 1.0))
+    for (x, y) in ((1, 1), (30, 1), (1, 30), (30, 30)):
+        cv.px(x, y, (60, 60, 58), 1)
+    rust(cv, r, 0.5, base=3)
+    grime(cv, r, 0.4)
+    cv.a = np.where(frame | slat, 1.0, 0.0)
+    return cv
+
+
+def vent_fan(seed, spinning):
+    """Ventilador del conducto: carcasa redonda y aspas (borrosas si gira)."""
+    r = R(seed)
+    cv = Canvas(S, S, (30, 30, 30))
+    yy, xx = np.mgrid[0:S, 0:S].astype(float)
+    d = np.hypot(xx - 15.5, yy - 15.5)
+    ang = np.arctan2(yy - 15.5, xx - 15.5)
+    housing = (d > 13) & (d < 16)
+    hub = d < 3.2
+    blades = (d < 13) & (np.abs(np.sin(2 * ang + d * 0.12)) > 0.75)
+    cv.c[:] = (18, 18, 18)
+    if spinning:
+        cv.c[d < 13] = (64, 64, 62)
+        cv.mul(np.where(d < 13, 0.8 + 0.3 * np.sin(d * 1.3), 1.0))
+    else:
+        cv.c[blades] = (110, 112, 108)
+        cv.mul(np.where(blades, 0.8 + 0.4 * np.cos(ang * 2), 1.0))
+    cv.c[housing] = (96, 98, 94)
+    cv.c[hub] = (70, 70, 68)
+    corner = d >= 16
+    cv.c[corner] = (120, 122, 118)
+    rust(cv, r, 0.35, base=3)
+    return cv
+
+
 def hazard(seed):
     r = R(seed)
     cv = Canvas(S, S, (20, 20, 18))
@@ -730,6 +795,10 @@ def blocks():
         "lab_server": [server_rack(430 + i) for i in range(3)],
         "lab_machine": [machine(440 + i) for i in range(2)],
         "lab_debris": [debris(420)],
+        "lab_vent_duct": [vent_duct(450 + i) for i in range(2)],
+        "vent_grille": [vent_grille(460)],
+        "vent_fan": [vent_fan(470, False)],
+        "vent_fan_spin": [vent_fan(470, True)],
     }
 
 

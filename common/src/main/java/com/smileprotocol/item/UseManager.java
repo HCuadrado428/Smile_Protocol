@@ -203,7 +203,7 @@ public final class UseManager {
         if (slot != data.getSPInventory().getSelected()) return;
         if (ItemDefs.throwable(p.server, data.getSPInventory().get(slot)) == null) return;
         // no corriendo, ni en dive, vault, escondites, agarrado o en secuencias (README 12.7)
-        if (MotionManager.action(p) != Action.NONE || p.isSprinting() || isUsing(p)) return;
+        if (MotionManager.action(p) != Action.NONE || p.isSprinting() || p.isVisuallyCrawling() || isUsing(p)) return;
         AIMING.put(p.getUUID(), slot);
         MotionManager.setAction(p, Action.AIM, 0, false);
     }

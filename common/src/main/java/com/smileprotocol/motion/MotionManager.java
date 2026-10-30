@@ -50,6 +50,7 @@ public final class MotionManager {
         boolean wasOnGround = true;
         float lastFall;
         double stride;
+        boolean inVent;
         MotionView synced = MotionView.NONE;
     }
 
@@ -114,7 +115,7 @@ public final class MotionManager {
             default -> {
                 int lean = Integer.signum(in.lean());
                 // Asomarse: de pie, agachado o andando despacio, nunca corriendo ni en otra accion (README 12.6)
-                if (lean != 0 && (p.isSprinting() || s.action != Action.NONE)) lean = 0;
+                if (lean != 0 && (p.isSprinting() || p.isVisuallyCrawling() || s.action != Action.NONE)) lean = 0;
                 boolean look = in.lookBack() && s.action != Action.HIDDEN;
                 if (lean != s.lean || look != s.lookBack) {
                     s.lean = lean;
@@ -127,7 +128,7 @@ public final class MotionManager {
 
     private static void tryDive(ServerPlayer p, State s) {
         boolean recentlySprinting = p.tickCount - s.lastSprintTick <= 10;
-        if (s.action != Action.NONE || s.diveCooldown > 0 || !recentlySprinting || !p.onGround()) {
+        if (s.action != Action.NONE || s.diveCooldown > 0 || !recentlySprinting || !p.onGround() || p.isVisuallyCrawling()) {
             sync(p, s, true); // corrige la prediccion del cliente
             return;
         }
@@ -141,7 +142,7 @@ public final class MotionManager {
     }
 
     private static void tryVault(ServerPlayer p, State s, BlockPos obstacle) {
-        boolean ok = s.action == Action.NONE && s.vaultCooldown <= 0
+        boolean ok = s.action == Action.NONE && s.vaultCooldown <= 0 && !p.isVisuallyCrawling()
                 && obstacle.distToCenterSqr(p.position()) < 3.5 * 3.5
                 && isVaultable(p.serverLevel(), obstacle, p);
         if (!ok) {
@@ -215,6 +216,12 @@ public final class MotionManager {
         double moved = Math.sqrt(dx * dx + dz * dz);
         s.lastPos = pos;
         SPConfig.Values cfg = SPConfig.get();
+        // Conductos de ventilacion (README 12.9): el metal retumba
+        boolean vent = p.isVisuallyCrawling() && inDuct(p);
+        if (vent != s.inVent) {
+            s.inVent = vent;
+            if (vent) com.smileprotocol.mechanism.LabEvents.fire(p.serverLevel(), p.blockPosition(), p, "vent_entered", "");
+        }
         if (p.onGround() && s.action != Action.HIDDEN && moved > 0.01 && moved < 2) {
             s.stride += moved;
             boolean crawl = s.action == Action.DOWNED;
@@ -222,6 +229,7 @@ public final class MotionManager {
             if (s.stride >= strideLen) {
                 s.stride = 0;
                 float r = crawl ? cfg.noise_crawl : p.isCrouching() || p.isVisuallyCrawling() ? cfg.noise_crouch_walk : p.isSprinting() ? cfg.noise_sprint : cfg.noise_walk;
+                if (vent) r *= cfg.noise_vent_mult;
                 NoiseType t = crawl ? NoiseType.CRAWL : p.isSprinting() ? NoiseType.SPRINT : NoiseType.FOOTSTEP;
                 NoiseSystem.emit(p.serverLevel(), pos, r, t, p);
             }
@@ -232,6 +240,13 @@ public final class MotionManager {
         }
         s.lastFall = p.fallDistance;
         s.wasOnGround = p.onGround();
+    }
+
+    /** Esta dentro de un conducto: pisa chapa de conducto. */
+    public static boolean inDuct(Player p) {
+        BlockPos below = BlockPos.containing(p.getX(), p.getY() - 0.2, p.getZ());
+        return net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(p.level().getBlockState(below).getBlock())
+                .getPath().equals("lab_vent_duct");
     }
 
     private static void sync(ServerPlayer p, State s, boolean force) {

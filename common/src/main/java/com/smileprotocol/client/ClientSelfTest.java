@@ -275,6 +275,46 @@ public final class ClientSelfTest {
         SHOTS.add(() -> wait = 3);
         SHOTS.add(() -> grab(mc, "26_susto"));
         SHOTS.add(() -> wait = 100);
+        // 8d. Fase 17: retirar una rejilla del suelo y gatear por el conducto
+        BlockPos[] grille = {null};
+        Direction[] ductDir = {Direction.NORTH};
+        SHOTS.add(() -> server.execute(() -> {
+            BlockEntity ventBe = find(level, z, vb -> vb instanceof com.smileprotocol.blockentity.VentBlockEntity
+                    && vb.getBlockState().getBlock() instanceof com.smileprotocol.block.VentGrilleBlock
+                    && !b.getBlockState().getValue(com.smileprotocol.block.VentGrilleBlock.SEALED));
+            if (ventBe == null) {
+                log("FALLO rejilla de ventilacion: no hay ninguna en la zona");
+                return;
+            }
+            grille[0] = ventBe.getBlockPos();
+            for (Direction vd : Direction.Plane.HORIZONTAL) {
+                if (level.getBlockState(grille[0].below().relative(vd)).isAir()) ductDir[0] = vd;
+            }
+            Direction ventBack = ductDir[0].getOpposite();
+            SPSessionManager.teleport(sp, level, Vec3.atBottomCenterOf(grille[0].above().relative(ventBack, 2)), ductDir[0].toYRot(), 45f);
+        }));
+        SHOTS.add(() -> wait = 30);
+        SHOTS.add(() -> grab(mc, "27_rejilla"));
+        SHOTS.add(() -> server.execute(() -> {
+            if (grille[0] == null) return;
+            BlockState vst = level.getBlockState(grille[0]);
+            if (vst.getBlock() instanceof com.smileprotocol.block.VentGrilleBlock vg) vg.complete(level, grille[0], vst, sp);
+            boolean ventOk = level.getBlockState(grille[0]).getValue(com.smileprotocol.block.VentGrilleBlock.OPEN);
+            log((ventOk ? "OK" : "FALLO") + " rejilla de ventilacion retirada");
+        }));
+        SHOTS.add(() -> wait = 10);
+        SHOTS.add(() -> grab(mc, "28_rejilla_abierta"));
+        SHOTS.add(() -> server.execute(() -> {
+            if (grille[0] == null) return;
+            SPSessionManager.teleport(sp, level, Vec3.atBottomCenterOf(grille[0].below().relative(ductDir[0])), ductDir[0].toYRot(), 0f);
+        }));
+        SHOTS.add(() -> wait = 30);
+        SHOTS.add(() -> server.execute(() -> {
+            if (grille[0] == null) return;
+            boolean ventOk = sp.isVisuallyCrawling() && com.smileprotocol.motion.MotionManager.inDuct(sp);
+            log((ventOk ? "OK" : "FALLO") + " gateando dentro del conducto (pose " + sp.getPose() + ")");
+        }));
+        SHOTS.add(() -> grab(mc, "29_conducto"));
         // 9. Fase 12: levantarse tras la reanimacion, muerte instantanea en primera persona y muerte final
         SHOTS.add(() -> server.execute(() -> {
             com.smileprotocol.qte.QTEManager.clear(sp);

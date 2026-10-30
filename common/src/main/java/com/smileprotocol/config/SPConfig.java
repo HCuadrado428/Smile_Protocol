@@ -88,6 +88,8 @@ public final class SPConfig {
         public boolean look_back_toggle = false;
         public boolean lean_toggle = false;
         public float noise_crouch_walk = 3;
+        /** Multiplicador del ruido de gatear dentro de un conducto de chapa (README 12.9). */
+        public float noise_vent_mult = 1.6f;
         public float noise_walk = 8;
         public float noise_sprint = 16;
         public float noise_dive = 18;

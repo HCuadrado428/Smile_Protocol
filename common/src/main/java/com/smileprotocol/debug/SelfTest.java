@@ -78,7 +78,7 @@ public final class SelfTest {
             log("FALLO zona " + id + ": no se coloco");
             return 1;
         }
-        int[] boxes = {0}, need = {0}, doors = {0}, valves = {0};
+        int[] boxes = {0}, need = {0}, doors = {0}, valves = {0}, grilles = {0}, ventFails = {0};
         CircuitManager.forEachBlockEntity(level, z.box(), be -> {
             if (be instanceof FuseBoxBlockEntity fb) {
                 boxes[0]++;
@@ -87,6 +87,20 @@ public final class SelfTest {
                 doors[0]++;
             } else if (be instanceof ValveBlockEntity) {
                 valves[0]++;
+            } else if (be instanceof com.smileprotocol.blockentity.VentBlockEntity vb) {
+                // Conductos (fase 17): la rejilla sellada se abre con corriente; el ventilador con freno se para
+                var st = be.getBlockState();
+                if (st.getBlock() instanceof com.smileprotocol.block.VentGrilleBlock) {
+                    grilles[0]++;
+                    if (st.getValue(com.smileprotocol.block.VentGrilleBlock.SEALED)) {
+                        vb.onCircuit(level, true);
+                        if (level.getBlockState(be.getBlockPos()).getValue(com.smileprotocol.block.VentGrilleBlock.SEALED)) ventFails[0]++;
+                    }
+                } else if (st.getBlock() instanceof com.smileprotocol.block.VentFanBlock) {
+                    if (!st.getValue(com.smileprotocol.block.VentFanBlock.RUNNING)) ventFails[0]++;
+                    vb.onCircuit(level, true);
+                    if (level.getBlockState(be.getBlockPos()).getValue(com.smileprotocol.block.VentFanBlock.RUNNING)) ventFails[0]++;
+                }
             }
         });
         int items = level.getEntitiesOfClass(ItemEntity.class, AABB.of(z.box())).size();
@@ -94,7 +108,7 @@ public final class SelfTest {
         log("zona " + id + " caja=" + z.box().getXSpan() + "x" + z.box().getZSpan()
                 + " marcadores=" + z.markers().keySet() + " cajas=" + boxes[0] + " fusibles necesarios=" + need[0]
                 + " fusibles en el suelo=" + z.fuses().size() + " objetos=" + items + " puertas=" + doors[0]
-                + " valvulas=" + valves[0] + " salida=" + exit + " puertas salida=" + z.marker("exit_door").size()
+                + " valvulas=" + valves[0] + " rejillas=" + grilles[0] + " salida=" + exit + " puertas salida=" + z.marker("exit_door").size()
                 + " circuitos=" + CircuitManager.describe(level, z.box()));
         int fails = 0;
         if (z.marker("entry").isEmpty()) {
@@ -107,6 +121,10 @@ public final class SelfTest {
         }
         if (boxes[0] > 0 && z.fuses().size() < need[0]) {
             log("FALLO zona " + id + ": faltan sitios para fusibles (" + z.fuses().size() + " < " + need[0] + ")");
+            fails++;
+        }
+        if (grilles[0] < 2 || ventFails[0] > 0) {
+            log("FALLO zona " + id + ": conductos (" + grilles[0] + " rejillas, " + ventFails[0] + " fallos de circuito)");
             fails++;
         }
         InstanceManager.release(server, g);

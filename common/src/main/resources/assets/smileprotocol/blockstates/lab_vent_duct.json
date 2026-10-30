@@ -1,0 +1,12 @@
+{
+  "variants": {
+    "": [
+      {
+        "model": "smileprotocol:block/lab_vent_duct"
+      },
+      {
+        "model": "smileprotocol:block/lab_vent_duct_1"
+      }
+    ]
+  }
+}

@@ -72,12 +72,12 @@ public final class ModBlocks {
             "lab_tile_floor", "lab_tile_floor_dark", "lab_linoleum", "lab_concrete_floor", "lab_grate", "lab_wood_floor",
             "lab_morgue_floor", "lab_moss_floor", "lab_plaster", "lab_plaster_green", "lab_plaster_blue", "lab_wall_tiles",
             "lab_wall_tiles_teal", "lab_wall_tiles_white", "lab_concrete_wall", "lab_metal_wall", "lab_hazard",
-            "lab_ceiling", "lab_ceiling_concrete", "lab_crate", "lab_pipes", "lab_server", "lab_machine"};
+            "lab_ceiling", "lab_ceiling_concrete", "lab_crate", "lab_pipes", "lab_server", "lab_machine", "lab_vent_duct"};
     public static final java.util.Map<String, Supplier<Block>> BUILDING = new java.util.LinkedHashMap<>();
 
     static {
         for (String n : BUILDING_NAMES) {
-            SoundType snd = n.contains("metal") || n.contains("grate") || n.contains("pipes") || n.contains("server") || n.contains("machine") ? SoundType.METAL
+            SoundType snd = n.contains("metal") || n.contains("vent") || n.contains("grate") || n.contains("pipes") || n.contains("server") || n.contains("machine") ? SoundType.METAL
                     : n.contains("wood") || n.contains("crate") ? SoundType.WOOD
                     : n.contains("moss") ? SoundType.MOSS : SoundType.STONE;
             BUILDING.put(n, register(n, () -> new Block(steel(snd))));
@@ -86,6 +86,12 @@ public final class ModBlocks {
 
     public static final Supplier<net.minecraft.world.level.block.SlabBlock> LAB_DEBRIS = register("lab_debris",
             () -> new net.minecraft.world.level.block.SlabBlock(steel(SoundType.GRAVEL)));
+
+    // Conductos de ventilacion (README 12.9)
+    public static final Supplier<com.smileprotocol.block.VentGrilleBlock> VENT_GRILLE = register("vent_grille",
+            () -> new com.smileprotocol.block.VentGrilleBlock(steel(SoundType.METAL).noOcclusion()));
+    public static final Supplier<com.smileprotocol.block.VentFanBlock> VENT_FAN = register("vent_fan",
+            () -> new com.smileprotocol.block.VentFanBlock(steel(SoundType.METAL).noOcclusion()));
 
     // Sangre y pintadas
     public static final Supplier<com.smileprotocol.block.DecalBlock> BLOOD_FLOOR = register("blood_floor",

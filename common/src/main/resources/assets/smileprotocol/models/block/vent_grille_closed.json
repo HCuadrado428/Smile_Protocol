@@ -1,0 +1,66 @@
+{
+  "parent": "block/block",
+  "render_type": "cutout",
+  "textures": {
+    "g": "smileprotocol:block/vent_grille",
+    "particle": "smileprotocol:block/vent_grille"
+  },
+  "elements": [
+    {
+      "from": [
+        0,
+        13,
+        0
+      ],
+      "to": [
+        16,
+        16,
+        16
+      ],
+      "faces": {
+        "up": {
+          "texture": "#g"
+        },
+        "down": {
+          "texture": "#g"
+        },
+        "north": {
+          "texture": "#g",
+          "uv": [
+            0,
+            0,
+            16,
+            3
+          ]
+        },
+        "south": {
+          "texture": "#g",
+          "uv": [
+            0,
+            0,
+            16,
+            3
+          ]
+        },
+        "east": {
+          "texture": "#g",
+          "uv": [
+            0,
+            0,
+            16,
+            3
+          ]
+        },
+        "west": {
+          "texture": "#g",
+          "uv": [
+            0,
+            0,
+            16,
+            3
+          ]
+        }
+      }
+    }
+  ]
+}

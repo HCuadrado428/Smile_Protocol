@@ -38,6 +38,11 @@ public final class ModBlockEntities {
             BuiltInRegistries.BLOCK_ENTITY_TYPE, "lab_door",
             () -> Services.PLATFORM.blockEntityType(LabDoorBlockEntity::new, ModBlocks.LAB_DOOR.get(), ModBlocks.SECURITY_DOOR.get()));
 
+    public static final Supplier<BlockEntityType<com.smileprotocol.blockentity.VentBlockEntity>> VENT = Services.PLATFORM.register(
+            BuiltInRegistries.BLOCK_ENTITY_TYPE, "vent",
+            () -> Services.PLATFORM.blockEntityType(com.smileprotocol.blockentity.VentBlockEntity::new,
+                    ModBlocks.VENT_GRILLE.get(), ModBlocks.VENT_FAN.get()));
+
     public static final Supplier<BlockEntityType<ValveBlockEntity>> VALVE = Services.PLATFORM.register(
             BuiltInRegistries.BLOCK_ENTITY_TYPE, "valve",
             () -> Services.PLATFORM.blockEntityType(ValveBlockEntity::new, ModBlocks.VALVE.get()));

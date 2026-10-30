@@ -630,6 +630,70 @@ class Floor:
     def by_distance(self):
         return sorted(self.rooms, key=lambda r: r["z0"] + abs(r["x0"]) * 0.5)
 
+    # Conductos de ventilacion (README 12.9) ---------------------------------------------------------
+    def vent_spot(self, room):
+        """Hueco del suelo para una rejilla: libre, sin muebles encima y lejos de las puertas."""
+        cells = [(x, z) for x in range(room["x0"], room["x1"] + 1) for z in range(room["z0"], room["z1"] + 1)
+                 if self.free(x, z) and not self.solid(x, 2, z) and not self.near_door(x, z)]
+        self.rnd.shuffle(cells)
+        return cells[0] if cells else None
+
+    def vent(self, a, b, fan=None, brake=False, seal=None):
+        """Conducto de un bloque de alto bajo el suelo entre dos salas: rejillas en el suelo de cada
+        una (y=0), canal en y=-1 con paredes de chapa y fondo en y=-2. `fan`: circuito del ventilador
+        (a mitad de camino); `seal`: circuito que sella la rejilla de la sala `b`."""
+        t, duct = self.t, f"{MOD}:lab_vent_duct"
+        pa, pb = self.vent_spot(a), self.vent_spot(b)
+        if not pa or not pb:
+            return False
+        path, (x, z) = [pa], pa
+        while x != pb[0]:
+            x += 1 if pb[0] > x else -1
+            path.append((x, z))
+        while z != pb[1]:
+            z += 1 if pb[1] > z else -1
+            path.append((x, z))
+        if not hasattr(self, "vent_cells"):
+            self.vent_cells = set()
+        self.vent_cells |= set(path)
+        for (x, z) in path:
+            t.set(x, -1, z, "air")
+            t.set(x, -2, z, duct)
+            for dx, dz in ((1, 0), (-1, 0), (0, 1), (0, -1), (1, 1), (1, -1), (-1, 1), (-1, -1)):
+                n = (x + dx, z + dz)
+                if n not in self.vent_cells:
+                    t.set(n[0], -1, n[1], duct)
+                    t.set(n[0], -2, n[1], duct)
+        for (x, z), room, sealed in ((pa, a, None), (pb, b, seal)):
+            f = "south" if (x, z) == path[0] and len(path) > 1 and path[1][1] > z else "north"
+            nbt = be("vent", Circuit=sealed) if sealed else None
+            t.set(x, 0, z, f"{MOD}:vent_grille", nbt=nbt, facing=f, open=False, sealed=bool(sealed))
+            self.used.add((x, z))
+        if fan and len(path) > 6:
+            i = len(path) // 2
+            (x, z), (nx, nz) = path[i], path[i + 1]
+            f = "east" if nx != x else "south"
+            t.set(x, -1, z, f"{MOD}:vent_fan", nbt=be("vent", Circuit=fan, Brake=brake), facing=f,
+                  running=brake)
+        self.vents = getattr(self, "vents", 0) + 1
+        return True
+
+    def vent_between(self, rooms, i, j, **kw):
+        """Conducto desde la sala i (o una cercana) hasta la que mas se acerque a la j, a una
+        distancia razonable (ni pegadas ni de punta a punta de la planta)."""
+        n = len(rooms)
+        for u in sorted(range(n), key=lambda k: abs(k - i))[:8]:
+            a = rooms[u]
+            for v in sorted(range(n), key=lambda k: abs(k - j)):
+                b = rooms[v]
+                if b is a or getattr(b, "vented", False):
+                    continue
+                d = abs((a["x0"] + a["x1"]) - (b["x0"] + b["x1"])) // 2 + abs((a["z0"] + a["z1"]) - (b["z0"] + b["z1"])) // 2
+                if 14 <= d <= 48 and self.vent(a, b, **kw):
+                    return True
+        print(f"  {self.t.name}: sin sitio para un conducto desde la sala {i}")
+        return False
+
     def retype(self, room, block, nbt):
         self.place_door(room, block, nbt)
 
@@ -993,6 +1057,7 @@ def apply_start(f):
     rooms = f.by_distance()
     f.fusebox(rooms[1], slots=1)
     f.fusebox(rooms[-1], slots=1)
+    f.vent_between(rooms, 0, len(rooms) // 2)
 
 
 def apply_storage(f):
@@ -1002,6 +1067,7 @@ def apply_storage(f):
     f.fusebox(locked)
     f.fusebox(rooms[len(rooms) // 2])
     f.item_in(rooms[len(rooms) // 3], "key red")
+    f.vent_between(rooms, len(rooms) // 4, len(rooms) - 3)
 
 
 def apply_offices(f):
@@ -1011,6 +1077,8 @@ def apply_offices(f):
     f.fusebox(sec)
     f.fusebox(rooms[len(rooms) // 2])
     f.item_in(rooms[len(rooms) // 4], "keycard 1")
+    f.vent_between(rooms, 1, len(rooms) // 2)
+    f.vent_between(rooms, len(rooms) // 2 + 1, len(rooms) - 2)
 
 
 def apply_morgue(f):
@@ -1021,6 +1089,9 @@ def apply_morgue(f):
     f.retype(locked, f"{MOD}:security_door", be("lab_door", Type="locked", Param="blue", Consume=True))
     f.fusebox(locked)
     f.item_in(rooms[len(rooms) // 4], "key blue")
+    # atajo sellado: se abre con su propia caja de fusibles
+    f.fusebox(rooms[len(rooms) // 3], circuit="vent", slots=1)
+    f.vent_between(rooms, len(rooms) // 3, len(rooms) - 3, seal="vent")
 
 
 def apply_generators(f):
@@ -1035,6 +1106,8 @@ def apply_generators(f):
     f.retype(elec, f"{MOD}:security_door", be("lab_door", Type="electric", Param="aux"))
     f.fusebox(rooms[len(rooms) // 2], circuit="aux", slots=1)
     f.fusebox(elec)
+    # el ventilador del conducto se frena con el circuito auxiliar
+    f.vent_between(rooms, len(rooms) // 4, len(rooms) - 4, fan="aux", brake=True)
 
 
 def apply_greenhouse(f):
@@ -1048,6 +1121,8 @@ def apply_greenhouse(f):
     f.retype(sec, f"{MOD}:security_door", be("lab_door", Type="keycard", Param="2"))
     f.fusebox(sec)
     f.item_in(rooms[len(rooms) // 3], "keycard 2")
+    f.vent_between(rooms, 1, len(rooms) // 2)
+    f.vent_between(rooms, len(rooms) // 3, len(rooms) - 3)
 
 
 def apply_final(f):
@@ -1067,6 +1142,7 @@ def apply_final(f):
     f.retype(rooms[-1], f"{MOD}:security_door", be("lab_door", Type="keycard", Param="3"))
     f.fusebox(rooms[-1])
     f.item_in(rooms[len(rooms) // 2], "keycard 3")
+    f.vent_between(rooms, len(rooms) // 4, len(rooms) - 3)
 
 
 FLOORS = [
@@ -1109,13 +1185,18 @@ def verify(path):
     import nbtlib
     t = nbtlib.load(path)
     pal = [str(p["Name"]) for p in t["palette"]]
-    solid, marks = {}, {}
+    solid, marks, oy = {}, {}, 0
     for b in t["blocks"]:
         x, y, z = [int(v) for v in b["pos"]]
         if "nbt" in b and "metadata" in b["nbt"]:
-            marks.setdefault(str(b["nbt"]["metadata"]).split()[0], []).append((x, z))
+            meta = str(b["nbt"]["metadata"]).split()[0]
+            marks.setdefault(meta, []).append((x, z))
+            if meta == "sp:entry":
+                oy = y - 1      # las plantillas con conductos empiezan por debajo del suelo
             continue
         solid[(x, y, z)] = pal[int(b["state"])]
+    solid = {(x, y - oy, z): v for (x, y, z), v in solid.items()}
+    grilles = sum(1 for (x, y, z), v in solid.items() if y == 0 and v.endswith("vent_grille"))
     floor = {(x, z) for (x, y, z) in solid if y == 0}
 
     def ok(b):
@@ -1154,22 +1235,25 @@ def verify(path):
             if n not in floor and (n[0], 1, n[1]) not in solid and (n[0], 2, n[1]) not in solid:
                 problems.append(f"hueco al vacio en {n[0]},{n[1]}")
                 break
+    if grilles and grilles % 2:
+        problems.append(f"{grilles} rejillas (cada conducto tiene dos)")
     if problems:
         raise SystemExit(f"{path.name}: " + "; ".join(problems[:5]))
+    return grilles
 
 def main():
     pool = []
     for name, theme_name, seed, kinds, apply, extra, kind, diff, title in FLOORS:
         f = make_floor(name, theme_name, seed, kinds, apply, dict(extra, diff=diff))
         size, nb, nm = f.t.save()
-        verify(ROOT / "structure/zones" / f"{name}.nbt")
+        grilles = verify(ROOT / "structure/zones" / f"{name}.nbt")
         zone = {"template": f"{MOD}:zones/{name}", "kind": kind, "difficulty": diff, "entry_yaw": 0, "name": title}
         path = ROOT / "zone" / f"{name}.json"
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(json.dumps(zone, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
         if kind == "intermediate":
             pool.append(f"{MOD}:{name}")
-        print(f"{name:16} {size[0]}x{size[1]}x{size[2]}  bloques={nb} marcadores={nm} salas={len(f.rooms)}")
+        print(f"{name:16} {size[0]}x{size[1]}x{size[2]}  bloques={nb} marcadores={nm} salas={len(f.rooms)} conductos={grilles // 2}")
     (ROOT / "zone_pool").mkdir(parents=True, exist_ok=True)
     (ROOT / "zone_pool/default.json").write_text(json.dumps({"zones": pool}, indent=2) + "\n", encoding="utf-8")
 

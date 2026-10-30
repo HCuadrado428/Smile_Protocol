@@ -61,6 +61,8 @@ public final class ModItems {
         block("blood_floor", ModBlocks.BLOOD_FLOOR);
         block("wall_decal", ModBlocks.WALL_DECAL);
         block("wall_writing", ModBlocks.WALL_WRITING);
+        block("vent_grille", ModBlocks.VENT_GRILLE);
+        block("vent_fan", ModBlocks.VENT_FAN);
     }
 
     private ModItems() {}

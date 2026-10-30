@@ -327,5 +327,10 @@
   "smileprotocol.end.fell": "Tu grupo cayó en %s (planta %s de %s)",
   "smileprotocol.end.made_it": "Llegasteis hasta %s (planta %s de %s)",
   "smileprotocol.end.time": "Tiempo: %s:%s",
-  "smileprotocol.end.no_retry": "No hay segundo intento. Puedes mirar a los grupos que siguen vivos."
+  "smileprotocol.end.no_retry": "No hay segundo intento. Puedes mirar a los grupos que siguen vivos.",
+  "block.smileprotocol.lab_vent_duct": "Conducto de ventilación",
+  "block.smileprotocol.vent_grille": "Rejilla de ventilación",
+  "block.smileprotocol.vent_fan": "Ventilador del conducto",
+  "smileprotocol.vent.open": "Retirar rejilla",
+  "smileprotocol.vent.sealed": "Sellada: sin corriente"
 }

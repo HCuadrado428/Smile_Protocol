@@ -327,5 +327,10 @@
   "smileprotocol.end.fell": "Your group fell in %s (floor %s of %s)",
   "smileprotocol.end.made_it": "You made it to %s (floor %s of %s)",
   "smileprotocol.end.time": "Time: %s:%s",
-  "smileprotocol.end.no_retry": "There is no second chance. You can watch the groups still alive."
+  "smileprotocol.end.no_retry": "There is no second chance. You can watch the groups still alive.",
+  "block.smileprotocol.lab_vent_duct": "Ventilation duct",
+  "block.smileprotocol.vent_grille": "Vent grille",
+  "block.smileprotocol.vent_fan": "Duct fan",
+  "smileprotocol.vent.open": "Remove grille",
+  "smileprotocol.vent.sealed": "Sealed: no power"
 }
