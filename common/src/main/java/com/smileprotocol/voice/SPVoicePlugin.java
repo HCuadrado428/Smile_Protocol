@@ -93,7 +93,6 @@ public class SPVoicePlugin implements VoicechatPlugin, VoiceBridge {
         java.util.List<WalkieManager.Rx> rx = WalkieManager.routes(id);
         if (rx != null && !rx.isEmpty()) sendRadio(id, pcm, rx);
     }
-    }
 
     /** Nivel RMS en dBFS (0 = maximo, -127 = silencio). */
     static double decibels(short[] pcm) {
