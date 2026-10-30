@@ -28,6 +28,9 @@ public final class ClientState {
     @javax.annotation.Nullable public static com.smileprotocol.network.Payloads.SyncMission mission;
     /** Cuando cambio de paso (para el destello del HUD). */
     public static long missionChanged;
+    /** Resultados de la partida (README 6.8) y hasta cuando se muestran. */
+    @javax.annotation.Nullable public static com.smileprotocol.network.Payloads.Results results;
+    public static long resultsUntil;
     public static boolean downed;
     public static float bleed;
     /** Progreso de la reanimacion que recibe (0-1), o -1 si nadie lo reanima. */

@@ -37,6 +37,11 @@ public final class ClientController {
         });
         SPNetwork.setClientHandler(Payloads.StartSequence.TYPE, ClientSequence::start);
         SPNetwork.setClientHandler(Payloads.PlayJumpscare.TYPE, ClientScare::play);
+        SPNetwork.setClientHandler(Payloads.GroupEnd.TYPE, GroupEndScreen::open);
+        SPNetwork.setClientHandler(Payloads.Results.TYPE, p -> {
+            ClientState.results = p;
+            ClientState.resultsUntil = net.minecraft.Util.getMillis() + p.seconds() * 1000L + 2000L;
+        });
         SPNetwork.setClientHandler(Payloads.SyncMission.TYPE, p -> {
             Payloads.SyncMission old = ClientState.mission;
             if (old == null || old.step() != p.step() || !old.text().equals(p.text())) ClientState.missionChanged = net.minecraft.Util.getMillis();

@@ -51,6 +51,13 @@ public final class SPNetwork {
             new Def<>(Payloads.SyncRevive.TYPE, Payloads.SyncRevive.CODEC, true, null),
             new Def<>(Payloads.SyncMission.TYPE, Payloads.SyncMission.CODEC, true, null),
             new Def<>(Payloads.PlayJumpscare.TYPE, Payloads.PlayJumpscare.CODEC, true, null),
+            new Def<>(Payloads.GroupEnd.TYPE, Payloads.GroupEnd.CODEC, true, null),
+            new Def<>(Payloads.Results.TYPE, Payloads.Results.CODEC, true, null),
+            new Def<>(Payloads.ReturnLobby.TYPE, Payloads.ReturnLobby.CODEC, false, (p, player) -> {
+                if (com.smileprotocol.player.SPPlayerData.inSP(player) && com.smileprotocol.run.RunManager.canReturnToLobby(player)) {
+                    com.smileprotocol.session.SPSessionManager.leave(player, com.smileprotocol.session.SPSessionManager.Destination.LOBBY);
+                }
+            }),
             new Def<>(Payloads.UseItem.TYPE, Payloads.UseItem.CODEC, false, com.smileprotocol.item.UseManager::onInput),
             new Def<>(Payloads.StartSequence.TYPE, Payloads.StartSequence.CODEC, true, null),
             new Def<>(Payloads.QTEState.TYPE, Payloads.QTEState.CODEC, true, null),

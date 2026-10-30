@@ -345,6 +345,43 @@ public final class Payloads {
         @Override public Type<PlayJumpscare> type() { return TYPE; }
     }
 
+    /**
+     * S -> C: final del grupo (README 6.6, 6.7): GAME OVER (todos muertos) o escapados, con la planta
+     * en que acabo. C -> S no; para volver al lobby desde la pantalla se usa {@link ReturnLobby}.
+     */
+    public record GroupEnd(boolean eliminated, Component zone, int zoneIndex, int zones, int seconds) implements CustomPacketPayload {
+        public static final Type<GroupEnd> TYPE = typeOf("group_end");
+        public static final StreamCodec<RegistryFriendlyByteBuf, GroupEnd> CODEC = StreamCodec.composite(
+                ByteBufCodecs.BOOL, GroupEnd::eliminated,
+                ComponentSerialization.TRUSTED_STREAM_CODEC, GroupEnd::zone,
+                ByteBufCodecs.VAR_INT, GroupEnd::zoneIndex,
+                ByteBufCodecs.VAR_INT, GroupEnd::zones,
+                ByteBufCodecs.VAR_INT, GroupEnd::seconds,
+                GroupEnd::new);
+
+        @Override public Type<GroupEnd> type() { return TYPE; }
+    }
+
+    /** S -> C: resultados de la partida (README 6.8), una linea por grupo. */
+    public record Results(List<Component> lines, int seconds) implements CustomPacketPayload {
+        public static final Type<Results> TYPE = typeOf("results");
+        public static final StreamCodec<RegistryFriendlyByteBuf, Results> CODEC = StreamCodec.composite(
+                ComponentSerialization.TRUSTED_STREAM_CODEC.apply(ByteBufCodecs.list(32)), Results::lines,
+                ByteBufCodecs.VAR_INT, Results::seconds,
+                Results::new);
+
+        @Override public Type<Results> type() { return TYPE; }
+    }
+
+    /** C -> S: «Volver al lobby» desde la pantalla de GAME OVER (README 6.7). */
+    public record ReturnLobby(boolean confirm) implements CustomPacketPayload {
+        public static final Type<ReturnLobby> TYPE = typeOf("return_lobby");
+        public static final StreamCodec<ByteBuf, ReturnLobby> CODEC = StreamCodec.composite(
+                ByteBufCodecs.BOOL, ReturnLobby::confirm, ReturnLobby::new);
+
+        @Override public Type<ReturnLobby> type() { return TYPE; }
+    }
+
     /** S -> C: empieza el minijuego de escape (README 18). */
     public record StartQTE(int qteType, int ticks, long seed, int target, int difficulty) implements CustomPacketPayload {
         public static final Type<StartQTE> TYPE = typeOf("start_qte");

@@ -124,6 +124,7 @@ public final class HudOverlay {
                 renderBattery(g, font, mc.player, h);
                 renderSlots(g, font, w, h);
             }
+            renderResults(g, font, w, h);
             Payloads.SyncReady ready = ClientState.ready;
             if (ready != null) renderReady(g, font, ready, w);
             renderDebug(g, font);
@@ -451,6 +452,29 @@ public final class HudOverlay {
         g.drawString(font, head, x + 10, y + 7, 0xFF7A2018, false);
         java.util.List<net.minecraft.util.FormattedCharSequence> lines = font.split(text, tw);
         if (!lines.isEmpty()) g.drawString(font, lines.get(0), x + 10, y + 19, INK, false);
+    }
+
+    /** Resultados de la partida (README 6.8): una hoja con una linea por grupo, hasta volver al lobby. */
+    private static void renderResults(GuiGraphics g, Font font, int w, int h) {
+        Payloads.Results r = ClientState.results;
+        if (r == null) return;
+        if (Util.getMillis() > ClientState.resultsUntil) {
+            ClientState.results = null;
+            return;
+        }
+        if (Minecraft.getInstance().screen != null) return;
+        int lw = 0;
+        for (Component c : r.lines()) lw = Math.max(lw, font.width(c));
+        int pw = Math.min(lw + 30, w - 20), ph = r.lines().size() * 12 + 22;
+        int x = w / 2 - pw / 2, y = h / 2 - ph / 2 - 20;
+        RenderSystem.setShaderColor(1f, 1f, 1f, 0.92f);
+        g.blitSprite(NOTE, x, y, pw, ph);
+        RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
+        int ly = y + 11;
+        for (Component c : r.lines()) {
+            g.drawString(font, c, x + 15, ly, INK, false);
+            ly += 12;
+        }
     }
 
     /** Sustos (README 14.7): la cara a pantalla completa y los destellos. */

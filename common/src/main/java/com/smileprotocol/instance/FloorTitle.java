@@ -18,6 +18,12 @@ public final class FloorTitle {
 
     private FloorTitle() {}
 
+    /** Nombre visible de una planta. */
+    public static Component zoneName(net.minecraft.server.MinecraftServer server, ResourceLocation zoneId) {
+        ZoneDef def = ZoneCatalog.get(server, zoneId);
+        return Component.literal(def != null ? def.name() : zoneId.getPath());
+    }
+
     public static void show(ServerPlayer p, int index, ResourceLocation zoneId) {
         ZoneDef def = ZoneCatalog.get(p.server, zoneId);
         String name = def != null ? def.name() : zoneId.getPath();

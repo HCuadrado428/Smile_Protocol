@@ -128,6 +128,10 @@ public final class SPConfig {
         /** Segundos minimos entre dos sustos para el mismo jugador. */
         public int jumpscare_cooldown = 20;
 
+        // Game over (README 6.7)
+        /** A quien pueden mirar los eliminados: ALL_RUNS (cualquier partida en curso) u OWN_RUN. */
+        public String spectate_scope = "ALL_RUNS";
+
         // Mobs (README 20)
         /** Berserkers por planta segun la dificultad de la zona (0, 1, 2, 3, 4...), antes de escalar por el grupo. */
         public java.util.List<Integer> berserkers_by_difficulty = new java.util.ArrayList<>(java.util.List.of(1, 2, 2, 3, 3));

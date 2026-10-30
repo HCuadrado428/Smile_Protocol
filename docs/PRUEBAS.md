@@ -204,6 +204,16 @@ Lo que hacéis en el laboratorio puede provocar eventos: unos solo asustan y otr
 
 Disparadores: `fuse_inserted`, `fuse_removed`, `fuse_moved`, `circuit_powered`, `circuit_unpowered`, `door_opened`, `door_closed`, `door_forced`, `valve_turned`, `valve_group_complete`, `item_picked`, `item_dropped`, `hide_enter`, `hide_exit`, `zone_entered`, `flashlight_on`, `player_downed`, `player_revived`, `mission_objective_completed` y `timer` (cada segundo; la ficha pone la probabilidad). Condiciones: `once`, `cooldown` (ticks), `chance`, `min_players`, `zone`; `arg` admite `*` al final. Alcance: `trigger_player`, `players_in_zone` o `all`. Acciones: `jumpscare` (`visual`, `audio`, `flash`, `peek`, `environment`), `light_flicker`, `blackout`, `lights_off`/`lights_on`, `alarm`, `sound`, `lock_door`/`unlock_door`, `door_slam`, `set_circuit`, `noise_burst`, `spawn_mob`, `message`, `radio_message`, `camera_effect` y `ambient_damage`.
 
+## Ascensores de zona, game over y fin de partida (fase 16)
+
+1. **Los muertos vuelven en el ascensor.** Cuando el grupo sube, los compañeros muertos (espectadores) aparecen dentro de la cabina con los demás, curados, pero **pierden lo que llevaban** (salvo la linterna), igual que los heridos, los derribados y los que se quedaron fuera (`elevator_strip`).
+2. **Viaje:** pantalla negra y la cabina tiembla al salir y al frenar.
+3. **GAME OVER.** Si mueren todos los del grupo, sale la pantalla de GAME OVER (estática, letras rojas que tiemblan, en qué planta caísteis y el tiempo) con **«Volver al lobby»** o **«Seguir mirando»**. Los eliminados pasan a mirar a los jugadores vivos de **cualquier partida en curso** (`spectate_scope`: `ALL_RUNS` u `OWN_RUN`); clic para cambiar. Si no queda nadie a quien mirar, vuelves al lobby al acabar la partida.
+4. **Escapar.** Al subir en el último ascensor el grupo termina: pantalla «HABÉIS ESCAPADO» con la planta y el tiempo.
+5. **Resultados.** Al acabar la partida aparece una hoja con los resultados de cada grupo (estado, planta, tiempo y supervivientes) hasta volver al lobby.
+
+La **batalla final contra Smiley** sigue pendiente de diseño (README 27); de momento la sala final acaba con su misión (despertar al Berserker y aguantar).
+
 ## Depuración
 
 - `/spadmin debug on`: muestra el panel de estado (sesión, mods, lobby y ascensores). Solo lo ven los operadores.

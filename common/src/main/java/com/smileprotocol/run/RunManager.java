@@ -8,6 +8,8 @@ import com.smileprotocol.difficulty.DifficultyScaler;
 import com.smileprotocol.dimension.SPDimension;
 import com.smileprotocol.instance.InstanceManager;
 import com.smileprotocol.instance.ZonePlacement;
+import com.smileprotocol.network.Payloads;
+import com.smileprotocol.network.SPNetwork;
 import com.smileprotocol.player.SPPlayerData;
 import com.smileprotocol.session.SPSessionManager;
 import com.smileprotocol.zone.ZoneSequence;
@@ -331,9 +333,18 @@ public final class RunManager {
         RunData.get(server).changed();
         Component msg = Component.translatable("smileprotocol.run.group_" + state.name().toLowerCase(), g.label())
                 .withStyle(state == GroupState.COMPLETED ? ChatFormatting.GREEN : ChatFormatting.RED);
+        // Pantalla de GAME OVER o de escapados (README 6.6, 6.7)
+        Run run = runOf(server, g);
+        long secs = run == null ? 0 : Math.max(0, (now - run.startTime()) / 20);
+        ZonePlacement cur = g.current();
+        Component zoneName = cur == null ? Component.empty() : com.smileprotocol.instance.FloorTitle.zoneName(server, cur.zoneId());
+        Payloads.GroupEnd end = new Payloads.GroupEnd(state == GroupState.ELIMINATED, zoneName, g.zoneIndex(), g.lastIndex(), (int) secs);
         for (UUID id : g.members().keySet()) {
             ServerPlayer p = server.getPlayerList().getPlayer(id);
-            if (p != null) p.sendSystemMessage(msg);
+            if (p != null) {
+                p.sendSystemMessage(msg);
+                if (SPPlayerData.inSP(p)) SPNetwork.sendTo(p, end);
+            }
         }
         SPDebug.log(g.label() + " " + state);
     }
@@ -353,10 +364,13 @@ public final class RunManager {
             lines.add(line.withStyle(g.state() == GroupState.COMPLETED ? ChatFormatting.GREEN : ChatFormatting.GRAY));
         }
         lines.add(Component.translatable("smileprotocol.run.returning", SPConfig.get().mini_return_delay).withStyle(ChatFormatting.DARK_GRAY));
+        Payloads.Results res = new Payloads.Results(lines, SPConfig.get().mini_return_delay);
         for (Group g : run.groups()) {
             for (UUID id : g.members().keySet()) {
                 ServerPlayer p = server.getPlayerList().getPlayer(id);
-                if (p != null) for (Component c : lines) p.sendSystemMessage(c);
+                if (p == null) continue;
+                for (Component c : lines) p.sendSystemMessage(c);
+                if (SPPlayerData.inSP(p)) SPNetwork.sendTo(p, res);
             }
         }
     }

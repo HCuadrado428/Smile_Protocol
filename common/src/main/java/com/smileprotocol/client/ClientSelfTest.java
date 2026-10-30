@@ -328,6 +328,10 @@ public final class ClientSelfTest {
         }));
         SHOTS.add(() -> wait = 5);
         SHOTS.add(() -> grab(mc, "22_muerto"));
+        // grupo de uno: con el unico jugador muerto es game over (README 6.7)
+        SHOTS.add(() -> wait = 50);
+        SHOTS.add(() -> log((mc.screen instanceof GroupEndScreen ? "OK" : "FALLO") + " pantalla de GAME OVER"));
+        SHOTS.add(() -> grab(mc, "27_game_over"));
     }
 
     // Grabacion de animaciones -------------------------------------------------------------------

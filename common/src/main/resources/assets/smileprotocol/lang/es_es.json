@@ -318,5 +318,14 @@
   "subtitles.smileprotocol.event.knock": "Golpes en la pared",
   "subtitles.smileprotocol.event.scream": "Un grito lejano",
   "smileprotocol.event.radio.keycard": "📻 «…¿Hay alguien? La tarjeta ha activado la alarma. Salid de ahí, ya.»",
-  "smileprotocol.event.radio.downed": "📻 «…os oigo gritar. No os separéis.»"
+  "smileprotocol.event.radio.downed": "📻 «…os oigo gritar. No os separéis.»",
+  "smileprotocol.end.game_over": "GAME OVER",
+  "smileprotocol.end.escaped": "HABÉIS ESCAPADO",
+  "smileprotocol.end.lobby": "Volver al lobby",
+  "smileprotocol.end.watch": "Seguir mirando",
+  "smileprotocol.end.stay": "Quedarse",
+  "smileprotocol.end.fell": "Tu grupo cayó en %s (planta %s de %s)",
+  "smileprotocol.end.made_it": "Llegasteis hasta %s (planta %s de %s)",
+  "smileprotocol.end.time": "Tiempo: %s:%s",
+  "smileprotocol.end.no_retry": "No hay segundo intento. Puedes mirar a los grupos que siguen vivos."
 }

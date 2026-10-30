@@ -318,5 +318,14 @@
   "subtitles.smileprotocol.event.knock": "Knocking",
   "subtitles.smileprotocol.event.scream": "Distant scream",
   "smileprotocol.event.radio.keycard": "📻 «…anyone there? The keycard tripped the alarm. Get out of there, now.»",
-  "smileprotocol.event.radio.downed": "📻 «…I can hear you screaming. Stay together.»"
+  "smileprotocol.event.radio.downed": "📻 «…I can hear you screaming. Stay together.»",
+  "smileprotocol.end.game_over": "GAME OVER",
+  "smileprotocol.end.escaped": "YOU ESCAPED",
+  "smileprotocol.end.lobby": "Back to lobby",
+  "smileprotocol.end.watch": "Keep watching",
+  "smileprotocol.end.stay": "Stay",
+  "smileprotocol.end.fell": "Your group fell in %s (floor %s of %s)",
+  "smileprotocol.end.made_it": "You made it to %s (floor %s of %s)",
+  "smileprotocol.end.time": "Time: %s:%s",
+  "smileprotocol.end.no_retry": "There is no second chance. You can watch the groups still alive."
 }

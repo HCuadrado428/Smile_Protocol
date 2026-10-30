@@ -74,6 +74,19 @@ public final class DeathManager {
         SPDebug.log(p.getGameProfile().getName() + " muere" + (cause != null ? " (" + cause + ")" : ""));
     }
 
+    /** El grupo sube en el ascensor: el muerto vuelve a jugar (README 6.5, punto 3). */
+    public static void reviveAtElevator(ServerPlayer p) {
+        Group g = RunManager.groupOf(p);
+        if (g == null || !g.isDead(p.getUUID())) return;
+        g.setStatus(p.getUUID(), MemberStatus.ACTIVE);
+        RunData.get(p.server).changed();
+        p.setGameMode(GameType.ADVENTURE);
+        p.setCamera(p);
+        p.setHealth(p.getMaxHealth());
+        SPNetwork.sendTo(p, new Payloads.SyncRevive(-1f, false));
+        SPDebug.log(p.getGameProfile().getName() + " vuelve en el ascensor");
+    }
+
     /** Al volver a conectarse estando muerto: sigue de espectador. */
     public static void onRejoinDead(ServerPlayer p) {
         p.setGameMode(GameType.SPECTATOR);
@@ -119,13 +132,29 @@ public final class DeathManager {
         return cam instanceof ServerPlayer o && aliveMates(p).contains(o);
     }
 
+    /**
+     * A quien puede mirar: sus companeros vivos; si su grupo ya ha caido (game over, README 6.7), los
+     * jugadores vivos de los grupos que sigan en juego, de cualquier partida ({@code spectate_scope}).
+     */
     private static List<ServerPlayer> aliveMates(ServerPlayer p) {
         List<ServerPlayer> out = new ArrayList<>();
         Group g = RunManager.groupOf(p);
         if (g == null) return out;
-        for (UUID id : g.activeMembers()) {
-            ServerPlayer o = p.server.getPlayerList().getPlayer(id);
-            if (o != null && o != p && o.isAlive() && !o.isSpectator() && SPPlayerData.inSP(o)) out.add(o);
+        List<Group> groups = new ArrayList<>();
+        if (!g.state().isDone()) {
+            groups.add(g);
+        } else {
+            boolean own = "OWN_RUN".equalsIgnoreCase(com.smileprotocol.config.SPConfig.get().spectate_scope);
+            for (com.smileprotocol.run.Run run : RunManager.openRuns(p.server)) {
+                if (own && !run.id().equals(g.runId())) continue;
+                for (Group o : run.groups()) if (!o.state().isDone()) groups.add(o);
+            }
+        }
+        for (Group gr : groups) {
+            for (UUID id : gr.activeMembers()) {
+                ServerPlayer o = p.server.getPlayerList().getPlayer(id);
+                if (o != null && o != p && o.isAlive() && !o.isSpectator() && SPPlayerData.inSP(o)) out.add(o);
+            }
         }
         return out;
     }

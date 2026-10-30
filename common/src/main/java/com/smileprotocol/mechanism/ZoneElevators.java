@@ -186,6 +186,7 @@ public final class ZoneElevators {
         level.playSound(null, center, SoundEvents.PISTON_CONTRACT, SoundSource.BLOCKS, 1f, 0.5f);
         // Pantalla negra durante el viaje (README 6.5, punto 7)
         for (ServerPlayer p : players) SPNetwork.sendTo(p, new Payloads.ScreenFade(15, ride - 25, 20));
+        com.smileprotocol.labevent.LabActions.scare(players, com.smileprotocol.labevent.LabActions.SCARE_SHAKE, 0.8f);
         SPDebug.log(g.label() + ": ascensor de la zona " + g.zoneIndex() + " sale con " + inside.size() + "/" + players.size());
     }
 
@@ -202,6 +203,13 @@ public final class ZoneElevators {
     /** Llegada a la zona siguiente: curar, penalizar, teletransportar (README 6.5, puntos 3 a 7). */
     private static void arrive(MinecraftServer server, ServerLevel level, Group g, State s) {
         String mode = SPConfig.get().elevator_strip.toUpperCase(Locale.ROOT);
+        // Los muertos del grupo vuelven en la cabina (README 6.5, punto 3): antes de cambiar de zona,
+        // para que los lleve con los demas
+        for (UUID id : new ArrayList<>(g.members().keySet())) {
+            if (!g.isDead(id)) continue;
+            ServerPlayer p = server.getPlayerList().getPlayer(id);
+            if (p != null && SPPlayerData.inSP(p)) com.smileprotocol.downed.DeathManager.reviveAtElevator(p);
+        }
         for (UUID id : g.activeMembers()) {
             ServerPlayer p = server.getPlayerList().getPlayer(id);
             if (p == null || !SPPlayerData.inSP(p)) continue;
@@ -216,6 +224,8 @@ public final class ZoneElevators {
             };
             if (strip) stripItems(p);
             SPHeal.heal(p, p.getMaxHealth());
+            // temblor de la cabina al frenar
+            com.smileprotocol.labevent.LabActions.scare(List.of(p), com.smileprotocol.labevent.LabActions.SCARE_SHAKE, 0.5f);
         }
         int next = g.zoneIndex() + 1;
         Component result = RunManager.setZone(server, g, next);
