@@ -507,7 +507,10 @@ public final class ClientSelfTest {
         SHOTS.add(() -> follow(-2, new Vec3(1.8, 1.4, 2.8), 0.7));
         scene(server, level, sp, null, chest, P, -90f, () -> com.smileprotocol.motion.MotionManager.setAction(sp,
                 com.smileprotocol.motion.Action.INTERACT, com.smileprotocol.client.anim.PoseCalculator.INTERACT_REVIVE, false));
-        record(mc, "jugador_reanimar", 50, null);
+        record(mc, "jugador_reanimar", 70, null);
+        SHOTS.add(() -> follow(-2, new Vec3(0, 1.0, 3.0), 0.6));
+        record(mc, "jugador_reanimar_lado", 70, null);
+        SHOTS.add(() -> follow(-2, new Vec3(1.8, 1.4, 2.8), 0.7));
         scene(server, level, sp, null, chest, P, -90f, () -> com.smileprotocol.motion.MotionManager.setAction(sp,
                 com.smileprotocol.motion.Action.INTERACT, com.smileprotocol.client.anim.PoseCalculator.INTERACT_PULL, false));
         record(mc, "jugador_ayudar_agarre", 40, null);

@@ -368,6 +368,41 @@ public final class PoseCalculator {
         for (int i = 0; i < PARTS.length; i++) a[i].lerp(b[i], k).apply(pose, PARTS[i]);
     }
 
+    /**
+     * Reanimar a un companero (README 9.3), postura absoluta: de rodillas junto a el, inclinado
+     * encima con los brazos rectos sobre su espalda. Ciclo de 3 s: compresiones (todo el peso del
+     * cuerpo baja y sube), y luego lo zarandea por los hombros mirando por encima del hombro por si
+     * viene algo. Entra desde de pie en 8 ticks.
+     */
+    private static void reviveRescuer(Pose pose, float time, float age) {
+        float k = Mth.clamp(age / 8f, 0f, 1f);
+        k = k * k * (3 - 2 * k);
+        float cyc = (age % 60f) / 60f;
+        // 0..1: cuanto de "zarandear" (frente a compresiones), con fundidos suaves
+        float shake = Mth.clamp((cyc - 0.66f) / 0.06f, 0f, 1f) * (1 - Mth.clamp((cyc - 0.94f) / 0.06f, 0f, 1f));
+        float pump = 1 - shake;
+        float press = Math.max(0f, Mth.sin(time * 0.62f)) * pump;          // bajada de cada compresion
+        float rock = Mth.sin(time * 0.45f) * shake;                          // vaiven al zarandear
+        float glance = shake * Mth.clamp(Mth.sin((cyc - 0.66f) / 0.34f * PI) * 1.6f, 0f, 1f);
+        float breath = Mth.sin(time * 0.15f);
+
+        // Caderas sobre las rodillas (rodillas en el suelo, espinillas hacia atras)
+        float hipY = 16.6f + 0.5f * press, hipZ = 0.5f;
+        float lean = 0.92f + 0.10f * press + 0.04f * breath * shake;
+        float topY = hipY - 12f * Mth.cos(lean), topZ = hipZ - 12f * Mth.sin(lean);
+        Key[] kneel = {
+                new Key(lean, 0.22f * glance, 0.08f * rock, 0.6f * rock, topY, topZ, 0),
+                new Key(0.65f - 0.75f * glance + 0.12f * press, 1.05f * glance, 0.1f * rock, 0.6f * rock, topY + 0.3f, topZ - 0.3f, 0),
+                // brazos rectos hacia abajo y algo adelante; al zarandear, a los hombros y doblados
+                new Key(-0.32f - 0.25f * shake + 0.06f * rock, -0.1f + 0.2f * glance, 0.12f + 0.1f * shake, -4.6f + 0.6f * rock,
+                        topY + 2f * Mth.cos(lean), topZ + 2f * Mth.sin(lean), -0.15f - 0.55f * shake + 0.2f * (1 - press) * pump),
+                new Key(-0.32f - 0.25f * shake - 0.06f * rock, 0.1f, -0.12f - 0.1f * shake, 4.6f + 0.6f * rock,
+                        topY + 2f * Mth.cos(lean), topZ + 2f * Mth.sin(lean), -0.15f - 0.55f * shake + 0.2f * (1 - press) * pump),
+                new Key(-0.22f, 0, 0.1f, -2.1f, hipY, hipZ, 1.78f),
+                new Key(-0.18f, 0, -0.1f, 2.1f, hipY, hipZ, 1.74f)};
+        for (int i = 0; i < PARTS.length; i++) STAND[i].lerp(kneel[i], k).apply(pose, PARTS[i]);
+    }
+
     // Remates y muertes (README 9.3) -------------------------------------------------------------
 
     private static float pulse(float since, float len) {
@@ -505,23 +540,7 @@ public final class PoseCalculator {
                 pose.rot(HEAD, 0.1f * in, (0.15f + 0.1f * swipe) * in, 0);
                 pose.rot(TORSO, 0.05f * in, -0.1f * in, 0);
             }
-            case INTERACT_REVIVE -> {
-                // De rodillas junto al companero: lo zarandea por los hombros y tira de el, mirando
-                // de vez en cuando por encima del hombro
-                float press = Mth.sin(time * 0.5f) * 0.5f + 0.5f;
-                float glance = Mth.clamp(Mth.sin(time * 0.045f) * 3f - 2f, 0f, 1f);
-                pose.rot(TORSO, (0.75f - 0.1f * press) * in, 0.15f * glance * in, 0.04f * Mth.sin(time * 0.5f) * in);
-                pose.rot(HEAD, (0.25f - 0.45f * glance) * in, 0.9f * glance * in, 0);
-                pose.rot(RIGHT_ARM, (-1.0f + press * 0.25f) * in, 0.2f * in, 0);
-                pose.rot(LEFT_ARM, (-1.0f + press * 0.25f) * in, -0.2f * in, 0);
-                pose.bend(RIGHT_ARM, 0, (-0.2f - 0.4f * press) * in);
-                pose.bend(LEFT_ARM, 0, (-0.2f - 0.4f * press) * in);
-                pose.rot(RIGHT_LEG, -1.4f * in, 0, 0.1f * in);
-                pose.rot(LEFT_LEG, -0.3f * in, 0, -0.1f * in);
-                pose.bend(RIGHT_LEG, 0, 1.5f * in);
-                pose.bend(LEFT_LEG, 0, 1.4f * in);
-                bodyPx(pose, 0, 5f * in, 0);
-            }
+            case INTERACT_REVIVE -> reviveRescuer(pose, time, age);
             case INTERACT_PULL -> {
                 // Tira del companero agarrado: brazos estirados, echado hacia atras, pies clavados
                 float tug = Mth.sin(time * 0.55f) * 0.5f + 0.5f;
