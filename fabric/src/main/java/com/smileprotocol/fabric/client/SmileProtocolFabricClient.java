@@ -44,6 +44,8 @@ public final class SmileProtocolFabricClient implements ClientModInitializer {
         BlockEntityRenderers.register(ModBlockEntities.FUSE_BOX.get(), com.smileprotocol.client.SPGeoRenderer::new);
         BlockEntityRenderers.register(ModBlockEntities.LAB_DOOR.get(), com.smileprotocol.client.SPGeoRenderer::new);
         BlockEntityRenderers.register(ModBlockEntities.HIDE.get(), com.smileprotocol.client.SPGeoRenderer::new);
+        net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(
+                com.smileprotocol.registry.ModEntities.BERSERKER.get(), com.smileprotocol.client.BerserkerRenderer::new);
         BlockRenderLayerMap.INSTANCE.putBlock(ModBlocks.ELEVATOR_BUTTON.get(), RenderType.cutout());
         BlockRenderLayerMap.INSTANCE.putBlocks(RenderType.cutout(), ModBlocks.LAB_DOOR.get(), ModBlocks.SECURITY_DOOR.get(),
                 ModBlocks.VALVE.get(), ModBlocks.GURNEY.get(), ModBlocks.CURTAIN.get(), ModBlocks.FUSE_BOX.get(),

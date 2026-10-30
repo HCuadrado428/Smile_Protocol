@@ -103,6 +103,18 @@ public final class SPConfig {
         /** Segundos de linterna encendida con la bateria llena (README 10). */
         public int flashlight_battery_seconds = 420;
 
+        // Derribado (README 9.3; la reanimacion llega en la fase 12)
+        public int bleed_out_time = 60;
+        public int downed_noise_interval = 200;
+        public float noise_crawl = 3.5f;
+        public float noise_groan = 6;
+
+        // Mobs (README 20)
+        /** Berserkers por planta segun la dificultad de la zona (0, 1, 2, 3, 4...), antes de escalar por el grupo. */
+        public java.util.List<Integer> berserkers_by_difficulty = new java.util.ArrayList<>(java.util.List.of(1, 2, 2, 3, 3));
+        /** Los mobs no se mueven hasta que el grupo llega a su planta. */
+        public boolean mobs_wait_for_players = true;
+
         // Ascensores de zona (README 6.5)
         public int elevator_grace = 15;
         public int elevator_ride_time = 4;
@@ -123,6 +135,10 @@ public final class SPConfig {
             descent_countdown = Math.max(0, descent_countdown);
             required_ready_ratio = Math.min(1.0, Math.max(0.1, required_ready_ratio));
             max_dynamic_lights = Math.max(0, max_dynamic_lights);
+            bleed_out_time = Math.max(5, bleed_out_time);
+            if (berserkers_by_difficulty == null || berserkers_by_difficulty.isEmpty()) {
+                berserkers_by_difficulty = new java.util.ArrayList<>(java.util.List.of(1, 2, 2, 3, 3));
+            }
             max_groups = Math.max(1, max_groups);
             if (group_mode == null) group_mode = "RANDOM";
             instance_spacing = Math.max(1024, instance_spacing);

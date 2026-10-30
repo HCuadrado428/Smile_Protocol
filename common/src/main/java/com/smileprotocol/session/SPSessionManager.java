@@ -89,6 +89,7 @@ public final class SPSessionManager {
         boolean wasIn = data.inSP();
         if (wasIn) RunManager.onPlayerLeft(player, data.getGroupId());
         com.smileprotocol.hide.HideManager.forceExit(player, false);
+        com.smileprotocol.downed.DownedManager.clear(player);
         com.smileprotocol.interact.InteractionManager.stop(player, true);
 
         data.setInSP(false);

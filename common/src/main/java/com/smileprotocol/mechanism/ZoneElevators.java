@@ -189,6 +189,7 @@ public final class ZoneElevators {
             ServerPlayer p = server.getPlayerList().getPlayer(id);
             if (p == null || !SPPlayerData.inSP(p)) continue;
             HideManager.forceExit(p, false);
+            com.smileprotocol.downed.DownedManager.clear(p);
             boolean outside = !s.insideAtDeparture.contains(id);
             boolean hurt = s.hurtAtDeparture.contains(id);
             boolean strip = switch (mode) {

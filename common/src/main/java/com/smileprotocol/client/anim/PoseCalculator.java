@@ -113,6 +113,15 @@ public final class PoseCalculator {
                 pose.rot(BODY, 0, 0, 0.25f * arc);
             }
             case INTERACT -> interact(pose, m.detail(), time, age);
+            case DOWNED -> {
+                // Derribado: se arrastra tirando de los brazos, las piernas casi muertas
+                float sw = player.walkAnimation.speed(pt) > 0.02f ? Mth.sin(time * 0.35f) : 0f;
+                pose.rot(RIGHT_ARM, -2.6f + sw * 0.5f, 0, 0.25f);
+                pose.rot(LEFT_ARM, -2.6f - sw * 0.5f, 0, -0.25f);
+                pose.rot(RIGHT_LEG, 0.05f - sw * 0.15f, 0, 0.05f);
+                pose.rot(LEFT_LEG, 0.05f + sw * 0.15f, 0, -0.05f);
+                pose.rot(HEAD, -0.5f, 0, 0);
+            }
             default -> {
                 if (player.isSprinting()) {
                     // Carrera: torso adelantado y la cabeza compensa

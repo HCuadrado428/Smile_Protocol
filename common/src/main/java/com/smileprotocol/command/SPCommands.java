@@ -421,6 +421,13 @@ public final class SPCommands {
         root.then(Commands.literal("noise").then(Commands.literal("test")
                 .then(Commands.argument("radius", com.mojang.brigadier.arguments.FloatArgumentType.floatArg(0.5f, 64f))
                         .executes(MechanismCommands::noiseTest))));
+        // Mobs (fase 11): aparecer uno, quitar los de alrededor y derribarse para probar
+        root.then(Commands.literal("mob")
+                .then(Commands.literal("spawn").then(Commands.argument("type", StringArgumentType.word())
+                        .suggests((c, b) -> net.minecraft.commands.SharedSuggestionProvider.suggest(new String[]{"berserker"}, b))
+                        .executes(MechanismCommands::mobSpawn)))
+                .then(Commands.literal("clear").executes(MechanismCommands::mobClear))
+                .then(Commands.literal("down").executes(MechanismCommands::selfDown)));
 
         d.register(root);
     }

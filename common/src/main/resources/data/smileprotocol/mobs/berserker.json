@@ -1,0 +1,23 @@
+{
+  "id": "smileprotocol:berserker",
+  "family": "smiler",
+  "based_on": "smiley",
+  "size": { "width": 0.9, "height": 2.6 },
+  "senses": {
+    "vision": { "enabled": false },
+    "hearing": { "multiplier": 1.5, "min_noise": 5.0 }
+  },
+  "ai": {
+    "idle_behavior": "WANDER",
+    "retarget_loudness_ratio": 1.5,
+    "search_time": 120,
+    "checks_hiding_spots": false,
+    "opens_doors": true
+  },
+  "speed": { "walk": 0.55, "run": 1.35 },
+  "strike": { "windup_ticks": 12, "radius": 2.5, "recovery_ticks": 30 },
+  "on_catch": "DOWN",
+  "execution": true,
+  "can_enter_vents": false,
+  "causes_interference": false
+}

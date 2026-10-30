@@ -256,4 +256,15 @@ public final class Payloads {
 
         @Override public Type<SyncFlashlight> type() { return TYPE; }
     }
+
+    /** S -> C: derribado y cuanto le queda antes de desangrarse (0-1). */
+    public record SyncDowned(boolean downed, float bleed) implements CustomPacketPayload {
+        public static final Type<SyncDowned> TYPE = typeOf("sync_downed");
+        public static final StreamCodec<ByteBuf, SyncDowned> CODEC = StreamCodec.composite(
+                ByteBufCodecs.BOOL, SyncDowned::downed,
+                ByteBufCodecs.FLOAT, SyncDowned::bleed,
+                SyncDowned::new);
+
+        @Override public Type<SyncDowned> type() { return TYPE; }
+    }
 }

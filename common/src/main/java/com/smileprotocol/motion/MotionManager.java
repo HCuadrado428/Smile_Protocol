@@ -206,11 +206,13 @@ public final class MotionManager {
         SPConfig.Values cfg = SPConfig.get();
         if (p.onGround() && s.action != Action.HIDDEN && moved > 0.01 && moved < 2) {
             s.stride += moved;
-            double strideLen = p.isSprinting() ? 2.2 : p.isCrouching() ? 1.2 : 1.7;
+            boolean crawl = s.action == Action.DOWNED;
+            double strideLen = crawl ? 0.8 : p.isSprinting() ? 2.2 : p.isCrouching() ? 1.2 : 1.7;
             if (s.stride >= strideLen) {
                 s.stride = 0;
-                float r = p.isCrouching() ? cfg.noise_crouch_walk : p.isSprinting() ? cfg.noise_sprint : cfg.noise_walk;
-                NoiseSystem.emit(p.serverLevel(), pos, r, p.isSprinting() ? NoiseType.SPRINT : NoiseType.FOOTSTEP, p);
+                float r = crawl ? cfg.noise_crawl : p.isCrouching() ? cfg.noise_crouch_walk : p.isSprinting() ? cfg.noise_sprint : cfg.noise_walk;
+                NoiseType t = crawl ? NoiseType.CRAWL : p.isSprinting() ? NoiseType.SPRINT : NoiseType.FOOTSTEP;
+                NoiseSystem.emit(p.serverLevel(), pos, r, t, p);
             }
         }
         // Caidas de mas de 3 bloques: mucho ruido (README 12.8)

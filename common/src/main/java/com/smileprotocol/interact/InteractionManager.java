@@ -84,7 +84,7 @@ public final class InteractionManager {
         }
         if (!SPPlayerData.inSP(p) || p.isSpectator()) return;
         Action a = MotionManager.action(p);
-        if (a == Action.DIVE || a == Action.VAULT || a == Action.HIDDEN) return;
+        if (a == Action.DIVE || a == Action.VAULT || a == Action.HIDDEN || a == Action.DOWNED) return;
 
         boolean entity = in.kind() == Payloads.Interact.ENTITY;
         BlockPos pos = in.pos();

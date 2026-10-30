@@ -78,6 +78,13 @@ public final class FabricPlatform implements Platform {
     }
 
     @Override
+    public <T extends net.minecraft.world.entity.LivingEntity> void registerAttributes(
+            Supplier<net.minecraft.world.entity.EntityType<T>> type,
+            Supplier<net.minecraft.world.entity.ai.attributes.AttributeSupplier.Builder> attributes) {
+        net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry.register(type.get(), attributes.get());
+    }
+
+    @Override
     public SPPlayerData playerData(Player player) {
         return player.getAttachedOrCreate(PLAYER_DATA);
     }

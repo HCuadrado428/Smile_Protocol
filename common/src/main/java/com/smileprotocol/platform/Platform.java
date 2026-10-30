@@ -43,6 +43,11 @@ public interface Platform {
     /** Tipo de entidad de bloque (el constructor vanilla no es publico sin el loader). */
     <T extends BlockEntity> BlockEntityType<T> blockEntityType(BiFunction<BlockPos, BlockState, T> factory, Block... blocks);
 
+    /** Atributos de una entidad viva (Fabric: al momento; NeoForge: en su evento). */
+    <T extends net.minecraft.world.entity.LivingEntity> void registerAttributes(
+            Supplier<net.minecraft.world.entity.EntityType<T>> type,
+            Supplier<net.minecraft.world.entity.ai.attributes.AttributeSupplier.Builder> attributes);
+
     /** Datos persistentes del jugador (adjuntos a la entidad, se copian al morir). */
     SPPlayerData playerData(Player player);
 

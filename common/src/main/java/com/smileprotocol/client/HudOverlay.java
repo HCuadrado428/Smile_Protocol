@@ -103,7 +103,9 @@ public final class HudOverlay {
 
         if (!mc.options.hideGui) {
             if (inGame) {
-                if (ClientHide.hidden()) {
+                if (ClientState.downed) {
+                    renderDowned(g, font, w, h);
+                } else if (ClientHide.hidden()) {
                     renderHide(g, font, w, h, partialTick);
                 } else {
                     renderCrosshair(g, w, h);
@@ -251,6 +253,27 @@ public final class HudOverlay {
         }
         Component hint = hud(Component.translatable(st.partial() ? "smileprotocol.hud.hide_hint_partial" : "smileprotocol.hud.hide_hint"));
         g.drawString(font, hint, cx - font.width(hint) / 2, y + 10, BONE_DIM, true);
+    }
+
+    /** Derribado: todo se oscurece y enrojece, y una barra marca lo que queda antes de desangrarse. */
+    private static void renderDowned(GuiGraphics g, Font font, int w, int h) {
+        float beat = (float) Math.exp(-Math.pow(((Util.getMillis() / 1000.0 * 1.6) % 1.0 - 0.3) * 10, 2));
+        g.fill(0, 0, w, h, 0x50200000);
+        RenderSystem.setShaderColor(1f, 1f, 1f, 0.55f + 0.35f * beat);
+        g.blitSprite(BLOOD_VIGNETTE, -6, -6, w + 12, h + 12);
+        RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
+        int cx = w / 2, y = h / 2 - 30;
+        Component title = scrawl(Component.translatable("smileprotocol.downed.title"));
+        g.pose().pushPose();
+        g.pose().translate(cx, y, 0);
+        g.pose().scale(1.6f, 1.6f, 1f);
+        g.drawString(font, title, -font.width(title) / 2, 0, 0xFFB01418, false);
+        g.pose().popPose();
+        int bw = 140, bx = cx - bw / 2, by = y + 30;
+        g.blitSprite(BAR_EMPTY, bx, by, bw, 7);
+        bar(g, BAR_BLOOD, 100, 8, bx, by, bw, 7, ClientState.bleed);
+        Component hint = hud(Component.translatable("smileprotocol.downed.hint"));
+        g.drawString(font, hint, cx - font.width(hint) / 2, by + 12, BONE_DIM, true);
     }
 
     /** Dibuja la parte llena de una barra (sprite recortado a la fraccion {@code k}). */

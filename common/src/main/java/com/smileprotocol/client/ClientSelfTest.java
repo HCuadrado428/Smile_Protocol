@@ -144,6 +144,31 @@ public final class ClientSelfTest {
         SHOTS.add(() -> server.execute(() -> sp.setHealth(4f)));
         lookAt(mc, server, level, z, "14_vida_baja_camilla", be -> be instanceof HideBlockEntity h && h.modelName().equals("gurney"));
         SHOTS.add(() -> server.execute(() -> sp.setHealth(sp.getMaxHealth())));
+        // 7. Berserker (fase 11): de frente, de lado, golpeando donde sono un ruido y el derribo
+        Vec3 cam = e.add(0, 0, 30);
+        Vec3 mobAt = cam.add(0, 0, 4);
+        SHOTS.add(() -> server.execute(() -> {
+            com.smileprotocol.entity.Berserker b = com.smileprotocol.entity.MobManager.spawn(level,
+                    com.smileprotocol.registry.ModEntities.BERSERKER.get(), BlockPos.containing(mobAt), level.random);
+            if (b != null) {
+                b.setYRot(180f);
+                b.setYBodyRot(180f);
+                b.setYHeadRot(180f);
+            }
+            SPSessionManager.teleport(sp, level, cam, 0f, 0f);
+        }));
+        SHOTS.add(() -> wait = 50);
+        SHOTS.add(() -> grab(mc, "15_berserker"));
+        shot(mc, server, "16_berserker_lado", mobAt.add(4, 0, 0), 90f, 0f, 30);
+        SHOTS.add(() -> server.execute(() -> {
+            SPSessionManager.teleport(sp, level, cam, 0f, 0f);
+            com.smileprotocol.noise.NoiseSystem.emit(level, mobAt.add(0, 0, -2), 12f, com.smileprotocol.noise.NoiseType.TEST, null);
+        }));
+        SHOTS.add(() -> wait = 14);
+        SHOTS.add(() -> grab(mc, "17_berserker_golpe"));
+        SHOTS.add(() -> server.execute(() -> com.smileprotocol.downed.DownedManager.down(sp, "prueba")));
+        SHOTS.add(() -> wait = 30);
+        SHOTS.add(() -> grab(mc, "18_derribado"));
     }
 
     private static void shot(Minecraft mc, MinecraftServer server, String name, Vec3 pos, float yaw, float pitch, int delay) {

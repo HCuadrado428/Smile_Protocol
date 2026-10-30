@@ -23,6 +23,9 @@ public final class ClientState {
     private static final Map<BlockPos, Payloads.Board> boards = new HashMap<>();
 
     public static List<String> debugLines = List.of();
+    /** Derribado (fase 11, minimo) y cuanto le queda antes de desangrarse. */
+    public static boolean downed;
+    public static float bleed;
 
     private static int fadeIn, fadeHold, fadeOut, fadeAge = -1;
 
@@ -93,5 +96,6 @@ public final class ClientState {
         boards.clear();
         debugLines = List.of();
         fadeAge = -1;
+        downed = false;
     }
 }

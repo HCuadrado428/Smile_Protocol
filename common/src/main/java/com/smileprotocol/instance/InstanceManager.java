@@ -213,6 +213,10 @@ public final class InstanceManager {
                 ? ZoneSetup.setup(level, box, markers, group.difficulty(), rnd)
                 : List.of();
 
+        if (template != null && !mobs.isEmpty()) {
+            com.smileprotocol.entity.MobManager.spawnForZone(level, mobs, entry, def != null ? def.difficulty() : 1,
+                    group.difficulty(), rnd);
+        }
         ZonePlacement placement = new ZonePlacement(zoneId, index, sub, box, entry, yaw, markers, mobs, fuses);
         data.changed();
         SPDebug.log("zona " + zoneId + " (" + index + ") colocada para " + group.label() + " en " + origin.toShortString()

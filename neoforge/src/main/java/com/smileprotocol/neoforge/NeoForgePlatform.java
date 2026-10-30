@@ -43,10 +43,25 @@ public final class NeoForgePlatform implements Platform {
     public static final Supplier<AttachmentType<SPPlayerData>> PLAYER_DATA = ATTACHMENTS.register("player_data",
             () -> AttachmentType.builder(SPPlayerData::new).serialize(SPPlayerData.CODEC).copyOnDeath().build());
 
+    private static final List<Runnable> ATTRIBUTES = new java.util.ArrayList<>();
+    private static net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent attributeEvent;
+
     /** Conecta todos los registros al bus del mod. Se llama tras registrar el contenido. */
     static void registerAll(IEventBus modBus) {
         REGISTERS.values().forEach(r -> r.register(modBus));
         ATTACHMENTS.register(modBus);
+        modBus.addListener((net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent e) -> {
+            attributeEvent = e;
+            ATTRIBUTES.forEach(Runnable::run);
+            attributeEvent = null;
+        });
+    }
+
+    @Override
+    public <T extends net.minecraft.world.entity.LivingEntity> void registerAttributes(
+            Supplier<net.minecraft.world.entity.EntityType<T>> type,
+            Supplier<net.minecraft.world.entity.ai.attributes.AttributeSupplier.Builder> attributes) {
+        ATTRIBUTES.add(() -> attributeEvent.put(type.get(), attributes.get().build()));
     }
 
     @Override

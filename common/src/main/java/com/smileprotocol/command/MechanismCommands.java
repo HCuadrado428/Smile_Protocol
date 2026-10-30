@@ -179,4 +179,36 @@ final class MechanismCommands {
         ctx.getSource().sendSuccess(() -> Component.translatable("smileprotocol.command.noise.test", r), false);
         return 1;
     }
+
+    static int mobSpawn(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        String type = StringArgumentType.getString(ctx, "type");
+        ServerLevel level = ctx.getSource().getLevel();
+        if (!type.equals("berserker")) {
+            ctx.getSource().sendFailure(Component.translatable("smileprotocol.command.mob.unknown", type));
+            return 0;
+        }
+        BlockPos pos = BlockPos.containing(ctx.getSource().getPosition());
+        com.smileprotocol.entity.MobManager.spawn(level, com.smileprotocol.registry.ModEntities.BERSERKER.get(), pos, level.random);
+        ctx.getSource().sendSuccess(() -> Component.translatable("smileprotocol.command.mob.spawned", type), true);
+        return 1;
+    }
+
+    static int mobClear(CommandContext<CommandSourceStack> ctx) {
+        ServerLevel level = ctx.getSource().getLevel();
+        net.minecraft.world.phys.Vec3 c = ctx.getSource().getPosition();
+        int n = 0;
+        for (com.smileprotocol.entity.SPMonster m : level.getEntitiesOfClass(com.smileprotocol.entity.SPMonster.class,
+                new net.minecraft.world.phys.AABB(c, c).inflate(96))) {
+            m.discard();
+            n++;
+        }
+        int k = n;
+        ctx.getSource().sendSuccess(() -> Component.literal("Mobs quitados: " + k), true);
+        return n;
+    }
+
+    static int selfDown(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        com.smileprotocol.downed.DownedManager.down(ctx.getSource().getPlayerOrException(), "comando");
+        return 1;
+    }
 }

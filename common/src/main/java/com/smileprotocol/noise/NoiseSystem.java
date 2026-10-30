@@ -16,7 +16,7 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
-import java.util.function.Consumer;
+import java.util.function.BiConsumer;
 
 /**
  * Fuente central de ruido (README 17.1). Cada accion emite un {@link NoiseEvent} en la
@@ -29,12 +29,12 @@ public final class NoiseSystem {
     /** Cuanto tiempo se recuerdan los ruidos en una instancia (ticks). */
     private static final int MEMORY = 100;
     private static final String KEY = "noise";
-    private static final List<Consumer<NoiseEvent>> LISTENERS = new ArrayList<>();
+    private static final List<BiConsumer<ServerLevel, NoiseEvent>> LISTENERS = new ArrayList<>();
 
     private NoiseSystem() {}
 
     /** Registro de un oyente global (los mobs filtran por su instancia y su oido). */
-    public static void listen(Consumer<NoiseEvent> listener) {
+    public static void listen(BiConsumer<ServerLevel, NoiseEvent> listener) {
         LISTENERS.add(listener);
     }
 
@@ -48,7 +48,7 @@ public final class NoiseSystem {
             while (!q.isEmpty() && q.peekFirst().gameTime() < e.gameTime() - MEMORY) q.removeFirst();
             while (q.size() > 64) q.removeFirst();
         }
-        for (Consumer<NoiseEvent> l : LISTENERS) l.accept(e);
+        for (BiConsumer<ServerLevel, NoiseEvent> l : LISTENERS) l.accept(level, e);
         showDebug(level, e);
     }
 

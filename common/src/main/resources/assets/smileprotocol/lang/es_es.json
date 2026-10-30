@@ -219,5 +219,10 @@
   "block.smileprotocol.wall_decal": "Mancha en la pared",
   "block.smileprotocol.wall_writing": "Pintada de sangre",
   "block.smileprotocol.lab_server": "Armario de servidores",
-  "block.smileprotocol.lab_machine": "Carcasa de generador"
+  "block.smileprotocol.lab_machine": "Carcasa de generador",
+  "smileprotocol.downed.title": "DERRIBADO",
+  "smileprotocol.downed.hint": "Te desangras. Arrastrarte hace ruido...",
+  "entity.smileprotocol.berserker": "Berserker",
+  "smileprotocol.command.mob.spawned": "Mob %s aparecido",
+  "smileprotocol.command.mob.unknown": "Mob desconocido: %s"
 }

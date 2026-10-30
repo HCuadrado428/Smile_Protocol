@@ -73,6 +73,7 @@ public final class SPEvents {
         LobbyManager.onLogout(player);
         com.smileprotocol.interact.InteractionManager.onLogout(player);
         com.smileprotocol.hide.HideManager.onLogout(player);
+        com.smileprotocol.downed.DownedManager.clear(player);
         com.smileprotocol.motion.MotionManager.onLogout(player);
     }
 
@@ -114,6 +115,7 @@ public final class SPEvents {
         com.smileprotocol.motion.MotionManager.tick(server);
         com.smileprotocol.interact.InteractionManager.tick(server);
         com.smileprotocol.hide.HideManager.tick(server);
+        com.smileprotocol.downed.DownedManager.tick(server);
         com.smileprotocol.mechanism.ZoneElevators.tick(server);
         com.smileprotocol.motion.Flashlights.tick(server);
         LobbyManager.tick(server);

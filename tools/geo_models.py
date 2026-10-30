@@ -463,8 +463,11 @@ def apply_blood(c, k, f, age=0.5):
 # Modelo ----------------------------------------------------------------------------------------------
 
 class Geo:
-    def __init__(self, name, seed=0):
+    def __init__(self, name, seed=0, folder="block", glow=(), ao=True):
         self.name = name
+        self.folder = folder
+        self.glow = set(glow)       # materiales que brillan (capa emisiva *_glowmask.png)
+        self.ao = ao
         self.bones = []
         self.seed = seed
         self.splats = []
@@ -524,6 +527,7 @@ class Geo:
             W *= 2
         TW, TH = W, max(16, 1 << math.ceil(math.log2(max(1, Ht))))
         img = np.zeros((TH * SCALE, TW * SCALE, 4), dtype=np.float64)
+        glow = np.zeros_like(img)
         for n, (c, f, w, h, rw, rh) in enumerate(faces):
             u, v, _, _, pw, ph = c["uv"][f]
             face = Face(c, f, pw * SCALE, ph * SCALE, self.seed * 1000 + n)
@@ -531,11 +535,17 @@ class Geo:
             if c["blood"] and self.splats:
                 col = apply_blood(col, blood_layer(face, self.splats), face)
             # oclusion: las caras de abajo y lo que queda cerca del suelo, mas oscuro
-            if f == "down":
-                col = col * 0.6
-            col = col * (0.82 + 0.18 * sstep(0, 6, face.Y))[..., None]
+            if self.ao:
+                if f == "down":
+                    col = col * 0.6
+                col = col * (0.82 + 0.18 * sstep(0, 6, face.Y))[..., None]
             img[v * SCALE:(v + ph) * SCALE, u * SCALE:(u + pw) * SCALE, :3] = np.clip(col, 0, 255)
             img[v * SCALE:(v + ph) * SCALE, u * SCALE:(u + pw) * SCALE, 3] = a * 255
+            if c["mat"] in self.glow:
+                g = getattr(MAT[c["mat"]], "glowmask", None)
+                gm = g(face) if g else np.ones((face.h, face.w))
+                glow[v * SCALE:(v + ph) * SCALE, u * SCALE:(u + pw) * SCALE, :3] = np.clip(col, 0, 255)
+                glow[v * SCALE:(v + ph) * SCALE, u * SCALE:(u + pw) * SCALE, 3] = gm * a * 255
 
         bones_out = []
         for b in self.bones:
@@ -565,8 +575,14 @@ class Geo:
                 "bones": bones_out,
             }],
         }
-        (ROOT / "geo/block").mkdir(parents=True, exist_ok=True)
-        (ROOT / "geo/block" / f"{self.name}.geo.json").write_text(json.dumps(geo, indent=1) + "\n", encoding="utf-8")
+        (ROOT / f"geo/{self.folder}").mkdir(parents=True, exist_ok=True)
+        (ROOT / f"geo/{self.folder}" / f"{self.name}.geo.json").write_text(json.dumps(geo, indent=1) + "\n", encoding="utf-8")
+        (ROOT / f"textures/{self.folder}").mkdir(parents=True, exist_ok=True)
+        if self.glow:
+            Image.fromarray(glow.astype(np.uint8), "RGBA").save(ROOT / f"textures/{self.folder}" / f"{self.name}_glowmask.png")
+        if self.folder != "block":
+            Image.fromarray(img.astype(np.uint8), "RGBA").save(ROOT / f"textures/{self.folder}" / f"{self.name}.png")
+            return TW, TH, len(faces)
         (ROOT / "animations/block").mkdir(parents=True, exist_ok=True)
         (ROOT / "animations/block" / f"{self.name}.animation.json").write_text(
             json.dumps({"format_version": "1.8.0", "animations": {}}) + "\n", encoding="utf-8")

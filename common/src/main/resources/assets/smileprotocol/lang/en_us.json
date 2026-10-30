@@ -219,5 +219,10 @@
   "block.smileprotocol.wall_decal": "Wall stain",
   "block.smileprotocol.wall_writing": "Blood writing",
   "block.smileprotocol.lab_server": "Server rack",
-  "block.smileprotocol.lab_machine": "Generator housing"
+  "block.smileprotocol.lab_machine": "Generator housing",
+  "smileprotocol.downed.title": "DOWNED",
+  "smileprotocol.downed.hint": "You are bleeding out. Crawling makes noise...",
+  "entity.smileprotocol.berserker": "Berserker",
+  "smileprotocol.command.mob.spawned": "Spawned %s",
+  "smileprotocol.command.mob.unknown": "Unknown mob: %s"
 }
