@@ -40,3 +40,23 @@ Inspirado en los ángeles llorones de Doctor Who.
 - **Sonido:** susurros desde todas partes y un zumbido que se hace grave.
 - **Cómo se le gana:** luces encendidas, baterías, bengalas y no separarse.
 - **Dónde:** plantas con apagones, generadores y la final.
+
+## Smiley (jefe final)
+Inspirado en Slenderman y en SCP-096 («el tímido»). Aspecto canónico de 20.1: 4 bloques, delgado, se agacha en las puertas; un ojo rojo a la derecha y la sonrisa roja.
+
+- **Antes de la batalla:** se le ve un instante de lejos en cada planta, sin atacar.
+- **Inicio:** cinemática: se apagan las luces, se enciende su ojo y la sonrisa se abre.
+- **Sala:** laboratorio de varias alturas con pasarelas.
+- **Cómo se gana:** no se le puede herir. Hay que encender los generadores, poner fusibles y demás mecanismos, y **esperar al ascensor**.
+- **Fases (3, una más con cada generador encendido):**
+  1. Lento y teatral: camina, observa y tantea al grupo; agarre con QTE largo.
+  2. Más rápido; invoca a 1 o 2 smilers y apaga luces.
+  3. Furioso y a oscuras: solo se ven su ojo y la sonrisa; muerte instantánea; encender el último generador y correr al ascensor.
+- **Habilidades:** apaga las luces de la sala; invoca a otros smilers; grito que aturde y atrae a todos los mobs; **teletransporte por manchas**: en las paredes hay manchas con su forma, y sale de una cercana a otro jugador cuando se cansa de perseguir al actual.
+- **Al alcanzarte:** agarre con un QTE que cambia de tipo cada vez; si fallas, remate.
+- **Luz:** retrocede si lo apuntan dos linternas o más a la vez.
+- **Escalado:** más generadores y más smilers invocados cuanto más grande es el grupo.
+- **Voz:** frases cortas en voz baja y distorsionada, llamando a los jugadores por su nombre.
+- **Música:** mezcla de todo: canción infantil distorsionada, música tensa que sube con cada fase y latidos que se aceleran; el ambiente se rompe en la última fase.
+- **Al vencerlo:** la sala se sella con él dentro, su ojo se apaga pero la sonrisa sigue; escapáis en el ascensor.
+- **Si cae el grupo:** se ve a Smiley arrastrando al último jugador, una risa y GAME OVER.
