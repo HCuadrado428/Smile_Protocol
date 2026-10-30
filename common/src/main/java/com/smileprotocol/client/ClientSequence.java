@@ -81,6 +81,25 @@ public final class ClientSequence {
     }
 
     /**
+     * Cara del mob: el hueso {@code head} de GeckoLib en el mundo (un poco por encima del pivote,
+     * que esta en el cuello); si aun no se ha dibujado, una altura aproximada.
+     */
+    private static Vec3 headPosition(Entity mob, float pt) {
+        Vec3 base = mob.getPosition(pt);
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.getEntityRenderDispatcher().getRenderer(mob) instanceof software.bernie.geckolib.renderer.GeoEntityRenderer<?> r) {
+            var bone = r.getGeoModel().getBone("head").orElse(null);
+            if (bone != null) {
+                bone.setTrackingMatrices(true);
+                org.joml.Vector3d w = bone.getWorldPosition();
+                Vec3 v = new Vec3(w.x, w.y + 0.25, w.z);
+                if (v.distanceToSqr(base) < 16) return v;
+            }
+        }
+        return base.add(0, 2.3, 0);
+    }
+
+    /**
      * Giro de la camara (yaw, pitch): mirando a la cabeza del mob, con temblor y sacudidas. Null si
      * no hay secuencia o no se ve el mob.
      */
@@ -89,8 +108,7 @@ public final class ClientSequence {
         if (!active()) return null;
         Entity mob = mob();
         if (mob == null) return null;
-        Vec3 head = mob.getPosition(pt).add(0, mob.getBbHeight() * 0.92, 0);
-        if (kind() == SequenceKind.SMILER_KILL) head = head.add(0, -0.1, 0);
+        Vec3 head = headPosition(mob, pt);
         double dx = head.x - camPos.x, dy = head.y - camPos.y, dz = head.z - camPos.z;
         float yaw = (float) Math.toDegrees(Math.atan2(-dx, dz));
         float pitch = (float) -Math.toDegrees(Math.atan2(dy, Math.sqrt(dx * dx + dz * dz)));

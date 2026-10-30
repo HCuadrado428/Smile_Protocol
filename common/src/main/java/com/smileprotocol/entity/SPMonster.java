@@ -70,6 +70,8 @@ public abstract class SPMonster extends PathfinderMob implements GeoEntity {
         if (id != animatedSequence) {
             animatedSequence = id;
             st.getController().forceAnimationReset();
+            // sin transicion: los golpes caen a la vez que el sonido y la sacudida de la victima
+            st.getController().transitionLength(k != null ? 0 : 4);
         }
         if (k == null) return null;
         return st.setAndContinue(software.bernie.geckolib.animation.RawAnimation.begin().thenPlayAndHold(k.anim));

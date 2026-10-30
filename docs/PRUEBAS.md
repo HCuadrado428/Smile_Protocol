@@ -125,8 +125,7 @@ El Berserker es ciego: solo oye. Corre al sitio donde sonó el ruido y golpea **
 7. **Después del golpe** se queda 1,5 s recuperándose y luego escucha unos 6 s girando la cabeza. Si nadie hace ruido, vuelve a merodear.
 8. **Escondites.** No los revisa, pero si haces ruido dentro (por ejemplo, al quedarte sin aliento), golpea ese sitio y te saca derribado.
 9. **Puertas.** Abre las puertas normales del laboratorio (haciendo ruido). Las de seguridad, con llave o tarjeta, le cortan el paso.
-10. **Derribado (mínimo).** Te arrastras muy despacio, se oye al arrastrarte y gimes de vez en cuando. Tienes 60 s antes de desangrarte. Si el Berserker te oye, viene y te **remata**. Para probarlo sin mob: `/spadmin mob down`.
-    - La reanimación por los compañeros, la jeringa y las animaciones propias son de la fase 12. De momento, derribado acaba en muerte y vuelta al lobby.
+10. **Derribado.** Te arrastras muy despacio, se oye al arrastrarte y gimes de vez en cuando. Tienes 60 s antes de desangrarte. Si el Berserker te oye, viene y te **remata** (ver la fase 12). Para probarlo sin mob: `/spadmin mob down`.
 
 11. **Agarre y QTE (mob de pruebas).** `/spadmin mob spawn smiler_test` pone un smiler que **sí ve**: te persigue y, si te alcanza, te agarra: te arrastra hasta sus manos, te sujeta por los hombros pegado a él y te sacude. Sale el minijuego:
     - **MASH:** machaca ESPACIO (es el que usa el mob de pruebas; se cambia en `data/smileprotocol/mobs/smiler_test.json`, campo `qte.type`);
@@ -137,6 +136,25 @@ El Berserker es ciego: solo oye. Corre al sitio donde sonó el ruido y golpea **
 12. **Sonidos.** Pasos, respiración, chasquidos al oír algo, olfateo, el chillido del aviso y el golpe del Berserker, el quejido del derribado, el latido y el agarre son propios (provisionales, generados con `tools/sounds.py`). Activa los subtítulos para verlos.
 
 **Configuración nueva:** `bleed_out_time`, `downed_noise_interval`, `noise_crawl`, `noise_groan`, `berserkers_by_difficulty` y `mobs_wait_for_players`. La ficha del mob está en `data/smileprotocol/mobs/berserker.json`.
+
+## Derribado, reanimación, remates y muertes (fase 12)
+
+Hacen falta **dos jugadores** para reanimar y ayudar. Comandos útiles: `/spadmin player <jugador> down|revive|kill`, `/spadmin mob execute <jugador>` (el mob más cercano lo derriba y lo remata) y `/spadmin mob kill <jugador>` (muerte instantánea del mob más cercano).
+
+1. **Reanimar.** Mira a un compañero derribado y mantén **click derecho** (6 s). Te arrodillas y lo zarandeas. Si te mueves, sueltas o te agarran, se corta. Con dos rescatadores tarda menos. Hace ruido.
+   - El derribado ve «Te están reanimando» con una barra y **no se desangra** mientras tanto.
+   - Al acabar, se levanta (tumbado → a cuatro patas → de rodillas, alzando la mano hacia quien le ayuda → de pie) con el **30 %** de la vida y **3 s de protección** contra remates.
+2. **Ayudar en un agarre.** Si a un compañero lo tiene agarrado un mob, mírale y mantén **click derecho** (2 s) tirando de él. Al acabar se suelta, como si hubiera ganado el minijuego (el mob queda aturdido).
+3. **Daño letal = derribo.** Dentro de la partida no hay pantalla de muerte de vanilla: si la vida llega a 0 (una caída, por ejemplo) quedas derribado. Si ya lo estabas, mueres. `/kill` y el vacío matan directamente.
+4. **Remates** (no se pueden cancelar una vez empiezan; la víctima es invulnerable y la cámara se clava en la cara del mob, tiembla con cada golpe y se funde a negro):
+   - **Berserker:** si golpea donde hay un derribado, levanta los brazos y lo aplasta tres veces contra el suelo.
+   - **Smiler de pruebas** (`/spadmin mob spawn smiler_test`): tras dejarte derribado por fallar el agarre se aparta 5 s y vuelve a por ti si te ve: se agacha, te levanta la cabeza y te la retuerce. Hay tiempo para que te reanimen.
+5. **Muerte instantánea** (`/spadmin mob spawn smiler_kill`, los dos ojos abiertos): te persigue y, al alcanzarte, sin minijuego ni derribo, te levanta del suelo, te muerde la cara dos veces y te suelta.
+6. **Muerte final.** Pasas a **espectador** de tus compañeros vivos («HAS MUERTO»): click izquierdo y derecho cambian de compañero. Sigues en el grupo; al subir el grupo en el ascensor reaparecerás en la cabina (fase 16). Si mueren todos, el grupo queda eliminado y volvéis al lobby al acabar la partida.
+
+**Configuración nueva:** `revive_time` (ticks, 120), `revive_health_percent` (30), `revive_protection` (ticks, 60), `noise_revive` (7) y `qte_help_time` (ticks, 40). Las fichas de los mobs admiten `"sequences": {"execution": ..., "kill": ...}` con `BERSERKER_EXECUTION`, `SMILER_EXECUTION` o `SMILER_KILL`.
+
+La jeringa de adrenalina (levantarse solo) es de la fase 13.
 
 ## Depuración
 

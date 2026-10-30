@@ -18,11 +18,11 @@ import net.minecraft.util.Mth;
  */
 public enum SequenceKind {
     /** El Berserker levanta los brazos y aplasta tres veces al derribado contra el suelo. */
-    BERSERKER_EXECUTION("execute", 64, true, 1.9, false, new int[]{20, 34, 50}, true),
+    BERSERKER_EXECUTION("execute", 64, true, 1.4, false, new int[]{20, 34, 50}, true),
     /** El smiler de pruebas se agacha sobre el derribado, le levanta la cabeza y se la retuerce. */
-    SMILER_EXECUTION("execute_smiler", 60, true, 1.5, true, new int[]{22, 42}, true),
+    SMILER_EXECUTION("execute_smiler", 60, true, 1.45, true, new int[]{22, 42}, true),
     /** Muerte instantanea: agarra a la victima, la levanta del suelo y le muerde la cara. */
-    SMILER_KILL("kill", 64, false, 1.5, true, new int[]{30, 40}, false);
+    SMILER_KILL("kill", 64, false, 1.25, true, new int[]{30, 40}, false);
 
     private static final SequenceKind[] VALUES = values();
 
