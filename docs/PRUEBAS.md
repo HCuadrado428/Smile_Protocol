@@ -245,6 +245,19 @@ Hace falta Simple Voice Chat en el servidor y en los clientes (es opcional: sin 
 1. **Tensión.** Acércate a un Berserker (o deja que te agarren, o cae derribado): la imagen se desatura, los bordes se separan en rojo y azul, ondula un poco, sale grano y la viñeta late. Al alejarte vuelve a la normalidad poco a poco. Se quita con `tension_shader: false` o se suaviza con `tension_strength`.
 2. **Ambiente.** Dentro de la partida suena un zumbido grave constante que de vez en cuando se apaga del todo unos segundos (silencio) y que baja cuando hay tensión. Cada 20-60 s cruje la estructura o gotea algo a unos metros (con Sound Physics Remastered se oye el eco de la sala). Se quita con `ambience: false`.
 
+## Accesibilidad (fase 22)
+
+1. **Menú.** Pulsa **F7** (también desde la lista de mods en NeoForge). Todo se guarda al cerrar, en `smileprotocol.json`.
+2. **Aviso de sustos.** La primera vez que entras en una partida en cada sesión sale un aviso con «Continuar», «Accesibilidad» y «No volver a avisar».
+3. **Subtítulos de sonido.** Con ellos activos, los ruidos del mod (mobs, eventos, walkie, puertas...) salen abajo a la derecha con una flecha que apunta hacia donde suenan; se desvanecen en 3 s.
+4. **Daltonismo.** Deuteranopía y protanopía cambian los colores de los marcadores de los compañeros por una paleta azul/naranja/amarilla; tritanopía, por una roja/cian. Los marcadores conservan su forma.
+5. **Sacudida de cámara.** De 0 a 100 %: afecta a los sustos, a las secuencias de remate y a la inclinación al asomarse.
+6. **Sin destellos.** Los fogonazos y la cara del susto se cambian por un fundido oscuro suave, y como mucho uno cada 3 s.
+7. **Sustos suaves.** Sin la cara a pantalla completa y con el golpe de sonido más bajo.
+8. **Pulsar en vez de mantener.** Interactuar y apuntar con una pulsación (otra lo corta). Mirar atrás y asomarse tienen la suya.
+9. **Minijuego asistido.** Si el servidor lo permite (`allow_qte_assist`), el agarre da un 50 % más de tiempo y pide menos: menos pulsaciones, 2 aciertos de ritmo y secuencias de 4 teclas.
+10. **Tamaño de la HUD.** De 0,75× a 1,5×.
+
 ## Muebles (fase 24)
 
 1. **Decoración.** Por todas las plantas, el lobby y la sala de Smiley hay muebles nuevos: puestos de trabajo con monitor de tubo, sillas de oficina, estanterías metálicas, baldas de especímenes, lavabos con el espejo roto, carros de curas, goteros con bolsa de sangre y sillas de ruedas. Cada tipo de sala lleva los suyos (despachos con mesas y sillas, almacenes con estanterías y cajas, morgue con carros y lavabos, salas con goteros...).

@@ -69,6 +69,7 @@ public final class SelfTest {
                 for (ResourceLocation id : ZoneCatalog.all(server)) {
                     failures += testZone(server, level, id, slot++);
                 }
+                failures += loadTest(server, level);
                 // Limpieza de lo colocado (en este mismo tick)
                 for (int i = 0; i < 400; i++) InstanceManager.tick(server);
             }
@@ -77,6 +78,46 @@ public final class SelfTest {
             SmileProtocol.LOGGER.error("SELFTEST excepcion", t);
         }
         log(failures == 0 ? "OK" : "FALLOS: " + failures);
+    }
+
+    /**
+     * Prueba de carga (fase 23): varias partidas a la vez. Coloca la planta mas grande para 6 grupos
+     * seguidos y comprueba que no se solapan, cuanto tarda cada una y cuantos mobs y luces quedan.
+     */
+    private static int loadTest(MinecraftServer server, ServerLevel level) {
+        ResourceLocation id = ResourceLocation.tryParse("smileprotocol:start_corridor");
+        List<Group> groups = new java.util.ArrayList<>();
+        List<net.minecraft.world.level.levelgen.structure.BoundingBox> boxes = new java.util.ArrayList<>();
+        long t0 = System.nanoTime();
+        int mobs = 0, lights = 0, fails = 0;
+        for (int i = 0; i < 6; i++) {
+            DifficultyProfile diff = DifficultyScaler.forGroup(server, 2 + i % 4);
+            Group g = new Group(UUID.randomUUID(), "LOAD", 950 + i, List.of(id), diff, 950 + i);
+            ZonePlacement z = InstanceManager.place(level, g, 0, 0);
+            if (z == null) {
+                fails++;
+                continue;
+            }
+            groups.add(g);
+            for (var b : boxes) {
+                if (b.intersects(z.box())) {
+                    log("FALLO carga: dos instancias se solapan");
+                    fails++;
+                }
+            }
+            boxes.add(z.box());
+            mobs += level.getEntitiesOfClass(com.smileprotocol.entity.SPMonster.class, AABB.of(z.box())).size();
+            int[] l = {0};
+            CircuitManager.forEachBlockEntity(level, z.box(), be -> {
+                if (be instanceof com.smileprotocol.blockentity.FluorescentLightBlockEntity) l[0]++;
+            });
+            lights += l[0];
+        }
+        long ms = (System.nanoTime() - t0) / 1_000_000;
+        log((fails == 0 ? "carga" : "FALLO carga") + ": " + groups.size() + " instancias a la vez en " + ms + " ms ("
+                + (groups.isEmpty() ? 0 : ms / groups.size()) + " ms cada una), mobs=" + mobs + " luces=" + lights);
+        for (Group g : groups) InstanceManager.release(server, g);
+        return fails;
     }
 
     private static int testZone(MinecraftServer server, ServerLevel level, ResourceLocation id, int slot) {
