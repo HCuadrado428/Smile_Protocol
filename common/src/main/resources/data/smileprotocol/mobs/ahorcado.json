@@ -1,0 +1,32 @@
+{
+  "id": "smileprotocol:ahorcado",
+  "family": "smiler",
+  "based_on": "smiley",
+  "_comment": "El Ahorcado (docs/SMILERS.md): cuelga del techo, cae sobre quien pasa debajo sin iluminarlo, agarra con QTE SEQUENCE, se arrastra 2 s y vuelve a subir.",
+  "size": {
+    "width": 0.6,
+    "height": 1.2
+  },
+  "senses": {
+    "vision": {
+      "enabled": false
+    },
+    "hearing": {
+      "multiplier": 1.0,
+      "min_noise": 2.0
+    }
+  },
+  "speed": {
+    "walk": 0.6,
+    "run": 1.7
+  },
+  "on_catch": "GRAB_QTE",
+  "qte": {
+    "type": "SEQUENCE",
+    "ticks": 90
+  },
+  "qte_fail_result": "DOWN",
+  "execution": false,
+  "can_enter_vents": true,
+  "causes_interference": false
+}

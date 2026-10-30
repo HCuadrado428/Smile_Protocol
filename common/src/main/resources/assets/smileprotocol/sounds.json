@@ -185,5 +185,17 @@
     "sounds": [
       "smileprotocol:rastreador/scratch"
     ]
+  },
+  "ahorcado.creak": {
+    "subtitle": "subtitles.smileprotocol.ahorcado.creak",
+    "sounds": [
+      "smileprotocol:ahorcado/creak"
+    ]
+  },
+  "ahorcado.laugh": {
+    "subtitle": "subtitles.smileprotocol.ahorcado.laugh",
+    "sounds": [
+      "smileprotocol:ahorcado/laugh"
+    ]
   }
 }

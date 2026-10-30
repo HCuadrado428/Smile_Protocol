@@ -100,6 +100,26 @@ public final class MobManager {
         if (spawn(level, ModEntities.RASTREADOR.get(), p, rnd) != null) SPDebug.log("mobs: rastreador en " + p.toShortString());
     }
 
+    /** Ahorcados: colgados del techo de los pasillos en las plantas de {@code ahorcado_zones}. */
+    public static void spawnAhorcados(ServerLevel level, net.minecraft.resources.ResourceLocation zoneId, List<BlockPos> points,
+                                      Vec3 entry, RandomSource rnd) {
+        if (!SPConfig.get().ahorcado_zones.contains(zoneId.getPath())) return;
+        List<BlockPos> far = new ArrayList<>();
+        for (BlockPos p : points) if (Vec3.atBottomCenterOf(p).distanceTo(entry) > 20) far.add(p);
+        java.util.Collections.shuffle(far, new java.util.Random(rnd.nextLong()));
+        int k = 0;
+        for (BlockPos p : far) {
+            if (k >= SPConfig.get().ahorcado_count) break;
+            // hace falta techo a 4 bloques del suelo (pasillos y salas del laboratorio)
+            if (!level.getBlockState(p.above(3)).isAir() || level.getBlockState(p.above(4)).isAir()) continue;
+            Ahorcado a = spawn(level, ModEntities.AHORCADO.get(), p, rnd);
+            if (a == null) continue;
+            a.hangAt(Vec3.atBottomCenterOf(p).add(0, 1.75, 0));
+            k++;
+        }
+        SPDebug.log("mobs: " + k + " ahorcados en " + zoneId);
+    }
+
     public static <T extends SPMonster> T spawn(ServerLevel level, EntityType<T> type, BlockPos pos, RandomSource rnd) {
         T mob = type.create(level);
         if (mob == null) return null;

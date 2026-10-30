@@ -41,6 +41,12 @@ public final class ModEntities {
                     MobCategory.MONSTER).sized(0.7f, 1.95f).eyeHeight(1.8f).clientTrackingRange(12).fireImmune()
                     .build("rastreador"));
 
+    /** El Ahorcado (fase 21): muneco de 1,2 bloques que cuelga del techo. */
+    public static final Supplier<EntityType<com.smileprotocol.entity.Ahorcado>> AHORCADO = Services.PLATFORM.register(
+            BuiltInRegistries.ENTITY_TYPE, "ahorcado", () -> EntityType.Builder.of(com.smileprotocol.entity.Ahorcado::new,
+                    MobCategory.MONSTER).sized(0.6f, 1.2f).eyeHeight(1.0f).clientTrackingRange(10).fireImmune()
+                    .build("ahorcado"));
+
     /** Bengala encendida (fase 13). */
     public static final Supplier<EntityType<com.smileprotocol.entity.FlareEntity>> FLARE = Services.PLATFORM.register(
             BuiltInRegistries.ENTITY_TYPE, "flare", () -> EntityType.Builder.<com.smileprotocol.entity.FlareEntity>of(
@@ -61,5 +67,6 @@ public final class ModEntities {
         Services.PLATFORM.registerAttributes(SMILER_KILL, com.smileprotocol.entity.SmilerTest::attributes);
         Services.PLATFORM.registerAttributes(PACIENTE, com.smileprotocol.entity.Paciente::attributes);
         Services.PLATFORM.registerAttributes(RASTREADOR, com.smileprotocol.entity.Rastreador::attributes);
+        Services.PLATFORM.registerAttributes(AHORCADO, com.smileprotocol.entity.Ahorcado::attributes);
     }
 }

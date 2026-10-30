@@ -32,6 +32,7 @@ Inspirado en los ángeles llorones de Doctor Who. *Implementado (fase 21):* mode
 - **Dónde:** oficinas y almacén.
 
 ## El Ahorcado (muñeco colgante)
+*Implementado (fase 21):* modelo `ahorcado`, IA en `entity/Ahorcado.java`, colgado en `ahorcado_zones` (`ahorcado_count` por planta).
 - **Aspecto:** pequeño (1,2 bloques), muñeco de trapo flácido colgado de cables. Ojo cosido con un botón rojo brillante; sonrisa cosida que se descose al atacar.
 - **Movimiento:** inmóvil colgado; cae, se arrastra muy rápido 2 s y vuelve a subir.
 - **Actitud:** emboscador, no persigue lejos. Nota lo que pasa justo debajo (2 bloques). No revisa escondites.

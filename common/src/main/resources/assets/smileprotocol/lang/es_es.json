@@ -357,5 +357,8 @@
   "subtitles.smileprotocol.rastreador.screech": "Un chillido",
   "subtitles.smileprotocol.rastreador.pant": "Jadeo",
   "subtitles.smileprotocol.rastreador.scratch": "Arañazos en el metal",
-  "entity.smileprotocol.rastreador": "El Rastreador"
+  "entity.smileprotocol.rastreador": "El Rastreador",
+  "subtitles.smileprotocol.ahorcado.creak": "Una cuerda cruje arriba",
+  "subtitles.smileprotocol.ahorcado.laugh": "Risa de juguete",
+  "entity.smileprotocol.ahorcado": "El Ahorcado"
 }

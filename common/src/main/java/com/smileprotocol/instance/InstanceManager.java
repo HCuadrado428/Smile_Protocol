@@ -218,6 +218,7 @@ public final class InstanceManager {
                     group.difficulty(), rnd);
             com.smileprotocol.entity.MobManager.spawnPaciente(level, zoneId, mobPoints, entry, rnd);
             com.smileprotocol.entity.MobManager.spawnRastreador(level, zoneId, mobPoints, entry, rnd);
+            com.smileprotocol.entity.MobManager.spawnAhorcados(level, zoneId, mobPoints, entry, rnd);
         }
         ZonePlacement placement = new ZonePlacement(zoneId, index, sub, box, entry, yaw, markers, mobs, fuses);
         data.changed();

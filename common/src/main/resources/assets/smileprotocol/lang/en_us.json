@@ -357,5 +357,8 @@
   "subtitles.smileprotocol.rastreador.screech": "Screech",
   "subtitles.smileprotocol.rastreador.pant": "Panting",
   "subtitles.smileprotocol.rastreador.scratch": "Claws scrape metal",
-  "entity.smileprotocol.rastreador": "The Tracker"
+  "entity.smileprotocol.rastreador": "The Tracker",
+  "subtitles.smileprotocol.ahorcado.creak": "A rope creaks above",
+  "subtitles.smileprotocol.ahorcado.laugh": "Toy laughter",
+  "entity.smileprotocol.ahorcado": "The Hanged"
 }

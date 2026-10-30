@@ -487,6 +487,34 @@ def scratch():
     return x
 
 
+def creak_rope():
+    """Cuerda que se tensa: crujido largo de fibras."""
+    r = np.random.default_rng(341)
+    n = int(SR * 1.1)
+    tt = np.arange(n) / SR
+    f = 260 + 90 * np.sin(np.clip(tt / 1.0, 0, 1) * np.pi)
+    grit = np.sign(np.sin(2 * np.pi * np.cumsum(f) / SR)) * (0.5 + 0.5 * np.sin(2 * np.pi * 31 * tt)) ** 4
+    x = bandpass(grit, 900, 2) + bandpass(noise(n, r), 1400, 3) * 0.2
+    return x * np.clip(tt / 0.1, 0, 1) * np.clip((1.1 - tt) / 0.4, 0, 1)
+
+
+def toy_laugh():
+    """Risa de juguete a pilas, desafinada y lenta."""
+    n = int(SR * 1.4)
+    tt = np.arange(n) / SR
+    x = np.zeros(n)
+    for k, t0 in enumerate((0.0, 0.22, 0.44, 0.7, 0.95)):
+        a = int(t0 * SR)
+        m = int(SR * 0.18)
+        tm = np.arange(m) / SR
+        f = (620 - k * 40) * (1 - 0.3 * tm / 0.18)
+        x[a:a + m] += np.sign(np.sin(2 * np.pi * np.cumsum(f) / SR)) * env(m, 0.005, 0.12) * 0.5
+    x = lowpass(x, 2200)
+    d = int(SR * 0.09)
+    x[d:] += x[:-d] * 0.3
+    return x
+
+
 def main():
     for i in range(3):
         save(f"berserker/step{i + 1}", step(10 + i))
@@ -525,6 +553,8 @@ def save_new():
     for i in range(2):
         save(f"ambient/creak{i + 1}", creak(200 + i))
     save("ambient/drip", drip())
+    save("ahorcado/creak", creak_rope())
+    save("ahorcado/laugh", toy_laugh())
     save("rastreador/screech", screech())
     save("rastreador/pant", pant())
     save("rastreador/scratch", scratch())

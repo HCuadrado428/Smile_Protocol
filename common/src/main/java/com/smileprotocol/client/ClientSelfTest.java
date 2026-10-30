@@ -467,6 +467,46 @@ public final class ClientSelfTest {
         SHOTS.add(() -> wait = 25);
         SHOTS.add(() -> grab(mc, "38_rastreador_cerca"));
         SHOTS.add(() -> server.execute(() -> { if (ras[0] != null) ras[0].discard(); }));
+        // 8i. Fase 21: el Ahorcado cae sobre quien pasa debajo, salvo si le apuntan con la linterna
+        com.smileprotocol.entity.Ahorcado[] ah = {null};
+        SHOTS.add(() -> server.execute(() -> {
+            com.smileprotocol.qte.QTEManager.clear(sp);
+            SPSessionManager.teleport(sp, level, cam, 0f, -32f);
+            ah[0] = com.smileprotocol.entity.MobManager.spawn(level, com.smileprotocol.registry.ModEntities.AHORCADO.get(),
+                    BlockPos.containing(cam.add(0, 0, 3)), level.random);
+            if (ah[0] != null) {
+                ah[0].setYRot(180f);
+                ah[0].setYBodyRot(180f);
+                ah[0].hangAt(Vec3.atBottomCenterOf(BlockPos.containing(cam.add(0, 0, 3))).add(0, 1.75, 0));
+            }
+            com.smileprotocol.motion.Flashlights.set(sp, true);
+        }));
+        SHOTS.add(() -> wait = 25);
+        SHOTS.add(() -> grab(mc, "39_ahorcado"));
+        SHOTS.add(() -> server.execute(() -> {
+            // pasa por debajo mirando arriba con la linterna: no cae
+            SPSessionManager.teleport(sp, level, cam.add(0, 0, 3), 0f, -80f);
+        }));
+        SHOTS.add(() -> wait = 25);
+        SHOTS.add(() -> server.execute(() -> {
+            boolean ok = ah[0] != null && ah[0].state() == com.smileprotocol.entity.Ahorcado.State.HANG;
+            log((ok ? "OK" : "FALLO") + " ahorcado iluminado no cae (" + (ah[0] == null ? "-" : ah[0].state()) + ")");
+            com.smileprotocol.motion.Flashlights.set(sp, false);
+            SPSessionManager.teleport(sp, level, cam.add(0, 0, 3), 0f, 10f);
+        }));
+        SHOTS.add(() -> wait = 30);
+        SHOTS.add(() -> server.execute(() -> {
+            boolean ok = ah[0] != null && (ah[0].state() == com.smileprotocol.entity.Ahorcado.State.GRAB
+                    || com.smileprotocol.qte.QTEManager.isGrabbed(sp));
+            log((ok ? "OK" : "FALLO") + " ahorcado cae y agarra al que pasa debajo sin mirar (" + (ah[0] == null ? "-" : ah[0].state()) + ")");
+        }));
+        SHOTS.add(() -> grab(mc, "40_ahorcado_agarre"));
+        SHOTS.add(() -> server.execute(() -> {
+            com.smileprotocol.qte.QTEManager.clear(sp);
+            com.smileprotocol.downed.DownedManager.clear(sp);
+            sp.setHealth(sp.getMaxHealth());
+            if (ah[0] != null) ah[0].discard();
+        }));
         // 9. Fase 12: levantarse tras la reanimacion, muerte instantanea en primera persona y muerte final
         SHOTS.add(() -> server.execute(() -> {
             com.smileprotocol.qte.QTEManager.clear(sp);

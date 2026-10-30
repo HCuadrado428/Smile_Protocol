@@ -392,6 +392,112 @@ def rastreador():
     return g.save()
 
 
+def sheet_cloth():
+    """El Ahorcado: muneco de sabanas de hospital cosidas, amarillentas y manchadas, con costuras."""
+    def m(f):
+        c = np.zeros((f.h, f.w, 3)) + (176, 168, 146)
+        c *= (0.78 + 0.3 * f.n(0.7, 3, 501))[..., None]
+        weave = 0.94 + 0.06 * ((np.floor(f.U * gm.SCALE) + np.floor(f.V * gm.SCALE)) % 2)
+        c *= weave[..., None]
+        stain = sstep(0.6, 0.85, f.n(0.4, 3, 502))
+        c = c * (1 - stain[..., None] * 0.6) + np.array([110, 84, 50]) * stain[..., None] * 0.6
+        blood = sstep(0.72, 0.88, f.n(0.55, 2, 503))
+        c = c * (1 - blood[..., None]) + np.array([96, 16, 14]) * blood[..., None]
+        seam = np.abs(noise3(f.X * 0.8, f.Y * 0.8, f.Z * 0.8, 1.0, 504) - 0.5) < 0.03
+        stitch = seam & (np.floor((f.U + f.V) * gm.SCALE) % 2 == 0)
+        c = np.where(stitch[..., None], np.array([40, 30, 26]), c)
+        return c, np.ones((f.h, f.w))
+    return m
+
+
+def stuffing():
+    def m(f):
+        c = np.zeros((f.h, f.w, 3)) + (150, 120, 96)
+        c *= (0.7 + 0.4 * f.n(1.5, 2, 511))[..., None]
+        gore = sstep(0.55, 0.75, f.n(1.0, 2, 512))
+        c = c * (1 - gore[..., None]) + np.array([110, 24, 22]) * gore[..., None]
+        return c, np.ones((f.h, f.w))
+    return m
+
+
+def cable():
+    def m(f):
+        c = np.zeros((f.h, f.w, 3)) + (34, 32, 30)
+        c *= (0.8 + 0.4 * (0.5 + 0.5 * np.sin(f.Y * 6)))[..., None]
+        return c, np.ones((f.h, f.w))
+    return m
+
+
+def doll_face():
+    """Cabeza: tela con un boton rojo por ojo (brilla) y la sonrisa cosida con hilo rojo (brilla)."""
+    cl = sheet_cloth()
+
+    def glow(f):
+        if f.face != "north":
+            return np.zeros((f.h, f.w))
+        px = np.floor(f.U * gm.SCALE).astype(int)
+        py = np.floor(f.V * gm.SCALE).astype(int)
+        W, H = int(f.w), int(f.h)
+        ex, ey = int(W * 0.28), int(H * 0.36)
+        button = (np.abs(px - ex) <= 1) & (np.abs(py - ey) <= 1)
+        sy = int(H * 0.7)
+        smile = ((py == sy) & (px >= 1) & (px <= W - 2)) | ((py == sy - 1) & ((px == 1) | (px == W - 2)))
+        thread = smile | ((np.abs(py - sy) == 1) & (px % 2 == 0) & (px >= 2) & (px <= W - 3))
+        return (button | thread).astype(float)
+
+    def mat(f):
+        c, a = cl(f)
+        if f.face != "north":
+            return c, a
+        px = np.floor(f.U * gm.SCALE).astype(int)
+        py = np.floor(f.V * gm.SCALE).astype(int)
+        W, H = int(f.w), int(f.h)
+        g = glow(f)
+        c = np.where(g[..., None] > 0, np.array([214, 22, 26]), c)
+        # agujeros del boton y la otra cuenca: una X cosida
+        ex, ey = int(W * 0.28), int(H * 0.36)
+        c = np.where(((px == ex) & (py == ey))[..., None], np.array([60, 0, 0]), c)
+        ox = int(W * 0.72)
+        x_ = (np.abs(px - ox) == np.abs(py - ey)) & (np.abs(px - ox) <= 1)
+        c = np.where(x_[..., None], np.array([30, 24, 22]), c)
+        return c, a
+
+    mat.glowmask = glow
+    return mat
+
+
+MAT.update({"sheet_cloth": sheet_cloth(), "stuffing": stuffing(), "cable": cable(), "doll_face": doll_face()})
+
+
+def ahorcado():
+    """El Ahorcado (docs/SMILERS.md): muneco de trapo de 1,2 bloques hecho de sabanas cosidas,
+    colgado del techo por cables enredados en el cuello y los brazos. Ojo de boton rojo, sonrisa
+    cosida con hilo rojo que se descose (la mandibula se abre) al atacar; relleno que se sale."""
+    g = Geo("ahorcado", 71, folder="entity", glow=("doll_face",), ao=False)
+    g.bone("root")
+    g.bone("body", "root", (0, 10, 0))
+    g.cube("body", (-2.6, 6, -1.6), (5.2, 6, 3.2), "sheet_cloth")
+    g.cube("body", (-1.2, 7.5, -1.9), (2.4, 2.2, 0.4), "stuffing")                           # desgarron en la barriga
+    g.cube("body", (-2.2, 11.8, -1.4), (4.4, 0.8, 2.8), "sheet_cloth")
+    g.bone("head", "body", (0, 12.6, 0))
+    g.cube("head", (-3, 15.2, -2.6), (6, 4.2, 5.2), "doll_face")                              # cabeza grande de muneco
+    g.cube("head", (2.2, 18.6, -2.2), (1.4, 1.6, 1.4), "stuffing")                           # relleno por la costura
+    g.cube("head", (-0.4, 12.6, -0.4), (0.8, 2.8, 0.8), "cable")                             # cuello de cable
+    g.bone("jaw", "head", (0, 15.6, 1.8))
+    g.cube("jaw", (-2.8, 13.6, -2.4), (5.6, 2, 4.8), "sheet_cloth")
+    g.cube("jaw", (-2.4, 15.3, -2.2), (4.8, 0.4, 4.2), "stuffing")                           # dentro: carne
+    g.bone("cables", "root", (0, 19.4, 0))
+    for x, z, ln in ((-0.6, 0.2, 40), (0.7, -0.5, 44), (0.1, 1.0, 38)):
+        g.cube("cables", (x - 0.25, 19.2, z - 0.25), (0.5, ln, 0.5), "cable")                 # cables hasta el techo
+    for side, sx in (("r", 1), ("l", -1)):
+        g.bone(f"arm_{side}", "body", (sx * 2.6, 11.5, 0))
+        g.cube(f"arm_{side}", (sx * 2.6 - (0 if sx > 0 else 1.6), 5, -0.8), (1.6, 6.5, 1.6), "sheet_cloth")
+        g.cube(f"arm_{side}", (sx * 2.6 - (0 if sx > 0 else 1.6) + 0.3, 4, -0.5), (1, 1.2, 1), "stuffing")
+        g.bone(f"leg_{side}", "body", (sx * 1.3, 6.3, 0))
+        g.cube(f"leg_{side}", (sx * 1.3 - 0.9, 0, -0.9), (1.8, 6.5, 1.8), "sheet_cloth")
+    return g.save()
+
+
 GRIN = [
     "R................R",
     "RR..............RR",
@@ -1052,6 +1158,66 @@ def rastreador_animations():
     return A
 
 
+def ahorcado_animations():
+    A = {}
+    L = 4.0
+    A["hang"] = loop_anim(L, {
+        "body": {"rotation": kf(multi(L, [0, 0, 0], [3, 12, 3], [0, 1.2, 2.0]))},
+        "head": {"rotation": kf(multi(L, [22, 0, 16], [5, 8, 6], [0.4, 1.0, 2.4]))},
+        "arm_r": {"rotation": kf(wave(L, [6, 0, 10], 6, 0.5))}, "arm_l": {"rotation": kf(wave(L, [4, 0, -12], 6, 1.5))},
+        "leg_r": {"rotation": kf(wave(L, [8, 0, 4], 8, 0.2))}, "leg_l": {"rotation": kf(wave(L, [-4, 0, -6], 8, 2.2))},
+        "jaw": {"rotation": kf([(0, [0, 0, 0])])},
+    })
+    # DROP: cae de golpe con los brazos abiertos y la boca descosida
+    L = 0.5
+    A["drop"] = {"loop": "hold_on_last_frame", "animation_length": L, "bones": {
+        "root": {"rotation": kf([(0, [0, 0, 0]), (0.2, [-30, 0, 0]), (L, [0, 0, 0])])},
+        "head": {"rotation": kf([(0, [28, 0, 18]), (0.2, [-30, 0, 0]), (L, [-10, 0, 0])])},
+        "jaw": {"rotation": kf([(0, [0, 0, 0]), (0.15, [60, 0, 0]), (L, [55, 0, 0])])},
+        "arm_r": {"rotation": kf([(0, [6, 0, 10]), (0.2, [-160, 0, 40]), (L, [-120, 0, 30])])},
+        "arm_l": {"rotation": kf([(0, [-150, 0, -20]), (0.2, [-160, 0, -40]), (L, [-120, 0, -30])])},
+        "cables": {"scale": kf([(0, [1, 1, 1]), (0.05, [0, 0, 0])])},
+    }}
+    # CRAWL: a cuatro patas, retorcido y muy rapido, la cabeza colgando de lado
+    L = 0.35
+    A["crawl"] = loop_anim(L, {
+        "body": {"rotation": kf(wave(L, [80, 0, 0], 6))},
+        "head": {"rotation": kf(multi(L, [-70, 0, 40], [8, 10, 10], [0, 1, 2]))},
+        "jaw": {"rotation": kf(wave(L, [50, 0, 0], 10))},
+        "arm_r": {"rotation": kf(wave(L, [-80, 0, 10], 50))}, "arm_l": {"rotation": kf(wave(L, [-80, 0, -10], 50, math.pi))},
+        "leg_r": {"rotation": kf(wave(L, [-30, 0, 20], 45, math.pi))}, "leg_l": {"rotation": kf(wave(L, [-30, 0, -20], 45))},
+        "cables": {"scale": kf([(0, [0, 0, 0])])},
+    })
+    # GRAB: se agarra a la cara de la victima con brazos y piernas
+    L = 0.4
+    A["grab"] = loop_anim(L, {
+        "body": {"rotation": kf(wave(L, [-10, 0, 0], 6))},
+        "head": {"rotation": kf(multi(L, [-20, 0, 0], [10, 14, 12], [0, 1, 2]))},
+        "jaw": {"rotation": kf(wave(L, [70, 0, 0], 12))},
+        "arm_r": {"rotation": kf(wave(L, [-150, 30, 40], 10))}, "arm_l": {"rotation": kf(wave(L, [-150, -30, -40], 10, 1))},
+        "leg_r": {"rotation": kf([(0, [-80, 0, 30])])}, "leg_l": {"rotation": kf([(0, [-80, 0, -30])])},
+        "cables": {"scale": kf([(0, [0, 0, 0])])},
+    })
+    # CLIMB: los cables tiran de el hacia arriba, colgando del cuello y pataleando
+    L = 1.0
+    A["climb"] = loop_anim(L, {
+        "head": {"rotation": kf(wave(L, [40, 0, 20], 10))},
+        "arm_r": {"rotation": kf(wave(L, [-170, 0, 20], 20))}, "arm_l": {"rotation": kf(wave(L, [-170, 0, -20], 20, 1))},
+        "leg_r": {"rotation": kf(wave(L, [10, 0, 10], 30))}, "leg_l": {"rotation": kf(wave(L, [10, 0, -10], 30, math.pi))},
+        "jaw": {"rotation": kf([(0, [20, 0, 0])])},
+    })
+    L = 1.0
+    A["stunned"] = loop_anim(L, {
+        "body": {"rotation": kf([(0, [88, 0, 0])])},
+        "head": {"rotation": kf(multi(L, [-80, 0, 60], [6, 12, 10], [0, 1, 2]))},
+        "arm_r": {"rotation": kf(wave(L, [-60, 0, 60], 20))}, "arm_l": {"rotation": kf(wave(L, [-60, 0, -60], 20, 1))},
+        "cables": {"scale": kf([(0, [0, 0, 0])])},
+    })
+    out = {"format_version": "1.8.0", "animations": A}
+    (ROOT / "animations/entity/ahorcado.animation.json").write_text(json.dumps(out, indent=1) + "\n", encoding="utf-8")
+    return A
+
+
 # Vista previa con huesos y animacion ---------------------------------------------------------------
 
 def _rot(rx, ry, rz):
@@ -1173,6 +1339,8 @@ def main():
     P = paciente_animations()
     rastreador()
     rastreador_animations()
+    ahorcado()
+    ahorcado_animations()
     print(f"paciente textura {pw * gm.SCALE}x{ph * gm.SCALE} caras={pn} animaciones={list(P)}")
     if len(sys.argv) > 2:
         frames = [("pose0", 200), ("pose0", 110), ("pose1", 160), ("pose2", 130), ("pose3", 200), ("pose4", 160)]

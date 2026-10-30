@@ -188,6 +188,10 @@ final class MechanismCommands {
             case "berserker" -> com.smileprotocol.entity.MobManager.spawn(level, com.smileprotocol.registry.ModEntities.BERSERKER.get(), pos, level.random);
             case "smiler_test" -> com.smileprotocol.entity.MobManager.spawn(level, com.smileprotocol.registry.ModEntities.SMILER_TEST.get(), pos, level.random);
             case "smiler_kill" -> com.smileprotocol.entity.MobManager.spawn(level, com.smileprotocol.registry.ModEntities.SMILER_KILL.get(), pos, level.random);
+            case "ahorcado" -> {
+                var m = com.smileprotocol.entity.MobManager.spawn(level, com.smileprotocol.registry.ModEntities.AHORCADO.get(), pos.above(2), level.random);
+                if (m != null) m.hangAt(m.position());
+            }
             case "rastreador" -> com.smileprotocol.entity.MobManager.spawn(level, com.smileprotocol.registry.ModEntities.RASTREADOR.get(), pos, level.random);
             case "paciente" -> com.smileprotocol.entity.MobManager.spawn(level, com.smileprotocol.registry.ModEntities.PACIENTE.get(), pos, level.random);
             default -> {

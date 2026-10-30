@@ -180,6 +180,9 @@ public final class SPConfig {
         public float paciente_view_angle = 50;
         /** Si su victima esta mas lejos que esto y hay otra mas cerca, cambia. */
         public float paciente_retarget_distance = 24;
+        // El Ahorcado: plantas y cuantos por planta (colgados en los pasillos)
+        public java.util.List<String> ahorcado_zones = new java.util.ArrayList<>(java.util.List.of("lab_greenhouse", "lab_morgue", "lab_generators"));
+        public int ahorcado_count = 2;
         // El Rastreador
         public java.util.List<String> rastreador_zones = new java.util.ArrayList<>(java.util.List.of("lab_offices", "lab_storage"));
         /** Ticks que aguanta corriendo antes de cansarse. */
