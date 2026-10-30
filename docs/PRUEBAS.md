@@ -59,6 +59,7 @@ La configuración está en `config/smileprotocol.json`.
 
 Dentro de una partida:
 - **Correr** con Ctrl hace más ruido que andar, y **agachado** casi no hace.
+- **Agachado = a cuatro patas**: con Shift vas de rodillas y con las manos en el suelo. Mides menos de un bloque (0,95), así que cabes por huecos y conductos de ventilación de 1 bloque de alto. Si sueltas Shift debajo de algo bajo, sigues a cuatro patas hasta que haya sitio para levantarte.
 - **Dive**: corriendo, pulsa **Shift**. Te deslizas tumbado unos metros y cabes por debajo de las tuberías caídas de los pasillos transversales. Tiene 3 s de espera.
 - **Vault**: corriendo o andando hacia un obstáculo de 1 bloque (barriles, losas, escombros), pulsa **Espacio** y lo saltas apoyando la mano.
 - **Mirar atrás**: mantén **C**. Gira la cámara, no la dirección en que corres.
