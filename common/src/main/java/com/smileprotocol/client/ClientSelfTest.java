@@ -174,6 +174,16 @@ public final class ClientSelfTest {
                         log("berserker " + b.getId() + " estado=" + b.state() + " anim="
                                 + (ctl == null ? "sin controlador" : ctl.getCurrentAnimation() == null ? "ninguna"
                                 : ctl.getCurrentAnimation().animation().name()));
+                        if (ctl != null) log("  controlador=" + ctl.getAnimationState() + " colas=" + ctl.getBoneAnimationQueues().size());
+                        if (mc.getEntityRenderDispatcher().getRenderer(b) instanceof BerserkerRenderer r) {
+                            var model = r.getGeoModel();
+                            for (String bn : new String[]{"torso", "thigh_r", "arm_r"}) {
+                                model.getBone(bn).ifPresentOrElse(
+                                        bone -> log("  hueso " + bn + " rotX=" + bone.getRotX() + " inicial=" + bone.getInitialSnapshot().getRotX()),
+                                        () -> log("  hueso " + bn + " NO EXISTE"));
+                            }
+                            log("  huesos registrados=" + model.getAnimationProcessor().getRegisteredBones().size());
+                        }
                     }
                 }
             }
