@@ -1,0 +1,60 @@
+== neoforge: salida 0
+[10:20:36] [main/ERROR] [minecraft/DedicatedServerProperties]: No key layers in MapLike[{}]
+[10:20:38] [Server thread/INFO] [minecraft/DedicatedServer]: Done (0.616s)! For help, type "help"
+[10:20:38] [Server thread/INFO] [Smile Protocol/]: SELFTEST inicio
+[10:20:38] [Server thread/INFO] [Smile Protocol/]: SELFTEST grupos 4 -> [4]
+[10:20:38] [Server thread/INFO] [Smile Protocol/]: SELFTEST grupos 7 -> [7]
+[10:20:38] [Server thread/INFO] [Smile Protocol/]: SELFTEST grupos 9 -> [5, 4]
+[10:20:38] [Server thread/INFO] [Smile Protocol/]: SELFTEST grupos 11 -> [6, 5]
+[10:20:38] [Server thread/INFO] [Smile Protocol/]: SELFTEST grupos 19 -> [5, 5, 5, 4]
+[10:20:38] [Server thread/INFO] [Smile Protocol/]: SELFTEST grupos 23 -> [5, 5, 5, 4, 4]
+[10:20:38] [Server thread/INFO] [Smile Protocol/]: SELFTEST dificultad 2j fus×0.5 mobs×0.6 qte×1.4
+[10:20:38] [Server thread/INFO] [Smile Protocol/]: SELFTEST dificultad 3j fus×0.75 mobs×0.8 qte×1.2
+[10:20:38] [Server thread/INFO] [Smile Protocol/]: SELFTEST dificultad 4j fus×1.0 mobs×1.0 qte×1.0
+[10:20:38] [Server thread/INFO] [Smile Protocol/]: SELFTEST dificultad 5j fus×1.0 mobs×1.15 qte×1.0
+[10:20:38] [Server thread/INFO] [Smile Protocol/]: SELFTEST dificultad 6j fus×1.25 mobs×1.3 qte×1.0
+[10:20:38] [Server thread/INFO] [Smile Protocol/]: SELFTEST escondite HideType[id=locker, capacity=1, enterTime=16, exitTime=14, noiseOnEnter=6.0, viewCone=70.0, breathDrain=0.12, searchPriority=1.5, canBeLocked=false, partial=false, low=false, overlay=slits]
+[10:20:38] [Server thread/INFO] [Smile Protocol/]: SELFTEST escondite HideType[id=wardrobe, capacity=2, enterTime=20, exitTime=16, noiseOnEnter=8.0, viewCone=80.0, breathDrain=0.12, searchPriority=1.2, canBeLocked=false, partial=false, low=false, overlay=crack]
+[10:20:38] [Server thread/INFO] [Smile Protocol/]: SELFTEST escondite HideType[id=gurney, capacity=1, enterTime=14, exitTime=16, noiseOnEnter=3.0, viewCone=120.0, breathDrain=0.14, searchPriority=0.8, canBeLocked=false, partial=false, low=true, overlay=low]
+[10:20:38] [Server thread/INFO] [Smile Protocol/]: SELFTEST escondite HideType[id=curtain, capacity=1, enterTime=8, exitTime=8, noiseOnEnter=2.0, viewCone=140.0, breathDrain=0.0, searchPriority=0.6, canBeLocked=false, partial=true, low=false, overlay=cloth]
+[10:20:38] [Server thread/INFO] [Smile Protocol/]: SELFTEST escondite HideType[id=container, capacity=1, enterTime=18, exitTime=16, noiseOnEnter=3.0, viewCone=60.0, breathDrain=0.1, searchPriority=1.0, canBeLocked=false, partial=false, low=false, overlay=crack]
+[10:20:38] [Server thread/INFO] [Smile Protocol/]: SELFTEST secuencia [smileprotocol:start_corridor, smileprotocol:lab_storage, smileprotocol:lab_morgue, smileprotocol:lab_greenhouse, smileprotocol:final_room]
+[10:20:38] [Server thread/INFO] [Smile Protocol/]: SELFTEST zona smileprotocol:final_room caja=128x154 marcadores=[fuse, mob_spawn, item:keycard:3, exit_cabin, entry, exit_door, entry_door] cajas=4 fusibles necesarios=4 fusibles en el suelo=5 objetos=5 puertas=81 valvulas=0 salida=true puertas salida=3 circuitos={exit=false}
+[10:20:39] [Server thread/INFO] [Smile Protocol/]: SELFTEST zona smileprotocol:lab_generators caja=117x146 marcadores=[fuse, item:wheel, mob_spawn, entry, exit_cabin, exit_door, entry_door] cajas=3 fusibles necesarios=4 fusibles en el suelo=5 objetos=6 puertas=66 valvulas=2 salida=true puertas salida=3 circuitos={exit=false, aux=false}
+[10:20:39] [Server thread/INFO] [Smile Protocol/]: SELFTEST zona smileprotocol:lab_greenhouse caja=116x153 marcadores=[fuse, mob_spawn, entry, exit_cabin, item:keycard:2, exit_door, entry_door] cajas=2 fusibles necesarios=2 fusibles en el suelo=3 objetos=4 puertas=70 valvulas=2 salida=true puertas salida=3 circuitos={exit=false}
+[10:20:40] [Server thread/INFO] [Smile Protocol/]: SELFTEST zona smileprotocol:lab_morgue caja=138x167 marcadores=[fuse, mob_spawn, entry, item:key:blue, exit_cabin, exit_door, entry_door] cajas=2 fusibles necesarios=2 fusibles en el suelo=3 objetos=3 puertas=95 valvulas=0 salida=true puertas salida=3 circuitos={exit=false}
+[10:20:40] [Server thread/INFO] [Smile Protocol/]: SELFTEST zona smileprotocol:lab_offices caja=148x144 marcadores=[fuse, mob_spawn, exit_cabin, entry, item:keycard:1, exit_door, entry_door] cajas=2 fusibles necesarios=2 fusibles en el suelo=3 objetos=3 puertas=90 valvulas=0 salida=true puertas salida=3 circuitos={exit=false}
+[10:20:40] [Server thread/INFO] [Smile Protocol/]: SELFTEST zona smileprotocol:lab_storage caja=120x149 marcadores=[fuse, mob_spawn, exit_cabin, entry, item:key:red, exit_door, entry_door] cajas=2 fusibles necesarios=2 fusibles en el suelo=3 objetos=3 puertas=68 valvulas=0 salida=true puertas salida=3 circuitos={exit=false}
+[10:20:41] [Server thread/INFO] [Smile Protocol/]: SELFTEST zona smileprotocol:start_corridor caja=140x169 marcadores=[fuse, exit_cabin, mob_spawn, entry, exit_door, entry_door] cajas=2 fusibles necesarios=2 fusibles en el suelo=3 objetos=3 puertas=102 valvulas=0 salida=true puertas salida=3 circuitos={exit=false}
+[10:20:41] [Server thread/INFO] [Smile Protocol/]: SELFTEST OK
+== fabric: salida 0
+[10:21:04] [main/ERROR] (Minecraft) No data fixer registered for berserker
+[10:21:04] [main/ERROR] (Minecraft) No data fixer registered for smiler_test
+[10:21:05] [main/ERROR] (Minecraft) No key layers in MapLike[{}]
+[10:21:07] [Server thread/INFO] (Minecraft) Done (0.874s)! For help, type "help"
+[10:21:07] [Server thread/INFO] (Smile Protocol) SELFTEST inicio
+[10:21:07] [Server thread/INFO] (Smile Protocol) SELFTEST grupos 4 -> [4]
+[10:21:07] [Server thread/INFO] (Smile Protocol) SELFTEST grupos 7 -> [7]
+[10:21:07] [Server thread/INFO] (Smile Protocol) SELFTEST grupos 9 -> [5, 4]
+[10:21:07] [Server thread/INFO] (Smile Protocol) SELFTEST grupos 11 -> [6, 5]
+[10:21:07] [Server thread/INFO] (Smile Protocol) SELFTEST grupos 19 -> [5, 5, 5, 4]
+[10:21:07] [Server thread/INFO] (Smile Protocol) SELFTEST grupos 23 -> [5, 5, 5, 4, 4]
+[10:21:07] [Server thread/INFO] (Smile Protocol) SELFTEST dificultad 2j fus×0.5 mobs×0.6 qte×1.4
+[10:21:07] [Server thread/INFO] (Smile Protocol) SELFTEST dificultad 3j fus×0.75 mobs×0.8 qte×1.2
+[10:21:07] [Server thread/INFO] (Smile Protocol) SELFTEST dificultad 4j fus×1.0 mobs×1.0 qte×1.0
+[10:21:07] [Server thread/INFO] (Smile Protocol) SELFTEST dificultad 5j fus×1.0 mobs×1.15 qte×1.0
+[10:21:07] [Server thread/INFO] (Smile Protocol) SELFTEST dificultad 6j fus×1.25 mobs×1.3 qte×1.0
+[10:21:07] [Server thread/INFO] (Smile Protocol) SELFTEST escondite HideType[id=locker, capacity=1, enterTime=16, exitTime=14, noiseOnEnter=6.0, viewCone=70.0, breathDrain=0.12, searchPriority=1.5, canBeLocked=false, partial=false, low=false, overlay=slits]
+[10:21:07] [Server thread/INFO] (Smile Protocol) SELFTEST escondite HideType[id=wardrobe, capacity=2, enterTime=20, exitTime=16, noiseOnEnter=8.0, viewCone=80.0, breathDrain=0.12, searchPriority=1.2, canBeLocked=false, partial=false, low=false, overlay=crack]
+[10:21:07] [Server thread/INFO] (Smile Protocol) SELFTEST escondite HideType[id=gurney, capacity=1, enterTime=14, exitTime=16, noiseOnEnter=3.0, viewCone=120.0, breathDrain=0.14, searchPriority=0.8, canBeLocked=false, partial=false, low=true, overlay=low]
+[10:21:07] [Server thread/INFO] (Smile Protocol) SELFTEST escondite HideType[id=curtain, capacity=1, enterTime=8, exitTime=8, noiseOnEnter=2.0, viewCone=140.0, breathDrain=0.0, searchPriority=0.6, canBeLocked=false, partial=true, low=false, overlay=cloth]
+[10:21:07] [Server thread/INFO] (Smile Protocol) SELFTEST escondite HideType[id=container, capacity=1, enterTime=18, exitTime=16, noiseOnEnter=3.0, viewCone=60.0, breathDrain=0.1, searchPriority=1.0, canBeLocked=false, partial=false, low=false, overlay=crack]
+[10:21:07] [Server thread/INFO] (Smile Protocol) SELFTEST secuencia [smileprotocol:start_corridor, smileprotocol:lab_storage, smileprotocol:lab_morgue, smileprotocol:lab_greenhouse, smileprotocol:final_room]
+[10:21:08] [Server thread/INFO] (Smile Protocol) SELFTEST zona smileprotocol:final_room caja=128x154 marcadores=[fuse, mob_spawn, item:keycard:3, exit_cabin, entry, exit_door, entry_door] cajas=4 fusibles necesarios=4 fusibles en el suelo=5 objetos=6 puertas=81 valvulas=0 salida=true puertas salida=3 circuitos={exit=false}
+[10:21:08] [Server thread/INFO] (Smile Protocol) SELFTEST zona smileprotocol:lab_generators caja=117x146 marcadores=[fuse, item:wheel, mob_spawn, entry, exit_cabin, exit_door, entry_door] cajas=3 fusibles necesarios=4 fusibles en el suelo=5 objetos=6 puertas=66 valvulas=2 salida=true puertas salida=3 circuitos={exit=false, aux=false}
+[10:21:08] [Server thread/INFO] (Smile Protocol) SELFTEST zona smileprotocol:lab_greenhouse caja=116x153 marcadores=[fuse, mob_spawn, entry, exit_cabin, item:keycard:2, exit_door, entry_door] cajas=2 fusibles necesarios=2 fusibles en el suelo=3 objetos=4 puertas=70 valvulas=2 salida=true puertas salida=3 circuitos={exit=false}
+[10:21:09] [Server thread/INFO] (Smile Protocol) SELFTEST zona smileprotocol:lab_morgue caja=138x167 marcadores=[fuse, mob_spawn, entry, item:key:blue, exit_cabin, exit_door, entry_door] cajas=2 fusibles necesarios=2 fusibles en el suelo=3 objetos=2 puertas=95 valvulas=0 salida=true puertas salida=3 circuitos={exit=false}
+[10:21:09] [Server thread/INFO] (Smile Protocol) SELFTEST zona smileprotocol:lab_offices caja=148x144 marcadores=[fuse, mob_spawn, exit_cabin, entry, item:keycard:1, exit_door, entry_door] cajas=2 fusibles necesarios=2 fusibles en el suelo=3 objetos=4 puertas=90 valvulas=0 salida=true puertas salida=3 circuitos={exit=false}
+[10:21:09] [Server thread/INFO] (Smile Protocol) SELFTEST zona smileprotocol:lab_storage caja=120x149 marcadores=[fuse, mob_spawn, exit_cabin, entry, item:key:red, exit_door, entry_door] cajas=2 fusibles necesarios=2 fusibles en el suelo=3 objetos=4 puertas=68 valvulas=0 salida=true puertas salida=3 circuitos={exit=false}
+[10:21:10] [Server thread/INFO] (Smile Protocol) SELFTEST zona smileprotocol:start_corridor caja=140x169 marcadores=[fuse, exit_cabin, mob_spawn, entry, exit_door, entry_door] cajas=2 fusibles necesarios=2 fusibles en el suelo=3 objetos=1 puertas=102 valvulas=0 salida=true puertas salida=3 circuitos={exit=false}
+[10:21:10] [Server thread/INFO] (Smile Protocol) SELFTEST OK
