@@ -45,6 +45,7 @@ public final class ClientSelfTest {
     private static int step;
     private static int wait;
     private static final List<Runnable> SHOTS = new ArrayList<>();
+    private static BlockPos LOBBY = BlockPos.ZERO;
 
     private ClientSelfTest() {}
 
@@ -71,6 +72,46 @@ public final class ClientSelfTest {
         MinecraftServer server = mc.getSingleplayerServer();
         switch (step) {
             case 0 -> {
+                // El lobby (README 5.2): se construye en el cielo del mundo de prueba y se mira
+                log("en el mundo, construyendo el lobby");
+                server.execute(() -> {
+                    ServerPlayer sp = server.getPlayerList().getPlayers().get(0);
+                    BlockPos spawn = BlockPos.containing(sp.getX(), 180, sp.getZ());
+                    com.smileprotocol.lobby.LobbyBuilder.build(server.overworld(), spawn);
+                    SPSessionManager.teleport(sp, server.overworld(), Vec3.atBottomCenterOf(spawn), 180f, 0f);
+                    LOBBY = spawn;
+                });
+                wait = 80;
+                step++;
+            }
+            case 1 -> {
+                Screenshot.grab(mc.gameDirectory, "00_lobby.png", mc.getMainRenderTarget(), c -> log("captura 00_lobby"));
+                server.execute(() -> {
+                    ServerPlayer sp = server.getPlayerList().getPlayers().get(0);
+                    var lv = com.smileprotocol.lobby.LobbyData.get(server);
+                    log((lv.inRegion(sp.position()) ? "OK" : "FALLO") + " lobby: el punto de aparicion esta dentro de la region");
+                    // hacia la recepcion y el logotipo
+                    SPSessionManager.teleport(sp, server.overworld(), Vec3.atBottomCenterOf(LOBBY).add(-6, 0, -6), 100f, 5f);
+                });
+                wait = 30;
+                step++;
+            }
+            case 2 -> {
+                Screenshot.grab(mc.gameDirectory, "00_lobby_recepcion.png", mc.getMainRenderTarget(), c -> log("captura 00_lobby_recepcion"));
+                server.execute(() -> {
+                    ServerPlayer sp = server.getPlayerList().getPlayers().get(0);
+                    // los ascensores, desde el centro
+                    SPSessionManager.teleport(sp, server.overworld(), Vec3.atBottomCenterOf(LOBBY).add(0, 0, -30), 180f, -5f);
+                });
+                wait = 30;
+                step++;
+            }
+            case 3 -> {
+                Screenshot.grab(mc.gameDirectory, "00_lobby_ascensores.png", mc.getMainRenderTarget(), c -> log("captura 00_lobby_ascensores"));
+                wait = 10;
+                step++;
+            }
+            case 4 -> {
                 log("en el mundo, bajando a una partida");
                 server.execute(() -> {
                     ServerPlayer sp = server.getPlayerList().getPlayers().get(0);
@@ -80,12 +121,12 @@ public final class ClientSelfTest {
                 wait = 200;
                 step++;
             }
-            case 1 -> {
+            case 5 -> {
                 plan(mc, server);
                 step++;
             }
             default -> {
-                int i = step - 2;
+                int i = step - 6;
                 if (i >= SHOTS.size()) {
                     log("fin");
                     mc.stop();

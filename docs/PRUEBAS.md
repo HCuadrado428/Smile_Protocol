@@ -26,7 +26,7 @@ La configuración está en `config/smileprotocol.json`.
 ## Lobby (fase 5)
 
 1. En el overworld, colócate donde quieras que aparezcan los jugadores.
-2. `/spadmin lobby build`: muestra la zona que se va a ocupar (unos 43 × 12 × 44 bloques).
+2. `/spadmin lobby build`: muestra la zona que se va a ocupar (unos 43 × 12 × 56 bloques).
 3. `/spadmin lobby build confirm`: construye la recepción y registra:
    - la región protegida,
    - el punto de aparición (también el del mundo),
@@ -34,6 +34,7 @@ La configuración está en `config/smileprotocol.json`.
 4. `/spadmin lobby info` lista lo registrado.
 
 **Qué comprobar:**
+- **El sitio.** Entrando desde el sur: los tornos de seguridad y la garita acristalada (monitores de cámaras), la recepción con el logotipo de la empresa en la pared (una cara sonriente con un ojo que gotea rojo), la cafetería con máquinas expendedoras, la sala de espera con televisores, el muro de desaparecidos con velas, los carteles de «PROTOCOLO» en las columnas (cada uno avisa de un smiler sin nombrarlo), la sala de observación con camillas y cortinas, la puerta de urgencias precintada, el carro de limpieza y el cartel de suelo mojado, y un rastro de sangre muy discreto que entra en el ascensor 3. Hay fluorescentes que parpadean y alguno fundido. Si el lobby ya estaba construido, vuelve a hacer `/spadmin lobby build confirm` para verlo nuevo.
 - **Protecciones.** En aventura no se puede romper ni colocar, no hay daño ni hambre, no aparecen mobs y solo se interactúa con los bloques del mod.
 - **Modo libre (por defecto).** El ascensor de servicio (mega) muestra «Cerrado» y los cuatro pequeños «Libre».
 - **Mini ascensor.**

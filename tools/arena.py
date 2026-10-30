@@ -186,6 +186,22 @@ def build():
             if not t.solid(x, 4, z):
                 t.set(x, 4, z, lab("lab_pipes"))
 
+    # Conducto bajo el suelo de oeste a este: los jugadores pueden huir por el; Smiley no cabe
+    duct = lab("lab_vent_duct")
+    path = [(x, 26) for x in range(-15, 16)] + [(15, z) for z in range(25, 17, -1)]
+    cells = set(path)
+    for (x, z) in path:
+        t.set(x, -1, z, "air")
+        t.set(x, -2, z, duct)
+        for dx in (-1, 0, 1):
+            for dz in (-1, 0, 1):
+                n = (x + dx, z + dz)
+                if n not in cells:
+                    t.set(n[0], -1, n[1], duct)
+                    t.set(n[0], -2, n[1], duct)
+    t.set(-15, 0, 26, lab("vent_grille"), facing="east", open=False, sealed=False)
+    t.set(15, 0, 18, lab("vent_grille"), facing="south", open=False, sealed=False)
+
     # Marcadores
     t.marker(0, 1, 12, "sp:arena")
     t.marker(0, 1, 26, "sp:smiley")

@@ -11,7 +11,6 @@ import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.BannerBlock;
-import net.minecraft.world.level.block.BedBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CeilingHangingSignBlock;
@@ -22,26 +21,28 @@ import net.minecraft.world.level.block.WallSignBlock;
 import net.minecraft.world.level.block.entity.SignBlockEntity;
 import net.minecraft.world.level.block.entity.SignText;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.state.properties.BedPart;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 
 /**
- * Construye el lobby automaticamente (README 5.2): una recepcion de laboratorio y hospital
- * con sala de espera, maquinas expendedoras, televisores, tablon de avisos, taquillas,
- * plantas secas, camillas, una silla de ruedas, un cartel de «suelo mojado» y, al fondo,
- * los ascensores: cuatro mini y el mega en el centro. Registra la region protegida, el punto
- * de aparicion y los cinco ascensores.
+ * Construye el lobby automaticamente (README 5.2): la recepcion del laboratorio S.M.I.L.E. y su
+ * hospital. Entrando desde el sur: el control de seguridad con tornos y la garita, la recepcion
+ * con el logotipo de la empresa (una cara sonriente con un ojo que gotea rojo), la cafeteria con
+ * maquinas expendedoras, la sala de espera con televisores, un muro de desaparecidos, tablones con
+ * avisos que hablan de los smilers sin nombrarlos, taquillas, la sala de observacion con camillas
+ * y cortinas, el acceso a urgencias precintado y, al fondo, los ascensores: cuatro mini y el mega
+ * en el centro. Un rastro de sangre muy discreto entra en el ascensor 3. Registra la region
+ * protegida, el punto de aparicion y los cinco ascensores.
  * <p>
  * Orientacion fija: la entrada mira al sur (+Z) y los ascensores estan al norte (-Z).
- * Coordenadas locales: X 0..40, Z 0..34 la sala, Z -7..-1 las cabinas, Y 0 el suelo.
+ * Coordenadas locales: X 0..40, Z 0..46 la sala, Z -7..-1 las cabinas, Y 0 el suelo.
  */
 public final class LobbyBuilder {
 
     public static final int WIDTH = 41;
-    public static final int DEPTH = 35;
+    public static final int DEPTH = 47;
     /** Punto de aparicion en coordenadas locales. */
-    private static final int SPAWN_X = 20, SPAWN_Z = 29;
+    private static final int SPAWN_X = 20, SPAWN_Z = 43;
 
     private static final int FLAGS = Block.UPDATE_CLIENTS | Block.UPDATE_KNOWN_SHAPE;
 
@@ -89,6 +90,9 @@ public final class LobbyBuilder {
         b.waitingArea();
         b.westWall();
         b.eastWall();
+        b.observation();
+        b.cafeteria();
+        b.security();
         b.details();
         return b.register(spawn);
     }
@@ -189,9 +193,10 @@ public final class LobbyBuilder {
         fill(0, 8, 0, WIDTH - 1, 8, DEPTH - 1, ModBlocks.building("lab_ceiling"));
         BlockState light = ModBlocks.FLUORESCENT_LIGHT.get().defaultBlockState();
         for (int x = 5; x <= 35; x += 5) {
-            for (int z = 4; z <= 28; z += 6) {
-                boolean flicker = (x == 30 && z == 22) || (x == 10 && z == 10) || (x == 25 && z == 4);
-                set(x, 8, z, light.setValue(FluorescentLightBlock.FLICKERS, flicker));
+            for (int z = 4; z <= DEPTH - 3; z += 6) {
+                boolean flicker = (x == 30 && z == 22) || (x == 10 && z == 10) || (x == 25 && z == 4) || (x == 35 && z == 40);
+                boolean dead = (x == 15 && z == 16) || (x == 35 && z == 10);
+                set(x, 8, z, light.setValue(FluorescentLightBlock.FLICKERS, flicker).setValue(FluorescentLightBlock.LIT, !dead));
             }
         }
     }
@@ -250,27 +255,50 @@ public final class LobbyBuilder {
     }
 
     private void reception() {
+        // Mostrador curvo delante del logotipo de la pared oeste (x 0, z 30..38)
         BlockState counter = Blocks.POLISHED_DIORITE.defaultBlockState();
-        fill(6, 1, 22, 14, 1, 22, counter);
-        fill(6, 1, 23, 6, 1, 24, counter);
-        fill(14, 1, 23, 14, 1, 24, counter);
-        // Encima del mostrador: ordenadores, teclado, papeles y una planta seca
+        fill(7, 1, 30, 7, 1, 38, counter);
+        fill(3, 1, 29, 7, 1, 29, counter);
+        fill(3, 1, 39, 6, 1, 39, counter);
         BlockState monitor = Blocks.BLACK_STAINED_GLASS_PANE.defaultBlockState()
-                .setValue(IronBarsBlock.EAST, true).setValue(IronBarsBlock.WEST, true);
-        set(8, 2, 22, monitor);
-        set(9, 2, 22, Blocks.GRAY_CARPET);
-        set(11, 2, 22, Blocks.WHITE_CARPET);
-        set(12, 2, 22, monitor);
-        set(13, 2, 22, Blocks.POTTED_DEAD_BUSH);
-        // Sillas del personal y archivadores
-        set(9, 1, 24, stairs(Blocks.DARK_OAK_STAIRS, Direction.SOUTH));
-        set(12, 1, 24, stairs(Blocks.DARK_OAK_STAIRS, Direction.SOUTH));
-        set(7, 1, 26, ModBlocks.building("lab_crate"));
-        set(13, 1, 26, ModBlocks.building("lab_crate"));
-        set(10, 1, 26, Blocks.BOOKSHELF);
-        hangingSign(10, 7, 22, 0, "RECEPCIÓN", "Información", "y admisión", "");
-        // Cartel pegado al frente del mostrador
-        wallSign(10, 1, 21, Direction.NORTH, "Por favor,", "espere su", "turno", "Gracias :)");
+                .setValue(IronBarsBlock.NORTH, true).setValue(IronBarsBlock.SOUTH, true);
+        set(7, 2, 31, monitor);
+        set(7, 2, 32, Blocks.GRAY_CARPET);
+        set(7, 2, 34, Blocks.WHITE_CARPET);
+        set(7, 2, 36, monitor);
+        set(7, 2, 37, Blocks.POTTED_DEAD_BUSH);
+        set(7, 2, 33, Blocks.BELL.defaultBlockState()
+                .setValue(net.minecraft.world.level.block.BellBlock.ATTACHMENT, net.minecraft.world.level.block.state.properties.BellAttachType.FLOOR)
+                .setValue(net.minecraft.world.level.block.BellBlock.FACING, Direction.EAST));
+        // Sillas del personal (vacias) y archivadores
+        set(5, 1, 31, stairs(Blocks.DARK_OAK_STAIRS, Direction.EAST));
+        set(5, 1, 36, stairs(Blocks.DARK_OAK_STAIRS, Direction.EAST).setValue(StairBlock.FACING, Direction.NORTH));
+        set(2, 1, 33, ModBlocks.building("lab_crate"));
+        set(2, 2, 33, ModBlocks.building("lab_crate"));
+        set(2, 1, 35, Blocks.BOOKSHELF);
+        hangingSign(5, 7, 34, 4, "RECEPCIÓN", "Información", "y admisión", "");
+        wallSign(8, 1, 34, Direction.EAST, "Por favor,", "espere su", "turno", "Gracias :)");
+        // Logotipo de la empresa, metido en la pared: la cara sonriente, un ojo que gotea rojo
+        String[] logo = {
+                "..YYYYY..",
+                ".YYYYYYY.",
+                "YYKYYYRYY",
+                "YYYYYYRYY",
+                "YKYYYYYKY",
+                ".YKKKKKY.",
+                "..YYYYY..",
+        };
+        for (int row = 0; row < logo.length; row++) {
+            int y = 7 - row;
+            for (int k = 0; k < 9; k++) {
+                char c = logo[row].charAt(k);
+                if (c == '.') continue;
+                Block b = c == 'Y' ? Blocks.YELLOW_CONCRETE : c == 'K' ? Blocks.BLACK_CONCRETE : Blocks.RED_CONCRETE;
+                set(0, y, 38 - k, b);
+            }
+        }
+        wallSign(1, 1, 40, Direction.EAST, "S.M.I.L.E.", "Servicio Médico", "de Investigación", "y Lab. Exp.");
+        set(1, 1, 28, Blocks.POTTED_DEAD_BUSH);
     }
 
     private void waitingArea() {
@@ -304,19 +332,19 @@ public final class LobbyBuilder {
         wallSign(2, 4, 15, Direction.EAST, "AVISO", "Prohibido el", "paso al personal", "no autorizado");
         wallSign(2, 4, 17, Direction.EAST, "Horario de", "visitas", "10:00 - 20:00", "(suspendido)");
         wallSign(2, 4, 19, Direction.EAST, "PROTOCOLO", "S.M.I.L.E.", "Mantenga la", "calma. Sonría.");
-        // Maquinas expendedoras
-        Block[][] machines = {
-                {ModBlocks.building("lab_metal_wall"), Blocks.LIGHT_BLUE_STAINED_GLASS},
-                {Blocks.RED_CONCRETE, Blocks.WHITE_STAINED_GLASS},
-                {ModBlocks.building("lab_metal_wall"), Blocks.LIME_STAINED_GLASS},
-        };
-        for (int i = 0; i < machines.length; i++) {
-            int z = 25 + i * 2;
-            set(1, 1, z, machines[i][0]);
-            set(1, 2, z, machines[i][1]);
-            set(1, 3, z, ModBlocks.building("lab_metal_wall"));
+        // Muro de desaparecidos: fotos (marcos negros) y nombres
+        for (int z = 21; z <= 27; z += 2) {
+            set(1, 4, z, Blocks.BLACK_CONCRETE);
+            set(1, 5, z, Blocks.GRAY_CONCRETE);
         }
-        set(2, 1, 31, Blocks.CAULDRON); // papelera
+        wallSign(2, 3, 21, Direction.EAST, "DESAPARECIDO", "Dr. A. Ferrer", "Planta -3", "Morgue");
+        wallSign(2, 3, 23, Direction.EAST, "DESAPARECIDA", "Enf. L. Prieto", "Planta -2", "Oficinas");
+        wallSign(2, 3, 25, Direction.EAST, "DESAPARECIDO", "Téc. J. Ibáñez", "Planta -4", "Energía");
+        wallSign(2, 3, 27, Direction.EAST, "DESAPARECIDA", "Niña sin", "identificar", "¿La ha visto?");
+        hangingSign(4, 7, 24, 4, "¿LOS HA", "VISTO?", "Llame a", "seguridad");
+        set(2, 1, 22, Blocks.POTTED_WITHER_ROSE);
+        set(2, 1, 26, Blocks.CANDLE.defaultBlockState()
+                .setValue(net.minecraft.world.level.block.CandleBlock.CANDLES, 3));
     }
 
     private void eastWall() {
@@ -326,21 +354,137 @@ public final class LobbyBuilder {
         fill(x, 3, 25, x, 4, 27, Blocks.BLACK_CONCRETE);
         set(x, 3, 26, Blocks.LIGHT_GRAY_STAINED_GLASS);
         set(x, 4, 26, Blocks.WHITE_STAINED_GLASS);
-        // Camillas aparcadas
-        for (int z : new int[]{6, 9}) {
-            set(38, 1, z, Blocks.WHITE_BED.defaultBlockState().setValue(BedBlock.FACING, Direction.NORTH).setValue(BedBlock.PART, BedPart.HEAD));
-            set(38, 1, z + 1, Blocks.WHITE_BED.defaultBlockState().setValue(BedBlock.FACING, Direction.NORTH).setValue(BedBlock.PART, BedPart.FOOT));
+        wallSign(x, 2, 24, Direction.WEST, "NOTICIAS", "«Cierran el", "laboratorio", "por un brote»");
+    }
+
+    /** Sala de observacion: camillas con cortinas, goteros, y la puerta de urgencias precintada. */
+    private void observation() {
+        BlockState gurney = ModBlocks.GURNEY.get().defaultBlockState().setValue(com.smileprotocol.block.HideBlock.FACING, Direction.EAST);
+        BlockState curtain = ModBlocks.CURTAIN.get().defaultBlockState().setValue(com.smileprotocol.block.HideBlock.FACING, Direction.NORTH);
+        for (int z : new int[]{5, 9, 13}) {
+            set(36, 1, z, gurney.setValue(com.smileprotocol.block.HideBlock.HALF, DoubleBlockHalf.LOWER));
+            set(37, 1, z, gurney.setValue(com.smileprotocol.block.HideBlock.HALF, DoubleBlockHalf.UPPER));
+            // gotero
+            set(35, 1, z - 1, Blocks.IRON_BARS);
+            set(35, 2, z - 1, Blocks.IRON_BARS);
+            set(35, 3, z - 1, Blocks.LANTERN.defaultBlockState()
+                    .setValue(net.minecraft.world.level.block.LanternBlock.HANGING, false));
+            if (z < 13) {
+                for (int x = 34; x <= 38; x++) {
+                    set(x, 1, z + 2, curtain.setValue(com.smileprotocol.block.HideBlock.HALF, DoubleBlockHalf.LOWER));
+                    set(x, 2, z + 2, curtain.setValue(com.smileprotocol.block.HideBlock.HALF, DoubleBlockHalf.UPPER));
+                }
+            }
         }
         // Silla de ruedas
-        set(37, 1, 13, stairs(Blocks.SMOOTH_QUARTZ_STAIRS, Direction.EAST));
-        set(38, 1, 13, Blocks.IRON_BARS.defaultBlockState());
+        set(31, 1, 14, stairs(Blocks.SMOOTH_QUARTZ_STAIRS, Direction.EAST));
+        set(32, 1, 14, Blocks.IRON_BARS.defaultBlockState());
+        hangingSign(34, 7, 9, 12, "OBSERVACIÓN", "", "Silencio,", "por favor");
+        // Urgencias: puerta de seguridad cerrada en la pared este, precintada
+        BlockState door = ModBlocks.SECURITY_DOOR.get().defaultBlockState()
+                .setValue(net.minecraft.world.level.block.DoorBlock.FACING, Direction.WEST);
+        set(WIDTH - 1, 1, 17, door.setValue(net.minecraft.world.level.block.DoorBlock.HALF, DoubleBlockHalf.LOWER));
+        set(WIDTH - 1, 2, 17, door.setValue(net.minecraft.world.level.block.DoorBlock.HALF, DoubleBlockHalf.UPPER));
+        fill(WIDTH - 2, 1, 16, WIDTH - 2, 1, 18, ModBlocks.building("lab_hazard"));
+        set(WIDTH - 2, 2, 16, Blocks.IRON_BARS);
+        set(WIDTH - 2, 2, 18, Blocks.IRON_BARS);
+        wallSign(WIDTH - 2, 3, 17, Direction.WEST, "URGENCIAS", "CERRADO POR", "PROTOCOLO", "S.M.I.L.E.");
+    }
+
+    /** Cafeteria: mesas con sillas, maquinas expendedoras, cafetera y papeleras. */
+    private void cafeteria() {
+        BlockState top = Blocks.SPRUCE_SLAB.defaultBlockState()
+                .setValue(net.minecraft.world.level.block.SlabBlock.TYPE, net.minecraft.world.level.block.state.properties.SlabType.TOP);
+        for (int x = 29; x <= 35; x += 3) {
+            for (int z = 33; z <= 37; z += 4) {
+                set(x, 1, z, top);
+                set(x, 1, z - 1, stairs(Blocks.SPRUCE_STAIRS, Direction.SOUTH));
+                set(x, 1, z + 1, stairs(Blocks.SPRUCE_STAIRS, Direction.NORTH));
+            }
+        }
+        set(32, 2, 33, Blocks.FLOWER_POT);
+        set(29, 2, 37, Blocks.WHITE_CARPET);
+        Block[][] machines = {
+                {ModBlocks.building("lab_metal_wall"), Blocks.LIGHT_BLUE_STAINED_GLASS},
+                {Blocks.RED_CONCRETE, Blocks.WHITE_STAINED_GLASS},
+                {ModBlocks.building("lab_metal_wall"), Blocks.LIME_STAINED_GLASS},
+        };
+        for (int i = 0; i < machines.length; i++) {
+            int z = 31 + i * 2;
+            set(WIDTH - 2, 1, z, machines[i][0]);
+            set(WIDTH - 2, 2, z, machines[i][1]);
+            set(WIDTH - 2, 3, z, ModBlocks.building("lab_metal_wall"));
+        }
+        set(WIDTH - 2, 1, 37, Blocks.SMOKER.defaultBlockState()
+                .setValue(net.minecraft.world.level.block.SmokerBlock.FACING, Direction.WEST));     // cafetera
+        set(WIDTH - 2, 1, 38, Blocks.CAULDRON);
+        hangingSign(33, 7, 35, 0, "CAFETERÍA", "", "Hoy: nada", "");
+    }
+
+    /** Control de seguridad: tornos delante de la entrada y la garita acristalada con sus monitores. */
+    private void security() {
+        int z = DEPTH - 6;
+        for (int x = 13; x <= 27; x++) {
+            if (x % 2 == 1) set(x, 1, z, Blocks.IRON_BARS);
+        }
+        set(12, 1, z, ModBlocks.building("lab_metal_wall"));
+        set(28, 1, z, ModBlocks.building("lab_metal_wall"));
+        // garita: x 32..39, z DEPTH-8 .. DEPTH-2
+        int z0 = DEPTH - 8, z1 = DEPTH - 2;
+        for (int y = 1; y <= 4; y++) {
+            for (int x = 32; x <= 39; x++) {
+                set(x, y, z0, y == 1 || y == 4 ? ModBlocks.building("lab_metal_wall").defaultBlockState()
+                        : Blocks.WHITE_STAINED_GLASS.defaultBlockState());
+            }
+            for (int zz = z0; zz <= z1; zz++) {
+                if (zz == z1 - 2 && y <= 2) continue;                        // puerta
+                set(32, y, zz, y == 1 || y == 4 ? ModBlocks.building("lab_metal_wall").defaultBlockState()
+                        : Blocks.WHITE_STAINED_GLASS.defaultBlockState());
+            }
+        }
+        fill(33, 4, z0 + 1, 39, 4, z1, ModBlocks.building("lab_ceiling"));
+        // monitores de las camaras: uno muestra el ascensor 3, otro esta en negro
+        fill(39, 2, z0 + 1, 39, 3, z0 + 3, Blocks.BLACK_CONCRETE);
+        set(39, 2, z0 + 1, Blocks.LIME_STAINED_GLASS);
+        set(39, 3, z0 + 2, Blocks.GREEN_STAINED_GLASS);
+        set(39, 2, z0 + 3, Blocks.LIME_STAINED_GLASS);
+        fill(38, 1, z0 + 1, 38, 1, z0 + 3, ModBlocks.building("lab_metal_wall"));
+        set(37, 1, z0 + 2, stairs(Blocks.DARK_OAK_STAIRS, Direction.EAST));
+        wallSign(31, 3, z0 + 3, Direction.WEST, "SEGURIDAD", "", "Muestre su", "tarjeta");
+        set(36, 2, z1, Blocks.POTTED_DEAD_BUSH);
     }
 
     private void details() {
-        // Cartel de «suelo mojado»
+        // Cartel de «suelo mojado» y el carro de limpieza abandonado
         set(SPAWN_X + 1, 1, 15, Blocks.YELLOW_BANNER.defaultBlockState().setValue(BannerBlock.ROTATION, 2));
-        // Papelera junto a la recepcion
+        set(SPAWN_X + 3, 1, 16, Blocks.CAULDRON);
+        set(SPAWN_X + 4, 1, 16, Blocks.IRON_TRAPDOOR.defaultBlockState().setValue(TrapDoorBlock.FACING, Direction.EAST)
+                .setValue(TrapDoorBlock.OPEN, false));
+        // Columnas con carteles
+        for (int x : new int[]{14, 26}) {
+            for (int z : new int[]{12, 28}) {
+                fill(x, 1, z, x, 7, z, ModBlocks.building("lab_wall_tiles_white"));
+                set(x, 3, z, ModBlocks.building("lab_wall_tiles_teal"));
+            }
+        }
+        wallSign(14, 4, 13, Direction.SOUTH, "PROTOCOLO", "Si algo le mira", "sin ojos, NO", "aparte la vista");
+        wallSign(26, 4, 13, Direction.SOUTH, "PROTOCOLO", "Lleve linterna.", "En la oscuridad", "no está solo");
+        wallSign(14, 4, 29, Direction.SOUTH, "PROTOCOLO", "No pase bajo", "los juguetes", "colgados");
+        wallSign(26, 4, 29, Direction.SOUTH, "PROTOCOLO", "Si oye correr,", "escóndase y", "no respire");
+        // Papeleras y algun papel por el suelo
         set(16, 1, 23, Blocks.CAULDRON);
+        set(23, 1, 37, Blocks.WHITE_CARPET);
+        set(11, 1, 18, Blocks.WHITE_CARPET);
+        // Rastro de sangre muy discreto que entra en el ascensor 3
+        BlockState blood = ModBlocks.BLOOD_FLOOR.get().defaultBlockState();
+        int[][] trail = {{25, 9}, {26, 7}, {26, 5}, {27, 3}, {27, 2}};
+        for (int i = 0; i < trail.length; i++) {
+            set(trail[i][0], 1, trail[i][1], blood.setValue(com.smileprotocol.block.DecalBlock.VARIANT, i % 6));
+        }
+        // Bancos frente a los ascensores
+        for (int x : new int[]{8, 30}) {
+            fill(x, 1, 5, x + 2, 1, 5, stairs(Blocks.DARK_OAK_STAIRS, Direction.SOUTH));
+        }
     }
 
     private Component register(BlockPos spawn) {
