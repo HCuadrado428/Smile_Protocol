@@ -1041,6 +1041,9 @@ def animations():
     return A
 
 
+HAND_Y = -90
+
+
 def rastreador_animations():
     """Patrulla de pie y encorvado, persigue a cuatro patas, busca alzando la mano del ojo, jadea
     al cansarse, agarra (QTE) y remata arrancando la cabeza (execute_smiler, mismos tiempos)."""
@@ -1093,15 +1096,20 @@ def rastreador_animations():
         "shin_r": {"rotation": kf(wave(L, [50, 0, 0], 28, math.pi - 1))}, "shin_l": {"rotation": kf(wave(L, [50, 0, 0], 28, math.pi - 0.4))},
         "hips": {"position": kf(wave(L, [0, -5, 0], 1.2, 0, 8, 1))},
     }))
-    # SEARCH: de pie, alza la mano del ojo y barre la sala con la palma por delante
+    # SEARCH: encogido, con el codo doblado y la mano junto a la cara, la palma (el ojo) hacia
+    # delante como un farol; gira el torso a un lado y a otro. La otra mano, recogida en el pecho
     L = 3.0
     A["search"] = loop_anim(L, base({
-        "torso": {"rotation": kf(wave(L, [12, 0, 0], 2))},
-        "arm_r": {"rotation": kf([(0, [-100, -40, 0]), (1.5, [-100, 40, 0]), (L, [-100, -40, 0])])},
-        "forearm_r": {"rotation": kf([(0, [-10, 0, 0])])},
-        "hand_r": {"rotation": kf([(0, [0, -90, 0])])},
-        "head": {"rotation": kf([(0, [-6, -20, 0]), (1.5, [-6, 20, 0]), (L, [-6, -20, 0])])},
-        **{f"finger{i}_r": {"rotation": kf([(0, [-20, 0, 0])])} for i in range(3)},
+        "torso": {"rotation": kf([(0, [26, -28, 0]), (1.5, [26, 28, 0]), (L, [26, -28, 0])])},
+        "neck": {"rotation": kf([(0, [-24, 0, 0])])},
+        "head": {"rotation": kf([(0, [-6, -10, 0]), (1.5, [-6, 10, 0]), (L, [-6, -10, 0])])},
+        "arm_r": {"rotation": kf([(0, [-55, 0, -14])])},
+        "forearm_r": {"rotation": kf([(0, [-105, 0, 0])])},
+        "hand_r": {"rotation": kf(wave(L, [10, HAND_Y, 0], 6, 0, 8))},
+        "arm_l": {"rotation": kf([(0, [-30, 0, 18])])},
+        "forearm_l": {"rotation": kf([(0, [-95, 0, 0])])},
+        **{f"finger{i}_r": {"rotation": kf([(0, [-25, 0, 0])])} for i in range(3)},
+        **{f"finger{i}_l": {"rotation": kf([(0, [60, 0, 0])])} for i in range(3)},
     }))
     # TIRED: se para jadeando con las manos en las rodillas
     L = 0.8
