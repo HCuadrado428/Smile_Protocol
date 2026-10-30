@@ -187,6 +187,23 @@ Cada planta tiene su misión: una lista de objetivos que se muestran de uno en u
    - Criogenización: tarjeta 3 → sala de criogenización → corriente a las cápsulas (se despierta un Berserker) → aguantar 25 s → ascensor.
 4. **Fichas:** `data/smileprotocol/missions/<planta>.json`. Tipos de objetivo: `FIND_ITEM`, `OPEN_DOOR` (o `forced` para las atascadas), `INSERT_FUSES`, `TURN_VALVES`, `POWER`, `REACH` (marcador), `SURVIVE` (segundos) y `ESCAPE`. Eventos al cumplirlos (`on_complete`): `message`, `sound`, `spawn_mob`, `lights_off`, `lights_on` y `power`. Una planta sin fichero usa «fusibles del ascensor → ascensor».
 
+## Eventos de laboratorio y sustos (fase 15)
+
+Lo que hacéis en el laboratorio puede provocar eventos: unos solo asustan y otros son peligro de verdad (hacen ruido o traen un mob). Están en `data/smileprotocol/lab_events/*.json` y se pueden editar sin recompilar. Cada jugador recibe como mucho un susto cada 20 s (`jumpscare_cooldown`).
+
+1. **Primer fusible de la planta:** las luces parpadean con un zumbido de sobretensión.
+2. **Mover un fusible de una caja a otra:** parpadeo, sobretensión y la **cara de Smiley** a pantalla completa con un golpe de sonido (solo quien lo movió).
+3. **Poner un fusible** (25 %, como mucho cada minuto): apagón de 6 s y ruido que atrae mobs.
+4. **Recoger una tarjeta:** salta la **alarma** 5 s, las luces parpadean, mucho ruido y un mensaje por radio.
+5. **Esconderse** (20 %): golpes en la pared al rato y la cámara tiembla.
+6. **Forzar una puerta atascada:** chirrido y ruido fuerte.
+7. **Encender la linterna** (12 %): un smiler se asoma a lo lejos un segundo y desaparece en humo. No ataca.
+8. **Al azar** de vez en cuando: una puerta abierta cercana se cierra de golpe y se apagan algunas luces, o se oye un grito lejano. También un grito al poco de llegar a cada planta.
+9. **Caer derribado:** mensaje por radio para todo el grupo. **Cumplir un objetivo** (30 %): destello y parpadeo.
+10. **Invernadero, al abrir las válvulas de niebla:** apagón, la cara y aparece un Berserker.
+
+Disparadores: `fuse_inserted`, `fuse_removed`, `fuse_moved`, `circuit_powered`, `circuit_unpowered`, `door_opened`, `door_closed`, `door_forced`, `valve_turned`, `valve_group_complete`, `item_picked`, `item_dropped`, `hide_enter`, `hide_exit`, `zone_entered`, `flashlight_on`, `player_downed`, `player_revived`, `mission_objective_completed` y `timer` (cada segundo; la ficha pone la probabilidad). Condiciones: `once`, `cooldown` (ticks), `chance`, `min_players`, `zone`; `arg` admite `*` al final. Alcance: `trigger_player`, `players_in_zone` o `all`. Acciones: `jumpscare` (`visual`, `audio`, `flash`, `peek`, `environment`), `light_flicker`, `blackout`, `lights_off`/`lights_on`, `alarm`, `sound`, `lock_door`/`unlock_door`, `door_slam`, `set_circuit`, `noise_burst`, `spawn_mob`, `message`, `radio_message`, `camera_effect` y `ambient_damage`.
+
 ## Depuración
 
 - `/spadmin debug on`: muestra el panel de estado (sesión, mods, lobby y ascensores). Solo lo ven los operadores.

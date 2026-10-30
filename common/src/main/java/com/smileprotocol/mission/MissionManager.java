@@ -274,6 +274,8 @@ public final class MissionManager {
                 default -> { }
             }
         }
+        if (!players.isEmpty()) com.smileprotocol.mechanism.LabEvents.fire(level, players.get(0).blockPosition(), players.get(0),
+                "mission_objective_completed", s.def.id() + ":" + s.step);
         SPDebug.log(g.label() + ": objetivo cumplido " + st.type() + (st.arg().isEmpty() ? "" : " " + st.arg())
                 + (last ? " (mision completa)" : ""));
     }

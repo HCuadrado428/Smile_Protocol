@@ -1,0 +1,19 @@
+{
+  "id": "ambient_scream",
+  "trigger": {
+    "type": "timer"
+  },
+  "conditions": {
+    "cooldown": 2400,
+    "chance": 0.04
+  },
+  "scope": "players_in_zone",
+  "actions": [
+    {
+      "type": "sound",
+      "id": "smileprotocol:event.scream",
+      "ambient": true,
+      "volume": 0.5
+    }
+  ]
+}

@@ -268,6 +268,84 @@ def squelch(seed):
     return np.tanh((burble * 1.6 + splash) * 1.4)
 
 
+def surge():
+    """Sobretension: zumbido electrico que sube, chisporroteo y un golpe seco al final."""
+    r = np.random.default_rng(131)
+    n = int(SR * 1.6)
+    tt = np.arange(n) / SR
+    f = 50 + 40 * tt
+    hum = np.sign(np.sin(2 * np.pi * np.cumsum(f) / SR)) * 0.35 + np.sin(2 * np.pi * 2 * np.cumsum(f) / SR) * 0.3
+    hum *= np.clip(tt / 1.2, 0, 1) ** 2 * (tt < 1.35)
+    crackle = np.zeros(n)
+    for _ in range(60):
+        k = int(r.uniform(0.2, 1.35) * SR)
+        m = int(SR * r.uniform(0.002, 0.008))
+        crackle[k:k + m] += highpass(noise(m, r), 3000) * r.uniform(0.2, 0.9)
+    pop = np.zeros(n)
+    k = int(1.35 * SR)
+    m = n - k
+    pop[k:] = lowpass(noise(m, r), 1500) * env(m, 0.001, 0.12) * 1.4
+    return np.tanh((hum + crackle + pop) * 1.4)
+
+
+def alarm():
+    """Alarma del laboratorio: dos tonos estridentes que se alternan, con eco."""
+    n = int(SR * 2.4)
+    tt = np.arange(n) / SR
+    tone = np.where((tt * 2.5) % 1 < 0.5, 880, 660)
+    ph = 2 * np.pi * np.cumsum(tone) / SR
+    x = np.sign(np.sin(ph)) * 0.5 + np.sin(2 * ph) * 0.2
+    x = bandpass(x, 1200, 1.5)
+    d = int(SR * 0.18)
+    x[d:] += x[:-d] * 0.35
+    return x * np.clip(tt / 0.05, 0, 1) * np.clip((2.4 - tt) / 0.2, 0, 1)
+
+
+def sting(seed):
+    """Golpe de susto: cluster disonante de cuerdas con un impacto grave."""
+    r = np.random.default_rng(seed)
+    n = int(SR * 1.8)
+    tt = np.arange(n) / SR
+    x = np.zeros(n)
+    for f in (233, 247, 262, 349, 370, 523, 554):
+        f2 = f * (1 + 0.004 * r.standard_normal())
+        saw = 2 * ((f2 * tt) % 1) - 1
+        x += saw * (0.6 + 0.4 * np.sin(2 * np.pi * r.uniform(5, 8) * tt))
+    x = bandpass(x, 1800, 0.7) * env(n, 0.004, 0.9) * 0.6
+    boom = np.sin(2 * np.pi * (55 * np.exp(-tt * 4) + 30) * tt) * env(n, 0.002, 0.5) * 1.3
+    scrape = bandpass(noise(n, r), 3000, 2) * env(n, 0.01, 0.4) * 0.4
+    return np.tanh((x + boom + scrape) * 1.6)
+
+
+def knock():
+    """Tres golpes secos al otro lado de la pared, el ultimo mas fuerte."""
+    r = np.random.default_rng(141)
+    n = int(SR * 1.5)
+    x = np.zeros(n)
+    for t0, g in ((0.0, 0.7), (0.32, 0.8), (0.75, 1.1)):
+        k = int(t0 * SR)
+        m = int(SR * 0.25)
+        tm = np.arange(m) / SR
+        x[k:k + m] += (np.sin(2 * np.pi * 90 * tm) * env(m, 0.001, 0.07) + lowpass(noise(m, r), 900) * env(m, 0.0005, 0.02)) * g
+    return lowpass(x, 1500)
+
+
+def scream():
+    """Grito lejano y filtrado por las paredes, que se quiebra."""
+    r = np.random.default_rng(151)
+    n = int(SR * 2.2)
+    tt = np.arange(n) / SR
+    f = 520 + 180 * np.sin(np.clip(tt / 1.6, 0, 1) * np.pi) + 25 * np.sin(2 * np.pi * 7 * tt) - 200 * np.clip((tt - 1.5) / 0.5, 0, 1)
+    ph = 2 * np.pi * np.cumsum(f) / SR
+    voice = np.sign(np.sin(ph)) * 0.4 + bandpass(noise(n, r), 1200, 1.5) * 0.3
+    voice = bandpass(voice, 900, 2) + bandpass(voice, 2400, 3) * 0.5
+    e = np.clip(tt / 0.2, 0, 1) * np.clip((2.2 - tt) / 0.6, 0, 1)
+    x = lowpass(voice * e, 1600)
+    d = int(SR * 0.23)
+    x[d:] += x[:-d] * 0.4
+    return x
+
+
 def revive():
     """Reanimar: jadeo profundo al recuperar el aire."""
     r = np.random.default_rng(81)
@@ -300,6 +378,12 @@ def main():
         save(f"mob/tear{i + 1}", tear(110 + i))
         save(f"mob/squelch{i + 1}", squelch(120 + i))
     save("player/revive", revive())
+    save("event/surge", surge())
+    save("event/alarm", alarm())
+    for i in range(2):
+        save(f"event/sting{i + 1}", sting(160 + i))
+    save("event/knock", knock())
+    save("event/scream", scream())
     print("sonidos escritos en", OUT)
 
 

@@ -1,0 +1,30 @@
+{
+  "id": "keycard_alarm",
+  "trigger": {
+    "type": "item_picked",
+    "arg": "smileprotocol:keycard_*"
+  },
+  "conditions": {
+    "once": true
+  },
+  "delay_ticks": 10,
+  "scope": "players_in_zone",
+  "actions": [
+    {
+      "type": "alarm",
+      "ticks": 100
+    },
+    {
+      "type": "light_flicker",
+      "ticks": 100
+    },
+    {
+      "type": "noise_burst",
+      "radius": 20
+    },
+    {
+      "type": "radio_message",
+      "text": "smileprotocol.event.radio.keycard"
+    }
+  ]
+}

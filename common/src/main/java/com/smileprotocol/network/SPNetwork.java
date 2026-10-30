@@ -50,6 +50,7 @@ public final class SPNetwork {
             new Def<>(Payloads.StartQTE.TYPE, Payloads.StartQTE.CODEC, true, null),
             new Def<>(Payloads.SyncRevive.TYPE, Payloads.SyncRevive.CODEC, true, null),
             new Def<>(Payloads.SyncMission.TYPE, Payloads.SyncMission.CODEC, true, null),
+            new Def<>(Payloads.PlayJumpscare.TYPE, Payloads.PlayJumpscare.CODEC, true, null),
             new Def<>(Payloads.UseItem.TYPE, Payloads.UseItem.CODEC, false, com.smileprotocol.item.UseManager::onInput),
             new Def<>(Payloads.StartSequence.TYPE, Payloads.StartSequence.CODEC, true, null),
             new Def<>(Payloads.QTEState.TYPE, Payloads.QTEState.CODEC, true, null),

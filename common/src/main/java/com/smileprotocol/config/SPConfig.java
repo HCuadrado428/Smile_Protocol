@@ -124,6 +124,10 @@ public final class SPConfig {
         /** Espera entre lanzamientos (ticks). */
         public int throw_cooldown = 15;
 
+        // Eventos de laboratorio (README 14.7)
+        /** Segundos minimos entre dos sustos para el mismo jugador. */
+        public int jumpscare_cooldown = 20;
+
         // Mobs (README 20)
         /** Berserkers por planta segun la dificultad de la zona (0, 1, 2, 3, 4...), antes de escalar por el grupo. */
         public java.util.List<Integer> berserkers_by_difficulty = new java.util.ArrayList<>(java.util.List.of(1, 2, 2, 3, 3));

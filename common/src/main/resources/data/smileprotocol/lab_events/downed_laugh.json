@@ -1,0 +1,17 @@
+{
+  "id": "downed_laugh",
+  "trigger": {
+    "type": "player_downed"
+  },
+  "conditions": {
+    "cooldown": 600
+  },
+  "delay_ticks": 40,
+  "scope": "all",
+  "actions": [
+    {
+      "type": "radio_message",
+      "text": "smileprotocol.event.radio.downed"
+    }
+  ]
+}

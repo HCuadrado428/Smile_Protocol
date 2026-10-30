@@ -55,6 +55,7 @@ public final class HudOverlay {
     private static final ResourceLocation BAR_LIGHT_EMPTY = sprite("bar_light_empty");
     private static final ResourceLocation TAPE = sprite("tape");
     private static final ResourceLocation NOTE = sprite("note");
+    private static final ResourceLocation SCARE_FACE = sprite("scare_face");
     private static final ResourceLocation[] SPLATTER = {sprite("splatter0"), sprite("splatter1"), sprite("splatter2"), sprite("splatter3")};
 
     /** Fuentes: maquina de escribir para todo y garabato para los numeros grandes. */
@@ -128,6 +129,7 @@ public final class HudOverlay {
             renderDebug(g, font);
         }
 
+        if (inGame) renderScare(g, w, h, partialTick);
         float fade = ClientState.fadeAlpha(partialTick);
         if (fade > 0f) g.fill(0, 0, w, h, Mth.clamp((int) (fade * 255), 0, 255) << 24);
     }
@@ -449,6 +451,22 @@ public final class HudOverlay {
         g.drawString(font, head, x + 10, y + 7, 0xFF7A2018, false);
         java.util.List<net.minecraft.util.FormattedCharSequence> lines = font.split(text, tw);
         if (!lines.isEmpty()) g.drawString(font, lines.get(0), x + 10, y + 19, INK, false);
+    }
+
+    /** Sustos (README 14.7): la cara a pantalla completa y los destellos. */
+    private static void renderScare(GuiGraphics g, int w, int h, float pt) {
+        float flash = ClientScare.flash(pt);
+        float face = ClientScare.face(pt);
+        if (face > 0f) {
+            float t = ClientScare.time(pt);
+            int size = (int) (Math.max(w, h) * ClientScare.faceScale(pt));
+            int jx = (int) (Mth.sin(t * 7.3f) * 6), jy = (int) (Mth.cos(t * 6.1f) * 5);
+            g.fill(0, 0, w, h, ((int) (face * 230) << 24));
+            RenderSystem.setShaderColor(1f, 1f, 1f, face);
+            g.blitSprite(SCARE_FACE, w / 2 - size / 2 + jx, h / 2 - size / 2 + jy, size, size);
+            RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
+        }
+        if (flash > 0f) g.fill(0, 0, w, h, ((int) (flash * 200) << 24) | 0xE8D8D0);
     }
 
     /** Muerto: rotulo y a quien se esta mirando (README 9.3). */

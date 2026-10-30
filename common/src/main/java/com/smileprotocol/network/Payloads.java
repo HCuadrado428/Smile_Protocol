@@ -334,6 +334,17 @@ public final class Payloads {
         @Override public Type<SyncMission> type() { return TYPE; }
     }
 
+    /** S -> C: susto local (README 14.7): cara, destello, sacudida o golpe de sonido. */
+    public record PlayJumpscare(int kind, float strength) implements CustomPacketPayload {
+        public static final Type<PlayJumpscare> TYPE = typeOf("play_jumpscare");
+        public static final StreamCodec<ByteBuf, PlayJumpscare> CODEC = StreamCodec.composite(
+                ByteBufCodecs.VAR_INT, PlayJumpscare::kind,
+                ByteBufCodecs.FLOAT, PlayJumpscare::strength,
+                PlayJumpscare::new);
+
+        @Override public Type<PlayJumpscare> type() { return TYPE; }
+    }
+
     /** S -> C: empieza el minijuego de escape (README 18). */
     public record StartQTE(int qteType, int ticks, long seed, int target, int difficulty) implements CustomPacketPayload {
         public static final Type<StartQTE> TYPE = typeOf("start_qte");

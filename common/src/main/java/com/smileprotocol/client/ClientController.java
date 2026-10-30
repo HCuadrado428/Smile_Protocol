@@ -36,6 +36,7 @@ public final class ClientController {
             ClientState.dead = p.dead();
         });
         SPNetwork.setClientHandler(Payloads.StartSequence.TYPE, ClientSequence::start);
+        SPNetwork.setClientHandler(Payloads.PlayJumpscare.TYPE, ClientScare::play);
         SPNetwork.setClientHandler(Payloads.SyncMission.TYPE, p -> {
             Payloads.SyncMission old = ClientState.mission;
             if (old == null || old.step() != p.step() || !old.text().equals(p.text())) ClientState.missionChanged = net.minecraft.Util.getMillis();
@@ -57,6 +58,7 @@ public final class ClientController {
         ClientHide.reset();
         ClientQTE.reset();
         ClientSequence.reset();
+        ClientScare.reset();
         com.smileprotocol.client.light.Flashlight.reset();
         com.smileprotocol.client.light.DynamicLights.clear();
         com.smileprotocol.client.light.FlareLights.clear();
@@ -70,6 +72,7 @@ public final class ClientController {
         ClientInteraction.tick(mc);
         ClientQTE.tick(mc);
         ClientSequence.tick(mc);
+        ClientScare.tick();
         com.smileprotocol.client.light.FlareLights.tick(mc);
         if (mc.player == null || !ClientState.inSmileProtocol()) return;
         // Muerto: click izquierdo / derecho cambia de companero al que mira (README 9.3)

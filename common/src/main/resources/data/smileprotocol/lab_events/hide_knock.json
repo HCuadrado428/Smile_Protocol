@@ -1,0 +1,22 @@
+{
+  "id": "hide_knock",
+  "trigger": {
+    "type": "hide_enter"
+  },
+  "conditions": {
+    "cooldown": 900,
+    "chance": 0.2
+  },
+  "delay_ticks": 60,
+  "scope": "trigger_player",
+  "actions": [
+    {
+      "type": "sound",
+      "id": "smileprotocol:event.knock"
+    },
+    {
+      "type": "camera_effect",
+      "strength": 0.6
+    }
+  ]
+}

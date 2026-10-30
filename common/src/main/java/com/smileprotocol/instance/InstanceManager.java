@@ -289,6 +289,7 @@ public final class InstanceManager {
         InstanceContext ctx = InstanceContext.forGroup(server, group.id());
         if (ctx != null) ctx.resetZoneState();
         data.changed();
+        com.smileprotocol.mechanism.LabEvents.fire(level, BlockPos.containing(target.entry()), null, "zone_entered", target.zoneId().getPath());
         SPDebug.log(group.label() + " -> zona " + index + " (" + target.zoneId() + ")");
         return true;
     }

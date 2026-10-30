@@ -1,0 +1,17 @@
+{
+  "id": "ambient_slam",
+  "trigger": {
+    "type": "timer"
+  },
+  "conditions": {
+    "cooldown": 1800,
+    "chance": 0.06
+  },
+  "scope": "players_in_zone",
+  "actions": [
+    {
+      "type": "jumpscare",
+      "kind": "environment"
+    }
+  ]
+}

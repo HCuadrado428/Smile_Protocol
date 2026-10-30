@@ -311,5 +311,12 @@
   "smileprotocol.mission.final.power": "Devuelve la corriente a las cápsulas",
   "smileprotocol.mission.final.survive": "Algo se ha despertado. Aguanta hasta que arranque el ascensor",
   "smileprotocol.mission.final.awake": "Las cápsulas se abren. Algo se mueve en la oscuridad...",
-  "smileprotocol.mission.generators.lights": "El generador se ahoga. Las luces se apagan."
+  "smileprotocol.mission.generators.lights": "El generador se ahoga. Las luces se apagan.",
+  "subtitles.smileprotocol.event.surge": "Sobretensión",
+  "subtitles.smileprotocol.event.alarm": "Alarma",
+  "subtitles.smileprotocol.event.sting": "Algo te sobresalta",
+  "subtitles.smileprotocol.event.knock": "Golpes en la pared",
+  "subtitles.smileprotocol.event.scream": "Un grito lejano",
+  "smileprotocol.event.radio.keycard": "📻 «…¿Hay alguien? La tarjeta ha activado la alarma. Salid de ahí, ya.»",
+  "smileprotocol.event.radio.downed": "📻 «…os oigo gritar. No os separéis.»"
 }

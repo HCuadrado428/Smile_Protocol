@@ -1,0 +1,19 @@
+{
+  "id": "zone_welcome",
+  "trigger": {
+    "type": "zone_entered"
+  },
+  "conditions": {
+    "once": true
+  },
+  "delay_ticks": 200,
+  "scope": "players_in_zone",
+  "actions": [
+    {
+      "type": "sound",
+      "id": "smileprotocol:event.scream",
+      "ambient": true,
+      "volume": 0.35
+    }
+  ]
+}

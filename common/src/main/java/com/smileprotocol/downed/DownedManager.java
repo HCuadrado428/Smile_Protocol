@@ -79,6 +79,7 @@ public final class DownedManager {
         MotionManager.setAction(p, Action.DOWNED, 0, true);
         p.serverLevel().playSound(null, p.blockPosition(), SoundEvents.PLAYER_HURT, SoundSource.PLAYERS, 1f, 0.6f);
         sync(p, s);
+        com.smileprotocol.mechanism.LabEvents.fire(p.serverLevel(), p.blockPosition(), p, "player_downed", cause != null ? cause : "");
         SPDebug.log(p.getGameProfile().getName() + " derribado" + (cause != null ? " por " + cause : ""));
     }
 
@@ -133,6 +134,7 @@ public final class DownedManager {
             p.displayClientMessage(net.minecraft.network.chat.Component.translatable("smileprotocol.downed.revived_by", by.getDisplayName())
                     .withStyle(net.minecraft.ChatFormatting.GREEN), true);
         }
+        com.smileprotocol.mechanism.LabEvents.fire(p.serverLevel(), p.blockPosition(), p, "player_revived", "");
         SPDebug.log(p.getGameProfile().getName() + " reanimado" + (by != null ? " por " + by.getGameProfile().getName() : ""));
     }
 

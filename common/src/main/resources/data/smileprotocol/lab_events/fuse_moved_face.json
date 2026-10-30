@@ -1,0 +1,25 @@
+{
+  "id": "fuse_moved_face",
+  "trigger": {
+    "type": "fuse_moved"
+  },
+  "conditions": {
+    "once": true
+  },
+  "delay_ticks": 20,
+  "scope": "trigger_player",
+  "actions": [
+    {
+      "type": "light_flicker",
+      "ticks": 80
+    },
+    {
+      "type": "sound",
+      "id": "smileprotocol:event.surge"
+    },
+    {
+      "type": "jumpscare",
+      "kind": "visual"
+    }
+  ]
+}

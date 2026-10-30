@@ -1,0 +1,27 @@
+{
+  "id": "greenhouse_mist_scare",
+  "trigger": {
+    "type": "valve_group_complete",
+    "arg": "mist"
+  },
+  "conditions": {
+    "once": true,
+    "zone": "lab_greenhouse"
+  },
+  "delay_ticks": 40,
+  "scope": "players_in_zone",
+  "actions": [
+    {
+      "type": "blackout",
+      "ticks": 160
+    },
+    {
+      "type": "jumpscare",
+      "kind": "visual"
+    },
+    {
+      "type": "spawn_mob",
+      "mob": "berserker"
+    }
+  ]
+}

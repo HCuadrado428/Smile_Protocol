@@ -1,0 +1,21 @@
+{
+  "id": "first_fuse_surge",
+  "trigger": {
+    "type": "fuse_inserted"
+  },
+  "conditions": {
+    "once": true
+  },
+  "delay_ticks": 10,
+  "scope": "players_in_zone",
+  "actions": [
+    {
+      "type": "light_flicker",
+      "ticks": 70
+    },
+    {
+      "type": "sound",
+      "id": "smileprotocol:event.surge"
+    }
+  ]
+}

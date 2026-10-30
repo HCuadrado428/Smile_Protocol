@@ -263,6 +263,18 @@ public final class ClientSelfTest {
             sp.setHealth(sp.getMaxHealth());
         }));
         SHOTS.add(() -> wait = 30);
+        // 8c. Fase 15: recoger una tarjeta dispara la alarma (parpadeo, ruido, radio) y un susto
+        SHOTS.add(() -> server.execute(() -> com.smileprotocol.mechanism.LabEvents.fire(level, sp.blockPosition(), sp,
+                "item_picked", "smileprotocol:keycard_1")));
+        SHOTS.add(() -> wait = 25);
+        SHOTS.add(() -> server.execute(() -> log((com.smileprotocol.labevent.LabEventManager.running() > 0 ? "OK" : "FALLO")
+                + " evento de laboratorio: alarma de la tarjeta (" + com.smileprotocol.labevent.LabEventManager.running() + " efectos)")));
+        SHOTS.add(() -> grab(mc, "25_alarma"));
+        SHOTS.add(() -> server.execute(() -> com.smileprotocol.labevent.LabActions.scare(java.util.List.of(sp),
+                com.smileprotocol.labevent.LabActions.SCARE_FACE, 1f)));
+        SHOTS.add(() -> wait = 3);
+        SHOTS.add(() -> grab(mc, "26_susto"));
+        SHOTS.add(() -> wait = 100);
         // 9. Fase 12: levantarse tras la reanimacion, muerte instantanea en primera persona y muerte final
         SHOTS.add(() -> server.execute(() -> {
             com.smileprotocol.qte.QTEManager.clear(sp);

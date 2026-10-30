@@ -90,5 +90,36 @@
       "smileprotocol:mob/squelch1",
       "smileprotocol:mob/squelch2"
     ]
+  },
+  "event.surge": {
+    "subtitle": "subtitles.smileprotocol.event.surge",
+    "sounds": [
+      "smileprotocol:event/surge"
+    ]
+  },
+  "event.alarm": {
+    "subtitle": "subtitles.smileprotocol.event.alarm",
+    "sounds": [
+      "smileprotocol:event/alarm"
+    ]
+  },
+  "event.sting": {
+    "subtitle": "subtitles.smileprotocol.event.sting",
+    "sounds": [
+      "smileprotocol:event/sting1",
+      "smileprotocol:event/sting2"
+    ]
+  },
+  "event.knock": {
+    "subtitle": "subtitles.smileprotocol.event.knock",
+    "sounds": [
+      "smileprotocol:event/knock"
+    ]
+  },
+  "event.scream": {
+    "subtitle": "subtitles.smileprotocol.event.scream",
+    "sounds": [
+      "smileprotocol:event/scream"
+    ]
   }
 }

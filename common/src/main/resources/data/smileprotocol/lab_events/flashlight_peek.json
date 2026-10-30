@@ -1,0 +1,18 @@
+{
+  "id": "flashlight_peek",
+  "trigger": {
+    "type": "flashlight_on"
+  },
+  "conditions": {
+    "cooldown": 2400,
+    "chance": 0.12
+  },
+  "delay_ticks": 30,
+  "scope": "trigger_player",
+  "actions": [
+    {
+      "type": "jumpscare",
+      "kind": "peek"
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "id": "fuse_blackout",
+  "trigger": {
+    "type": "fuse_inserted",
+    "arg": "*"
+  },
+  "conditions": {
+    "cooldown": 1200,
+    "chance": 0.25
+  },
+  "delay_ticks": 5,
+  "scope": "players_in_zone",
+  "actions": [
+    {
+      "type": "blackout",
+      "ticks": 120
+    },
+    {
+      "type": "noise_burst",
+      "radius": 12
+    }
+  ]
+}

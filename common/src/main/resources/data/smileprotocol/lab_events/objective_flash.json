@@ -1,0 +1,22 @@
+{
+  "id": "objective_flash",
+  "trigger": {
+    "type": "mission_objective_completed"
+  },
+  "conditions": {
+    "cooldown": 1200,
+    "chance": 0.3
+  },
+  "delay_ticks": 80,
+  "scope": "players_in_zone",
+  "actions": [
+    {
+      "type": "jumpscare",
+      "kind": "flash"
+    },
+    {
+      "type": "light_flicker",
+      "ticks": 40
+    }
+  ]
+}

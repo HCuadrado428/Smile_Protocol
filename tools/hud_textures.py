@@ -347,13 +347,50 @@ def splatter(i):
     return save(cv, f"splatter{i}")
 
 
+def scare_face():
+    """Susto: la cara de Smiley pegada a la pantalla. Negro con una sonrisa roja enorme y un ojo."""
+    r = R(77)
+    S = 256
+    cv = Canvas(S, S, (0, 0, 0), 0)
+    yy, xx = np.mgrid[0:S, 0:S].astype(float)
+    n = fbm(S, S, r, base=5, octaves=5, periodic=False)
+    # cabeza alargada y deforme que se sale por los bordes
+    d = np.hypot((xx - S / 2) / (S * 0.46), (yy - S * 0.55) / (S * 0.62))
+    head = smoothstep(1.05, 0.9, d + (n - 0.5) * 0.25)
+    cv.a = head
+    cv.c[:] = (8, 6, 7)
+    cv.c = cv.c + (n[..., None] - 0.5) * 18
+    # sonrisa: arco ancho de dientes rojos
+    cy = S * 0.66
+    smile = (np.abs((yy - cy) + 0.0028 * (xx - S / 2) ** 2) < 16) & (np.abs(xx - S / 2) < S * 0.36)
+    teeth = smile & (((xx // 11) % 2) == 0)
+    cv.c[smile] = (90, 4, 6)
+    cv.c[teeth] = (225, 30, 26)
+    gums = smile & (np.abs((yy - cy) + 0.0028 * (xx - S / 2) ** 2) > 11)
+    cv.c[gums] = (150, 10, 14)
+    # un ojo abierto, rojo y brillante; el otro, una rendija
+    eye = np.hypot((xx - S * 0.36) / 15, (yy - S * 0.4) / 11) < 1
+    cv.c[eye] = (255, 50, 40)
+    cv.c[np.hypot((xx - S * 0.36) / 5, (yy - S * 0.4) / 5) < 1] = (40, 0, 0)
+    slit = (np.abs(yy - S * 0.41) < 2) & (np.abs(xx - S * 0.65) < 16)
+    cv.c[slit] = (160, 20, 18)
+    # chorretones de sangre desde la boca
+    for i in range(7):
+        x0 = S / 2 + r.uniform(-S * 0.3, S * 0.3)
+        y0 = cy - 0.0028 * (x0 - S / 2) ** 2 + 8
+        ln = r.uniform(20, 70)
+        band = (np.abs(xx - x0) < r.uniform(1.5, 3.5)) & (yy > y0) & (yy < y0 + ln)
+        cv.c[band & (head > 0.5)] = (120, 6, 8)
+    return save(cv, "scare_face")
+
+
 def main():
     ROOT.mkdir(parents=True, exist_ok=True)
     made = [vignette(), blood_vignette(), grain(), smear("smear", 20), smear("smear_small", 21, 64, 24, border=8),
             bar("bar_blood", 30, 100, 8, (120, 8, 10)), bar("bar_empty", 31, 100, 8, (40, 14, 12), empty=True),
             bar("bar_light", 32, 64, 6, (196, 180, 104)), bar("bar_light_empty", 33, 64, 6, (40, 38, 30), empty=True),
             heart(), bulb(), slot(False), slot(True), tape(), note(), panel("panel", 0), panel("panel_alert", 1),
-            splatter(0), splatter(1), splatter(2), splatter(3)]
+            splatter(0), splatter(1), splatter(2), splatter(3), scare_face()]
     pips()
     print(len(made) + 2, "sprites")
     if len(sys.argv) > 1:

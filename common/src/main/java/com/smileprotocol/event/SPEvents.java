@@ -77,6 +77,7 @@ public final class SPEvents {
         com.smileprotocol.qte.QTEManager.clear(player);
         com.smileprotocol.sequence.SequenceManager.clear(player);
         com.smileprotocol.item.UseManager.onLogout(player);
+        com.smileprotocol.labevent.LabEventManager.onLogout(player);
         com.smileprotocol.motion.MotionManager.onLogout(player);
     }
 
@@ -125,6 +126,7 @@ public final class SPEvents {
         com.smileprotocol.downed.DeathManager.tick(server);
         com.smileprotocol.mechanism.ZoneElevators.tick(server);
         com.smileprotocol.mission.MissionManager.tick(server);
+        com.smileprotocol.labevent.LabEventManager.tick(server);
         com.smileprotocol.motion.Flashlights.tick(server);
         LobbyManager.tick(server);
         if (server.getTickCount() % 20 == 0) SPDebug.tick(server);

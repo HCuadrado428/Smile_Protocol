@@ -311,5 +311,12 @@
   "smileprotocol.mission.final.power": "Restore power to the pods",
   "smileprotocol.mission.final.survive": "Something woke up. Hold out until the elevator starts",
   "smileprotocol.mission.final.awake": "The pods open. Something moves in the dark...",
-  "smileprotocol.mission.generators.lights": "The generator chokes. The lights go out."
+  "smileprotocol.mission.generators.lights": "The generator chokes. The lights go out.",
+  "subtitles.smileprotocol.event.surge": "Power surge",
+  "subtitles.smileprotocol.event.alarm": "Alarm",
+  "subtitles.smileprotocol.event.sting": "Something startles you",
+  "subtitles.smileprotocol.event.knock": "Knocking",
+  "subtitles.smileprotocol.event.scream": "Distant scream",
+  "smileprotocol.event.radio.keycard": "📻 «…anyone there? The keycard tripped the alarm. Get out of there, now.»",
+  "smileprotocol.event.radio.downed": "📻 «…I can hear you screaming. Stay together.»"
 }

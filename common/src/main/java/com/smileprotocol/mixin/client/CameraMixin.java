@@ -63,6 +63,11 @@ public abstract class CameraMixin {
         }
         com.smileprotocol.client.light.Flashlight.update((Camera) (Object) this, pt);
         if (this.detached) return;
+        float scare = com.smileprotocol.client.ClientScare.shake(pt);
+        if (scare > 0) {
+            float t = com.smileprotocol.client.ClientScare.time(pt);
+            setRotation(getYRot() + Mth.sin(t * 2.7f) * scare, getXRot() + Mth.cos(t * 3.3f) * scare * 0.7f);
+        }
         float yawOffset = ClientMotion.cameraYawOffset(entity, pt);
         float lean = ClientMotion.cameraLeanOffset(pt);
         float dip = ClientMotion.cameraDip(pt);

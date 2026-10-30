@@ -121,6 +121,8 @@ public final class InteractionManager {
         SPInventoryOps.take(p, slot);
         spawnItem(p.serverLevel(), p.position().add(p.getLookAngle().multiply(0.4, 0, 0.4)), stack);
         NoiseSystem.emit(p.serverLevel(), p.position(), SPConfig.get().noise_drop, NoiseType.ITEM, p);
+        com.smileprotocol.mechanism.LabEvents.fire(p.serverLevel(), p.blockPosition(), p, "item_dropped",
+                net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(stack.getItem()).toString());
     }
 
     /** Objeto de la partida en el suelo: no se recoge solo ni desaparece (README 10, 12.7). */

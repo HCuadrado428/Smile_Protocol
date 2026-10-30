@@ -1,0 +1,22 @@
+{
+  "id": "door_forced_screech",
+  "trigger": {
+    "type": "door_forced"
+  },
+  "conditions": {
+    "once": false,
+    "cooldown": 200
+  },
+  "scope": "players_in_zone",
+  "actions": [
+    {
+      "type": "noise_burst",
+      "radius": 16
+    },
+    {
+      "type": "sound",
+      "id": "minecraft:block.anvil.land",
+      "volume": 0.8
+    }
+  ]
+}
