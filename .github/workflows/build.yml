@@ -120,7 +120,7 @@ jobs:
           cp -r $L/runs/server/world $L/runs/client/saves/smoke
           timeout 900 xvfb-run -a -s "-screen 0 1280x720x24" ./gradlew :$L:runClient --no-daemon > anim-$L.log 2>&1
           echo "== anim: salida $?" >> client.log
-          grep -aE "CLIENTTEST|Exception|Caused by" anim-$L.log | head -100 >> client.log
+          grep -aE "CLIENTTEST|Exception|Caused by|PlayerAnimator|playerAnim" anim-$L.log | head -100 >> client.log
           pip install -q pillow > /dev/null 2>&1
           python3 tools/make_gifs.py $L/runs/client/screenshots anims >> client.log 2>&1
           exit 0

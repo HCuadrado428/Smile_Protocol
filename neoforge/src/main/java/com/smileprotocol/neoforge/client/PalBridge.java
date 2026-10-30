@@ -30,8 +30,11 @@ public final class PalBridge {
             ATTACHED.put(acp, Boolean.TRUE);
             try {
                 PlayerAnimationAccess.getPlayerAnimLayer(acp).addAnimLayer(PRIORITY, new Layer(acp));
-            } catch (RuntimeException e) {
+                com.smileprotocol.SmileProtocol.LOGGER.info("PlayerAnimator: capa anadida a {}", acp.getGameProfile().getName());
+            } catch (RuntimeException | LinkageError e) {
                 // Jugador sin soporte de animaciones: se deja la pose vanilla
+                com.smileprotocol.SmileProtocol.LOGGER.warn("PlayerAnimator: no se pudo anadir la capa a {}: {}",
+                        acp.getGameProfile().getName(), e.toString());
             }
         }
     }
