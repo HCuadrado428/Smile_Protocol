@@ -24,6 +24,10 @@ import geo_models as gm  # noqa: E402
 from geo_models import Geo, MAT, sstep, noise3  # noqa: E402
 
 ROOT = gm.ROOT
+# Las texturas de los mobs van a 4 px por unidad (mas detalle); los dibujos de pixel art (bocas,
+# ojos, costuras) siguen su rejilla de 2 px por unidad
+gm.SCALE = 4
+ART = 2
 
 
 # Materiales de los smilers -----------------------------------------------------------------------------
@@ -91,7 +95,7 @@ def face():
         sm = smile_mask(f)
         c = np.where(sm[..., None] > 0, np.array([206, 18, 22]), c)
         # dientes: lineas oscuras verticales dentro de la sonrisa
-        teeth = (sm > 0) & (np.floor(f.U * gm.SCALE) % 3 == 0)
+        teeth = (sm > 0) & (np.floor(f.U * ART) % 3 == 0)
         c = np.where(teeth[..., None], np.array([70, 6, 8]), c)
         # ojo derecho (lado +X, a la izquierda de quien lo mira): cosido, rojo apagado, no brilla
         w, h = f.w / gm.SCALE, f.h / gm.SCALE
@@ -119,8 +123,8 @@ def face_blind():
         # cara de 12 x 16 px: un corte fino de 10 px con las comisuras hacia arriba
         if f.face != "north":
             return np.zeros((f.h, f.w))
-        px = np.floor(f.U * gm.SCALE).astype(int)
-        py = np.floor(f.V * gm.SCALE).astype(int)
+        px = np.floor(f.U * ART).astype(int)
+        py = np.floor(f.V * ART).astype(int)
         m = ((py == 11) & (px >= 2) & (px <= 9)) | ((py == 10) & ((px == 1) | (px == 10)))
         return m.astype(float)
 
@@ -144,6 +148,29 @@ def face_blind():
     return mat
 
 
+# Detalles comunes ---------------------------------------------------------------------------------------
+
+def veins(f, seed, freq=1.1, width=0.02):
+    """Red de venas finas y ramificadas (0-1)."""
+    a = np.abs(noise3(f.X * freq, f.Y * freq * 0.7, f.Z * freq, 1.0, seed) - 0.5)
+    b = np.abs(noise3(f.X * freq * 2.1, f.Y * freq * 1.6, f.Z * freq * 2.1, 1.0, seed + 1) - 0.5)
+    return np.clip(sstep(width, 0, a) + 0.6 * sstep(width * 0.7, 0, b) * sstep(0.45, 0.6, f.n(0.6, 2, seed + 2)), 0, 1)
+
+
+def drips(f, seed, length=1.6, density=0.82):
+    """Regueros verticales que bajan desde manchas (0-1)."""
+    col = noise3(f.X * 3.0, np.zeros_like(f.Y), f.Z * 3.0, 1.0, seed)
+    start = noise3(f.X * 3.0, np.zeros_like(f.Y), f.Z * 3.0, 1.0, seed + 5) * 6
+    on = (col > density) & (f.Y < start + 30) & ((start + 30 - f.Y) % 9 < length * (0.6 + col))
+    return on.astype(float) * (0.6 + 0.4 * col)
+
+
+def grime_bottom(f, c, k=0.4, top=6.0, color=(40, 30, 24)):
+    """Suciedad que sube desde los pies."""
+    t = sstep(top, 0, f.Y) * k
+    return c * (1 - t[..., None]) + np.array(color) * t[..., None]
+
+
 def plaster(base=(128, 124, 116)):
     """Piel del Paciente: escayola palida y sucia, agrietada como una estatua, con manchas de humedad
     y vetas oscuras que bajan desde las grietas."""
@@ -154,9 +181,22 @@ def plaster(base=(128, 124, 116)):
         c = c * (1 - 0.25 * sstep(0.55, 0.85, f.n(0.25, 3, 302)))[..., None]          # humedad
         cr = np.abs(noise3(f.X * 0.9, f.Y * 0.6, f.Z * 0.9, 1.0, 303) - 0.5)
         crack = (cr < 0.011) & (f.n(0.3, 2, 305) > 0.5)
+        # venas grises azuladas bajo la escayola
+        v = veins(f, 306, 0.9, 0.03)
+        c = c * (1 - 0.6 * v[..., None]) + np.array([58, 62, 92]) * 0.6 * v[..., None]
+        # moratones amarillos y morados
+        br = sstep(0.62, 0.76, f.n(0.35, 3, 307)) * 1.4
+        bruise = np.array([92, 64, 96]) * (1 - sstep(0.74, 0.82, f.n(0.35, 3, 307)))[..., None] + \
+            np.array([140, 128, 70]) * sstep(0.74, 0.82, f.n(0.35, 3, 307))[..., None]
+        br = np.clip(br, 0, 1) * 0.6
+        c = c * (1 - br[..., None]) + bruise * br[..., None]
         c = np.where(crack[..., None], np.array([34, 30, 28]), c)                   # grietas
+        c = np.where((crack & (f.n(2.0, 1, 308) > 0.6))[..., None], np.array([170, 165, 156]), c)   # borde levantado
         streak = sstep(0.62, 0.95, noise3(f.X * 4, f.Y * 0.4, f.Z * 4, 1.0, 304))
         c = c * (1 - 0.35 * streak)[..., None]
+        d = drips(f, 309, 1.2, 0.86)
+        c = c * (1 - 0.5 * d[..., None]) + np.array([72, 60, 50]) * 0.5 * d[..., None]
+        c = grime_bottom(f, c, 0.5, 8)
         c += (f.white()[..., None] - 0.5) * 8
         return c, np.ones((f.h, f.w))
     return m
@@ -179,7 +219,7 @@ def autopsy():
         c = np.where(cut[..., None], np.array([92, 20, 18]), c)
         edge = (stem & (np.abs(u - w / 2) > 0.14))
         c = np.where(edge[..., None], np.array([150, 60, 52]), c)
-        st = (np.floor(v * gm.SCALE) % 2 == 0) & (np.abs(u - w / 2) < 0.6) & (v > h * 0.36)
+        st = (np.floor(v * ART) % 2 == 0) & (np.abs(u - w / 2) < 0.6) & (v > h * 0.36)
         c = np.where(st[..., None], np.array([18, 16, 16]), c)
         return c, a
     return m
@@ -203,7 +243,7 @@ def bandage():
 def wristband():
     def m(f):
         c = np.zeros((f.h, f.w, 3)) + (210, 210, 200)
-        c = np.where((np.floor(f.U * gm.SCALE * 2) % 3 == 0)[..., None] & (f.face in ("north", "south")), np.array([60, 60, 70]), c)
+        c = np.where((np.floor(f.U * ART * 2) % 3 == 0)[..., None] & (f.face in ("north", "south")), np.array([60, 60, 70]), c)
         return c, np.ones((f.h, f.w))
     return m
 
@@ -226,8 +266,8 @@ def face_plaster():
     def smile_mask(f):
         if f.face != "north":
             return np.zeros((f.h, f.w))
-        px = np.floor(f.U * gm.SCALE).astype(int)
-        py = np.floor(f.V * gm.SCALE).astype(int)
+        px = np.floor(f.U * ART).astype(int)
+        py = np.floor(f.V * ART).astype(int)
         m = ((py == 11) & (px >= 2) & (px <= 9)) | ((py == 10) & ((px == 1) | (px == 10)))
         return m.astype(float)
 
@@ -237,8 +277,8 @@ def face_plaster():
             return c, a
         w, h = f.w / gm.SCALE, f.h / gm.SCALE
         # labios agrietados y oscuros alrededor del corte; regueros secos desde las comisuras
-        px = np.floor(f.U * gm.SCALE).astype(int)
-        py = np.floor(f.V * gm.SCALE).astype(int)
+        px = np.floor(f.U * ART).astype(int)
+        py = np.floor(f.V * ART).astype(int)
         around = (np.abs(py - 11) <= 1) & (px >= 1) & (px <= 10)
         c = np.where(around[..., None], c * 0.55, c)
         drip = ((px == 2) | (px == 9)) & (py >= 12) & (py <= 14)
@@ -266,6 +306,17 @@ def muscle(base=(92, 26, 38)):
         c = c + wet[..., None] * 38
         ten = sstep(0.8, 0.9, noise3(f.X * 3, ax * 0.25, f.Z * 3, 1.0, 404))
         c = c * (1 - ten[..., None]) + np.array([196, 170, 150]) * ten[..., None]
+        # fascia: velo blanquecino y brillante a trozos
+        fas = sstep(0.62, 0.8, f.n(0.3, 3, 405)) * 0.35
+        c = c * (1 - fas[..., None]) + np.array([210, 190, 196]) * fas[..., None]
+        # venas azul oscuro y grasa amarillenta en grumos
+        v = veins(f, 406, 1.0, 0.022)
+        c = c * (1 - 0.7 * v[..., None]) + np.array([40, 36, 92]) * 0.7 * v[..., None]
+        fat = sstep(0.8, 0.88, f.n(1.4, 2, 407))
+        c = c * (1 - fat[..., None]) + np.array([214, 186, 110]) * fat[..., None]
+        d = drips(f, 408, 1.8, 0.8)
+        c = c * (1 - 0.8 * d[..., None]) + np.array([120, 8, 12]) * 0.8 * d[..., None]
+        c += (f.white()[..., None] - 0.5) * 10
         return c, np.ones((f.h, f.w))
     return m
 
@@ -287,18 +338,18 @@ def rastreador_head():
     def gum(f):
         if f.face != "north":
             return np.zeros((f.h, f.w))
-        px = np.floor(f.U * gm.SCALE).astype(int)
-        py = np.floor(f.V * gm.SCALE).astype(int)
-        H = int(f.h)
-        return ((py >= H - 3) & (py <= H - 2) & (px >= 1) & (px <= int(f.w) - 2)).astype(float)
+        px = np.floor(f.U * ART).astype(int)
+        py = np.floor(f.V * ART).astype(int)
+        H = int(round(f.h / gm.SCALE * ART))
+        return ((py >= H - 3) & (py <= H - 2) & (px >= 1) & (px <= int(round(f.w / gm.SCALE * ART)) - 2)).astype(float)
 
     def mat(f):
         c, a = mu(f)
         if f.face != "north":
             return c, a
-        px = np.floor(f.U * gm.SCALE).astype(int)
-        py = np.floor(f.V * gm.SCALE).astype(int)
-        H = int(f.h)
+        px = np.floor(f.U * ART).astype(int)
+        py = np.floor(f.V * ART).astype(int)
+        H = int(round(f.h / gm.SCALE * ART))
         # dientes de arriba: hilera de agujas palidas bajo las encias
         teeth = (py == H - 1) & (px % 2 == 1)
         c = np.where(teeth[..., None], np.array([216, 204, 184]), c)
@@ -397,15 +448,28 @@ def sheet_cloth():
     def m(f):
         c = np.zeros((f.h, f.w, 3)) + (176, 168, 146)
         c *= (0.78 + 0.3 * f.n(0.7, 3, 501))[..., None]
-        weave = 0.94 + 0.06 * ((np.floor(f.U * gm.SCALE) + np.floor(f.V * gm.SCALE)) % 2)
+        weave = 0.94 + 0.06 * ((np.floor(f.U * ART) + np.floor(f.V * ART)) % 2)
         c *= weave[..., None]
         stain = sstep(0.6, 0.85, f.n(0.4, 3, 502))
         c = c * (1 - stain[..., None] * 0.6) + np.array([110, 84, 50]) * stain[..., None] * 0.6
         blood = sstep(0.72, 0.88, f.n(0.55, 2, 503))
         c = c * (1 - blood[..., None]) + np.array([96, 16, 14]) * blood[..., None]
-        seam = np.abs(noise3(f.X * 0.8, f.Y * 0.8, f.Z * 0.8, 1.0, 504) - 0.5) < 0.03
-        stitch = seam & (np.floor((f.U + f.V) * gm.SCALE) % 2 == 0)
-        c = np.where(stitch[..., None], np.array([40, 30, 26]), c)
+        # costuras gruesas en cruz con puntadas en X
+        seam = np.abs(noise3(f.X * 0.35, f.Y * 0.35, f.Z * 0.35, 1.0, 504) - 0.5) < 0.022
+        stitch = seam & (np.floor((f.U + f.V) * ART) % 2 == 0)
+        c = np.where(seam[..., None], c * 0.7, c)
+        c = np.where(stitch[..., None], np.array([30, 22, 20]), c)
+        # sangre empapando la tela desde abajo y regueros
+        soak = sstep(4.5, 0, f.Y + 3 * (f.n(0.8, 2, 505) - 0.5)) * 0.7
+        c = c * (1 - soak[..., None]) + np.array([92, 20, 16]) * soak[..., None]
+        d = drips(f, 506, 1.5, 0.78)
+        c = c * (1 - 0.7 * d[..., None]) + np.array([100, 14, 12]) * 0.7 * d[..., None]
+        # rotos: agujeros oscuros con relleno asomando
+        hole = sstep(0.83, 0.86, f.n(0.9, 2, 507))
+        c = c * (1 - hole[..., None]) + np.array([60, 40, 30]) * hole[..., None]
+        fluff = (f.n(0.9, 2, 507) > 0.865) & (f.n(3.0, 1, 508) > 0.5)
+        c = np.where(fluff[..., None], np.array([196, 170, 140]), c)
+        c += (f.white()[..., None] - 0.5) * 10
         return c, np.ones((f.h, f.w))
     return m
 
@@ -435,9 +499,9 @@ def doll_face():
     def glow(f):
         if f.face != "north":
             return np.zeros((f.h, f.w))
-        px = np.floor(f.U * gm.SCALE).astype(int)
-        py = np.floor(f.V * gm.SCALE).astype(int)
-        W, H = int(f.w), int(f.h)
+        px = np.floor(f.U * ART).astype(int)
+        py = np.floor(f.V * ART).astype(int)
+        W, H = int(round(f.w / gm.SCALE * ART)), int(round(f.h / gm.SCALE * ART))
         ex, ey = int(W * 0.28), int(H * 0.36)
         button = (np.abs(px - ex) <= 1) & (np.abs(py - ey) <= 1)
         sy = int(H * 0.7)
@@ -449,9 +513,9 @@ def doll_face():
         c, a = cl(f)
         if f.face != "north":
             return c, a
-        px = np.floor(f.U * gm.SCALE).astype(int)
-        py = np.floor(f.V * gm.SCALE).astype(int)
-        W, H = int(f.w), int(f.h)
+        px = np.floor(f.U * ART).astype(int)
+        py = np.floor(f.V * ART).astype(int)
+        W, H = int(round(f.w / gm.SCALE * ART)), int(round(f.h / gm.SCALE * ART))
         g = glow(f)
         c = np.where(g[..., None] > 0, np.array([214, 22, 26]), c)
         # agujeros del boton y la otra cuenca: una X cosida
@@ -508,6 +572,11 @@ def ash(base=(58, 56, 58), fray=0.0):
         c *= (0.8 + 0.3 * swirl)[..., None]
         flake = sstep(0.8, 0.95, f.n(1.6, 2, 603))
         c = c + flake[..., None] * 40
+        # brasas que se apagan: puntos naranjas con halo
+        emb = sstep(0.9, 0.97, f.n(2.4, 2, 605))
+        c = c * (1 - emb[..., None]) + np.array([180, 70, 24]) * emb[..., None]
+        c = c * (0.7 + 0.3 * sstep(0, 20, f.Y))[..., None]                                 # mas oscuro abajo
+        c += (f.white()[..., None] - 0.5) * 12
         a = np.ones((f.h, f.w))
         if fray > 0:
             hole = f.n(1.2, 3, 604) < fray
@@ -540,8 +609,8 @@ def ash_face():
     asf = ash((40, 38, 40))
 
     def cells(f):
-        px = np.clip(np.floor(f.U * gm.SCALE).astype(int), 0, len(ASH_FACE[0]) - 1)
-        py = np.clip(np.floor(f.V * gm.SCALE).astype(int), 0, len(ASH_FACE) - 1)
+        px = np.clip(np.floor(f.U * ART).astype(int), 0, len(ASH_FACE[0]) - 1)
+        py = np.clip(np.floor(f.V * ART).astype(int), 0, len(ASH_FACE) - 1)
         return np.vectorize(lambda x, y: ASH_FACE[y][x])(px, py)
 
     def glow(f):
@@ -634,8 +703,8 @@ def grin():
     """La sonrisa que se abre (pixel art, 18 x 10): comisuras que suben, encias rojas, dientes
     afilados arriba y abajo y la boca negra. El juego la escala desde el centro al acercarse."""
     def cells(f):
-        px = np.clip(np.floor(f.U * gm.SCALE).astype(int), 0, len(GRIN[0]) - 1)
-        py = np.clip(np.floor(f.V * gm.SCALE).astype(int), 0, len(GRIN) - 1)
+        px = np.clip(np.floor(f.U * ART).astype(int), 0, len(GRIN[0]) - 1)
+        py = np.clip(np.floor(f.V * ART).astype(int), 0, len(GRIN) - 1)
         return np.vectorize(lambda x, y: GRIN[y][x])(px, py)
 
     def mask(f):
