@@ -105,6 +105,12 @@ public final class ZoneElevators {
             s.doorsOpen = !s.powered;
             s.countdown = -1;
         }
+        // Laboratorio Cero: el ascensor no ha llegado todavia (README de Smiley)
+        if (com.smileprotocol.entity.SmileyFight.holdsElevator(server, g)) {
+            setDoors(level, z, s, false);
+            hideHud(server, s);
+            return;
+        }
         setDoors(level, z, s, s.powered);
         if (!s.powered) {
             hideHud(server, s);

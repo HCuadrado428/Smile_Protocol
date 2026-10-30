@@ -53,6 +53,12 @@ public final class ModEntities {
                     MobCategory.MONSTER).sized(0.8f, 1.95f).eyeHeight(1.7f).clientTrackingRange(12).fireImmune()
                     .build("apagon"));
 
+    /** Smiley, el jefe (fase 21): 4 bloques de alto; la caja, algo menos para que quepa por los pasillos. */
+    public static final Supplier<EntityType<com.smileprotocol.entity.Smiley>> SMILEY = Services.PLATFORM.register(
+            BuiltInRegistries.ENTITY_TYPE, "smiley", () -> EntityType.Builder.of(com.smileprotocol.entity.Smiley::new,
+                    MobCategory.MONSTER).sized(0.9f, 3.4f).eyeHeight(3.2f).clientTrackingRange(16).fireImmune()
+                    .build("smiley"));
+
     /** Bengala encendida (fase 13). */
     public static final Supplier<EntityType<com.smileprotocol.entity.FlareEntity>> FLARE = Services.PLATFORM.register(
             BuiltInRegistries.ENTITY_TYPE, "flare", () -> EntityType.Builder.<com.smileprotocol.entity.FlareEntity>of(
@@ -75,5 +81,6 @@ public final class ModEntities {
         Services.PLATFORM.registerAttributes(RASTREADOR, com.smileprotocol.entity.Rastreador::attributes);
         Services.PLATFORM.registerAttributes(AHORCADO, com.smileprotocol.entity.Ahorcado::attributes);
         Services.PLATFORM.registerAttributes(APAGON, com.smileprotocol.entity.Apagon::attributes);
+        Services.PLATFORM.registerAttributes(SMILEY, com.smileprotocol.entity.Smiley::attributes);
     }
 }

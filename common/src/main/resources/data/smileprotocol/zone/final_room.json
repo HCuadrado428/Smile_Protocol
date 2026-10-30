@@ -1,6 +1,6 @@
 {
   "template": "smileprotocol:zones/final_room",
-  "kind": "final",
+  "kind": "intermediate",
   "difficulty": 4,
   "entry_yaw": 0,
   "name": "Criogenización y experimentos"

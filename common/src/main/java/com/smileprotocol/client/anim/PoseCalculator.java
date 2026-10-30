@@ -642,6 +642,47 @@ public final class PoseCalculator {
                 pose.bend(LEFT_LEG, 0, 1.0f * Math.max(0, -b) * fight + 1.2f * drop);
                 bodyPx(pose, 0, 6f * drop, -2f * drop);
             }
+            case SMILEY_KILL -> {
+                // Colgando del cuello a la altura de la cara de Smiley: patalea y le aparta la mano;
+                // el mordisco (44) le echa la cabeza atras y se queda flojo hasta que lo suelta
+                float up = Mth.clamp((age - 4f) / 18f, 0f, 1f);
+                float bite = Mth.clamp((age - kind.impacts[0]) / 3f, 0f, 1f);
+                float drop = Mth.clamp((age - 50f) / 5f, 0f, 1f);
+                float fight = up * (1 - bite);
+                float stare = Mth.clamp((age - 24f) / 10f, 0f, 1f) * (1 - bite);       // la sonrisa se abre: se queda helado
+                float twitch = bite * spasm * (1 - Mth.clamp((age - 56f) / 8f, 0f, 1f));
+                float a = Mth.sin(time * 1.5f), b = Mth.sin(time * 1.1f + 0.5f);
+                float kick = fight * (1 - 0.7f * stare);
+                pose.setRot(HEAD, -0.3f * up - 1.1f * bite + 0.3f * twitch, 0.1f * a * kick, 0.25f * bite);
+                pose.setRot(RIGHT_ARM, Mth.lerp(bite, -2.5f + 0.35f * a * kick, 0.15f) + 0.4f * twitch, 0.25f * (1 - bite), 0.25f + 0.2f * twitch);
+                pose.setRot(LEFT_ARM, Mth.lerp(bite, -2.5f - 0.35f * a * kick, 0.1f) - 0.3f * twitch, -0.25f * (1 - bite), -0.25f);
+                pose.bend(RIGHT_ARM, 0, -1.2f * fight);
+                pose.bend(LEFT_ARM, 0, -1.2f * fight);
+                pose.setRot(TORSO, -0.15f * hit + 0.1f * twitch + 0.45f * drop, 0.12f * b * kick, 0.06f * twitch);
+                pose.setRot(RIGHT_LEG, -0.7f * Math.max(0, b) * kick + 0.25f * twitch - 1.2f * drop, 0, 0.05f);
+                pose.setRot(LEFT_LEG, -0.7f * Math.max(0, -b) * kick - 0.2f * twitch - 0.8f * drop, 0, -0.05f);
+                pose.bend(RIGHT_LEG, 0, 1.0f * Math.max(0, b) * kick + 1.6f * drop);
+                pose.bend(LEFT_LEG, 0, 1.0f * Math.max(0, -b) * kick + 1.2f * drop);
+                bodyPx(pose, 0, 6f * drop, -2f * drop);
+            }
+            case SMILEY_DRAG -> {
+                // Boca abajo, arrastrado de un tobillo (la pierna derecha en alto): las manos arañan el
+                // suelo intentando agarrarse, mira atras de vez en cuando; al final ya no se mueve
+                float limp = Mth.clamp((age - 118f) / 10f, 0f, 1f);
+                float claw = 1 - limp;
+                float cyc = time * 0.55f;
+                float r = Mth.sin(cyc), l = Mth.sin(cyc + PI);
+                float look = Mth.clamp(Mth.sin(time * 0.09f) * 3f - 2f, 0f, 1f) * claw;
+                pose.setRot(RIGHT_ARM, -2.5f - 0.7f * r * claw, 0.15f, 0.35f + 0.2f * hit);
+                pose.setRot(LEFT_ARM, -2.5f - 0.7f * l * claw, -0.15f, -0.35f);
+                pose.bend(RIGHT_ARM, 0, (-0.3f - 0.9f * Math.max(0, -r)) * claw);
+                pose.bend(LEFT_ARM, 0, (-0.3f - 0.9f * Math.max(0, -l)) * claw);
+                pose.setRot(HEAD, -0.7f + 0.3f * limp + 0.2f * hit, 0.15f * r * claw + 1.2f * look, 0.3f * look);
+                pose.setRot(RIGHT_LEG, -0.55f, 0, 0.1f);                                   // la que lleva cogida
+                pose.setRot(LEFT_LEG, 0.05f + 0.2f * Math.max(0, r) * claw, 0, -0.12f);
+                pose.bend(LEFT_LEG, 0, 0.5f * Math.max(0, l) * claw);
+                pose.rot(TORSO, 0.06f * r * claw, 0.08f * r * claw, 0.05f * l * claw);
+            }
             case SMILER_KILL -> {
                 // Levantado: patalea y empuja la cara del mob; los mordiscos le echan la cabeza atras y
                 // le parten el cuello; el tiron de la garganta la deja colgando hacia atras; convulsiona

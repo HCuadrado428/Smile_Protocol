@@ -130,6 +130,7 @@ public final class SPEvents {
         com.smileprotocol.marker.MarkerManager.tick(server);
         com.smileprotocol.mechanism.ZoneElevators.tick(server);
         com.smileprotocol.mission.MissionManager.tick(server);
+        com.smileprotocol.entity.SmileyFight.tick(server);
         com.smileprotocol.labevent.LabEventManager.tick(server);
         com.smileprotocol.motion.Flashlights.tick(server);
         LobbyManager.tick(server);

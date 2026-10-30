@@ -73,7 +73,7 @@ public final class SPConfig {
         public boolean avoid_repeat_last = true;
         public boolean per_group_zones = false;
         public String start_zone = "smileprotocol:start_corridor";
-        public String final_zone = "smileprotocol:final_room";
+        public String final_zone = "smileprotocol:smiley_lab";
         public int zone_clear_blocks_per_tick = 32768;
         public int mini_return_delay = 10;
         public int disconnect_grace = 120;
@@ -190,6 +190,26 @@ public final class SPConfig {
         public java.util.List<String> rastreador_zones = new java.util.ArrayList<>(java.util.List.of("lab_offices", "lab_storage"));
         /** Ticks que aguanta corriendo antes de cansarse. */
         public int rastreador_stamina = 160;
+        // Smiley, el jefe (docs/SMILERS.md)
+        /** Se le ve una vez en cada planta, de lejos, entre estos segundos tras llegar. */
+        public boolean smiley_cameos = true;
+        public int smiley_cameo_min = 60;
+        public int smiley_cameo_max = 200;
+        /** Linternas a la vez que le hacen retroceder (o tantas como jugadores queden). */
+        public int smiley_retreat_lights = 2;
+        /** Velocidad en cada fase (multiplica la base). */
+        public java.util.List<Double> smiley_speed = new java.util.ArrayList<>(java.util.List.of(0.55, 0.8, 1.15));
+        /** Ticks persiguiendo sin ganar terreno antes de irse por la pared a por otro. */
+        public int smiley_chase_ticks = 300;
+        public int smiley_scream_cooldown = 700;
+        public int smiley_summon_cooldown = 1100;
+        /** Smilers invocados vivos a la vez, como mucho. */
+        public int smiley_summon_max = 3;
+        public int smiley_lights_cooldown = 600;
+        /** Ticks que tardan en volver las luces que apaga (fases 2; en la 3 no vuelven). */
+        public int smiley_dark_ticks = 300;
+        /** Duracion del minijuego del agarre en las fases 1 y 2 (en la 3 mata al instante). */
+        public java.util.List<Integer> smiley_qte_ticks = new java.util.ArrayList<>(java.util.List.of(140, 100));
         public java.util.List<Integer> berserkers_by_difficulty = new java.util.ArrayList<>(java.util.List.of(1, 2, 2, 3, 3));
         /** Los mobs no se mueven hasta que el grupo llega a su planta. */
         public boolean mobs_wait_for_players = true;
@@ -230,6 +250,11 @@ public final class SPConfig {
             intermediate_zones = Math.max(0, intermediate_zones);
             if (start_zone == null) start_zone = "";
             if (final_zone == null) final_zone = "";
+            // la sala final era final_room hasta que llego el Laboratorio Cero (ahora es intermedia)
+            if (final_zone.equals("smileprotocol:final_room")) final_zone = "smileprotocol:smiley_lab";
+            if (smiley_speed == null || smiley_speed.isEmpty()) smiley_speed = new java.util.ArrayList<>(java.util.List.of(0.55, 0.8, 1.15));
+            if (smiley_qte_ticks == null || smiley_qte_ticks.isEmpty()) smiley_qte_ticks = new java.util.ArrayList<>(java.util.List.of(140, 100));
+            smiley_chase_ticks = Math.max(40, smiley_chase_ticks);
             zone_clear_blocks_per_tick = Math.max(1024, zone_clear_blocks_per_tick);
             mini_return_delay = Math.max(0, mini_return_delay);
             disconnect_grace = Math.max(0, disconnect_grace);

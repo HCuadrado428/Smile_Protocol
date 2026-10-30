@@ -1,0 +1,35 @@
+{
+  "id": "smileprotocol:smiley",
+  "family": "smiler",
+  "_comment": "Smiley, el jefe (docs/SMILERS.md): fases por generador, grito, invocaciones, apaga luces, se teletransporta por manchas en la pared, retrocede ante dos linternas, agarre con minijuego distinto cada vez y remate; en la fase 3 mata al instante.",
+  "size": {
+    "width": 0.9,
+    "height": 3.4
+  },
+  "senses": {
+    "vision": {
+      "enabled": true,
+      "range": 64.0
+    },
+    "hearing": {
+      "multiplier": 2.0,
+      "min_noise": 1.0
+    }
+  },
+  "speed": {
+    "walk": 0.55,
+    "run": 1.15
+  },
+  "on_catch": "GRAB_QTE",
+  "qte": {
+    "type": "MASH",
+    "ticks": 140
+  },
+  "qte_fail_result": "DEATH",
+  "execution": false,
+  "sequences": {
+    "kill": "SMILEY_KILL"
+  },
+  "can_enter_vents": false,
+  "causes_interference": true
+}

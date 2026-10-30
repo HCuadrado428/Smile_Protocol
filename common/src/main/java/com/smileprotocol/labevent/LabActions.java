@@ -217,6 +217,7 @@ public final class LabActions {
             case "apagon" -> com.smileprotocol.registry.ModEntities.APAGON.get();
             case "rastreador" -> com.smileprotocol.registry.ModEntities.RASTREADOR.get();
             case "paciente" -> com.smileprotocol.registry.ModEntities.PACIENTE.get();
+            case "smiley" -> com.smileprotocol.registry.ModEntities.SMILEY.get();
             default -> com.smileprotocol.registry.ModEntities.BERSERKER.get();
         };
         com.smileprotocol.entity.MobManager.spawn(c.level(), type, best, c.level().random);

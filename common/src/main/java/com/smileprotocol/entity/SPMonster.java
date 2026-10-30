@@ -94,6 +94,11 @@ public abstract class SPMonster extends PathfinderMob implements GeoEntity {
         return st.setAndContinue(software.bernie.geckolib.animation.RawAnimation.begin().thenPlayAndHold(k.anim));
     }
 
+    /** Muerte instantanea con que mata a esta victima (la de su ficha; Smiley elige segun el grupo). */
+    public com.smileprotocol.sequence.SequenceKind killSequenceFor(net.minecraft.server.level.ServerPlayer p) {
+        return def().killSequence();
+    }
+
     /** Un ruido de su instancia (README 17.1). Por defecto, sordo. */
     public void hear(net.minecraft.server.level.ServerLevel level, com.smileprotocol.noise.NoiseEvent e) {}
 

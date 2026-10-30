@@ -108,6 +108,8 @@ public final class ClientSelfTest {
         ZonePlacement z = g.current();
         ServerLevel level = server.getLevel(SPDimension.SP_DIM);
         Vec3 e = z.entry();
+        // Smiley no se deja ver solo durante las pruebas (su aparicion se fuerza en la 8k)
+        com.smileprotocol.config.SPConfig.get().smiley_cameos = false;
         if (ANIM) {
             planAnimations(mc, server, sp, level, e);
             return;
@@ -537,6 +539,123 @@ public final class ClientSelfTest {
             com.smileprotocol.motion.Flashlights.set(sp, false);
             com.smileprotocol.qte.QTEManager.clear(sp);
             if (apg[0] != null) apg[0].discard();
+        }));
+        // 8k. Fase 21: Smiley (el jefe). Modelo, intro, reglas del combate, linterna, remate y arrastre
+        com.smileprotocol.entity.Smiley[] sm = {null};
+        SHOTS.add(() -> server.execute(() -> {
+            com.smileprotocol.qte.QTEManager.clear(sp);
+            for (var m : level.getEntitiesOfClass(com.smileprotocol.entity.SPMonster.class,
+                    new net.minecraft.world.phys.AABB(cam, cam).inflate(40))) m.discard();
+            SPSessionManager.teleport(sp, level, cam, 0f, -12f);
+            com.smileprotocol.motion.Flashlights.set(sp, false);
+            sm[0] = com.smileprotocol.entity.MobManager.spawn(level, com.smileprotocol.registry.ModEntities.SMILEY.get(),
+                    BlockPos.containing(cam.add(0, 0, 6)), level.random);
+            if (sm[0] != null) {
+                sm[0].debugForce(com.smileprotocol.entity.Smiley.State.STALK, 1);
+                sm[0].moveTo(cam.x, cam.y, cam.z + 6, 180f, 0f);
+                sm[0].setYBodyRot(180f);
+                sm[0].setYHeadRot(180f);
+            }
+        }));
+        SHOTS.add(() -> wait = 25);
+        SHOTS.add(() -> grab(mc, "43_smiley"));
+        // la intro: se le enciende el ojo y se le abre la sonrisa
+        SHOTS.add(() -> server.execute(() -> {
+            if (sm[0] != null) sm[0].debugForce(com.smileprotocol.entity.Smiley.State.INTRO, 1);
+            SPSessionManager.teleport(sp, level, cam.add(0, 0, 2.5), 0f, -38f);
+        }));
+        SHOTS.add(() -> wait = 105);
+        SHOTS.add(() -> grab(mc, "44_smiley_intro"));
+        SHOTS.add(() -> server.execute(() -> {
+            boolean phases = com.smileprotocol.entity.SmileyFight.phaseFor(0) == 1 && com.smileprotocol.entity.SmileyFight.phaseFor(1) == 2
+                    && com.smileprotocol.entity.SmileyFight.phaseFor(2) == 3 && com.smileprotocol.entity.SmileyFight.phaseFor(3) == 3;
+            log((phases ? "OK" : "FALLO") + " smiley: una fase mas por generador (1, 2, 3, 3)");
+            log((com.smileprotocol.entity.SmileyFight.phase(level, sp.blockPosition()) == 1 ? "OK" : "FALLO")
+                    + " smiley: sin generadores, fase 1");
+            if (sm[0] != null) {
+                var q1 = sm[0].nextQte();
+                sm[0].debugGrabbed();
+                var q2 = sm[0].nextQte();
+                log((q1 != q2 ? "OK" : "FALLO") + " smiley: minijuego distinto en cada agarre (" + q1 + " -> " + q2 + ")");
+                var k = sm[0].killSequenceFor(sp);
+                log((k == com.smileprotocol.sequence.SequenceKind.SMILEY_DRAG ? "OK" : "FALLO")
+                        + " smiley: al ultimo en pie se lo lleva a rastras (" + k + ")");
+                log((sm[0].neededLights(level) == 1 ? "OK" : "FALLO") + " smiley: solo, basta una linterna para hacerle retroceder");
+            }
+            boolean zone = com.smileprotocol.config.SPConfig.get().final_zone.equals("smileprotocol:smiley_lab");
+            var tpl = server.getStructureManager().get(SmileProtocol.id("zones/smiley_lab"));
+            int[] gens = {0};
+            java.util.Set<String> marks = new java.util.HashSet<>();
+            tpl.ifPresent(t -> {
+                var set = new net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings();
+                for (var info : t.filterBlocks(BlockPos.ZERO, set, com.smileprotocol.registry.ModBlocks.FUSE_BOX.get())) {
+                    if (info.nbt() != null && info.nbt().getString("Circuit").startsWith("gen")) gens[0]++;
+                }
+                for (var info : t.filterBlocks(BlockPos.ZERO, set, net.minecraft.world.level.block.Blocks.STRUCTURE_BLOCK)) {
+                    if (info.nbt() != null) marks.add(info.nbt().getString("metadata").split(" ")[0]);
+                }
+            });
+            boolean ok = zone && gens[0] == 3 && marks.containsAll(java.util.List.of("sp:smiley", "sp:cell", "sp:summon", "sp:exit_cabin", "sp:entry"));
+            log((ok ? "OK" : "FALLO") + " laboratorio cero: sala final con 3 generadores y sus marcadores (" + gens[0] + " " + marks + ")");
+            // linterna: le apunta y retrocede
+            if (sm[0] != null) {
+                sm[0].debugForce(com.smileprotocol.entity.Smiley.State.STALK, 1);
+                sm[0].debugRelease();
+            }
+            SPSessionManager.teleport(sp, level, cam, 0f, -8f);
+            com.smileprotocol.motion.Flashlights.recharge(sp, 1f);
+            com.smileprotocol.motion.Flashlights.set(sp, true);
+        }));
+        SHOTS.add(() -> wait = 10);
+        SHOTS.add(() -> server.execute(() -> {
+            boolean ok = sm[0] != null && sm[0].state() == com.smileprotocol.entity.Smiley.State.RETREAT;
+            log((ok ? "OK" : "FALLO") + " smiley retrocede ante la linterna (" + (sm[0] == null ? "-" : sm[0].state()) + ")");
+        }));
+        SHOTS.add(() -> grab(mc, "45_smiley_linterna"));
+        // remate (fase 1 y 2) y arrastre del ultimo, sin morir
+        SHOTS.add(() -> server.execute(() -> {
+            com.smileprotocol.motion.Flashlights.set(sp, false);
+            com.smileprotocol.qte.QTEManager.clear(sp);
+            com.smileprotocol.sequence.SequenceManager.TEST_NO_KILL = true;
+            if (sm[0] != null) {
+                sm[0].debugForce(com.smileprotocol.entity.Smiley.State.STALK, 2);
+                sm[0].moveTo(cam.x, cam.y, cam.z + 2, 180f, 0f);
+                SPSessionManager.teleport(sp, level, cam, 0f, 0f);
+                boolean ok = com.smileprotocol.sequence.SequenceManager.start(sm[0], sp, com.smileprotocol.sequence.SequenceKind.SMILEY_KILL);
+                log((ok ? "OK" : "FALLO") + " smiley: remate en marcha");
+            }
+        }));
+        SHOTS.add(() -> wait = 36);
+        SHOTS.add(() -> grab(mc, "46_smiley_remate"));
+        SHOTS.add(() -> wait = 50);
+        SHOTS.add(() -> server.execute(() -> {
+            com.smileprotocol.sequence.SequenceManager.clear(sp);
+            sp.setHealth(sp.getMaxHealth());
+            if (sm[0] != null) {
+                sm[0].moveTo(cam.x, cam.y, cam.z + 2, 180f, 0f);
+                SPSessionManager.teleport(sp, level, cam, 0f, 0f);
+                boolean ok = com.smileprotocol.sequence.SequenceManager.start(sm[0], sp, com.smileprotocol.sequence.SequenceKind.SMILEY_DRAG);
+                log((ok ? "OK" : "FALLO") + " smiley: arrastre en marcha");
+            }
+        }));
+        SHOTS.add(() -> wait = 50);
+        SHOTS.add(() -> grab(mc, "47_smiley_arrastre"));
+        SHOTS.add(() -> server.execute(() -> {
+            boolean ok = com.smileprotocol.sequence.SequenceManager.inSequence(sp);
+            log((ok ? "OK" : "FALLO") + " smiley: la victima sigue en el arrastre");
+            com.smileprotocol.sequence.SequenceManager.clear(sp);
+            com.smileprotocol.sequence.SequenceManager.TEST_NO_KILL = false;
+            if (sm[0] != null) sm[0].discard();
+            SPSessionManager.teleport(sp, level, e, 0f, 0f);
+            boolean seen = com.smileprotocol.entity.SmileyFight.cameoNow(level, sp);
+            log("INFO smiley se deja ver en la planta: " + seen);
+        }));
+        SHOTS.add(() -> wait = 20);
+        SHOTS.add(() -> grab(mc, "48_smiley_aparicion"));
+        SHOTS.add(() -> server.execute(() -> {
+            for (var m : level.getEntitiesOfClass(com.smileprotocol.entity.Smiley.class,
+                    new net.minecraft.world.phys.AABB(e, e).inflate(60))) m.discard();
+            sp.setHealth(sp.getMaxHealth());
         }));
         // 9. Fase 12: levantarse tras la reanimacion, muerte instantanea en primera persona y muerte final
         SHOTS.add(() -> server.execute(() -> {

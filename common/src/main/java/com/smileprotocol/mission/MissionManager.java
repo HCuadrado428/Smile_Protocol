@@ -271,6 +271,7 @@ public final class MissionManager {
                     }
                 });
                 case "power" -> CircuitManager.notify(level, z.box().getCenter(), ev.arg(), true);
+                case "boss" -> com.smileprotocol.entity.SmileyFight.event(level, g, z, players, ev.arg());
                 default -> { }
             }
         }

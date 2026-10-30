@@ -4,6 +4,7 @@
     "smileprotocol:lab_offices",
     "smileprotocol:lab_morgue",
     "smileprotocol:lab_generators",
-    "smileprotocol:lab_greenhouse"
+    "smileprotocol:lab_greenhouse",
+    "smileprotocol:final_room"
   ]
 }

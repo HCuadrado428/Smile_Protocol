@@ -16,7 +16,7 @@ import java.util.Locale;
  * "forced" para las atascadas), {@code INSERT_FUSES} (circuit), {@code TURN_VALVES} (group),
  * {@code POWER} (circuit), {@code REACH} (marker), {@code SURVIVE} (seconds) y {@code ESCAPE}.
  * Eventos: {@code message}, {@code sound}, {@code spawn_mob} (mob), {@code lights_off},
- * {@code lights_on} y {@code power} (circuit).
+ * {@code lights_on}, {@code power} (circuit) y {@code boss} (text: elevator o arrive, el combate contra Smiley).
  */
 public record MissionDef(String id, List<Step> steps) {
 

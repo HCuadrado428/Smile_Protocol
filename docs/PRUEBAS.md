@@ -244,6 +244,22 @@ Hace falta Simple Voice Chat en el servidor y en los clientes (es opcional: sin 
 1. **Tensión.** Acércate a un Berserker (o deja que te agarren, o cae derribado): la imagen se desatura, los bordes se separan en rojo y azul, ondula un poco, sale grano y la viñeta late. Al alejarte vuelve a la normalidad poco a poco. Se quita con `tension_shader: false` o se suaviza con `tension_strength`.
 2. **Ambiente.** Dentro de la partida suena un zumbido grave constante que de vez en cuando se apaga del todo unos segundos (silencio) y que baja cuando hay tensión. Cada 20-60 s cruje la estructura o gotea algo a unos metros (con Sound Physics Remastered se oye el eco de la sala). Se quita con `ambience: false`.
 
+## Smiley (fase 21)
+
+1. **De lejos.** En cada planta, entre 1 y 3 minutos después de llegar, aparece una vez al fondo de un pasillo mirándote. Si lo miras un rato o te acercas, se funde en una mancha negra y desaparece. No ataca. Se quita con `smiley_cameos: false`.
+2. **Intro.** En la sala final (Laboratorio Cero), al adentrarte unos bloques se apagan las luces y aparece en el centro: se le enciende el ojo y se le abre la sonrisa. A los 5 s vuelven las luces y empieza a moverse. Con `/spadmin mob smiley` sale con la intro donde estés.
+3. **Generadores.** Hay tres: en el suelo (al norte), en el anillo de pasarelas (al este) y arriba (al oeste). Cada uno necesita sus fusibles, que están repartidos por los tres niveles. Al encender uno, sube de fase y grita.
+4. **Fase 1.** Anda despacio y teatral. Si te coge, sale un minijuego (cada vez uno distinto: machacar, secuencia, ritmo, aguja). Si fallas, te levanta hasta su cara y te arranca la garganta.
+5. **Fase 2.** Más rápido. Invoca a 1 o 2 smilers (rastreador, apagón o berserker) lejos de vosotros y apaga las luces de alrededor unos segundos.
+6. **Fase 3.** La sala se queda a oscuras. Corre y mata al instante, sin minijuego.
+7. **Linternas.** Si le dan dos linternas a la vez (o una, si solo queda uno), se tapa la cara y retrocede; a veces se va por la pared.
+8. **Mancha.** Si lleva un rato persiguiendo a alguien sin alcanzarlo (o se aleja mucho), se funde en la pared y sale detrás de otro jugador.
+9. **Grito.** De cerca y viéndote, grita: la pantalla tiembla, vas lento y casi a ciegas un par de segundos.
+10. **Susurros.** Cada cierto tiempo a uno le sale abajo una frase con su nombre y lo oye susurrar.
+11. **Escondites.** Si te escondes delante de él, va al escondite y te saca.
+12. **Final.** Con los tres generadores encendidos, el ascensor baja: hay que aguantar 45 s. Al llegar, Smiley queda encerrado tras unas rejas en el centro, con el ojo apagado y la sonrisa encendida, y se abre el ascensor.
+13. **Si caéis todos.** Al último que queda en pie lo coge del tobillo y se lo lleva a rastras hacia la oscuridad; se ríe y se acaba la partida.
+
 ## Depuración
 
 - `/spadmin debug on`: muestra el panel de estado (sesión, mods, lobby y ascensores). Solo lo ven los operadores.
@@ -259,7 +275,7 @@ Al bajar un ascensor se crea una **partida** (`R1`, `R2`...) con uno o varios **
 - a ambos lados hay unas 45 salas (laboratorios, despachos, almacenes, morgue, vestuarios, servidores…), cada una con su puerta y su cartel;
 - al fondo está el vestíbulo del ascensor de salida.
 
-Las plantas son `start_corridor`, `lab_storage`, `lab_offices`, `lab_morgue`, `lab_generators`, `lab_greenhouse` y `final_room`. Cada partida elige **3 intermedias** al azar.
+Las plantas son `start_corridor`, `lab_storage`, `lab_offices`, `lab_morgue`, `lab_generators`, `lab_greenhouse` y `final_room` (intermedias) y la sala del jefe `smiley_lab` (final). Cada partida elige **3 intermedias** al azar.
 
 **Qué comprobar:**
 1. **Mini ascensor.** Bajad 2 jugadores por `mini1`. Aparecéis en la cabina del pasillo y el chat dice «Grupo R1.1 · 2 jugadores». La pantalla del ascensor pasa a «En curso, pasillo».

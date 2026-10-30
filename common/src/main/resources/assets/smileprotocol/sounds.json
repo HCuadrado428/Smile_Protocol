@@ -209,5 +209,29 @@
     "sounds": [
       "smileprotocol:apagon/whisper"
     ]
+  },
+  "smiley.scream": {
+    "subtitle": "subtitles.smileprotocol.smiley.scream",
+    "sounds": [
+      "smileprotocol:smiley/scream"
+    ]
+  },
+  "smiley.whisper": {
+    "subtitle": "subtitles.smileprotocol.smiley.whisper",
+    "sounds": [
+      "smileprotocol:smiley/whisper"
+    ]
+  },
+  "smiley.laugh": {
+    "subtitle": "subtitles.smileprotocol.smiley.laugh",
+    "sounds": [
+      "smileprotocol:smiley/laugh"
+    ]
+  },
+  "smiley.smear": {
+    "subtitle": "subtitles.smileprotocol.smiley.smear",
+    "sounds": [
+      "smileprotocol:smiley/smear"
+    ]
   }
 }

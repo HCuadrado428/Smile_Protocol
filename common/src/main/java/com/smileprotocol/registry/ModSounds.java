@@ -43,6 +43,10 @@ public final class ModSounds {
     public static final Supplier<SoundEvent> AHORCADO_LAUGH = register("ahorcado.laugh");
     public static final Supplier<SoundEvent> APAGON_HISS = register("apagon.hiss");
     public static final Supplier<SoundEvent> APAGON_WHISPER = register("apagon.whisper");
+    public static final Supplier<SoundEvent> SMILEY_SCREAM = register("smiley.scream");
+    public static final Supplier<SoundEvent> SMILEY_WHISPER = register("smiley.whisper");
+    public static final Supplier<SoundEvent> SMILEY_LAUGH = register("smiley.laugh");
+    public static final Supplier<SoundEvent> SMILEY_SMEAR = register("smiley.smear");
 
     private ModSounds() {}
 

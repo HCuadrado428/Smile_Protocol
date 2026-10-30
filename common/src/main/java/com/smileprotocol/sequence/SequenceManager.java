@@ -36,7 +36,7 @@ public final class SequenceManager {
     private static final class Session {
         final UUID mob;
         final SequenceKind kind;
-        final Vec3 anchor;
+        Vec3 anchor;
         final Vec3 mobPos;
         final float mobYaw;
         final float victimYaw;
@@ -111,6 +111,9 @@ public final class SequenceManager {
         com.smileprotocol.session.SPSessionManager.teleport(p, p.serverLevel(), anchor, victimYaw, kind.prone ? 5f : -25f);
         mob.startSequence(kind, p);
         SPNetwork.sendTo(p, new Payloads.StartSequence(kind.ordinal(), mob.getId(), kind.ticks));
+        if (kind == SequenceKind.SMILEY_KILL || kind == SequenceKind.SMILEY_DRAG) {
+            p.serverLevel().playSound(null, mob.blockPosition(), ModSounds.SMILEY_WHISPER.get(), SoundSource.HOSTILE, 1.6f, 0.6f);
+        }
         p.serverLevel().playSound(null, mob.blockPosition(), kind.execution ? ModSounds.BERSERKER_ROAR.get() : ModSounds.MOB_GRAB.get(),
                 SoundSource.HOSTILE, 1.4f, kind.execution ? 0.8f : 1f);
         SPDebug.log(p.getGameProfile().getName() + (kind.execution ? " rematado por " : " muerte instantanea por ")
@@ -139,18 +142,25 @@ public final class SequenceManager {
                 continue;
             }
             s.age++;
-            // Victima anclada (sin tocar su giro: la camara la lleva el cliente) y mob quieto
+            // Victima anclada (sin tocar su giro: la camara la lleva el cliente) y mob quieto; si la
+            // arrastra, la victima va tumbada detras del mob y el mob anda
+            if (s.kind.drag) {
+                Vec3 back = Vec3.directionFromRotation(0, mob.getYRot()).scale(-s.kind.distance);
+                s.anchor = new Vec3(mob.getX() + back.x, mob.getY(), mob.getZ() + back.z);
+            }
             Vec3 at = s.anchor.add(0, s.kind.lift(s.age), 0);
             if (p.position().distanceToSqr(at) > 0.0004) {
                 p.connection.teleport(at.x, at.y, at.z, 0f, 0f, Set.of(RelativeMovement.X_ROT, RelativeMovement.Y_ROT));
             }
             p.setDeltaMovement(Vec3.ZERO);
             p.fallDistance = 0;
-            mob.getNavigation().stop();
-            mob.setDeltaMovement(Vec3.ZERO);
-            if (mob.position().distanceToSqr(s.mobPos) > 0.01) mob.moveTo(s.mobPos.x, s.mobPos.y, s.mobPos.z, s.mobYaw, 0f);
-            mob.setYRot(s.mobYaw);
-            mob.setYBodyRot(s.mobYaw);
+            if (!s.kind.drag) {
+                mob.getNavigation().stop();
+                mob.setDeltaMovement(Vec3.ZERO);
+                if (mob.position().distanceToSqr(s.mobPos) > 0.01) mob.moveTo(s.mobPos.x, s.mobPos.y, s.mobPos.z, s.mobYaw, 0f);
+                mob.setYRot(s.mobYaw);
+                mob.setYBodyRot(s.mobYaw);
+            }
             ServerLevel level = p.serverLevel();
             Vec3 up = new Vec3(0, 1, 0);
             for (int t : s.kind.impacts) {

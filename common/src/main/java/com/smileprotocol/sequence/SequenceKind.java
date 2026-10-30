@@ -40,7 +40,19 @@ public enum SequenceKind {
      * hasta su cara, le parte el cuello de un giro, se lo retuerce del todo y la deja caer.
      */
     PACIENTE_KILL("kill_paciente", 50, false, 1.05, true, new int[]{22, 34}, new int[]{34}, -1,
-            new int[]{34, 48}, 0, false);
+            new int[]{34, 48}, 0, false),
+    /**
+     * Smiley levanta a la victima por el cuello hasta su cara, abre la sonrisa enorme y le arranca
+     * la garganta de un mordisco; la deja caer.
+     */
+    SMILEY_KILL("execute_smiley", 70, false, 1.3, true, new int[]{44}, new int[]{44}, -1,
+            new int[]{44, 66}, 0, false),
+    /**
+     * El ultimo que queda en pie: Smiley lo coge del tobillo y se lo lleva a rastras hacia la
+     * oscuridad mientras intenta agarrarse al suelo; una risa y se acaba la partida.
+     */
+    SMILEY_DRAG("drag", 140, true, 2.0, false, new int[]{132}, new int[]{}, -1,
+            new int[]{999, 0}, 0, false, true);
 
     /** Donde sale el chorro de sangre: cuello, cara o espalda de la victima. */
     public static final int NECK = 0, FACE = 1, BACK = 2;
@@ -61,9 +73,16 @@ public enum SequenceKind {
     public final int[] fountain;
     public final int fountainAt;
     public final boolean execution;
+    /** El mob no se queda quieto: se lleva a la victima a rastras (va detras de el). */
+    public final boolean drag;
 
     SequenceKind(String anim, int ticks, boolean prone, double distance, boolean facesMob, int[] impacts, int[] tears,
                  int decap, int[] fountain, int fountainAt, boolean execution) {
+        this(anim, ticks, prone, distance, facesMob, impacts, tears, decap, fountain, fountainAt, execution, false);
+    }
+
+    SequenceKind(String anim, int ticks, boolean prone, double distance, boolean facesMob, int[] impacts, int[] tears,
+                 int decap, int[] fountain, int fountainAt, boolean execution, boolean drag) {
         this.anim = anim;
         this.ticks = ticks;
         this.prone = prone;
@@ -75,6 +94,7 @@ public enum SequenceKind {
         this.fountain = fountain;
         this.fountainAt = fountainAt;
         this.execution = execution;
+        this.drag = drag;
     }
 
     public static SequenceKind of(int id) {
@@ -94,6 +114,12 @@ public enum SequenceKind {
             float down = Mth.clamp((age - 40) / 4f, 0f, 1f);
             up = up * up * (3 - 2 * up);
             return 1.25 * up * (1 - down);
+        }
+        if (this == SMILEY_KILL) {
+            float up = Mth.clamp((age - 4) / 18f, 0f, 1f);
+            float down = Mth.clamp((age - 50) / 5f, 0f, 1f);
+            up = up * up * (3 - 2 * up);
+            return 1.5 * up * (1 - down);
         }
         if (this != SMILER_KILL) return 0;
         float up = Mth.clamp((age - 6) / 12f, 0f, 1f);

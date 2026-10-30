@@ -1160,7 +1160,7 @@ FLOORS = [
     ("lab_greenhouse", "greenhouse", 66, ["lab", "lab", "storage", "office"], apply_greenhouse,
      dict(lockers=8, debris=12, pipes=3, mobs=10), "intermediate", 3, "Invernadero experimental"),
     ("final_room", "final", 77, ["lab", "lab", "server", "ward"], apply_final,
-     dict(lockers=10, debris=8, pipes=2, mobs=8), "final", 4, "Criogenización y experimentos"),
+     dict(lockers=10, debris=8, pipes=2, mobs=8), "intermediate", 4, "Criogenización y experimentos"),
 ]
 
 

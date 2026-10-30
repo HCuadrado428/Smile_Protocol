@@ -540,6 +540,80 @@ def whisper():
     return x
 
 
+def smiley_scream():
+    """Grito de Smiley: un chillido humano que se rompe en un rugido grave, con eco de nave vacia."""
+    r = np.random.default_rng(401)
+    n = int(SR * 2.2)
+    tt = np.arange(n) / SR
+    f = 520 + 380 * np.sin(np.clip(tt / 0.6, 0, 1) * np.pi / 2) - 520 * np.clip((tt - 0.9) / 1.0, 0, 1)
+    f = f * (1 + 0.04 * np.sin(2 * np.pi * 7 * tt))
+    ph = 2 * np.pi * np.cumsum(f) / SR
+    v = np.tanh(3 * (np.sin(ph) + 0.6 * np.sin(2 * ph + 0.3) + 0.4 * np.sin(3.01 * ph)))
+    v = bandpass(v, 1100, 0.7) + bandpass(noise(n, r), 2200, 1.2) * 0.35
+    low = np.sin(2 * np.pi * np.cumsum(70 + 20 * np.sin(2 * np.pi * 3 * tt)) / SR) * np.clip((tt - 0.6) / 0.4, 0, 1) * 0.6
+    x = (v + low) * np.clip(tt / 0.05, 0, 1) * np.clip((2.2 - tt) / 0.7, 0, 1)
+    for d, g in ((0.11, 0.35), (0.23, 0.25), (0.41, 0.15)):
+        k = int(d * SR)
+        x[k:] += x[:-k] * g
+    return x
+
+
+def smiley_whisper():
+    """Smiley susurra un nombre: voz de aire muy grave y desafinada, cerca del oido."""
+    r = np.random.default_rng(411)
+    n = int(SR * 1.8)
+    tt = np.arange(n) / SR
+    x = np.zeros(n)
+    for k, (t0, d, f0) in enumerate(((0.05, 0.35, 700), (0.42, 0.3, 1100), (0.78, 0.55, 600), (1.3, 0.35, 900))):
+        a = int(t0 * SR)
+        m = int(SR * d)
+        tm = np.linspace(0, 1, m)
+        seg = bandpass(noise(m, r), f0 * (1 - 0.2 * tm[m // 2]), 5) + bandpass(noise(m, r), f0 * 2.4, 6) * 0.5
+        x[a:a + m] += seg * np.sin(np.pi * tm) ** 1.5
+    # el mismo susurro una octava abajo, para que suene "mal"
+    idx = np.clip((np.arange(n) * 0.5).astype(int), 0, n - 1)
+    x = x + x[idx] * 0.7
+    return x * (0.8 + 0.2 * np.sin(2 * np.pi * 5.5 * tt))
+
+
+def smiley_laugh():
+    """Risa grave y lenta que se arrastra (al invocar y al llevarse al ultimo)."""
+    r = np.random.default_rng(421)
+    n = int(SR * 2.4)
+    tt = np.arange(n) / SR
+    x = np.zeros(n)
+    for k in range(7):
+        t0 = 0.12 + k * 0.28 + 0.02 * k * k
+        a = int(t0 * SR)
+        m = int(SR * 0.22)
+        tm = np.arange(m) / SR
+        f = (150 - k * 9) * (1 + 0.25 * np.exp(-tm / 0.05))
+        ph = 2 * np.pi * np.cumsum(f) / SR
+        voice = np.tanh(2.5 * (np.sin(ph) + 0.5 * np.sin(2 * ph) + 0.3 * np.sin(3 * ph)))
+        breathy = bandpass(noise(m, r), 800, 2) * 0.4
+        seg = (voice + breathy) * env(m, 0.01, 0.18)
+        x[a:a + m] += seg[:max(0, min(m, n - a))]
+    x = lowpass(x, 2500)
+    d = int(SR * 0.13)
+    x[d:] += x[:-d] * 0.35
+    return x
+
+
+def smiley_smear():
+    """Se funde en la pared o sale de ella: chapoteo espeso y un crujido de algo que se despega."""
+    r = np.random.default_rng(431)
+    n = int(SR * 1.2)
+    tt = np.arange(n) / SR
+    goo = lowpass(noise(n, r), 500) * (0.5 + 0.5 * np.sin(2 * np.pi * 9 * tt)) ** 2
+    pop = np.zeros(n)
+    for t0 in r.uniform(0.1, 1.0, 6):
+        a = int(t0 * SR)
+        m = int(SR * 0.05)
+        pop[a:a + m] += np.sin(2 * np.pi * r.uniform(180, 420) * np.arange(m) / SR) * env(m, 0.002, 0.03)
+    crack = highpass(noise(n, r), 2500) * np.exp(-np.abs(tt - 0.6) / 0.03) * 0.5
+    return (goo * 2 + pop + crack) * np.sin(np.clip(tt / 1.2, 0, 1) * np.pi)
+
+
 def main():
     for i in range(3):
         save(f"berserker/step{i + 1}", step(10 + i))
@@ -571,6 +645,15 @@ def main():
 
 
 def save_new():
+    save("smiley/scream", smiley_scream())
+    save("smiley/whisper", smiley_whisper())
+    save("smiley/laugh", smiley_laugh())
+    save("smiley/smear", smiley_smear())
+    print("sonidos de Smiley escritos en", OUT)
+
+
+def save_f18_f21():
+    """Los de las fases 18 a 21 (antes de Smiley)."""
     save("walkie/click", walkie_click())
     save("walkie/crackle", walkie_crackle())
     save("ui/marker", marker_ping())

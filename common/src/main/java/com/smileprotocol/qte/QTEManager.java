@@ -241,7 +241,7 @@ public final class QTEManager {
             p.hurtMarked = true;
         } else if ("DEATH".equalsIgnoreCase(s.fail)) {
             // muerte directa: con la secuencia de muerte del mob si la tiene (README 18.1)
-            if (!(mob instanceof SPMonster m && com.smileprotocol.sequence.SequenceManager.start(m, p, m.def().killSequence()))) {
+            if (!(mob instanceof SPMonster m && com.smileprotocol.sequence.SequenceManager.start(m, p, m.killSequenceFor(p)))) {
                 com.smileprotocol.downed.DeathManager.die(p, "agarre");
             }
         } else {

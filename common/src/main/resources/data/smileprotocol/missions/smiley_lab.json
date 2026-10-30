@@ -1,0 +1,40 @@
+{
+  "zone": "smileprotocol:smiley_lab",
+  "steps": [
+    {
+      "type": "INSERT_FUSES",
+      "circuit": "gen1",
+      "text": "smileprotocol.mission.smiley.gen1"
+    },
+    {
+      "type": "INSERT_FUSES",
+      "circuit": "gen2",
+      "text": "smileprotocol.mission.smiley.gen2"
+    },
+    {
+      "type": "INSERT_FUSES",
+      "circuit": "gen3",
+      "text": "smileprotocol.mission.smiley.gen3",
+      "on_complete": [
+        {
+          "type": "boss",
+          "text": "elevator"
+        }
+      ]
+    },
+    {
+      "type": "SURVIVE",
+      "seconds": 45,
+      "text": "smileprotocol.mission.smiley.survive",
+      "on_complete": [
+        {
+          "type": "boss",
+          "text": "arrive"
+        }
+      ]
+    },
+    {
+      "type": "ESCAPE"
+    }
+  ]
+}
