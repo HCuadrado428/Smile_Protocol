@@ -246,7 +246,7 @@ public final class ClientSelfTest {
         SHOTS.add(() -> wait = 40);
         SHOTS.add(() -> server.execute(() -> {
             boolean ok = level.getEntitiesOfClass(net.minecraft.world.entity.item.ItemEntity.class, sp.getBoundingBox().inflate(30),
-                    e -> e.getItem().is(com.smileprotocol.registry.ModItems.CAN.get())).size() > 0;
+                    ie -> ie.getItem().is(com.smileprotocol.registry.ModItems.CAN.get())).size() > 0;
             log((ok ? "OK" : "FALLO") + " la lata cae y se puede recoger");
             com.smileprotocol.downed.DownedManager.down(sp, "prueba");
             use(sp, com.smileprotocol.registry.ModItems.ADRENALINE.get(), com.smileprotocol.network.Payloads.UseItem.START);
