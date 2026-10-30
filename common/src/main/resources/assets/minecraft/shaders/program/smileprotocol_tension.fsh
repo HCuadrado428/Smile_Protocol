@@ -3,7 +3,7 @@
 // Tension (README 21): aberracion cromatica, distorsion, desaturacion, grano y vineta que crecen
 // con un mob cerca, en un QTE o derribado. Intensity 0..1; Pulse 0..1 sigue el latido.
 
-uniform sampler2D InSampler;
+uniform sampler2D DiffuseSampler;
 uniform vec2 InSize;
 uniform float Time;
 uniform float Intensity;
@@ -29,9 +29,9 @@ void main() {
     // aberracion cromatica radial
     vec2 off = c * (0.004 + 0.016 * k) * (0.35 + r) * k;
     vec3 col;
-    col.r = texture(InSampler, uv + off).r;
-    col.g = texture(InSampler, uv).g;
-    col.b = texture(InSampler, uv - off).b;
+    col.r = texture(DiffuseSampler, uv + off).r;
+    col.g = texture(DiffuseSampler, uv).g;
+    col.b = texture(DiffuseSampler, uv - off).b;
     // desaturacion hacia un tono enfermizo
     float g = dot(col, vec3(0.299, 0.587, 0.114));
     col = mix(col, vec3(g) * vec3(1.06, 0.97, 0.88), 0.5 * k);
