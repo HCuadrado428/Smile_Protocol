@@ -351,7 +351,9 @@ public final class HudOverlay {
     /** Derribado: todo se oscurece y enrojece, y una barra marca lo que queda antes de desangrarse. */
     private static void renderDowned(GuiGraphics g, Font font, int w, int h) {
         float beat = (float) Math.exp(-Math.pow(((Util.getMillis() / 1000.0 * 1.6) % 1.0 - 0.3) * 10, 2));
-        g.fill(0, 0, w, h, 0x30200000);
+        // (sin g.fill antes: el lote de fill cambia el estado y la vineta salia opaca)
+        RenderSystem.setShaderColor(0.25f, 0f, 0f, 0.6f);
+        g.blitSprite(VIGNETTE, 0, 0, w, h);
         RenderSystem.setShaderColor(1f, 1f, 1f, 0.3f + 0.25f * beat);
         g.blitSprite(BLOOD_VIGNETTE, -6, -6, w + 12, h + 12);
         RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
