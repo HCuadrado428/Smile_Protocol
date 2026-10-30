@@ -311,9 +311,13 @@ public final class ClientSelfTest {
 
         SHOTS.add(() -> server.execute(() -> level.setBlockAndUpdate(BlockPos.containing(P), com.smileprotocol.registry.ModBlocks.building("lab_crate").defaultBlockState())));
         scene(server, level, sp, null, chest, P.add(-3, 0, 0), -90f, null);
-        record(mc, "jugador_vault", 32, k -> {
-            o.keyUp.setDown(k < 26);
-            o.keyJump.setDown(k == 5 || k == 6);
+        boolean[] jumped = {false};
+        record(mc, "jugador_vault", 36, k -> {
+            if (k == 0) jumped[0] = false;
+            o.keyUp.setDown(k < 30);
+            boolean near = mc.player != null && mc.player.getX() > P.x - 1.7;
+            o.keyJump.setDown(near && !jumped[0]);
+            if (near && !jumped[0] && k > 0) jumped[0] = mc.player.getX() > P.x - 1.5;
         });
         SHOTS.add(() -> {
             o.keyUp.setDown(false);
@@ -349,7 +353,7 @@ public final class ClientSelfTest {
             SHOTS.add(() -> server.execute(() -> com.smileprotocol.motion.MotionManager.clearAction(sp, com.smileprotocol.motion.Action.INTERACT)));
         }
 
-        SHOTS.add(() -> follow(-2, new Vec3(0.6, 1.0, 2.4), 0.25));
+        SHOTS.add(() -> follow(-2, new Vec3(1.4, 1.5, 3.0), 0.3));
         scene(server, level, sp, null, chest, P.add(-2.5, 0, 0), -90f, () -> com.smileprotocol.downed.DownedManager.down(sp, "grabacion"));
         record(mc, "jugador_derribado", 70, k -> o.keyUp.setDown(true));
         SHOTS.add(() -> {

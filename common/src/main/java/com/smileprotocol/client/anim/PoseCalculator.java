@@ -252,13 +252,13 @@ public final class PoseCalculator {
         pose.setPos(LEFT_ARM, 5f, shoulder + 0.5f - 0.8f * lift2, 0.5f);
         pose.bend(RIGHT_ARM, 0, -0.35f - 0.4f * lift);
         pose.bend(LEFT_ARM, 0, -0.35f - 0.4f * lift2);
-        // Piernas: de rodillas, hacia atras; la contraria a cada brazo
-        pose.setRot(RIGHT_LEG, 0.62f + 0.45f * s, 0, 0.05f);
-        pose.setRot(LEFT_LEG, 0.62f - 0.45f * s, 0, -0.05f);
-        pose.setPos(RIGHT_LEG, -1.9f, shoulder + 0.8f - 0.8f * lift2, 11.2f);
-        pose.setPos(LEFT_LEG, 1.9f, shoulder + 0.8f - 0.8f * lift, 11.2f);
-        pose.bend(RIGHT_LEG, 0, 0.9f);
-        pose.bend(LEFT_LEG, 0, 0.9f);
+        // Piernas: de rodillas (muslo hacia abajo, espinilla apoyada hacia atras); la contraria a cada brazo
+        pose.setRot(RIGHT_LEG, -0.05f + 0.4f * s, 0, 0.06f);
+        pose.setRot(LEFT_LEG, -0.05f - 0.4f * s, 0, -0.06f);
+        pose.setPos(RIGHT_LEG, -1.9f, shoulder + 2.6f - 1.0f * lift2, 10.6f);
+        pose.setPos(LEFT_LEG, 1.9f, shoulder + 2.6f - 1.0f * lift, 10.6f);
+        pose.bend(RIGHT_LEG, 0, 1.5f - 0.3f * lift2);
+        pose.bend(LEFT_LEG, 0, 1.5f - 0.3f * lift);
     }
 
     // Acciones ----------------------------------------------------------------------------------
