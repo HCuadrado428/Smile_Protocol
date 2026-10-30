@@ -41,10 +41,10 @@ public final class ModEntities {
                     MobCategory.MONSTER).sized(0.7f, 1.95f).eyeHeight(1.8f).clientTrackingRange(12).fireImmune()
                     .build("rastreador"));
 
-    /** El Ahorcado (fase 21): cadaver amortajado de unos 2 bloques que cuelga del techo. */
+    /** El Ahorcado (fase 21): muneco de 1,2 bloques que cuelga del techo. */
     public static final Supplier<EntityType<com.smileprotocol.entity.Ahorcado>> AHORCADO = Services.PLATFORM.register(
             BuiltInRegistries.ENTITY_TYPE, "ahorcado", () -> EntityType.Builder.of(com.smileprotocol.entity.Ahorcado::new,
-                    MobCategory.MONSTER).sized(0.6f, 1.9f).eyeHeight(1.6f).clientTrackingRange(10).fireImmune()
+                    MobCategory.MONSTER).sized(0.6f, 1.2f).eyeHeight(1.0f).clientTrackingRange(10).fireImmune()
                     .build("ahorcado"));
 
     /** Bengala encendida (fase 13). */
