@@ -404,8 +404,21 @@ public final class ClientSelfTest {
             boolean ok = pac[0] != null && pac[0].jumps() > 0 && pac[0].distanceTo(sp) < pacDist[0] - 1;
             log((ok ? "OK" : "FALLO") + " paciente avanza cuando no lo miras (saltos " + (pac[0] == null ? -1 : pac[0].jumps())
                     + ", distancia " + String.format(java.util.Locale.ROOT, "%.1f -> %.1f", pacDist[0], pac[0] == null ? 0 : pac[0].distanceTo(sp)) + ")");
-            if (pac[0] != null) pac[0].debugForce(pac[0].poseId());
-            SPSessionManager.teleport(sp, level, cam, 0f, -14f);
+            if (pac[0] != null) {
+                // de cara a el a 2,5 bloques, mirandole a la sonrisa
+                pac[0].debugForce(0);
+                Vec3 m = pac[0].position();
+                Vec3 at = m.add(0, 0, -2.5);
+                if (!level.noCollision(sp, sp.getBoundingBox().move(at.subtract(sp.position())))) at = m.add(0, 0, 2.5);
+                Vec3 face = m.add(0, 3.35, 0);
+                double dx = face.x - at.x, dz = face.z - at.z, dy = face.y - (at.y + sp.getEyeHeight());
+                float yaw = (float) Math.toDegrees(Math.atan2(-dx, dz));
+                float pitch = (float) -Math.toDegrees(Math.atan2(dy, Math.sqrt(dx * dx + dz * dz)));
+                pac[0].setYRot(yaw + 180f);
+                pac[0].setYBodyRot(yaw + 180f);
+                pac[0].setYHeadRot(yaw + 180f);
+                SPSessionManager.teleport(sp, level, at, yaw, pitch);
+            }
         }));
         SHOTS.add(() -> wait = 15);
         SHOTS.add(() -> grab(mc, "36_paciente_cerca"));
