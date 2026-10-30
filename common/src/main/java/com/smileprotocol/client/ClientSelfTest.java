@@ -453,12 +453,20 @@ public final class ClientSelfTest {
             log((ok ? "OK" : "FALLO") + " rastreador te ve y persigue (" + (ras[0] == null ? "-" : ras[0].state()) + ")");
         }));
         SHOTS.add(() -> grab(mc, "37_rastreador"));
+        // de cerca, buscando con la palma del ojo en alto
         SHOTS.add(() -> server.execute(() -> {
+            com.smileprotocol.qte.QTEManager.clear(sp);
             if (ras[0] != null) {
-                com.smileprotocol.qte.QTEManager.clear(sp);
-                ras[0].discard();
+                ras[0].debugForce(com.smileprotocol.entity.Rastreador.State.SEARCH);
+                ras[0].moveTo(cam.x, cam.y, cam.z + 3.2, 180f, 0f);
+                ras[0].setYBodyRot(180f);
+                ras[0].setYHeadRot(180f);
             }
+            SPSessionManager.teleport(sp, level, cam, 0f, -10f);
         }));
+        SHOTS.add(() -> wait = 25);
+        SHOTS.add(() -> grab(mc, "38_rastreador_cerca"));
+        SHOTS.add(() -> server.execute(() -> { if (ras[0] != null) ras[0].discard(); }));
         // 9. Fase 12: levantarse tras la reanimacion, muerte instantanea en primera persona y muerte final
         SHOTS.add(() -> server.execute(() -> {
             com.smileprotocol.qte.QTEManager.clear(sp);
