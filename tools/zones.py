@@ -392,7 +392,10 @@ class Floor:
         for z in range(z0 + 2, cz):
             self.setp(x0 + 3, 1, z, "minecraft:polished_diorite")
         for x in range(x0 + 4, x0 + 3 + min(8, x1 - x0 - 6), 2):
-            self.setp(x, 1, cz - 1, "minecraft:spruce_stairs", facing="south")
+            self.furn("office_chair", x, cz - 1, "south")
+        self.furn("workstation", x0 + 5, z0 + 1, "south")
+        self.furn("filing_cabinet", x0 + 6, z0 + 1, "south")
+        self.furn("filing_cabinet", x0 + 7, z0 + 1, "south")
         # sala de espera: filas de sillas mirando al mostrador
         for z in range(cz + 3, z1 - 1, 3):
             for x in range(x0 + 2, x1 - 1):
@@ -418,6 +421,8 @@ class Floor:
                         break
                 if r.random() < 0.08:
                     self.setp(x, 1, z + 2, f"{MOD}:lab_crate")        # caida en el pasillo
+                elif r.random() < 0.04:
+                    self.furn("supply_box", x, z + 2, "north")
         for x in list(xs)[2::6]:
             for z in list(zs)[2::4]:
                 if not self.solid(x, 4, z):
@@ -438,10 +443,8 @@ class Floor:
                         self.setp(bx + k, y, bz, "minecraft:light_gray_wool")
                         if k < 2:
                             self.setp(bx, y, bz + k + 1, "minecraft:light_gray_wool")
-                self.setp(bx + 1, 1, bz + 1, "minecraft:spruce_slab", type="top")
-                self.setp(bx + 2, 1, bz + 1, "minecraft:spruce_stairs", facing="north")
-                if self.rnd.random() < 0.5:
-                    self.t.set(bx + 1, 2, bz + 1, "minecraft:flower_pot")
+                self.furn(self.rnd.choice(["workstation", "desk"]), bx + 1, bz + 1, "south")
+                self.furn("office_chair", bx + 1, bz + 2, "north")
 
     def sp_coldroom(self, room):
         """Camaras frigorificas: las paredes forradas de nichos de acero, mesas de autopsia en el
@@ -454,6 +457,7 @@ class Floor:
                 for y in (1, 2, 3):
                     self.t.set(x, y, z, "minecraft:iron_block" if (x + y) % 2 else f"{MOD}:lab_metal_wall")
                 self.used.add((x, z))
+        self.wall_furn(room, ["trolley", "sink", "medical_cabinet"], 4)
         for x in range(x0 + 3, x1 - 2, 4):
             self.gurney(x, (z0 + z1) // 2 - 1, "south")
             if (x, (z0 + z1) // 2 + 2) not in self.used:
@@ -485,6 +489,7 @@ class Floor:
         for x in range(room["x0"], room["x1"] + 1):
             if not self.solid(x, 4, room["z0"] + 1):
                 self.t.set(x, 4, room["z0"] + 1, f"{MOD}:lab_pipes")
+        self.wall_furn(room, ["tool_cart", "metal_shelf", "supply_box"], 4)
 
     def sp_garden(self, room):
         """Jardin del invernadero, comido por la vegetacion: parterres de tierra con helechos y
@@ -541,6 +546,9 @@ class Floor:
             self.used.add((x, z))
         for dx in (0, 1):
             self.setp(cx + dx, 1, cz, f"{MOD}:lab_server")
+        self.furn("workstation", cx, cz + 1, "south")
+        self.furn("office_chair", cx, cz + 2, "north")
+        self.wall_furn(room, ["medical_cabinet", "iv_stand"], 3)
         for (dx, dz) in ((-rad - 1, -rad - 1), (rad + 1, -rad - 1), (-rad - 1, rad + 1), (rad + 1, rad + 1)):
             x, z = cx + dx, cz + dz
             if room["x0"] < x < room["x1"] and room["z0"] < z < room["z1"] and (x, z) not in self.used:
@@ -550,6 +558,23 @@ class Floor:
             x, z = self.rnd.randint(room["x0"], room["x1"]), self.rnd.randint(room["z0"], room["z1"])
             if self.free(x, z):
                 self.t.set(x, 1, z, "minecraft:snow", layers=1)
+
+    SEARCHABLE = {"desk", "filing_cabinet", "medical_cabinet", "tool_cart", "supply_box"}
+
+    def furn(self, name, x, z, f):
+        """Mueble (fase 24, tools/furniture.py) en el suelo, con el frente hacia f."""
+        if not self.free(x, z):
+            return False
+        props = {"facing": f}
+        if name in self.SEARCHABLE:
+            props["open"] = False
+        self.t.set(x, 1, z, f"{MOD}:{name}", **props)
+        self.used.add((x, z))
+        return True
+
+    def wall_furn(self, room, names, n):
+        """n muebles contra la pared de la sala, eligiendo al azar de la lista."""
+        return self.take(self.wall_spots(room), n, lambda x, z, f: self.furn(self.rnd.choice(names), x, z, f))
 
     def furnish(self, room):
         kind, r = room["kind"], self.rnd
@@ -566,14 +591,19 @@ class Floor:
                         self.put(x, z, "minecraft:smooth_stone_slab", type="top")
             self.take(spots, 2, lambda x, z, f: self.tall(f"{MOD}:curtain", x, z, f))
             self.take(self.wall_spots(room), 1, lambda x, z, f: self.tall(f"{MOD}:locker", x, z, f))
-            self.take(self.wall_spots(room), 2, lambda x, z, f: self.put(x, z, "minecraft:brewing_stand", y=1))
+            self.take(self.wall_spots(room), 1, lambda x, z, f: self.put(x, z, "minecraft:brewing_stand", y=1))
+            self.wall_furn(room, ["workstation"], 1)
+            self.wall_furn(room, ["specimen_shelf", "metal_shelf"], 2)
+            self.wall_furn(room, ["sink"], 1)
+            self.wall_furn(room, ["medical_cabinet", "filing_cabinet"], 1)
         elif kind == "office":
             for x in range(x0 + 1, x1, 3):
                 for z in range(z0 + 1, z1, 3):
-                    if r.random() < 0.7 and self.put(x, z, "minecraft:spruce_slab", type="top"):
-                        self.put(x, z + 1, "minecraft:spruce_stairs", facing="north")
-            self.take(spots, 2, lambda x, z, f: self.tall(f"{MOD}:wardrobe", x, z, f))
-            self.take(self.wall_spots(room), 2, lambda x, z, f: self.put(x, z, "minecraft:bookshelf"))
+                    if r.random() < 0.7 and self.furn(r.choice(["desk", "desk", "workstation"]), x, z, "north"):
+                        self.furn("office_chair", x, z + 1, "north")
+            self.take(spots, 1, lambda x, z, f: self.tall(f"{MOD}:wardrobe", x, z, f))
+            self.wall_furn(room, ["filing_cabinet"], 2)
+            self.take(self.wall_spots(room), 1, lambda x, z, f: self.put(x, z, "minecraft:bookshelf"))
         elif kind == "storage":
             for x in range(x0 + 1, x1, 3):
                 for z in range(z0 + 1, z1):
@@ -581,6 +611,8 @@ class Floor:
                         if r.random() < 0.6:
                             self.t.set(x, 2, z, f"{MOD}:lab_crate")
             self.take(spots, 2, lambda x, z, f: self.tall(f"{MOD}:waste_container", x, z, f))
+            self.wall_furn(room, ["metal_shelf"], 3)
+            self.wall_furn(room, ["supply_box", "tool_cart"], 2)
         elif kind == "morgue":
             for x in range(x0 + 1, x1, 2):
                 if r.random() < 0.5:
@@ -588,14 +620,19 @@ class Floor:
                 else:
                     self.gurney(x, z1 - 1, "north")
             self.take(spots, 2, lambda x, z, f: self.tall(f"{MOD}:locker", x, z, f))
+            self.wall_furn(room, ["trolley"], 2)
+            self.wall_furn(room, ["sink", "medical_cabinet"], 2)
         elif kind == "lockers":
             self.take(spots, 8, lambda x, z, f: self.tall(f"{MOD}:locker", x, z, f))
+            self.wall_furn(room, ["supply_box", "sink"], 1)
             for x in range(x0 + 2, x1 - 1, 3):
                 self.put(x, (z0 + z1) // 2, "minecraft:spruce_slab", type="bottom")
         elif kind == "ward":
             for x in range(x0 + 1, x1, 3):
                 self.gurney(x, z0 + 1, "south")
                 self.tall(f"{MOD}:curtain", x + 1, z0 + 1, "east")
+                self.furn("iv_stand", x + 2, z0 + 1, "south")
+            self.wall_furn(room, ["medical_cabinet", "trolley", "wheelchair"], 3)
         elif kind == "server":
             for x in range(x0 + 1, x1, 2):
                 for z in range(z0 + 1, z1, 1):
@@ -603,6 +640,8 @@ class Floor:
                         self.t.fill(x, 1, z, x, 2, z, f"{MOD}:lab_server")
                         self.used.add((x, z))
             self.take(self.wall_spots(room), 1, lambda x, z, f: self.tall(f"{MOD}:locker", x, z, f))
+            self.wall_furn(room, ["workstation"], 2)
+            self.wall_furn(room, ["tool_cart"], 1)
         elif kind == "machine":
             for x in range(x0 + 2, x1 - 1, 4):
                 for z in range(z0 + 2, z1 - 1, 4):
@@ -612,11 +651,15 @@ class Floor:
                         self.t.set(x, 4, z, "minecraft:chain", axis="y")
                         self.used.add((x, z))
             self.take(spots, 1, lambda x, z, f: self.tall(f"{MOD}:waste_container", x, z, f))
+            self.wall_furn(room, ["tool_cart"], 2)
+            self.wall_furn(room, ["metal_shelf", "supply_box"], 2)
         elif kind == "break":
             for x in range(x0 + 2, x1 - 1, 3):
                 z = (z0 + z1) // 2
-                self.put(x, z, "minecraft:spruce_slab", type="top")
+                if self.put(x, z, "minecraft:spruce_slab", type="top"):
+                    self.furn("office_chair", x, z + 1, "north")
             self.take(spots, 1, lambda x, z, f: self.tall(f"{MOD}:wardrobe", x, z, f))
+            self.wall_furn(room, ["sink", "metal_shelf"], 2)
 
     def bloody(self, amount):
         """Sangre en el suelo, huellas y manchas en las paredes y alguna pintada (texturas: tools/textures_lab.py)."""
@@ -749,22 +792,56 @@ class Floor:
                 return True
         return False
 
+    PASS = ("_door", "slab", "carpet", "snow", "fern", "dead_bush", "blood_floor", "wall_decal", "wall_writing", "curtain")
+
+    def reach(self, room):
+        """Celdas de la sala a las que se llega andando desde sus puertas (los muebles pueden encerrar huecos)."""
+        from collections import deque
+        inward = {"north": (0, 1), "south": (0, -1), "west": (1, 0), "east": (-1, 0)}
+
+        def open_(x, z):
+            for y in (1, 2):
+                b = self.t.get(x, y, z)
+                if b != "minecraft:air" and not any(k in b for k in self.PASS):
+                    return False
+            return True
+
+        start = []
+        for d in room.get("doors") or ([(*room["door"], room["side"])] if room.get("door") else []):
+            x, z, f = d
+            dx, dz = inward.get(f, (0, 0))
+            start.append((x + dx, z + dz))
+        seen = {c for c in start if open_(*c)}
+        q = deque(seen)
+        while q:
+            x, z = q.popleft()
+            for dx, dz in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+                n = (x + dx, z + dz)
+                if n in seen or not (room["x0"] <= n[0] <= room["x1"] and room["z0"] <= n[1] <= room["z1"]):
+                    continue
+                if open_(*n):
+                    seen.add(n)
+                    q.append(n)
+        return seen
+
     def fuse_spots(self, per_room=1):
         for room in self.rooms:
+            ok = self.reach(room)
             for _ in range(per_room):
                 for _ in range(20):
                     x = self.rnd.randint(room["x0"], room["x1"])
                     z = self.rnd.randint(room["z0"], room["z1"])
-                    if self.free(x, z):
+                    if self.free(x, z) and (x, z) in ok:
                         self.t.marker(x, 1, z, "sp:fuse")
                         self.used.add((x, z))
                         break
 
     def item_in(self, room, spec):
+        ok = self.reach(room)
         for _ in range(40):
             x = self.rnd.randint(room["x0"], room["x1"])
             z = self.rnd.randint(room["z0"], room["z1"])
-            if self.free(x, z):
+            if self.free(x, z) and (x, z) in ok:
                 self.t.marker(x, 1, z, f"sp:item {spec}")
                 self.used.add((x, z))
                 return True

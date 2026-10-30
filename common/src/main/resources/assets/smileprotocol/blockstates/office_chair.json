@@ -1,0 +1,19 @@
+{
+ "variants": {
+  "facing=south": {
+   "model": "smileprotocol:block/office_chair"
+  },
+  "facing=west": {
+   "model": "smileprotocol:block/office_chair",
+   "y": 90
+  },
+  "facing=north": {
+   "model": "smileprotocol:block/office_chair",
+   "y": 180
+  },
+  "facing=east": {
+   "model": "smileprotocol:block/office_chair",
+   "y": 270
+  }
+ }
+}

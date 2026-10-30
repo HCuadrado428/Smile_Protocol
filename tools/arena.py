@@ -180,6 +180,20 @@ def build():
         t.set(x, 1, z, lab("lab_crate"))
     for (x, z) in ((-3, 15), (3, 36), (11, 25)):
         t.set(x, 1, z, lab("lab_debris"))
+    # Muebles (fase 24): puestos de control, estanterias y carros junto a los generadores
+    furniture = [("workstation", -4, 1, 39, "north"), ("workstation", -3, 1, 39, "north"), ("office_chair", -4, 1, 38, "north"),
+                 ("tool_cart", -13, 1, 39, "north"), ("supply_box", -14, 1, 37, "east"), ("metal_shelf", 18, 1, 21, "west"),
+                 ("metal_shelf", 18, 1, 22, "west"), ("specimen_shelf", -18, 1, 14, "east"), ("trolley", 8, 1, 30, "west"),
+                 ("medical_cabinet", -18, 1, 20, "east"), ("filing_cabinet", 18, 1, 33, "west"),
+                 ("tool_cart", 17, L1 + 1, 4, "west"), ("supply_box", 17, L1 + 1, 10, "west"), ("metal_shelf", -18, L1 + 1, 26, "east"),
+                 ("tool_cart", -17, L2 + 1, 29, "east"), ("workstation", -17, L2 + 1, 22, "east"), ("supply_box", 18, L2 + 1, 30, "west")]
+    for name, x, y, z, f in furniture:
+        if t.solid(x, y, z):
+            continue
+        props = {"facing": f}
+        if name in ("desk", "filing_cabinet", "medical_cabinet", "tool_cart", "supply_box"):
+            props["open"] = False
+        t.set(x, y, z, lab(name), **props)
     # tuberias por las paredes
     for z in range(Z0, Z1 + 1):
         for x in (-X, X):

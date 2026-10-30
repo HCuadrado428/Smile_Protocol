@@ -1,0 +1,75 @@
+{
+  "_comment": "Botin de los muebles que se registran (fase 24). item: ZoneSetup.itemFor o nothing; kinds: muebles donde puede salir.",
+  "entries": [
+    {
+      "item": "can",
+      "weight": 18
+    },
+    {
+      "item": "bottle",
+      "weight": 14
+    },
+    {
+      "item": "battery",
+      "weight": 10
+    },
+    {
+      "item": "medkit",
+      "weight": 5
+    },
+    {
+      "item": "flare",
+      "weight": 5
+    },
+    {
+      "item": "adrenaline",
+      "weight": 2
+    },
+    {
+      "item": "fuse_blown",
+      "weight": 4
+    },
+    {
+      "item": "nothing",
+      "weight": 150
+    },
+    {
+      "item": "medkit",
+      "weight": 10,
+      "kinds": [
+        "medical_cabinet"
+      ]
+    },
+    {
+      "item": "adrenaline",
+      "weight": 5,
+      "kinds": [
+        "medical_cabinet"
+      ]
+    },
+    {
+      "item": "battery",
+      "weight": 8,
+      "kinds": [
+        "tool_cart",
+        "supply_box"
+      ]
+    },
+    {
+      "item": "flare",
+      "weight": 6,
+      "kinds": [
+        "supply_box",
+        "tool_cart"
+      ]
+    },
+    {
+      "item": "battery",
+      "weight": 8
+    },
+    {
+      "item": "fuse_blown",
+      "weight": 4
+    }
+  ]
+}

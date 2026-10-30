@@ -131,7 +131,7 @@ public final class ZoneSetup {
     }
 
     /** {@code key:red}, {@code keycard:2}, {@code wheel}, {@code fuse:b}, {@code fuse_blown}. */
-    static ItemStack itemFor(String spec) {
+    public static ItemStack itemFor(String spec) {
         String[] parts = spec.split(":");
         String id = parts[0];
         String arg = parts.length > 1 ? parts[1] : "";

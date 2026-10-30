@@ -65,6 +65,7 @@ public final class ModItems {
         block("wall_writing", ModBlocks.WALL_WRITING);
         block("vent_grille", ModBlocks.VENT_GRILLE);
         block("vent_fan", ModBlocks.VENT_FAN);
+        for (String n : ModBlocks.FURNITURE.keySet()) block(n, ModBlocks.FURNITURE.get(n));
     }
 
     private ModItems() {}

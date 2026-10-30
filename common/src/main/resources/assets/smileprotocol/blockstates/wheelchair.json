@@ -1,0 +1,19 @@
+{
+ "variants": {
+  "facing=south": {
+   "model": "smileprotocol:block/wheelchair"
+  },
+  "facing=west": {
+   "model": "smileprotocol:block/wheelchair",
+   "y": 90
+  },
+  "facing=north": {
+   "model": "smileprotocol:block/wheelchair",
+   "y": 180
+  },
+  "facing=east": {
+   "model": "smileprotocol:block/wheelchair",
+   "y": 270
+  }
+ }
+}

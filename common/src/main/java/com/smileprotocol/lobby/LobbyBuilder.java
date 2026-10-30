@@ -129,6 +129,12 @@ public final class LobbyBuilder {
         return ModBlocks.building("lab_plaster").defaultBlockState();
     }
 
+    /** Mueble (fase 24) mirando hacia {@code facing}. */
+    private void furniture(int x, int y, int z, String name, Direction facing) {
+        set(x, y, z, ModBlocks.furniture(name).defaultBlockState()
+                .setValue(net.minecraft.world.level.block.HorizontalDirectionalBlock.FACING, facing));
+    }
+
     private static BlockState stairs(Block b, Direction facing) {
         return b.defaultBlockState().setValue(StairBlock.FACING, facing);
     }
@@ -271,11 +277,12 @@ public final class LobbyBuilder {
                 .setValue(net.minecraft.world.level.block.BellBlock.ATTACHMENT, net.minecraft.world.level.block.state.properties.BellAttachType.FLOOR)
                 .setValue(net.minecraft.world.level.block.BellBlock.FACING, Direction.EAST));
         // Sillas del personal (vacias) y archivadores
-        set(5, 1, 31, stairs(Blocks.DARK_OAK_STAIRS, Direction.EAST));
-        set(5, 1, 36, stairs(Blocks.DARK_OAK_STAIRS, Direction.EAST).setValue(StairBlock.FACING, Direction.NORTH));
-        set(2, 1, 33, ModBlocks.building("lab_crate"));
-        set(2, 2, 33, ModBlocks.building("lab_crate"));
-        set(2, 1, 35, Blocks.BOOKSHELF);
+        furniture(5, 1, 31, "office_chair", Direction.EAST);
+        furniture(5, 1, 36, "office_chair", Direction.EAST);
+        furniture(3, 1, 33, "workstation", Direction.EAST);
+        furniture(1, 1, 31, "filing_cabinet", Direction.EAST);
+        furniture(1, 1, 37, "filing_cabinet", Direction.EAST);
+        furniture(2, 1, 35, "metal_shelf", Direction.EAST);
         hangingSign(5, 7, 34, 4, "RECEPCIÓN", "Información", "y admisión", "");
         wallSign(8, 1, 34, Direction.EAST, "Por favor,", "espere su", "turno", "Gracias :)");
         // Logotipo de la empresa, metido en la pared: la cara sonriente, un ojo que gotea rojo
@@ -364,11 +371,7 @@ public final class LobbyBuilder {
         for (int z : new int[]{5, 9, 13}) {
             set(36, 1, z, gurney.setValue(com.smileprotocol.block.HideBlock.HALF, DoubleBlockHalf.LOWER));
             set(37, 1, z, gurney.setValue(com.smileprotocol.block.HideBlock.HALF, DoubleBlockHalf.UPPER));
-            // gotero
-            set(35, 1, z - 1, Blocks.IRON_BARS);
-            set(35, 2, z - 1, Blocks.IRON_BARS);
-            set(35, 3, z - 1, Blocks.LANTERN.defaultBlockState()
-                    .setValue(net.minecraft.world.level.block.LanternBlock.HANGING, false));
+            furniture(35, 1, z - 1, "iv_stand", Direction.EAST);
             if (z < 13) {
                 for (int x = 34; x <= 38; x++) {
                     set(x, 1, z + 2, curtain.setValue(com.smileprotocol.block.HideBlock.HALF, DoubleBlockHalf.LOWER));
@@ -376,9 +379,10 @@ public final class LobbyBuilder {
                 }
             }
         }
-        // Silla de ruedas
-        set(31, 1, 14, stairs(Blocks.SMOOTH_QUARTZ_STAIRS, Direction.EAST));
-        set(32, 1, 14, Blocks.IRON_BARS.defaultBlockState());
+        furniture(31, 1, 14, "wheelchair", Direction.EAST);
+        furniture(WIDTH - 2, 1, 2, "medical_cabinet", Direction.WEST);
+        furniture(33, 1, 2, "trolley", Direction.SOUTH);
+        furniture(32, 1, 2, "sink", Direction.SOUTH);
         hangingSign(34, 7, 9, 12, "OBSERVACIÓN", "", "Silencio,", "por favor");
         // Urgencias: puerta de seguridad cerrada en la pared este, precintada
         BlockState door = ModBlocks.SECURITY_DOOR.get().defaultBlockState()
@@ -418,6 +422,7 @@ public final class LobbyBuilder {
         set(WIDTH - 2, 1, 37, Blocks.SMOKER.defaultBlockState()
                 .setValue(net.minecraft.world.level.block.SmokerBlock.FACING, Direction.WEST));     // cafetera
         set(WIDTH - 2, 1, 38, Blocks.CAULDRON);
+        furniture(WIDTH - 2, 1, 30, "sink", Direction.WEST);
         hangingSign(33, 7, 35, 0, "CAFETERÍA", "", "Hoy: nada", "");
     }
 
@@ -448,8 +453,10 @@ public final class LobbyBuilder {
         set(39, 2, z0 + 1, Blocks.LIME_STAINED_GLASS);
         set(39, 3, z0 + 2, Blocks.GREEN_STAINED_GLASS);
         set(39, 2, z0 + 3, Blocks.LIME_STAINED_GLASS);
-        fill(38, 1, z0 + 1, 38, 1, z0 + 3, ModBlocks.building("lab_metal_wall"));
-        set(37, 1, z0 + 2, stairs(Blocks.DARK_OAK_STAIRS, Direction.EAST));
+        furniture(38, 1, z0 + 1, "filing_cabinet", Direction.WEST);
+        furniture(38, 1, z0 + 2, "workstation", Direction.WEST);
+        furniture(38, 1, z0 + 3, "desk", Direction.WEST);
+        furniture(37, 1, z0 + 2, "office_chair", Direction.EAST);
         wallSign(31, 3, z0 + 3, Direction.WEST, "SEGURIDAD", "", "Muestre su", "tarjeta");
         set(36, 2, z1, Blocks.POTTED_DEAD_BUSH);
     }

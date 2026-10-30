@@ -84,6 +84,24 @@ public final class ModBlocks {
         }
     }
 
+    // Muebles (fase 24): decoracion y muebles que se registran (tools/furniture.py)
+    public static final java.util.Map<String, Supplier<Block>> FURNITURE = new java.util.LinkedHashMap<>();
+
+    static {
+        for (com.smileprotocol.block.FurnitureDefs.Def d : com.smileprotocol.block.FurnitureDefs.ALL) {
+            String n = d.name();
+            SoundType snd = n.contains("desk") || n.contains("specimen") ? SoundType.WOOD
+                    : n.contains("chair") || n.contains("wheel") ? SoundType.WOOL : SoundType.METAL;
+            FURNITURE.put(n, ModBlocks.<Block>register(n, () -> d.searchable()
+                    ? new com.smileprotocol.block.SearchableFurnitureBlock(lab(snd).noOcclusion(), d.box(), n)
+                    : new com.smileprotocol.block.FurnitureBlock(lab(snd).noOcclusion(), d.box())));
+        }
+    }
+
+    public static Block furniture(String name) {
+        return FURNITURE.get(name).get();
+    }
+
     public static final Supplier<net.minecraft.world.level.block.SlabBlock> LAB_DEBRIS = register("lab_debris",
             () -> new net.minecraft.world.level.block.SlabBlock(steel(SoundType.GRAVEL)));
 

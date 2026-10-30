@@ -1,0 +1,19 @@
+{
+ "variants": {
+  "facing=south": {
+   "model": "smileprotocol:block/trolley"
+  },
+  "facing=west": {
+   "model": "smileprotocol:block/trolley",
+   "y": 90
+  },
+  "facing=north": {
+   "model": "smileprotocol:block/trolley",
+   "y": 180
+  },
+  "facing=east": {
+   "model": "smileprotocol:block/trolley",
+   "y": 270
+  }
+ }
+}

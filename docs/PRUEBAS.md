@@ -245,6 +245,12 @@ Hace falta Simple Voice Chat en el servidor y en los clientes (es opcional: sin 
 1. **Tensión.** Acércate a un Berserker (o deja que te agarren, o cae derribado): la imagen se desatura, los bordes se separan en rojo y azul, ondula un poco, sale grano y la viñeta late. Al alejarte vuelve a la normalidad poco a poco. Se quita con `tension_shader: false` o se suaviza con `tension_strength`.
 2. **Ambiente.** Dentro de la partida suena un zumbido grave constante que de vez en cuando se apaga del todo unos segundos (silencio) y que baja cuando hay tensión. Cada 20-60 s cruje la estructura o gotea algo a unos metros (con Sound Physics Remastered se oye el eco de la sala). Se quita con `ambience: false`.
 
+## Muebles (fase 24)
+
+1. **Decoración.** Por todas las plantas, el lobby y la sala de Smiley hay muebles nuevos: puestos de trabajo con monitor de tubo, sillas de oficina, estanterías metálicas, baldas de especímenes, lavabos con el espejo roto, carros de curas, goteros con bolsa de sangre y sillas de ruedas. Cada tipo de sala lleva los suyos (despachos con mesas y sillas, almacenes con estanterías y cajas, morgue con carros y lavabos, salas con goteros...).
+2. **Registrar.** Escritorios, archivadores, botiquines, carros de herramientas y cajas de suministros se registran: mírales y mantén el clic derecho (sale el texto, p. ej. «Registrar los cajones»). Hace algo de ruido. Al acabar se abren (cajón fuera, puertas abiertas, tapa quitada) y a veces sueltan algo delante: latas, botellas, pilas, botiquines, bengalas, adrenalina o un fusible fundido; muchas veces nada («No hay nada útil.»). Un mueble abierto ya no se puede registrar.
+3. **Botín por planta.** Cada planta tiene su tabla (`data/smileprotocol/search_loot/<planta>.json`): en la morgue salen más botiquines, en energía más pilas... y en los botiquines siempre es más fácil encontrar curas. Cada partida coloca la planta de nuevo, así que vuelven a estar cerrados.
+
 ## Smiley (fase 21)
 
 1. **De lejos.** En cada planta, entre 1 y 3 minutos después de llegar, aparece una vez al fondo de un pasillo mirándote. Si lo miras un rato o te acercas, se funde en una mancha negra y desaparece. No ataca. Se quita con `smiley_cameos: false`.

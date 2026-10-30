@@ -700,6 +700,49 @@ public final class ClientSelfTest {
                     new net.minecraft.world.phys.AABB(e, e).inflate(60))) m.discard();
             sp.setHealth(sp.getMaxHealth());
         }));
+        // 8l. Fase 24: muebles que se registran (se abren y sueltan botin de la planta, una vez)
+        BlockPos[] furn = {null};
+        SHOTS.add(() -> server.execute(() -> {
+            var box = z.box();
+            double best = Double.MAX_VALUE;
+            BlockPos.MutableBlockPos m = new BlockPos.MutableBlockPos();
+            for (int x = box.minX(); x <= box.maxX(); x++) {
+                for (int zz = box.minZ(); zz <= box.maxZ(); zz++) {
+                    m.set(x, BlockPos.containing(e).getY(), zz);
+                    if (level.getBlockState(m).getBlock() instanceof com.smileprotocol.block.SearchableFurnitureBlock) {
+                        double d = m.distSqr(BlockPos.containing(e));
+                        if (d < best) {
+                            best = d;
+                            furn[0] = m.immutable();
+                        }
+                    }
+                }
+            }
+            log((furn[0] != null ? "OK" : "FALLO") + " muebles: hay muebles que se registran en la planta");
+            if (furn[0] != null) {
+                var st = level.getBlockState(furn[0]);
+                Direction f = st.getValue(com.smileprotocol.block.FurnitureBlock.FACING);
+                Vec3 at = Vec3.atBottomCenterOf(furn[0]).add(f.getStepX() * 2.2, 0, f.getStepZ() * 2.2);
+                SPSessionManager.teleport(sp, level, at, f.getOpposite().toYRot(), 35f);
+            }
+        }));
+        SHOTS.add(() -> wait = 25);
+        SHOTS.add(() -> grab(mc, "49_mueble"));
+        SHOTS.add(() -> server.execute(() -> {
+            if (furn[0] == null) return;
+            var st = level.getBlockState(furn[0]);
+            if (st.getBlock() instanceof com.smileprotocol.block.SearchableFurnitureBlock b) {
+                boolean had = b.spec(level, furn[0], st, sp) != null;
+                b.complete(level, furn[0], st, sp);
+                var after = level.getBlockState(furn[0]);
+                boolean open = after.getValue(com.smileprotocol.block.SearchableFurnitureBlock.OPEN);
+                boolean gone = b.spec(level, furn[0], after, sp) == null;
+                log((had && open && gone ? "OK" : "FALLO") + " muebles: se registra una vez y queda abierto ("
+                        + level.getBlockState(furn[0]).getBlock().getDescriptionId() + ")");
+            }
+        }));
+        SHOTS.add(() -> wait = 15);
+        SHOTS.add(() -> grab(mc, "50_mueble_abierto"));
         // 9. Fase 12: levantarse tras la reanimacion, muerte instantanea en primera persona y muerte final
         SHOTS.add(() -> server.execute(() -> {
             com.smileprotocol.qte.QTEManager.clear(sp);

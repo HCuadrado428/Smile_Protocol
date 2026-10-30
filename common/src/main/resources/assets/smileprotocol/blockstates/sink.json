@@ -1,0 +1,19 @@
+{
+ "variants": {
+  "facing=south": {
+   "model": "smileprotocol:block/sink"
+  },
+  "facing=west": {
+   "model": "smileprotocol:block/sink",
+   "y": 90
+  },
+  "facing=north": {
+   "model": "smileprotocol:block/sink",
+   "y": 180
+  },
+  "facing=east": {
+   "model": "smileprotocol:block/sink",
+   "y": 270
+  }
+ }
+}
