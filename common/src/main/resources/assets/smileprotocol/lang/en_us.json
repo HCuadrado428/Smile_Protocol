@@ -263,5 +263,7 @@
   "smileprotocol.command.mob.none": "No mob nearby",
   "subtitles.smileprotocol.mob.crunch": "Bones crunch",
   "subtitles.smileprotocol.mob.bite": "Bite",
-  "subtitles.smileprotocol.player.revive": "Someone gasps for air"
+  "subtitles.smileprotocol.player.revive": "Someone gasps for air",
+  "subtitles.smileprotocol.mob.tear": "Flesh tearing",
+  "subtitles.smileprotocol.mob.squelch": "Blood gushing"
 }

@@ -69,6 +69,8 @@ public final class PalBridge {
                 return abs != null && abs[1] ? p : value0.add(p);
             }
             if (type == TransformType.BEND) return value0.add(new Vec3f(d[6], d[7], 0f));
+            // cabeza arrancada en un remate (README 9.3): la parte se encoge hasta desaparecer
+            if (type == TransformType.SCALE && d.length > 8 && d[8] > 0f) return value0.scale(Math.max(0.001f, 1f - d[8]));
             return value0;
         }
     }

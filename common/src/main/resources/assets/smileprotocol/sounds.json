@@ -76,5 +76,19 @@
     "sounds": [
       "smileprotocol:player/revive"
     ]
+  },
+  "mob.tear": {
+    "subtitle": "subtitles.smileprotocol.mob.tear",
+    "sounds": [
+      "smileprotocol:mob/tear1",
+      "smileprotocol:mob/tear2"
+    ]
+  },
+  "mob.squelch": {
+    "subtitle": "subtitles.smileprotocol.mob.squelch",
+    "sounds": [
+      "smileprotocol:mob/squelch1",
+      "smileprotocol:mob/squelch2"
+    ]
   }
 }

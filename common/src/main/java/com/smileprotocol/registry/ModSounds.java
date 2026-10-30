@@ -21,6 +21,8 @@ public final class ModSounds {
     public static final Supplier<SoundEvent> MOB_GRAB = register("mob.grab");
     public static final Supplier<SoundEvent> MOB_CRUNCH = register("mob.crunch");
     public static final Supplier<SoundEvent> MOB_BITE = register("mob.bite");
+    public static final Supplier<SoundEvent> MOB_TEAR = register("mob.tear");
+    public static final Supplier<SoundEvent> MOB_SQUELCH = register("mob.squelch");
     public static final Supplier<SoundEvent> PLAYER_REVIVE = register("player.revive");
 
     private ModSounds() {}

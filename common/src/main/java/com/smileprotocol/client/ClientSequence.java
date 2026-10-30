@@ -22,6 +22,12 @@ public final class ClientSequence {
     private static int age;
     private static float startYaw, startPitch;
 
+    /** Sangre en la pantalla: posicion (0-1), tamano (pixeles de GUI), variante, edad y caida. */
+    public record Splat(float x, float y, float size, int variant, int born, float drip) {}
+
+    private static final java.util.List<Splat> SPLATS = new java.util.ArrayList<>();
+    private static final java.util.Random RNG = new java.util.Random();
+
     private ClientSequence() {}
 
     public static void start(Payloads.StartSequence p) {
@@ -33,6 +39,7 @@ public final class ClientSequence {
         mobId = p.mobId();
         ticks = p.ticks();
         age = 0;
+        SPLATS.clear();
         Minecraft mc = Minecraft.getInstance();
         if (mc.player != null) {
             startYaw = mc.player.getYRot();
@@ -43,11 +50,32 @@ public final class ClientSequence {
     public static void reset() {
         kind = -1;
         mobId = -1;
+        SPLATS.clear();
+    }
+
+    public static java.util.List<Splat> splats() {
+        return SPLATS;
+    }
+
+    public static int ageTicks() {
+        return age;
+    }
+
+    /** Cada golpe salpica la pantalla; un desgarro la llena. */
+    private static void splash(int n, float sizeMin, float sizeMax) {
+        for (int i = 0; i < n; i++) {
+            float x = 0.12f + RNG.nextFloat() * 0.76f, y = 0.08f + RNG.nextFloat() * 0.6f;
+            SPLATS.add(new Splat(x, y, sizeMin + RNG.nextFloat() * (sizeMax - sizeMin), RNG.nextInt(4), age,
+                    0.0006f + RNG.nextFloat() * 0.0016f));
+        }
     }
 
     public static void tick(Minecraft mc) {
         if (kind < 0) return;
         age++;
+        SequenceKind k = kind();
+        for (int t : k.impacts) if (age == t) splash(3 + RNG.nextInt(3), 50, 120);
+        if (k.isTear(age)) splash(8, 80, 190);
         // por si se pierde el final (el servidor manda la muerte al acabar)
         if (age > ticks + 40 || mc.level == null) reset();
     }

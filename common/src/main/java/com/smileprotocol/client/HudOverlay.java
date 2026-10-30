@@ -55,6 +55,7 @@ public final class HudOverlay {
     private static final ResourceLocation BAR_LIGHT_EMPTY = sprite("bar_light_empty");
     private static final ResourceLocation TAPE = sprite("tape");
     private static final ResourceLocation NOTE = sprite("note");
+    private static final ResourceLocation[] SPLATTER = {sprite("splatter0"), sprite("splatter1"), sprite("splatter2"), sprite("splatter3")};
 
     /** Fuentes: maquina de escribir para todo y garabato para los numeros grandes. */
     public static final ResourceLocation FONT_HUD = SmileProtocol.id("hud");
@@ -395,7 +396,21 @@ public final class HudOverlay {
         RenderSystem.setShaderColor(1f, 1f, 1f, Mth.clamp(0.25f + 0.75f * hit + 0.3f * prog, 0f, 1f));
         g.blitSprite(BLOOD_VIGNETTE, -10, -10, w + 20, h + 20);
         RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
+        // sangre en la pantalla: cada mancha resbala despacio hacia abajo
+        int now = ClientSequence.ageTicks();
+        for (ClientSequence.Splat sp : ClientSequence.splats()) {
+            float life = now - sp.born() + pt;
+            float sy = sp.y() + sp.drip() * life;
+            float alpha = Mth.clamp(1.15f - life / 120f, 0.55f, 1f);
+            int size = (int) (sp.size() * (1f + Math.min(life, 4f) * 0.04f));
+            RenderSystem.setShaderColor(1f, 1f, 1f, alpha);
+            g.blitSprite(SPLATTER[sp.variant()], (int) (sp.x() * w) - size / 2, (int) (sy * h) - size / 2, size, (int) (size * 1.15f));
+        }
+        RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
         float black = Mth.clamp((prog - 0.8f) / 0.2f, 0f, 1f);
+        // cabeza arrancada: se va a negro en un momento
+        com.smileprotocol.sequence.SequenceKind kind = ClientSequence.kind();
+        if (kind.decap >= 0) black = Math.max(black, Mth.clamp((ClientSequence.age(pt) - kind.decap) / 5f, 0f, 1f));
         int a = Mth.clamp((int) (black * 255) + (int) (hit * 70), 0, 255);
         if (a > 0) g.fill(0, 0, w, h, a << 24 | (black < 0.5f ? 0x200000 : 0));
     }

@@ -24,8 +24,13 @@ public abstract class SPMonster extends PathfinderMob implements GeoEntity {
     /** Secuencia de remate o muerte en marcha (ordinal + 1; 0 = ninguna), para la animacion. */
     private static final net.minecraft.network.syncher.EntityDataAccessor<Byte> SEQUENCE =
             net.minecraft.network.syncher.SynchedEntityData.defineId(SPMonster.class, net.minecraft.network.syncher.EntityDataSerializers.BYTE);
+    /** Victima de la secuencia (id de entidad), para dibujar lo que lleva en la mano. */
+    private static final net.minecraft.network.syncher.EntityDataAccessor<Integer> SEQUENCE_VICTIM =
+            net.minecraft.network.syncher.SynchedEntityData.defineId(SPMonster.class, net.minecraft.network.syncher.EntityDataSerializers.INT);
     /** Cliente: ultima secuencia animada, para reiniciar la animacion al empezar otra. */
     private int animatedSequence;
+    /** Cliente: tick en que empezo la secuencia que se esta animando. */
+    private int sequenceStartTick;
 
     protected SPMonster(EntityType<? extends PathfinderMob> type, Level level) {
         super(type, level);
@@ -36,12 +41,23 @@ public abstract class SPMonster extends PathfinderMob implements GeoEntity {
     protected void defineSynchedData(net.minecraft.network.syncher.SynchedEntityData.Builder b) {
         super.defineSynchedData(b);
         b.define(SEQUENCE, (byte) 0);
+        b.define(SEQUENCE_VICTIM, -1);
     }
 
     /** La empieza {@code SequenceManager}: el mob se queda quieto y reproduce su animacion. */
     public void startSequence(com.smileprotocol.sequence.SequenceKind kind, net.minecraft.server.level.ServerPlayer victim) {
         getNavigation().stop();
+        entityData.set(SEQUENCE_VICTIM, victim.getId());
         entityData.set(SEQUENCE, (byte) (kind.ordinal() + 1));
+    }
+
+    public int sequenceVictim() {
+        return entityData.get(SEQUENCE_VICTIM);
+    }
+
+    /** Cliente: ticks desde que empezo la animacion de la secuencia. */
+    public float sequenceAge(float pt) {
+        return tickCount - sequenceStartTick + pt;
     }
 
     public void endSequence() {
@@ -69,6 +85,7 @@ public abstract class SPMonster extends PathfinderMob implements GeoEntity {
         int id = k == null ? 0 : k.ordinal() + 1;
         if (id != animatedSequence) {
             animatedSequence = id;
+            sequenceStartTick = tickCount;
             st.getController().forceAnimationReset();
             // sin transicion: los golpes caen a la vez que el sonido y la sacudida de la victima
             st.getController().transitionLength(k != null ? 0 : 4);

@@ -237,6 +237,37 @@ def bite():
     return np.tanh((snap + tear + gurgle) * 1.3)
 
 
+def tear(seed):
+    """Desgarro: carne que se rasga, tendones que chascan y un chorro humedo."""
+    r = np.random.default_rng(seed)
+    n = int(SR * 1.2)
+    tt = np.arange(n) / SR
+    rip = bandpass(noise(n, r), 900, 1.2) * np.clip(np.sin(np.clip(tt / 0.7, 0, 1) * np.pi), 0, 1) ** 0.6
+    rip *= 0.55 + 0.45 * np.abs(np.sin(2 * np.pi * (14 + 10 * tt) * tt))
+    snaps = np.zeros(n)
+    for _ in range(7):
+        k = int(r.uniform(0.05, 0.75) * SR)
+        m = int(SR * 0.006)
+        snaps[k:k + m] += highpass(noise(m, r), 2000) * np.linspace(1, 0, m) * r.uniform(0.6, 1.2)
+    gush = bandpass(noise(n, r), 380, 3) * np.clip((tt - 0.55) / 0.15, 0, 1) * np.exp(-np.clip(tt - 0.7, 0, None) * 3) * 0.9
+    return np.tanh((rip + snaps + gush) * 1.5)
+
+
+def squelch(seed):
+    """Chorro de sangre: borboteo y salpicadura contra el suelo."""
+    r = np.random.default_rng(seed)
+    n = int(SR * 0.9)
+    tt = np.arange(n) / SR
+    burble = bandpass(noise(n, r), 300 + 120 * np.sin(2 * np.pi * 7 * tt).mean(), 5) * (0.5 + 0.5 * np.sin(2 * np.pi * 11 * tt))
+    burble *= env(n, 0.01, 0.5)
+    splash = np.zeros(n)
+    for _ in range(18):
+        k = int(r.uniform(0.0, 0.6) * SR)
+        m = int(SR * 0.02)
+        splash[k:k + m] += bandpass(noise(m, r), 1500, 2) * env(m, 0.001, 0.008) * r.uniform(0.3, 0.9)
+    return np.tanh((burble * 1.6 + splash) * 1.4)
+
+
 def revive():
     """Reanimar: jadeo profundo al recuperar el aire."""
     r = np.random.default_rng(81)
@@ -265,6 +296,9 @@ def main():
     for i in range(2):
         save(f"mob/crunch{i + 1}", crunch(100 + i))
     save("mob/bite", bite())
+    for i in range(2):
+        save(f"mob/tear{i + 1}", tear(110 + i))
+        save(f"mob/squelch{i + 1}", squelch(120 + i))
     save("player/revive", revive())
     print("sonidos escritos en", OUT)
 

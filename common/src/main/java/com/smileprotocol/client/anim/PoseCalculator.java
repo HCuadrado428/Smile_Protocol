@@ -36,7 +36,10 @@ public final class PoseCalculator {
 
     private static final float PI = Mth.PI;
 
-    /** Pose calculada: por parte, {pitch, yaw, roll, x, y, z, ejeDoblez, doblez} y si es absoluta. */
+    /**
+     * Pose calculada: por parte, {pitch, yaw, roll, x, y, z, ejeDoblez, doblez, encoger} y si es
+     * absoluta. {@code encoger} 1 hace desaparecer la parte (cabeza arrancada en un remate).
+     */
     public static final class Pose {
         final Map<String, float[]> parts = new HashMap<>();
         final Map<String, boolean[]> absolute = new HashMap<>();
@@ -62,7 +65,7 @@ public final class PoseCalculator {
         }
 
         private float[] v(String part) {
-            return parts.computeIfAbsent(part, k -> new float[8]);
+            return parts.computeIfAbsent(part, k -> new float[9]);
         }
 
         private boolean[] f(String part) {
@@ -103,6 +106,12 @@ public final class PoseCalculator {
             v[5] = z;
             f(part)[1] = true;
             active = true;
+        }
+
+        /** Encoge la parte (0 normal, 1 invisible). */
+        void shrink(String part, float amount) {
+            v(part)[8] = Mth.clamp(amount, 0f, 1f);
+            if (amount != 0) active = true;
         }
 
         /** Codo o rodilla: eje (0 = hacia delante) y cuanto se dobla. */
@@ -413,68 +422,95 @@ public final class PoseCalculator {
 
     private static void sequence(Pose pose, com.smileprotocol.sequence.SequenceKind kind, float age, float time) {
         float hit = pulse(kind.sinceImpact(age), 7f);
+        float tear = 0;
+        for (int t : kind.tears) tear = Math.max(tear, pulse(age - t, 10f));
+        // espasmos de la agonia: rapidos e irregulares
+        float spasm = Mth.sin(time * 3.1f) * Mth.sin(time * 1.7f + 0.4f);
         switch (kind) {
             case BERSERKER_EXECUTION -> {
-                // Tumbado: intenta huir arrastrandose, cada golpe lo sacude; tras el ultimo queda inerte
-                float limp = Mth.clamp((age - kind.impacts[kind.impacts.length - 1] - 2) / 6f, 0f, 1f);
-                float panic = Mth.clamp(1f - (age - 20f) / 30f, 0.25f, 1f) * (1 - limp);
-                float cyc = time * 0.55f;
+                // Tumbado: intenta huir; cada golpe lo sacude y le va rompiendo; lo levantan colgando
+                // por la espalda, lo desgarran y lo estampan: queda con los miembros retorcidos
+                float broken = Mth.clamp((age - 38f) / 4f, 0f, 1f);
+                float held = (float) (kind.lift(age) / 0.75);
+                float flat = Mth.clamp((age - 60f) / 2f, 0f, 1f);
+                float panic = Mth.clamp(1f - (age - 18f) / 22f, 0f, 1f);
+                float twitch = flat * Mth.clamp(1f - (age - 62f) / 14f, 0f, 1f) * spasm;
+                float cyc = time * 0.6f;
                 float r = Mth.sin(cyc), l = Mth.sin(cyc + PI);
-                pose.setRot(RIGHT_ARM, Mth.lerp(limp, -2.4f - 0.6f * r * panic, -1.7f), 0.15f, Mth.lerp(limp, 0.35f, 0.95f) + 0.7f * hit);
-                pose.setRot(LEFT_ARM, Mth.lerp(limp, -2.4f - 0.6f * l * panic, -1.6f), -0.15f, Mth.lerp(limp, -0.35f, -0.9f) - 0.7f * hit);
-                pose.bend(RIGHT_ARM, 0, (-0.4f - 0.8f * Math.max(0, -r) * panic) * (1 - limp));
-                pose.bend(LEFT_ARM, 0, (-0.4f - 0.8f * Math.max(0, -l) * panic) * (1 - limp));
-                pose.setRot(HEAD, Mth.lerp(limp, -0.75f, -0.35f) - 0.6f * hit, Mth.lerp(limp, 0.15f * r * panic, 0.9f), 0);
-                pose.setRot(RIGHT_LEG, 0.05f - 0.5f * hit + 0.15f * r * panic, 0, 0.08f + 0.1f * limp);
-                pose.setRot(LEFT_LEG, 0.05f - 0.35f * hit - 0.15f * r * panic, 0, -0.08f - 0.1f * limp);
-                pose.bend(RIGHT_LEG, 0, 0.9f * hit);
-                pose.bend(LEFT_LEG, 0, 0.6f * hit);
-                pose.rot(TORSO, -0.25f * hit, 0.1f * r * panic, 0.08f * r * panic);
+                // brazos: arrastrandose -> rotos (el derecho doblado al reves) -> colgando -> despatarrados
+                float raPitch = Mth.lerp(broken, -2.4f - 0.6f * r * panic, -0.9f);
+                float laPitch = Mth.lerp(broken, -2.4f - 0.6f * l * panic, -2.6f);
+                raPitch = Mth.lerp(held, raPitch, -1.55f + 0.15f * Mth.sin(time * 0.3f));
+                laPitch = Mth.lerp(held, laPitch, -1.45f + 0.15f * Mth.sin(time * 0.3f + 1));
+                pose.setRot(RIGHT_ARM, raPitch + 0.3f * twitch, 0.15f + 0.6f * broken * (1 - held), 0.35f + 0.9f * broken * (1 - held) + 0.8f * hit);
+                pose.setRot(LEFT_ARM, laPitch - 0.2f * twitch, -0.15f, -0.35f - 0.5f * broken * (1 - held) - 0.8f * hit);
+                pose.bend(RIGHT_ARM, 0, Mth.lerp(broken, -0.4f - 0.8f * Math.max(0, -r) * panic, 1.7f));   // codo al reves
+                pose.bend(LEFT_ARM, 0, (-0.4f - 0.8f * Math.max(0, -l) * panic) * (1 - broken) - 0.3f * held);
+                float headYaw = Mth.lerp(flat, 0.15f * r * panic, 1.45f);
+                pose.setRot(HEAD, Mth.lerp(held, -0.75f, 0.7f) - 0.6f * hit - 0.5f * tear + 0.3f * flat, headYaw, 0.5f * flat);
+                pose.setRot(RIGHT_LEG, Mth.lerp(held, 0.05f, -1.1f) - 0.5f * hit + 0.15f * r * panic + 0.25f * twitch, 0,
+                        0.08f + 0.45f * broken * (1 - held));
+                pose.setRot(LEFT_LEG, Mth.lerp(held, 0.05f, -0.9f) - 0.35f * hit - 0.15f * r * panic, 0.3f * broken,
+                        -0.08f - 0.2f * broken);
+                pose.bend(RIGHT_LEG, 0, 0.9f * hit + 0.6f * held);
+                pose.bend(LEFT_LEG, 0, 0.6f * hit + 1.3f * broken * (1 - held));    // rodilla rota hacia arriba
+                pose.rot(TORSO, -0.25f * hit + 0.35f * tear * Mth.sin(time * 1.5f), 0.1f * r * panic, 0.3f * tear + 0.08f * r * panic);
             }
             case SMILER_EXECUTION -> {
-                // Tumbado de cara al mob: le agarra la cabeza y tira hacia arriba; forcejea; el
-                // segundo golpe le parte el cuello (la cabeza queda girada) y se desploma
+                // Tumbado de cara al mob: le levanta la cabeza, se la retuerce del todo (media vuelta) y
+                // se la arranca; el cuerpo sin cabeza se agita y queda temblando
                 float pull = Mth.clamp((age - 12f) / 8f, 0f, 1f);
-                float snap = Mth.clamp((age - kind.impacts[1]) / 2f, 0f, 1f);
-                float lift = pull * (1 - Mth.clamp((age - kind.impacts[1] - 4) / 6f, 0f, 1f));
-                float fight = pull * (1 - snap);
+                float twist = Mth.clamp((age - kind.impacts[1]) / 7f, 0f, 1f);
+                twist = twist * twist * (3 - 2 * twist);
+                boolean off = kind.headless(age);
+                float after = off ? Mth.clamp(1f - (age - kind.decap) / 22f, 0f, 1f) : 0f;
+                float fight = pull * (off ? 0 : 1);
                 float a = Mth.sin(time * 1.1f), b = Mth.sin(time * 0.8f + 1f);
-                pose.setRot(HEAD, Mth.lerp(lift, -0.75f, -1.75f) + 0.15f * hit, 1.45f * snap + 0.12f * a * fight, 0.4f * snap);
-                pose.rot(TORSO, -0.45f * lift, 0.1f * b * fight, 0);
-                // los brazos van atras, a las manos que le sujetan la cabeza
-                pose.setRot(RIGHT_ARM, Mth.lerp(pull, -2.3f + 0.4f * Mth.sin(time * 0.5f), -3.0f + 0.3f * a * fight) * (1 - snap) + -0.25f * snap,
-                        0.2f, Mth.lerp(snap, 0.45f, 0.35f) + 0.2f * hit);
-                pose.setRot(LEFT_ARM, Mth.lerp(pull, -2.3f - 0.4f * Mth.sin(time * 0.5f), -3.0f - 0.3f * a * fight) * (1 - snap) + -0.25f * snap,
-                        -0.2f, Mth.lerp(snap, -0.45f, -0.35f) - 0.2f * hit);
-                pose.bend(RIGHT_ARM, 0, -0.9f * fight);
-                pose.bend(LEFT_ARM, 0, -0.9f * fight);
-                pose.setRot(RIGHT_LEG, 0.05f - 0.45f * Math.max(0, b) * fight, 0, 0.08f);
-                pose.setRot(LEFT_LEG, 0.05f - 0.45f * Math.max(0, -b) * fight, 0, -0.08f);
-                pose.bend(RIGHT_LEG, 0, 1.1f * Math.max(0, b) * fight);
-                pose.bend(LEFT_LEG, 0, 1.1f * Math.max(0, -b) * fight);
+                pose.setRot(HEAD, Mth.lerp(pull, -0.75f, -1.75f) + 0.15f * hit, PI * twist + 0.12f * a * fight * (1 - twist),
+                        0.4f * Mth.clamp((age - kind.impacts[0]) / 2f, 0f, 1f));
+                if (off) pose.shrink(HEAD, 1f);
+                pose.rot(TORSO, -0.45f * pull * (off ? 0.2f : 1f) + 0.25f * after * spasm, 0.1f * b * fight, 0.15f * after * spasm);
+                // brazos: arrastrarse -> tiran de las manos que le sujetan -> sin cabeza se agitan
+                float flail = after * spasm;
+                pose.setRot(RIGHT_ARM, Mth.lerp(pull, -2.3f + 0.4f * Mth.sin(time * 0.5f), -3.0f + 0.3f * a) * (off ? 0.3f : 1f)
+                        - 0.6f * (off ? 1 : 0) + 0.9f * flail, 0.2f, 0.45f + 0.2f * hit + 0.6f * flail);
+                pose.setRot(LEFT_ARM, Mth.lerp(pull, -2.3f - 0.4f * Mth.sin(time * 0.5f), -3.0f - 0.3f * a) * (off ? 0.3f : 1f)
+                        - 0.6f * (off ? 1 : 0) - 0.8f * flail, -0.2f, -0.45f - 0.2f * hit - 0.5f * flail);
+                pose.bend(RIGHT_ARM, 0, -0.9f * fight - 0.6f * Math.abs(flail));
+                pose.bend(LEFT_ARM, 0, -0.9f * fight - 0.6f * Math.abs(flail));
+                float kick = Math.max(fight, after);
+                pose.setRot(RIGHT_LEG, 0.05f - 0.5f * Math.max(0, b) * kick + 0.2f * flail, 0, 0.08f);
+                pose.setRot(LEFT_LEG, 0.05f - 0.5f * Math.max(0, -b) * kick - 0.2f * flail, 0, -0.08f);
+                pose.bend(RIGHT_LEG, 0, 1.1f * Math.max(0, b) * kick);
+                pose.bend(LEFT_LEG, 0, 1.1f * Math.max(0, -b) * kick);
             }
             case SMILER_KILL -> {
-                // Levantado del suelo: patalea y empuja la cara del mob; el mordisco le echa la cabeza
-                // atras, convulsiona y queda colgando; al soltarlo se desploma
+                // Levantado: patalea y empuja la cara del mob; los mordiscos le echan la cabeza atras y
+                // le parten el cuello; el tiron de la garganta la deja colgando hacia atras; convulsiona
+                // y, al soltarlo, se desploma de rodillas con la cabeza colgando
                 float up = Mth.clamp((age - 6f) / 10f, 0f, 1f);
-                float limp = Mth.clamp((age - 44f) / 6f, 0f, 1f);
-                float drop = Mth.clamp((age - 53f) / 4f, 0f, 1f);
-                float fight = 1 - limp;
+                float torn = Mth.clamp((age - kind.tears[0]) / 3f, 0f, 1f);
+                float limp = Mth.clamp((age - 52f) / 6f, 0f, 1f);
+                float drop = Mth.clamp((age - 58f) / 5f, 0f, 1f);
+                float fight = 1 - Math.max(limp, torn * 0.6f);
                 float bite = Math.max(pulse(age - kind.impacts[0], 9f), pulse(age - kind.impacts[1], 8f));
-                float shake = age > kind.impacts[0] && limp < 1 ? Mth.sin(time * 2.6f) * 0.12f * fight : 0f;
+                float neck = Mth.clamp((age - kind.impacts[0]) / 3f, 0f, 1f);
+                float conv = age > kind.impacts[0] ? spasm * (0.25f + 0.5f * torn) * (1 - Mth.clamp((age - 64f) / 8f, 0f, 1f)) : 0f;
                 float a = Mth.sin(time * 1.25f), b = Mth.sin(time * 0.95f + 0.6f);
-                pose.setRot(RIGHT_ARM, Mth.lerp(limp, -1.55f + 0.3f * a, 0.15f) + shake, Mth.lerp(limp, 0.3f, 0), Mth.lerp(limp, 0.2f, 0.08f));
-                pose.setRot(LEFT_ARM, Mth.lerp(limp, -1.55f - 0.3f * a, 0.1f) - shake, Mth.lerp(limp, -0.3f, 0), Mth.lerp(limp, -0.2f, -0.08f));
-                pose.bend(RIGHT_ARM, 0, (-0.8f - 0.4f * Math.max(0, a)) * fight);
+                pose.setRot(RIGHT_ARM, Mth.lerp(limp, -1.55f + 0.3f * a, 0.15f) + 0.4f * conv, Mth.lerp(limp, 0.3f, 0), Mth.lerp(limp, 0.2f, 0.12f) + 0.2f * conv);
+                pose.setRot(LEFT_ARM, Mth.lerp(limp, -1.55f - 0.3f * a, 0.1f) - 0.35f * conv, Mth.lerp(limp, -0.3f, 0), Mth.lerp(limp, -0.2f, -0.12f));
+                pose.bend(RIGHT_ARM, 0, (-0.8f - 0.4f * Math.max(0, a)) * fight - 0.5f * Math.abs(conv));
                 pose.bend(LEFT_ARM, 0, (-0.8f - 0.4f * Math.max(0, -a)) * fight);
-                pose.setRot(HEAD, Mth.lerp(limp, -0.2f - 0.7f * bite, 0.75f) + shake, Mth.lerp(limp, -0.55f + 0.2f * b, 0.35f), Mth.lerp(limp, 0.1f * a, 0.3f));
-                pose.setRot(TORSO, -0.12f * bite + Mth.lerp(limp, 0, 0.12f) + 0.55f * drop, 0.15f * b * fight, 0);
-                // piernas colgando que patalean
-                float kick = up * fight;
-                pose.setRot(RIGHT_LEG, 0.15f * up - 0.55f * Math.max(0, b) * kick + 0.04f * Mth.sin(time * 0.2f) * limp - 1.1f * drop, 0, 0.06f);
-                pose.setRot(LEFT_LEG, 0.15f * up - 0.55f * Math.max(0, -b) * kick + 0.04f * Mth.sin(time * 0.2f + 1) * limp - 0.6f * drop, 0, -0.06f);
-                pose.bend(RIGHT_LEG, 0, 0.3f * up + 0.9f * Math.max(0, b) * kick + 1.6f * drop);
-                pose.bend(LEFT_LEG, 0, 0.3f * up + 0.9f * Math.max(0, -b) * kick + 1.2f * drop);
+                // cuello: mordisco -> roto de lado -> desgarrado, la cabeza cuelga hacia atras
+                float headPitch = -0.2f - 0.7f * bite;
+                headPitch = Mth.lerp(torn, headPitch, -1.35f);
+                pose.setRot(HEAD, headPitch + 0.2f * conv, Mth.lerp(neck, -0.55f + 0.2f * b * fight, 0.35f), 0.75f * neck + 0.25f * torn + 0.1f * conv);
+                pose.setRot(TORSO, -0.12f * bite - 0.15f * torn + 0.5f * drop + 0.1f * conv, 0.15f * b * fight, 0.05f * conv);
+                float kick = up * Math.max(fight, Math.abs(conv));
+                pose.setRot(RIGHT_LEG, 0.15f * up - 0.55f * Math.max(0, b) * kick + 0.3f * conv - 1.25f * drop, 0, 0.06f);
+                pose.setRot(LEFT_LEG, 0.15f * up - 0.55f * Math.max(0, -b) * kick - 0.25f * conv - 0.7f * drop, 0, -0.06f);
+                pose.bend(RIGHT_LEG, 0, 0.3f * up + 0.9f * Math.max(0, b) * kick + 1.7f * drop);
+                pose.bend(LEFT_LEG, 0, 0.3f * up + 0.9f * Math.max(0, -b) * kick + 1.3f * drop);
                 bodyPx(pose, 0, 6f * drop, -2f * drop);
             }
         }

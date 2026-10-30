@@ -11,6 +11,7 @@ import com.smileprotocol.network.SPNetwork;
 import com.smileprotocol.player.SPPlayerData;
 import com.smileprotocol.registry.ModSounds;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -38,14 +39,34 @@ public final class SequenceManager {
         final Vec3 anchor;
         final Vec3 mobPos;
         final float mobYaw;
+        final float victimYaw;
         int age;
 
-        Session(UUID mob, SequenceKind kind, Vec3 anchor, Vec3 mobPos, float mobYaw) {
+        Session(UUID mob, SequenceKind kind, Vec3 anchor, Vec3 mobPos, float mobYaw, float victimYaw) {
             this.mob = mob;
             this.kind = kind;
             this.anchor = anchor;
             this.mobPos = mobPos;
             this.mobYaw = mobYaw;
+            this.victimYaw = victimYaw;
+        }
+
+        /** Hacia donde mira la victima (horizontal). */
+        Vec3 facing() {
+            return Vec3.directionFromRotation(0, victimYaw);
+        }
+
+        /** Donde sangra: cuello o cara (hacia la cabeza) o espalda. */
+        Vec3 woundAt(int where) {
+            Vec3 f = facing();
+            double lift = kind.lift(age);
+            if (kind.prone) {
+                double fwd = where == SequenceKind.BACK ? 0.3 : 0.8;
+                double up = where == SequenceKind.BACK ? 0.3 : (kind == SequenceKind.SMILER_EXECUTION && age < 46 ? 0.6 : 0.3);
+                return anchor.add(f.x * fwd, up + lift, f.z * fwd);
+            }
+            double up = where == SequenceKind.FACE ? 1.55 : 1.35;
+            return anchor.add(f.x * 0.22, up + lift, f.z * 0.22);
         }
     }
 
@@ -81,7 +102,7 @@ public final class SequenceManager {
         Vec3 anchor = new Vec3(mob.getX() + dir.x * kind.distance, p.getY(), mob.getZ() + dir.z * kind.distance);
         float victimYaw = kind.facesMob ? yaw + 180f : yaw;
 
-        Session s = new Session(mob.getUUID(), kind, anchor, mob.position(), yaw);
+        Session s = new Session(mob.getUUID(), kind, anchor, mob.position(), yaw, victimYaw);
         SESSIONS.put(p.getUUID(), s);
         p.setSprinting(false);
         p.setDeltaMovement(Vec3.ZERO);
@@ -129,16 +150,33 @@ public final class SequenceManager {
             if (mob.position().distanceToSqr(s.mobPos) > 0.01) mob.moveTo(s.mobPos.x, s.mobPos.y, s.mobPos.z, s.mobYaw, 0f);
             mob.setYRot(s.mobYaw);
             mob.setYBodyRot(s.mobYaw);
+            ServerLevel level = p.serverLevel();
+            Vec3 up = new Vec3(0, 1, 0);
             for (int t : s.kind.impacts) {
-                if (s.age == t) {
-                    boolean bite = s.kind == SequenceKind.SMILER_KILL && t == s.kind.impacts[0];
-                    p.serverLevel().playSound(null, p.blockPosition(), bite ? ModSounds.MOB_BITE.get() : ModSounds.MOB_CRUNCH.get(),
-                            SoundSource.HOSTILE, 1.3f, 0.95f + 0.05f * (t % 3));
-                    if (s.kind == SequenceKind.BERSERKER_EXECUTION) {
-                        p.serverLevel().playSound(null, p.blockPosition(), ModSounds.BERSERKER_IMPACT.get(), SoundSource.HOSTILE, 0.9f, 1.1f);
-                    }
-                    p.serverLevel().playSound(null, p.blockPosition(), SoundEvents.PLAYER_HURT, SoundSource.PLAYERS, 1f, 0.7f);
+                if (s.age != t) continue;
+                boolean bite = s.kind == SequenceKind.SMILER_KILL && t < s.kind.impacts[2];
+                level.playSound(null, p.blockPosition(), bite ? ModSounds.MOB_BITE.get() : ModSounds.MOB_CRUNCH.get(),
+                        SoundSource.HOSTILE, 1.4f, 0.9f + 0.05f * (t % 3));
+                if (s.kind == SequenceKind.BERSERKER_EXECUTION) {
+                    level.playSound(null, p.blockPosition(), ModSounds.BERSERKER_IMPACT.get(), SoundSource.HOSTILE, 1.0f, 1.1f);
                 }
+                level.playSound(null, p.blockPosition(), SoundEvents.PLAYER_HURT, SoundSource.PLAYERS, 1f, 0.6f);
+                int where = s.kind == SequenceKind.BERSERKER_EXECUTION ? SequenceKind.BACK
+                        : s.kind == SequenceKind.SMILER_KILL ? SequenceKind.FACE : SequenceKind.NECK;
+                Gore.burst(level, s.woundAt(where), s.facing().scale(-1).add(up), 1.0f);
+                if (s.kind.prone || t >= s.kind.impacts[s.kind.impacts.length - 1]) Gore.pool(level, s.anchor, 3, 1);
+            }
+            if (s.kind.isTear(s.age)) {
+                level.playSound(null, p.blockPosition(), ModSounds.MOB_TEAR.get(), SoundSource.HOSTILE, 1.5f, 0.9f);
+                level.playSound(null, p.blockPosition(), ModSounds.MOB_SQUELCH.get(), SoundSource.HOSTILE, 1.2f, 1f);
+                Gore.burst(level, s.woundAt(s.kind.fountainAt), s.facing().add(up), 2.2f);
+                Gore.pool(level, s.anchor, 6, 2);
+            }
+            if (s.age >= s.kind.fountain[0] && s.age <= s.kind.fountain[1]) {
+                // chorro que se va agotando
+                float k = 1f - (s.age - s.kind.fountain[0]) / (float) (s.kind.fountain[1] - s.kind.fountain[0] + 1);
+                Gore.fountain(level, s.woundAt(s.kind.fountainAt), s.facing(), 0.4f + 0.8f * k);
+                if (s.age % 12 == 0) level.playSound(null, p.blockPosition(), ModSounds.MOB_SQUELCH.get(), SoundSource.HOSTILE, 0.6f * k + 0.2f, 1.1f);
             }
             if (s.age >= s.kind.ticks) {
                 it.remove();

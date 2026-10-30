@@ -322,12 +322,38 @@ def pips():
     save(off, "pip_off")
 
 
+def splatter(i):
+    """Salpicadura de sangre en la pantalla (remates): mancha con gotas y regueros que caen."""
+    r = R(60 + i)
+    S = 128
+    cv = Canvas(S, S, (0, 0, 0), 0)
+    m = splat_mask(S, S, r, S / 2 + r.uniform(-8, 8), S * 0.42, r.uniform(16, 24), drops=26,
+                   streak=(math.pi / 2 + r.uniform(-0.3, 0.3), r.uniform(30, 55)), lumpy=0.6)
+    # regueros que bajan desde la mancha
+    yy, xx = np.mgrid[0:S, 0:S].astype(float)
+    for _ in range(5):
+        x0 = S / 2 + r.uniform(-20, 20)
+        y0 = S * 0.42 + r.uniform(0, 10)
+        ln = r.uniform(20, 60)
+        wd = r.uniform(1.2, 2.6)
+        band = smoothstep(wd + 0.6, wd - 0.4, np.abs(xx - x0 - np.sin((yy - y0) * 0.08) * 1.5))
+        band *= (yy > y0) * (yy < y0 + ln)
+        tip = smoothstep(wd + 1.6, wd + 0.2, np.hypot(xx - x0, yy - y0 - ln))
+        m = np.maximum(m, np.maximum(band, tip))
+    m = np.clip(m, 0, 1)
+    apply_blood(cv, r, m, age=0.15, opacity=1.0, gloss=True)
+    cv.c = cv.c * 0.85
+    cv.a = m * 0.93
+    return save(cv, f"splatter{i}")
+
+
 def main():
     ROOT.mkdir(parents=True, exist_ok=True)
     made = [vignette(), blood_vignette(), grain(), smear("smear", 20), smear("smear_small", 21, 64, 24, border=8),
             bar("bar_blood", 30, 100, 8, (120, 8, 10)), bar("bar_empty", 31, 100, 8, (40, 14, 12), empty=True),
             bar("bar_light", 32, 64, 6, (196, 180, 104)), bar("bar_light_empty", 33, 64, 6, (40, 38, 30), empty=True),
-            heart(), bulb(), slot(False), slot(True), tape(), note(), panel("panel", 0), panel("panel_alert", 1)]
+            heart(), bulb(), slot(False), slot(True), tape(), note(), panel("panel", 0), panel("panel_alert", 1),
+            splatter(0), splatter(1), splatter(2), splatter(3)]
     pips()
     print(len(made) + 2, "sprites")
     if len(sys.argv) > 1:
