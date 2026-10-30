@@ -72,10 +72,20 @@ public class SmilerTest extends SmilerBase implements QTEManager.Grabber {
         timer = 0;
     }
 
+    private boolean forced;
+
+    /** Grabacion de animaciones: estado fijo, sin IA. */
+    public void debugForce(State s) {
+        forced = true;
+        setNoAi(false);
+        getNavigation().stop();
+        entityData.set(STATE, (byte) s.ordinal());
+    }
+
     @Override
     protected void customServerAiStep() {
         super.customServerAiStep();
-        if (!(level() instanceof ServerLevel level)) return;
+        if (!(level() instanceof ServerLevel level) || forced) return;
         MobDef def = def();
         timer++;
         if (cooldown > 0) cooldown--;

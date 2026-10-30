@@ -107,6 +107,24 @@ jobs:
           done
           exit 0
 
+      # Grabacion de animaciones (solo Fabric): fotogramas en tercera persona y GIF con tools/make_gifs.py
+      - name: Grabar animaciones (GIF)
+        if: success()
+        shell: bash
+        env:
+          SMILEPROTOCOL_ANIMTEST: "1"
+        run: |
+          set +e
+          L=fabric
+          rm -rf $L/runs/client/screenshots $L/runs/client/saves/smoke
+          cp -r $L/runs/server/world $L/runs/client/saves/smoke
+          timeout 900 xvfb-run -a -s "-screen 0 1280x720x24" ./gradlew :$L:runClient --no-daemon > anim-$L.log 2>&1
+          echo "== anim: salida $?" >> client.log
+          grep -aE "CLIENTTEST|Exception|Caused by" anim-$L.log | head -100 >> client.log
+          pip install -q pillow > /dev/null 2>&1
+          python3 tools/make_gifs.py $L/runs/client/screenshots anims >> client.log 2>&1
+          exit 0
+
       # El log (y los jar) se guardan en la rama ci-logs para poder leerlos sin la API de Actions
       - name: Guardar el log y los jar
         if: always()
@@ -129,6 +147,7 @@ jobs:
           [ -s "$GITHUB_WORKSPACE/client.log" ] && cp "$GITHUB_WORKSPACE/client.log" "logs/${GITHUB_SHA}-client.log"
           for L in fabric neoforge; do [ -s "$GITHUB_WORKSPACE/client-$L.log" ] && tail -c 600000 "$GITHUB_WORKSPACE/client-$L.log" > "logs/${GITHUB_SHA}-client-$L.log"; done
           if ls "$GITHUB_WORKSPACE"/shots/*.png >/dev/null 2>&1; then rm -rf shots && mkdir -p shots && cp "$GITHUB_WORKSPACE"/shots/*.png shots/; fi
+          if ls "$GITHUB_WORKSPACE"/anims/*.gif >/dev/null 2>&1; then rm -rf anims && mkdir -p anims && cp "$GITHUB_WORKSPACE"/anims/*.gif anims/; fi
           for L in neoforge fabric; do [ -s "$GITHUB_WORKSPACE/smoke-$L.log" ] && tail -c 400000 "$GITHUB_WORKSPACE/smoke-$L.log" > "logs/${GITHUB_SHA}-smoke-$L.log"; done
           jars=$(ls "$GITHUB_WORKSPACE"/fabric/build/libs/*.jar "$GITHUB_WORKSPACE"/neoforge/build/libs/*.jar 2>/dev/null | grep -v -- '-sources' || true)
           if [ -n "$jars" ]; then

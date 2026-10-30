@@ -76,6 +76,17 @@ public class Berserker extends SmilerBase {
     private Vec3 lastPos = Vec3.ZERO;
     private int ambientCooldown = 100;
     private boolean awake;
+    /** Grabacion de animaciones (prueba en el cliente): estado fijo, sin IA. */
+    private boolean forced;
+
+    public void debugForce(State s, boolean fast, @Nullable Vec3 to, double speed) {
+        forced = true;
+        setNoAi(false);
+        entityData.set(STATE, (byte) s.ordinal());
+        entityData.set(MOVING_FAST, fast);
+        if (to != null) getNavigation().moveTo(to.x, to.y, to.z, speed);
+        else getNavigation().stop();
+    }
 
     public Berserker(EntityType<? extends PathfinderMob> type, Level level) {
         super(type, level);
@@ -162,6 +173,7 @@ public class Berserker extends SmilerBase {
     protected void customServerAiStep() {
         super.customServerAiStep();
         if (!(level() instanceof ServerLevel level)) return;
+        if (forced) return;
         if (tickCount % 20 == 0) {
             awake = !com.smileprotocol.config.SPConfig.get().mobs_wait_for_players
                     || level.getNearestPlayer(this, 72) instanceof ServerPlayer sp && SPPlayerData.inSP(sp);

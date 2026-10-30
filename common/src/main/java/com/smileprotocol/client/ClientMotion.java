@@ -111,7 +111,11 @@ public final class ClientMotion {
 
     // Teclas ---------------------------------------------------------------------------------
 
+    /** Teclas propias forzadas por la grabacion de animaciones (nombres como key.keyboard.q). */
+    public static final java.util.Set<String> TEST_KEYS = new java.util.HashSet<>();
+
     static boolean isDown(String keyName) {
+        if (TEST_KEYS.contains(keyName)) return true;
         Minecraft mc = Minecraft.getInstance();
         if (mc.screen != null) return false;
         InputConstants.Key key;

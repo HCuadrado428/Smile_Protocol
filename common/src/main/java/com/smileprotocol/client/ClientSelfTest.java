@@ -38,7 +38,9 @@ import java.util.function.Predicate;
  */
 public final class ClientSelfTest {
 
-    private static final boolean ENABLED = "1".equals(System.getenv("SMILEPROTOCOL_CLIENTTEST"));
+    /** Grabacion de animaciones en tercera persona (SMILEPROTOCOL_ANIMTEST=1): fotogramas para hacer GIF. */
+    private static final boolean ANIM = "1".equals(System.getenv("SMILEPROTOCOL_ANIMTEST"));
+    private static final boolean ENABLED = ANIM || "1".equals(System.getenv("SMILEPROTOCOL_CLIENTTEST"));
     private static int ticks;
     private static int step;
     private static int wait;
@@ -106,6 +108,10 @@ public final class ClientSelfTest {
         ZonePlacement z = g.current();
         ServerLevel level = server.getLevel(SPDimension.SP_DIM);
         Vec3 e = z.entry();
+        if (ANIM) {
+            planAnimations(mc, server, sp, level, e);
+            return;
+        }
         // 1. Llegada, mirando hacia el vestibulo
         shot(mc, server, "01_llegada", e, 0f, 5f, 60);
         // 2. Pasillo principal
@@ -195,6 +201,219 @@ public final class ClientSelfTest {
         }));
         SHOTS.add(() -> wait = 50);
         SHOTS.add(() -> grab(mc, "19_agarre_qte"));
+    }
+
+    // Grabacion de animaciones -------------------------------------------------------------------
+
+    private static int cameraId = -1;
+
+    /**
+     * Estudio flotante encima de la planta, con luz y una pared de fondo. La camara es un soporte
+     * de armaduras invisible: el jugador se ve en tercera persona con sus poses reales (PlayerAnimator)
+     * y los mobs con sus animaciones de GeckoLib.
+     */
+    private static void planAnimations(Minecraft mc, MinecraftServer server, ServerPlayer sp, ServerLevel level, Vec3 e) {
+        BlockPos base = BlockPos.containing(e).offset(0, 30, 0);
+        Vec3 P = Vec3.atBottomCenterOf(base.above());
+        SHOTS.add(() -> server.execute(() -> {
+            net.minecraft.world.level.block.state.BlockState floor = com.smileprotocol.registry.ModBlocks.building("lab_tile_floor").defaultBlockState();
+            net.minecraft.world.level.block.state.BlockState wall = com.smileprotocol.registry.ModBlocks.building("lab_plaster").defaultBlockState();
+            net.minecraft.world.level.block.state.BlockState low = com.smileprotocol.registry.ModBlocks.building("lab_wall_tiles").defaultBlockState();
+            net.minecraft.world.level.block.state.BlockState light = net.minecraft.world.level.block.Blocks.LIGHT.defaultBlockState()
+                    .setValue(net.minecraft.world.level.block.LightBlock.LEVEL, 15);
+            for (int dx = -10; dx <= 10; dx++) {
+                for (int dz = -5; dz <= 8; dz++) level.setBlockAndUpdate(base.offset(dx, 0, dz), floor);
+                for (int dy = 1; dy <= 6; dy++) level.setBlockAndUpdate(base.offset(dx, dy, -5), dy <= 2 ? low : wall);
+            }
+            for (int dx = -8; dx <= 8; dx += 4) {
+                for (int dz = -3; dz <= 7; dz += 5) level.setBlockAndUpdate(base.offset(dx, 4, dz), light);
+            }
+            com.smileprotocol.motion.Flashlights.set(sp, false);
+            for (var m : level.getEntitiesOfClass(com.smileprotocol.entity.SPMonster.class, new net.minecraft.world.phys.AABB(P, P).inflate(60))) m.discard();
+            SPSessionManager.teleport(sp, level, P, -90f, 0f);
+            net.minecraft.world.entity.decoration.ArmorStand cam = new net.minecraft.world.entity.decoration.ArmorStand(level, P.x, P.y, P.z + 4);
+            cam.setInvisible(true);
+            cam.setNoGravity(true);
+            cam.setInvulnerable(true);
+            level.addFreshEntity(cam);
+            cameraId = cam.getId();
+        }));
+        SHOTS.add(() -> wait = 20);
+        SHOTS.add(() -> {
+            mc.options.hideGui = true;
+            if (mc.level != null && mc.level.getEntity(cameraId) != null) mc.setCameraEntity(mc.level.getEntity(cameraId));
+            else log("FALLO: sin camara");
+        });
+        Vec3 chest = P.add(0, 0.95, 0);
+        Vec3 side = P.add(0, 1.0, 5.2);
+        Vec3 threeQ = P.add(2.2, 1.1, 3.4);
+        var o = mc.options;
+
+        // Jugador ---------------------------------------------------------------------------------
+        scene(server, level, sp, threeQ, chest, P, -90f, null);
+        record(mc, "jugador_quieto", 40, null);
+
+        scene(server, level, sp, side, chest, P.add(-4.5, 0, 0), -90f, null);
+        record(mc, "jugador_andar", 45, k -> o.keyUp.setDown(true));
+        SHOTS.add(() -> o.keyUp.setDown(false));
+
+        scene(server, level, sp, side, chest, P.add(-5, 0, 0), -90f, null);
+        record(mc, "jugador_correr", 30, k -> {
+            o.keyUp.setDown(true);
+            o.keySprint.setDown(true);
+            if (mc.player != null) mc.player.setSprinting(true);
+        });
+        SHOTS.add(() -> { o.keyUp.setDown(false); o.keySprint.setDown(false); });
+
+        scene(server, level, sp, side, chest, P.add(-3.5, 0, 0), -90f, null);
+        record(mc, "jugador_agachado", 60, k -> { o.keyUp.setDown(true); o.keyShift.setDown(true); });
+        SHOTS.add(() -> { o.keyUp.setDown(false); o.keyShift.setDown(false); });
+
+        scene(server, level, sp, side, chest, P.add(-6, 0, 0), -90f, null);
+        record(mc, "jugador_dive", 40, k -> {
+            o.keyUp.setDown(k < 34);
+            o.keySprint.setDown(k < 12);
+            if (k < 12 && mc.player != null) mc.player.setSprinting(true);
+            o.keyShift.setDown(k == 12);
+        });
+        SHOTS.add(() -> { o.keyUp.setDown(false); o.keySprint.setDown(false); o.keyShift.setDown(false); });
+
+        SHOTS.add(() -> server.execute(() -> level.setBlockAndUpdate(BlockPos.containing(P), com.smileprotocol.registry.ModBlocks.building("lab_crate").defaultBlockState())));
+        scene(server, level, sp, side, chest, P.add(-3, 0, 0), -90f, null);
+        record(mc, "jugador_vault", 32, k -> {
+            o.keyUp.setDown(k < 26);
+            o.keyJump.setDown(k == 5 || k == 6);
+        });
+        SHOTS.add(() -> {
+            o.keyUp.setDown(false);
+            o.keyJump.setDown(false);
+            server.execute(() -> level.setBlockAndUpdate(BlockPos.containing(P), net.minecraft.world.level.block.Blocks.AIR.defaultBlockState()));
+        });
+
+        scene(server, level, sp, side, chest, P.add(-3.5, 0, 0), -90f, null);
+        record(mc, "jugador_mirar_atras", 45, k -> {
+            o.keyUp.setDown(true);
+            if (k == 8) ClientMotion.TEST_KEYS.add(com.smileprotocol.config.SPConfig.get().key_look_back);
+        });
+        SHOTS.add(() -> { o.keyUp.setDown(false); ClientMotion.TEST_KEYS.clear(); });
+
+        scene(server, level, sp, threeQ, chest, P, -90f, null);
+        record(mc, "jugador_asomarse", 56, k -> {
+            ClientMotion.TEST_KEYS.clear();
+            if (k >= 4 && k < 28) ClientMotion.TEST_KEYS.add(com.smileprotocol.config.SPConfig.get().key_lean_left);
+            if (k >= 32 && k < 54) ClientMotion.TEST_KEYS.add(com.smileprotocol.config.SPConfig.get().key_lean_right);
+        });
+        SHOTS.add(ClientMotion.TEST_KEYS::clear);
+
+        String[] names = {"valvula", "fusible", "puerta", "recoger", "tarjeta"};
+        int[] kinds = {com.smileprotocol.client.anim.PoseCalculator.INTERACT_VALVE, com.smileprotocol.client.anim.PoseCalculator.INTERACT_FUSE,
+                com.smileprotocol.client.anim.PoseCalculator.INTERACT_DOOR, com.smileprotocol.client.anim.PoseCalculator.INTERACT_PICKUP,
+                com.smileprotocol.client.anim.PoseCalculator.INTERACT_CARD};
+        for (int i = 0; i < names.length; i++) {
+            int kind = kinds[i];
+            scene(server, level, sp, threeQ, chest, P, -90f, () -> com.smileprotocol.motion.MotionManager.setAction(sp,
+                    com.smileprotocol.motion.Action.INTERACT, kind, false));
+            record(mc, "jugador_interactuar_" + names[i], 40, null);
+            SHOTS.add(() -> server.execute(() -> com.smileprotocol.motion.MotionManager.clearAction(sp, com.smileprotocol.motion.Action.INTERACT)));
+        }
+
+        scene(server, level, sp, side, P.add(0, 0.4, 0), P.add(-2.5, 0, 0), -90f, () -> com.smileprotocol.downed.DownedManager.down(sp, "grabacion"));
+        record(mc, "jugador_derribado", 70, k -> o.keyUp.setDown(true));
+        SHOTS.add(() -> {
+            o.keyUp.setDown(false);
+            server.execute(() -> com.smileprotocol.downed.DownedManager.clear(sp));
+        });
+
+        // Agarre con el mob de pruebas (jugador y mob a la vez)
+        com.smileprotocol.entity.SmilerTest[] tester = {null};
+        scene(server, level, sp, P.add(1.5, 1.3, 5.5), P.add(1.2, 1.1, 0), P, -90f, () -> {
+            tester[0] = com.smileprotocol.entity.MobManager.spawn(level, com.smileprotocol.registry.ModEntities.SMILER_TEST.get(),
+                    BlockPos.containing(P.add(4, 0, 0)), level.random);
+            if (tester[0] != null) tester[0].moveTo(P.x + 4, P.y, P.z, 90f, 0f);
+        });
+        record(mc, "agarre_qte", 70, null);
+        record(mc, "smiler_aturdido", 40, k -> {
+            if (k == 0) server.execute(() -> {
+                com.smileprotocol.qte.QTEManager.clear(sp);
+                com.smileprotocol.downed.DownedManager.clear(sp);
+                if (tester[0] != null) tester[0].debugForce(com.smileprotocol.entity.SmilerTest.State.STUNNED);
+                SPSessionManager.teleport(sp, level, P.add(-3, 0, 2), -90f, 0f);
+            });
+        });
+        SHOTS.add(() -> server.execute(() -> { if (tester[0] != null) tester[0].discard(); }));
+
+        // Berserker -----------------------------------------------------------------------------------
+        com.smileprotocol.entity.Berserker[] bz = {null};
+        Vec3 bChest = P.add(0, 1.3, 0);
+        Vec3 bQ = P.add(3.0, 1.6, 5.0);
+        Vec3 bSide = P.add(0, 1.4, 7.5);
+        SHOTS.add(() -> server.execute(() -> {
+            SPSessionManager.teleport(sp, level, P.add(-9, 0, 7), -90f, 0f);
+            bz[0] = com.smileprotocol.entity.MobManager.spawn(level, com.smileprotocol.registry.ModEntities.BERSERKER.get(),
+                    BlockPos.containing(P), level.random);
+        }));
+        mobScene(server, level, bz, bQ, bChest, P, com.smileprotocol.entity.Berserker.State.PATROL, false, null, 0);
+        record(mc, "berserker_quieto", 64, null);
+        mobScene(server, level, bz, bSide, bChest, P.add(-5, 0, 0), com.smileprotocol.entity.Berserker.State.PATROL, false, P.add(6, 0, 0), 0.55);
+        record(mc, "berserker_andar", 70, null);
+        mobScene(server, level, bz, bSide, bChest, P.add(-6, 0, 0), com.smileprotocol.entity.Berserker.State.INVESTIGATE, true, P.add(7, 0, 0), 1.35);
+        record(mc, "berserker_correr", 34, null);
+        mobScene(server, level, bz, bQ, bChest, P, com.smileprotocol.entity.Berserker.State.STRIKE, false, null, 0);
+        record(mc, "berserker_golpe", 64, k -> {
+            if (k == 22) server.execute(() -> { if (bz[0] != null) bz[0].debugForce(com.smileprotocol.entity.Berserker.State.RECOVER, false, null, 0); });
+        });
+        mobScene(server, level, bz, bQ, bChest, P, com.smileprotocol.entity.Berserker.State.SEARCH, false, null, 0);
+        record(mc, "berserker_escuchar", 80, null);
+        SHOTS.add(() -> {
+            mc.setCameraEntity(mc.player);
+            mc.options.hideGui = false;
+        });
+    }
+
+    /** Coloca la camara (mirando a {@code look}) y al jugador; {@code extra} corre en el servidor. */
+    private static void scene(MinecraftServer server, ServerLevel level, ServerPlayer sp, Vec3 cam, Vec3 look, Vec3 at, float yaw,
+                              Runnable extra) {
+        SHOTS.add(() -> server.execute(() -> {
+            placeCamera(level, cam, look);
+            SPSessionManager.teleport(sp, level, at, yaw, 0f);
+            if (extra != null) extra.run();
+        }));
+        SHOTS.add(() -> wait = 8);
+    }
+
+    private static void mobScene(MinecraftServer server, ServerLevel level, com.smileprotocol.entity.Berserker[] bz, Vec3 cam, Vec3 look,
+                                 Vec3 at, com.smileprotocol.entity.Berserker.State st, boolean fast, Vec3 to, double speed) {
+        SHOTS.add(() -> server.execute(() -> {
+            placeCamera(level, cam, look);
+            if (bz[0] == null) return;
+            bz[0].moveTo(at.x, at.y, at.z, -90f, 0f);
+            bz[0].setYBodyRot(-90f);
+            bz[0].setYHeadRot(-90f);
+            bz[0].debugForce(st, fast, to, speed);
+        }));
+        SHOTS.add(() -> wait = 10);
+    }
+
+    private static void placeCamera(ServerLevel level, Vec3 cam, Vec3 look) {
+        if (!(level.getEntity(cameraId) instanceof net.minecraft.world.entity.decoration.ArmorStand as)) return;
+        double dx = look.x - cam.x, dy = look.y - cam.y, dz = look.z - cam.z;
+        float yaw = (float) Math.toDegrees(Math.atan2(-dx, dz));
+        float pitch = (float) -Math.toDegrees(Math.atan2(dy, Math.sqrt(dx * dx + dz * dz)));
+        // el ojo del soporte esta a 1,7 sobre sus pies
+        as.moveTo(cam.x, cam.y - as.getEyeHeight(), cam.z, yaw, pitch);
+        as.setYHeadRot(yaw);
+        as.setYBodyRot(yaw);
+    }
+
+    private static void record(Minecraft mc, String name, int frames, java.util.function.IntConsumer perTick) {
+        for (int i = 0; i < frames; i++) {
+            int k = i;
+            SHOTS.add(() -> {
+                if (perTick != null) perTick.accept(k);
+                Screenshot.grab(mc.gameDirectory, String.format("anim-%s-%03d.png", name, k), mc.getMainRenderTarget(), c -> {});
+            });
+        }
+        SHOTS.add(() -> log("grabada " + name + " (" + frames + " fotogramas)"));
     }
 
     private static void shot(Minecraft mc, MinecraftServer server, String name, Vec3 pos, float yaw, float pitch, int delay) {
