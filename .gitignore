@@ -30,3 +30,4 @@ Thumbs.db
 runs/
 */runs/
 */build/
+__pycache__/
