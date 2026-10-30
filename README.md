@@ -1292,7 +1292,7 @@ Opciones de **cliente** (menú propio del mod), pensadas para que el terror no e
 9. **Interacción mantenida**, fusibles, llaves, puertas, circuitos y válvulas (por instancia).
 10. **Escondites:** tipos, aguante y vista.
 11. **Primer mob: el Berserker** (20.2), con oído, estados de IA y golpe de área, sobre `SmilerBase`. El **QTE** y la búsqueda de escondites se prueban con un mob de pruebas (`GRAB_QTE`) hasta definir el siguiente smiler.
-12. **Derribado, reanimación, remates y muertes instantáneas** (9.3 y 18.1), con sus animaciones.
+12. **Derribado, reanimación, remates y muertes instantáneas** (9.3 y 18.1), con sus animaciones. *Implementado:* reanimación cooperativa (6 s, el derribado no se desangra mientras tanto, se levanta con el 30 % y 3 s de protección), ayuda a un compañero agarrado, daño letal = derribo, secuencias dirigidas por el servidor (`SequenceManager`, `SequenceKind`: remate del Berserker, remate y muerte instantánea del smiler de pruebas) con cámara y HUD para la víctima, y muerte final como espectador de los compañeros vivos (estado `DEAD` del grupo). La jeringa de adrenalina queda para la fase 13 y la reaparición en la cabina para la 16.
 13. **Uso de objetos y consumibles** (10.1, 11.1) y **objetos lanzables** (12.7).
 14. **Misiones.**
 15. **Eventos de laboratorio y jumpscares** (14.7).
