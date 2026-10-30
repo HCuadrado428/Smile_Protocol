@@ -29,6 +29,12 @@ public final class ModEntities {
                     MobCategory.MONSTER).sized(0.9f, 1.95f).eyeHeight(1.75f).clientTrackingRange(10).fireImmune()
                     .build("smiler_kill"));
 
+    /** El Paciente (fase 21): 3,6 bloques de alto; no cabe por las puertas de las salas. */
+    public static final Supplier<EntityType<com.smileprotocol.entity.Paciente>> PACIENTE = Services.PLATFORM.register(
+            BuiltInRegistries.ENTITY_TYPE, "paciente", () -> EntityType.Builder.of(com.smileprotocol.entity.Paciente::new,
+                    MobCategory.MONSTER).sized(0.8f, 3.4f).eyeHeight(3.2f).clientTrackingRange(12).fireImmune()
+                    .build("paciente"));
+
     /** Bengala encendida (fase 13). */
     public static final Supplier<EntityType<com.smileprotocol.entity.FlareEntity>> FLARE = Services.PLATFORM.register(
             BuiltInRegistries.ENTITY_TYPE, "flare", () -> EntityType.Builder.<com.smileprotocol.entity.FlareEntity>of(
@@ -47,5 +53,6 @@ public final class ModEntities {
         Services.PLATFORM.registerAttributes(BERSERKER, Berserker::attributes);
         Services.PLATFORM.registerAttributes(SMILER_TEST, com.smileprotocol.entity.SmilerTest::attributes);
         Services.PLATFORM.registerAttributes(SMILER_KILL, com.smileprotocol.entity.SmilerTest::attributes);
+        Services.PLATFORM.registerAttributes(PACIENTE, com.smileprotocol.entity.Paciente::attributes);
     }
 }

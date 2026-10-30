@@ -110,7 +110,208 @@ def face():
     return mat
 
 
-MAT.update({"skin": skin(), "skin_hi": skin((22, 20, 21)), "hair": hair(), "claw": claw(), "face": face()})
+def face_blind():
+    """El Paciente: cara alargada sin ojo. Cuencas hundidas y lisas, y una sonrisa finisima y
+    larga, como un corte (la grande, que se abre al acercarse, es el hueso grin)."""
+    sk = skin((14, 12, 13))
+
+    def smile_mask(f):
+        # cara de 12 x 16 px: un corte fino de 10 px con las comisuras hacia arriba
+        if f.face != "north":
+            return np.zeros((f.h, f.w))
+        px = np.floor(f.U * gm.SCALE).astype(int)
+        py = np.floor(f.V * gm.SCALE).astype(int)
+        m = ((py == 11) & (px >= 2) & (px <= 9)) | ((py == 10) & ((px == 1) | (px == 10)))
+        return m.astype(float)
+
+    def mat(f):
+        c, a = sk(f)
+        if f.face != "north":
+            return c, a
+        w, h = f.w / gm.SCALE, f.h / gm.SCALE
+        # cuencas: hondonadas lisas donde deberian estar los ojos
+        for fx in (0.27, 0.73):
+            d = np.hypot((f.U - w * fx) / 1.25, (f.V - h * 0.38) / 0.75)
+            c = c * np.where(d < 1, 0.35 + 0.65 * d ** 2, 1.0)[..., None]
+        # pomulos marcados
+        for fx in (0.2, 0.8):
+            d = np.hypot((f.U - w * fx) / 0.9, (f.V - h * 0.56) / 0.5)
+            c = c + np.where(d < 1, (1 - d) * 8, 0)[..., None]
+        c = np.where(smile_mask(f)[..., None] > 0, np.array([210, 18, 22]), c)
+        return c, a
+
+    mat.glowmask = smile_mask
+    return mat
+
+
+GRIN = [
+    "R................R",
+    "RR..............RR",
+    ".RRRRRRRRRRRRRRRR.",
+    ".RTTKTTKTTKTTKTTR.",
+    "..RTKKTKKTKKTKKR..",
+    "..RKKKKKKKKKKKKR..",
+    "...RKTKKTKKTKKR...",
+    "...RTTKTTKTTKTR...",
+    "....RRRRRRRRRR....",
+    "......RRRRRR......",
+]
+GRIN_COLORS = {"R": (205, 16, 22), "T": (228, 70, 62), "K": (4, 0, 1)}
+
+
+def grin():
+    """La sonrisa que se abre (pixel art, 18 x 10): comisuras que suben, encias rojas, dientes
+    afilados arriba y abajo y la boca negra. El juego la escala desde el centro al acercarse."""
+    def cells(f):
+        px = np.clip(np.floor(f.U * gm.SCALE).astype(int), 0, len(GRIN[0]) - 1)
+        py = np.clip(np.floor(f.V * gm.SCALE).astype(int), 0, len(GRIN) - 1)
+        return np.vectorize(lambda x, y: GRIN[y][x])(px, py)
+
+    def mask(f):
+        if f.face != "north":
+            return np.zeros((f.h, f.w))
+        ch = cells(f)
+        return ((ch == "R") | (ch == "T")).astype(float)
+
+    def mat(f):
+        if f.face != "north":
+            return np.zeros((f.h, f.w, 3)), np.zeros((f.h, f.w))
+        ch = cells(f)
+        c = np.zeros((f.h, f.w, 3))
+        for k, col in GRIN_COLORS.items():
+            c = np.where((ch == k)[..., None], np.array(col), c)
+        return c, (ch != ".").astype(float)
+
+    mat.glowmask = mask
+    return mat
+
+
+MAT.update({"skin": skin(), "skin_hi": skin((22, 20, 21)), "hair": hair(), "claw": claw(), "face": face(),
+            "face_blind": face_blind(), "grin": grin()})
+
+
+# El Paciente (docs/SMILERS.md) ---------------------------------------------------------------------------
+#
+# Muy alto y delgado (unos 3,6 bloques), recto y rigido, brazos pegados al cuerpo y dedos larguisimos.
+# Sin ojo: solo la sonrisa, que una placa aparte (hueso grin) agranda cuanto mas cerca esta. No anda:
+# salta de pose en pose cuando nadie lo mira, asi que sus animaciones son poses quietas.
+
+def paciente():
+    g = Geo("paciente", 91, folder="entity", glow=("face_blind", "grin"), ao=False)
+    g.bone("root")
+    g.bone("hips", "root", (0, 28, 0))
+    g.cube("hips", (-2.8, 26.5, -1.7), (5.6, 3.5, 3.4), "skin")
+    for sx in (1, -1):
+        g.cube("hips", (sx * 2.6 - 0.6, 27.8, -1.2), (1.2, 1.4, 2.2), "skin_hi")             # crestas de la cadera
+    g.bone("torso", "hips", (0, 30, 0))
+    g.cube("torso", (-1.8, 30, -1.3), (3.6, 5.5, 2.6), "skin")                              # cintura de avispa
+    g.cube("torso", (-3.2, 35, -1.9), (6.4, 6, 3.8), "skin")                                # caja toracica
+    g.cube("torso", (-3.6, 40.5, -2), (7.2, 3.5, 4), "skin")
+    for i in range(4):
+        w = 6.6 - abs(i - 1.5) * 0.6
+        g.cube("torso", (-w / 2, 36 + i * 1.7, -2.25), (w, 0.6, 0.4), "skin_hi")            # costillas
+    for i in range(6):
+        g.cube("torso", (-0.5, 31 + i * 2.1, 1.3), (1, 1, 0.7), "skin_hi")                  # espinazo
+    for sx in (1, -1):
+        g.cube("torso", (sx * 2.4 - 1.6, 43.3, -1.3), (3.2, 1.2, 2.6), "skin", rotation=(0, 0, sx * -18),
+               pivot=(sx * 0.6, 44, 0))                                                    # clavicula caida
+    g.bone("neck", "torso", (0, 44.5, -0.3), rotation=(12, 0, 0))
+    g.cube("neck", (-0.8, 44.5, -1.1), (1.6, 7.5, 1.6), "skin")                             # cuello larguisimo
+    g.cube("neck", (-0.5, 46, -1.25), (1, 4.5, 0.3), "skin_hi")                             # tendones
+    g.bone("head", "neck", (0, 51.8, -0.6), rotation=(8, 0, 0))
+    g.cube("head", (-3, 52, -3.6), (6, 8, 6), "face_blind")                                 # cara alargada
+    g.cube("head", (-2.3, 50.6, -3.3), (4.6, 1.6, 4.8), "skin")                             # menton estrecho
+    g.cube("head", (-2.6, 59.8, -3.2), (5.2, 1.3, 5.2), "skin")                             # craneo alto
+    g.bone("grin", "head", (0, 56.4, -3.66))
+    g.cube("grin", (-4.5, 53.9, -3.66), (9, 5, 0.02), "grin", skip=("south", "east", "west", "up", "down"), blood=False)
+    # pelo: mechones sueltos de largos distintos, con huecos; dos caen por delante de la cara
+    g.bone("hair", "head", (0, 61, -0.6))
+    g.cube("hair", (-3.3, 60.6, -3.9), (6.6, 1.2, 6.6), "hair")
+    import random as _r
+    rr = _r.Random(7)
+    x = -3.4
+    while x < 3.0:
+        ln = rr.uniform(12, 24)
+        g.cube("hair", (x, 61 - ln, 2.5 + rr.uniform(-0.3, 0.4)), (rr.uniform(0.6, 1.0), ln, 0.6), "hair")
+        x += rr.uniform(0.7, 1.1)
+    for sx in (1, -1):
+        for k in range(3):
+            ln = rr.uniform(9, 17)
+            g.cube("hair", (sx * 3.25 - 0.3, 61 - ln, -2.8 + k * 2.1), (0.6, ln, rr.uniform(0.8, 1.2)), "hair")
+    for xx, ln in ((-1.9, 10.5), (1.2, 7.5)):
+        g.cube("hair", (xx, 61 - ln, -3.95), (0.7, ln, 0.4), "hair")
+    # brazos: huesudos, codos y munecas marcados, manos estrechas y dedos de dos falanges
+    for side, sx in (("r", 1), ("l", -1)):
+        g.bone(f"arm_{side}", "torso", (sx * 4.2, 43.2, 0))
+        g.cube(f"arm_{side}", (sx * 4.2 - 0.85, 31, -0.85), (1.7, 12.5, 1.7), "skin")
+        g.cube(f"arm_{side}", (sx * 4.2 - 1.05, 40.5, -1.05), (2.1, 3, 2.1), "skin")          # hombro
+        g.bone(f"forearm_{side}", f"arm_{side}", (sx * 4.2, 31.3, 0))
+        g.cube(f"forearm_{side}", (sx * 4.2 - 1.05, 29.8, -1.05), (2.1, 2, 2.1), "skin_hi")   # codo
+        g.cube(f"forearm_{side}", (sx * 4.2 - 0.7, 17.5, -0.7), (1.4, 12.5, 1.4), "skin")
+        g.bone(f"hand_{side}", f"forearm_{side}", (sx * 4.2, 17.8, 0))
+        g.cube(f"hand_{side}", (sx * 4.2 - 0.6, 14.2, -1.4), (1.2, 3.8, 2.8), "skin")
+        for i, z in enumerate((-1.25, -0.45, 0.35, 1.1)):
+            ln = (7, 8.2, 7.8, 6)[i]
+            g.bone(f"finger{i}_{side}", f"hand_{side}", (sx * 4.2, 14.4, z + 0.2))
+            g.cube(f"finger{i}_{side}", (sx * 4.2 - 0.25, 14.4 - ln * 0.5, z), (0.5, ln * 0.5, 0.45), "skin")
+            g.cube(f"finger{i}_{side}", (sx * 4.2 - 0.32, 14.4 - ln * 0.5 - 0.35, z - 0.05), (0.64, 0.7, 0.55), "skin_hi")
+            g.cube(f"finger{i}_{side}", (sx * 4.2 - 0.2, 14.4 - ln, z + 0.03), (0.4, ln * 0.5, 0.4), "claw")
+        g.cube(f"hand_{side}", (sx * 4.2 - 0.25, 13.2, -1.75), (0.5, 3.2, 0.5), "claw")          # pulgar
+    for side, sx in (("r", 1), ("l", -1)):
+        g.bone(f"thigh_{side}", "hips", (sx * 1.6, 27, 0))
+        g.cube(f"thigh_{side}", (sx * 1.6 - 1.1, 15.5, -1.1), (2.2, 12, 2.2), "skin")
+        g.bone(f"shin_{side}", f"thigh_{side}", (sx * 1.6, 15.5, 0))
+        g.cube(f"shin_{side}", (sx * 1.6 - 1.25, 14, -1.4), (2.5, 2.2, 2.6), "skin_hi")      # rodilla huesuda
+        g.cube(f"shin_{side}", (sx * 1.6 - 0.8, 1, -0.8), (1.6, 13.5, 1.6), "skin")
+        g.cube(f"shin_{side}", (sx * 1.6 - 0.95, 7.5, -0.6), (1.9, 4.5, 1.7), "skin")        # gemelo
+        g.bone(f"foot_{side}", f"shin_{side}", (sx * 1.6, 1, 0))
+        g.cube(f"foot_{side}", (sx * 1.6 - 0.9, 0, -2.2), (1.8, 1, 3.4), "skin")
+        g.cube(f"foot_{side}", (sx * 1.6 - 0.6, 0, -4.4), (1.2, 0.7, 2.3), "skin")          # pie largo y puntiagudo
+    return g.save()
+
+
+def paciente_animations():
+    """Poses quietas (cada salto elige una) y la muerte instantanea kill_paciente (50 ticks): se dobla
+    sobre la victima, le coge la cabeza con los dedos larguisimos, la sube hasta su cara (6-18), le
+    parte el cuello de un giro (22), se lo retuerce del todo y tira (34) y la deja caer (40)."""
+    A = {}
+
+    def still(bones):
+        return {"loop": True, "animation_length": 0.05, "bones": {k: {"rotation": kf([(0, v)])} for k, v in bones.items()}}
+
+    A["pose0"] = still({"head": [0, 0, 0]})                                                  # firme, mirando al frente
+    A["pose1"] = still({"neck": [8, 0, 0], "head": [10, 0, 38], "torso": [4, 0, 0]})         # cabeza ladeada
+    A["pose2"] = still({"arm_r": [-88, 0, 0], "forearm_r": [-6, 0, 0], "torso": [8, 0, 0],    # te senala, alargando el brazo
+                        **{f"finger{i}_r": [-4 * i, 0, 0] for i in range(4)}})
+    A["pose3"] = still({"torso": [18, 0, 0], "neck": [10, 0, 0], "head": [-14, 0, 0],        # inclinado hacia ti
+                        "arm_r": [-30, 0, 6], "arm_l": [-30, 0, -6], "forearm_r": [-20, 0, 0], "forearm_l": [-20, 0, 0]})
+    A["pose4"] = still({"head": [0, 92, 0], "neck": [0, 20, 0]})                             # cabeza girada de mas
+    A["pose5"] = still({"arm_r": [-160, 0, 8], "arm_l": [-160, 0, -8], "head": [-8, 0, 0]})  # brazos en alto, rigidos
+
+    L = 2.5
+    def arms(sign):
+        s_ = 1 if sign == "r" else -1
+        return [(0, [0, 0, 0]), (0.3, [-62, 0, -4 * s_]), (0.9, [-112, 0, -8 * s_]), (1.08, [-112, 0, -8 * s_]),
+                (1.12, [-108, 34 * s_, -10 * s_]), (1.6, [-110, 40 * s_, -10 * s_]), (1.7, [-104, 70 * s_, -28 * s_]),
+                (2.0, [-60, 30 * s_, -20 * s_]), (2.15, [-10, 0, -6 * s_]), (L, [-4, 0, -4 * s_])]
+    A["kill_paciente"] = {"loop": "hold_on_last_frame", "animation_length": L, "bones": {
+        "torso": {"rotation": kf([(0, [0, 0, 0]), (0.3, [42, 0, 0]), (0.9, [14, 0, 0]), (1.1, [16, 0, 0]),
+                                  (1.7, [20, 0, 0]), (2.1, [10, 0, 0]), (L, [12, 0, 0])])},
+        "neck": {"rotation": kf([(0, [0, 0, 0]), (0.3, [20, 0, 0]), (0.9, [26, 0, 0]), (1.12, [24, 0, 0]), (L, [20, 0, 0])])},
+        "head": {"rotation": kf([(0, [0, 0, 0]), (0.9, [8, 0, 0]), (1.12, [10, 0, 22]), (1.6, [12, 0, -18]),
+                                 (1.7, [14, 0, 30]), (2.1, [20, 0, 34]), (L, [22, 0, 40])])},
+        "arm_r": {"rotation": kf(arms("r"))}, "arm_l": {"rotation": kf(arms("l"))},
+        "forearm_r": {"rotation": kf([(0, [0, 0, 0]), (0.3, [-30, 0, 0]), (0.9, [-48, 0, 0]), (2.0, [-48, 0, 0]), (L, [-6, 0, 0])])},
+        "forearm_l": {"rotation": kf([(0, [0, 0, 0]), (0.3, [-30, 0, 0]), (0.9, [-48, 0, 0]), (2.0, [-48, 0, 0]), (L, [-6, 0, 0])])},
+        "hips": {"position": kf([(0, [0, 0, 0]), (0.3, [0, -2, 0]), (0.9, [0, 0, 0])])},
+        **{f"finger{i}_{sd}": {"rotation": kf([(0, [0, 0, 0]), (0.25, [-20, 0, 0]), (0.35, [55 - 4 * i, 0, 0]),
+                                                 (2.0, [55 - 4 * i, 0, 0]), (2.15, [0, 0, 0])])}
+           for i in range(4) for sd in "rl"},
+    }}
+    out = {"format_version": "1.8.0", "animations": A}
+    p = ROOT / "animations/entity/paciente.animation.json"
+    p.write_text(json.dumps(out, indent=1) + "\n", encoding="utf-8")
+    return A
 
 
 # Berserker ----------------------------------------------------------------------------------------------
@@ -503,9 +704,9 @@ def sample(channel, t):
     return keys[-1][1]
 
 
-def render_pose(anim, t, size=420, yaw=200, pitch=-12):
-    geo = json.loads((ROOT / "geo/entity/berserker.geo.json").read_text())["minecraft:geometry"][0]
-    tex = np.asarray(Image.open(ROOT / "textures/entity/berserker.png").convert("RGBA"))
+def render_pose(anim, t, size=420, yaw=200, pitch=-12, name="berserker", height=60):
+    geo = json.loads((ROOT / f"geo/entity/{name}.geo.json").read_text())["minecraft:geometry"][0]
+    tex = np.asarray(Image.open(ROOT / f"textures/entity/{name}.png").convert("RGBA"))
     bones = {b["name"]: b for b in geo["bones"]}
     cache = {}
 
@@ -562,7 +763,7 @@ def render_pose(anim, t, size=420, yaw=200, pitch=-12):
     quads.sort(key=lambda q: -q[0])
     img = Image.new("RGB", (size, size), (70, 74, 78))
     d = ImageDraw.Draw(img)
-    k = size / 60
+    k = size / height
     for z, pts, col in quads:
         d.polygon([(x * k + size / 2, y * k + size * 0.93) for x, y in pts], fill=col, outline=col)
     # suelo y escala (bloques)
@@ -596,6 +797,17 @@ def main():
     smiler_test()
     smiler_test("smiler_kill", (0.27, 0.73))
     A = animations()
+    pw, ph, pn = paciente()
+    P = paciente_animations()
+    print(f"paciente textura {pw * gm.SCALE}x{ph * gm.SCALE} caras={pn} animaciones={list(P)}")
+    if len(sys.argv) > 2:
+        frames = [("pose0", 200), ("pose0", 110), ("pose1", 160), ("pose2", 130), ("pose3", 200), ("pose4", 160)]
+        ims = [render_pose(P[n], 0, yaw=y, name="paciente", height=66) for n, y in frames]
+        ims += [render_pose(P["kill_paciente"], t, yaw=130, name="paciente", height=66) for t in (0.9, 1.7)]
+        sheet = Image.new("RGB", (4 * 420, 2 * 420))
+        for i, im in enumerate(ims):
+            sheet.paste(im, ((i % 4) * 420, (i // 4) * 420))
+        sheet.save(sys.argv[2])
     print(f"berserker textura {tw * gm.SCALE}x{th * gm.SCALE} caras={nf} animaciones={list(A)}")
     if len(sys.argv) > 1:
         frames = [("idle", 0.0, 200), ("idle", 0.0, 110), ("walk", 0.4, 160), ("run", 0.2, 120),

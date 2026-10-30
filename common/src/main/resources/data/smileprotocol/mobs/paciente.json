@@ -1,0 +1,13 @@
+{
+  "id": "smileprotocol:paciente",
+  "family": "smiler",
+  "based_on": "smiley",
+  "_comment": "El Paciente (docs/SMILERS.md): se congela mientras cualquiera lo mire y salta hacia su victima cuando nadie mira; muerte instantanea. Ajustes de movimiento en la configuracion (paciente_*).",
+  "size": { "width": 0.8, "height": 3.4 },
+  "senses": { "vision": { "enabled": false }, "hearing": { "multiplier": 0.0, "min_noise": 999.0 } },
+  "on_catch": "INSTANT_KILL",
+  "execution": false,
+  "can_enter_vents": false,
+  "causes_interference": true,
+  "sequences": { "kill": "PACIENTE_KILL" }
+}

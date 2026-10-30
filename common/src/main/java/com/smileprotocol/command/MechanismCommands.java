@@ -188,6 +188,7 @@ final class MechanismCommands {
             case "berserker" -> com.smileprotocol.entity.MobManager.spawn(level, com.smileprotocol.registry.ModEntities.BERSERKER.get(), pos, level.random);
             case "smiler_test" -> com.smileprotocol.entity.MobManager.spawn(level, com.smileprotocol.registry.ModEntities.SMILER_TEST.get(), pos, level.random);
             case "smiler_kill" -> com.smileprotocol.entity.MobManager.spawn(level, com.smileprotocol.registry.ModEntities.SMILER_KILL.get(), pos, level.random);
+            case "paciente" -> com.smileprotocol.entity.MobManager.spawn(level, com.smileprotocol.registry.ModEntities.PACIENTE.get(), pos, level.random);
             default -> {
                 ctx.getSource().sendFailure(Component.translatable("smileprotocol.command.mob.unknown", type));
                 return 0;

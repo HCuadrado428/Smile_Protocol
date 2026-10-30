@@ -35,6 +35,7 @@ public final class ModSounds {
     public static final Supplier<SoundEvent> AMBIENT_DRONE = register("ambient.drone");
     public static final Supplier<SoundEvent> AMBIENT_CREAK = register("ambient.creak");
     public static final Supplier<SoundEvent> AMBIENT_DRIP = register("ambient.drip");
+    public static final Supplier<SoundEvent> PACIENTE_CRACK = register("paciente.crack");
 
     private ModSounds() {}
 

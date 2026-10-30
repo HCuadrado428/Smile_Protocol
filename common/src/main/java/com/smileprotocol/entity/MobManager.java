@@ -66,6 +66,29 @@ public final class MobManager {
         return k;
     }
 
+    /**
+     * El Paciente (docs/SMILERS.md): uno en las plantas de {@code paciente_zones}, en un punto lejos
+     * de la llegada desde el que pueda andar hasta ella (en los pasillos: no cabe por las puertas).
+     */
+    public static void spawnPaciente(ServerLevel level, net.minecraft.resources.ResourceLocation zoneId, List<BlockPos> points,
+                                     Vec3 entry, RandomSource rnd) {
+        if (!SPConfig.get().paciente_zones.contains(zoneId.getPath())) return;
+        List<BlockPos> far = new ArrayList<>();
+        for (BlockPos p : points) if (Vec3.atBottomCenterOf(p).distanceTo(entry) > 30) far.add(p);
+        java.util.Collections.shuffle(far, new java.util.Random(rnd.nextLong()));
+        for (BlockPos p : far) {
+            Paciente m = spawn(level, ModEntities.PACIENTE.get(), p, rnd);
+            if (m == null) continue;
+            var path = m.getNavigation().createPath(BlockPos.containing(entry), 2);
+            if (level.noCollision(m) && path != null && path.getNodeCount() > 8) {
+                SPDebug.log("mobs: paciente en " + p.toShortString());
+                return;
+            }
+            m.discard();
+        }
+        SPDebug.log("mobs: sin sitio para el paciente en " + zoneId);
+    }
+
     public static <T extends SPMonster> T spawn(ServerLevel level, EntityType<T> type, BlockPos pos, RandomSource rnd) {
         T mob = type.create(level);
         if (mob == null) return null;

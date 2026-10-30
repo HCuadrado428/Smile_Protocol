@@ -154,7 +154,7 @@ public final class ClientSequence {
         float end = Mth.clamp((t - ticks * 0.82f) / (ticks * 0.18f), 0f, 1f);
         pitch = Mth.lerp(end * 0.7f, pitch, kind().prone ? 10f : 55f);
         // la cara del mob queda a un palmo: la camara se echa un poco atras para no meterse dentro
-        float back = kind() == SequenceKind.SMILER_KILL ? 0.45f : 0f;
+        float back = kind() == SequenceKind.SMILER_KILL ? 0.45f : kind() == SequenceKind.PACIENTE_KILL ? 0.35f : 0f;
         return new float[]{yaw, Mth.clamp(pitch, -89f, 89f), back};
     }
 }

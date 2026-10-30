@@ -351,5 +351,7 @@
   "subtitles.smileprotocol.walkie.crackle": "Crujido de radio",
   "subtitles.smileprotocol.ui.marker": "Marcador de equipo",
   "subtitles.smileprotocol.ambient.creak": "La estructura cruje",
-  "subtitles.smileprotocol.ambient.drip": "Goteo"
+  "subtitles.smileprotocol.ambient.drip": "Goteo",
+  "subtitles.smileprotocol.paciente.crack": "Crujido de huesos",
+  "entity.smileprotocol.paciente": "El Paciente"
 }

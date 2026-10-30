@@ -438,6 +438,20 @@ def drip():
     return x
 
 
+def crack(seed):
+    """El Paciente cambia de sitio: chasquido seco de huesos y un crujido corto."""
+    r = np.random.default_rng(seed)
+    n = int(SR * 0.45)
+    x = np.zeros(n)
+    for t0, g in ((0.0, 1.0), (0.05, 0.6), (0.11, 0.8), (0.2, 0.4)):
+        k = int(t0 * SR)
+        m = int(SR * 0.06)
+        x[k:k + m] += highpass(noise(m, r), 1800) * env(m, 0.0003, 0.012) * g
+    tt = np.arange(n) / SR
+    x += np.sin(2 * np.pi * 140 * tt) * env(n, 0.001, 0.05) * 0.4
+    return x
+
+
 def main():
     for i in range(3):
         save(f"berserker/step{i + 1}", step(10 + i))
@@ -476,6 +490,8 @@ def save_new():
     for i in range(2):
         save(f"ambient/creak{i + 1}", creak(200 + i))
     save("ambient/drip", drip())
+    save("paciente/crack1", crack(301))
+    save("paciente/crack2", crack(302))
     print("sonidos escritos en", OUT)
 
 

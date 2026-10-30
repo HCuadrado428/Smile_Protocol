@@ -213,6 +213,7 @@ public final class LabActions {
         var type = switch (id) {
             case "smiler_test" -> com.smileprotocol.registry.ModEntities.SMILER_TEST.get();
             case "smiler_kill" -> com.smileprotocol.registry.ModEntities.SMILER_KILL.get();
+            case "paciente" -> com.smileprotocol.registry.ModEntities.PACIENTE.get();
             default -> com.smileprotocol.registry.ModEntities.BERSERKER.get();
         };
         com.smileprotocol.entity.MobManager.spawn(c.level(), type, best, c.level().random);

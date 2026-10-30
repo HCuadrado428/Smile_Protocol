@@ -170,6 +170,16 @@ public final class SPConfig {
 
         // Mobs (README 20)
         /** Berserkers por planta segun la dificultad de la zona (0, 1, 2, 3, 4...), antes de escalar por el grupo. */
+        // El Paciente (docs/SMILERS.md)
+        /** Plantas donde aparece (uno por planta, en los pasillos). */
+        public java.util.List<String> paciente_zones = new java.util.ArrayList<>(java.util.List.of("lab_morgue", "final_room"));
+        /** Bloques de camino por salto y ticks entre saltos mientras nadie lo mira. */
+        public int paciente_step = 4;
+        public int paciente_jump_ticks = 5;
+        /** Medio angulo de vision con el que se le considera mirado (grados). */
+        public float paciente_view_angle = 50;
+        /** Si su victima esta mas lejos que esto y hay otra mas cerca, cambia. */
+        public float paciente_retarget_distance = 24;
         public java.util.List<Integer> berserkers_by_difficulty = new java.util.ArrayList<>(java.util.List.of(1, 2, 2, 3, 3));
         /** Los mobs no se mueven hasta que el grupo llega a su planta. */
         public boolean mobs_wait_for_players = true;

@@ -620,6 +620,28 @@ public final class PoseCalculator {
                 pose.bend(RIGHT_LEG, 0, 1.1f * Math.max(0, b) * kick);
                 pose.bend(LEFT_LEG, 0, 1.1f * Math.max(0, -b) * kick);
             }
+            case PACIENTE_KILL -> {
+                // Colgando de la cabeza: patalea y tira de los dedos que le sujetan; el giro le parte el
+                // cuello (22), el segundo se lo retuerce del todo (34) y cuelga sin vida hasta caer
+                float up = Mth.clamp((age - 6f) / 12f, 0f, 1f);
+                float snap = Mth.clamp((age - kind.impacts[0]) / 2f, 0f, 1f);
+                float twist = Mth.clamp((age - kind.impacts[1]) / 3f, 0f, 1f);
+                float drop = Mth.clamp((age - 40f) / 4f, 0f, 1f);
+                float fight = up * (1 - snap);
+                float twitch = snap * spasm * (1 - Mth.clamp((age - 44f) / 6f, 0f, 1f));
+                float a = Mth.sin(time * 1.4f), b = Mth.sin(time * 1.05f + 0.5f);
+                pose.setRot(HEAD, -0.35f * up + 0.3f * twitch, 0.9f * snap + 1.4f * twist, 0.35f * snap - 0.2f * twist);
+                pose.setRot(RIGHT_ARM, Mth.lerp(snap, -2.6f + 0.3f * a, 0.1f) + 0.4f * twitch, 0.2f * (1 - snap), 0.25f + 0.2f * twitch);
+                pose.setRot(LEFT_ARM, Mth.lerp(snap, -2.6f - 0.3f * a, 0.05f) - 0.3f * twitch, -0.2f * (1 - snap), -0.25f);
+                pose.bend(RIGHT_ARM, 0, -1.1f * fight);
+                pose.bend(LEFT_ARM, 0, -1.1f * fight);
+                pose.setRot(TORSO, 0.1f * twitch + 0.45f * drop, 0.12f * b * fight, 0.06f * twitch);
+                pose.setRot(RIGHT_LEG, -0.6f * Math.max(0, b) * fight + 0.25f * twitch - 1.2f * drop, 0, 0.05f);
+                pose.setRot(LEFT_LEG, -0.6f * Math.max(0, -b) * fight - 0.2f * twitch - 0.8f * drop, 0, -0.05f);
+                pose.bend(RIGHT_LEG, 0, 1.0f * Math.max(0, b) * fight + 1.6f * drop);
+                pose.bend(LEFT_LEG, 0, 1.0f * Math.max(0, -b) * fight + 1.2f * drop);
+                bodyPx(pose, 0, 6f * drop, -2f * drop);
+            }
             case SMILER_KILL -> {
                 // Levantado: patalea y empuja la cara del mob; los mordiscos le echan la cabeza atras y
                 // le parten el cuello; el tiron de la garganta la deja colgando hacia atras; convulsiona

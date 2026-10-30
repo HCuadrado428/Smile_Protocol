@@ -351,5 +351,7 @@
   "subtitles.smileprotocol.walkie.crackle": "Radio crackles",
   "subtitles.smileprotocol.ui.marker": "Team marker",
   "subtitles.smileprotocol.ambient.creak": "Structure creaks",
-  "subtitles.smileprotocol.ambient.drip": "Dripping"
+  "subtitles.smileprotocol.ambient.drip": "Dripping",
+  "subtitles.smileprotocol.paciente.crack": "Bones crack",
+  "entity.smileprotocol.paciente": "The Patient"
 }

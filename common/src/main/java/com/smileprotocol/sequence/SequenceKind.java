@@ -34,7 +34,13 @@ public enum SequenceKind {
      * arranca la garganta de un tiron; la deja caer desangrandose.
      */
     SMILER_KILL("kill", 72, false, 1.25, true, new int[]{30, 40, 50}, new int[]{50}, -1,
-            new int[]{30, 66}, 1, false);
+            new int[]{30, 66}, 1, false),
+    /**
+     * El Paciente se dobla sobre la victima, le coge la cabeza con sus dedos larguisimos, la sube
+     * hasta su cara, le parte el cuello de un giro, se lo retuerce del todo y la deja caer.
+     */
+    PACIENTE_KILL("kill_paciente", 50, false, 1.05, true, new int[]{22, 34}, new int[]{34}, -1,
+            new int[]{34, 48}, 0, false);
 
     /** Donde sale el chorro de sangre: cuello, cara o espalda de la victima. */
     public static final int NECK = 0, FACE = 1, BACK = 2;
@@ -82,6 +88,12 @@ public enum SequenceKind {
             float down = Mth.clamp((age - 57) / 3f, 0f, 1f);
             up = up * up * (3 - 2 * up);
             return 0.75 * up * (1 - down);
+        }
+        if (this == PACIENTE_KILL) {
+            float up = Mth.clamp((age - 6) / 12f, 0f, 1f);
+            float down = Mth.clamp((age - 40) / 4f, 0f, 1f);
+            up = up * up * (3 - 2 * up);
+            return 1.25 * up * (1 - down);
         }
         if (this != SMILER_KILL) return 0;
         float up = Mth.clamp((age - 6) / 12f, 0f, 1f);

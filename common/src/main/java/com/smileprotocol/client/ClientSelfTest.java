@@ -378,6 +378,38 @@ public final class ClientSelfTest {
             int slot = com.smileprotocol.interact.SPInventoryOps.find(sp, com.smileprotocol.voice.WalkieManager::isWalkie);
             if (slot >= 0) com.smileprotocol.interact.SPInventoryOps.take(sp, slot);
         }));
+        // 8g. Fase 21: el Paciente se congela mientras lo miras y salta cuando no
+        com.smileprotocol.entity.Paciente[] pac = {null};
+        double[] pacDist = {0};
+        SHOTS.add(() -> server.execute(() -> {
+            SPSessionManager.teleport(sp, level, cam, 0f, -8f);
+            pac[0] = com.smileprotocol.entity.MobManager.spawn(level, com.smileprotocol.registry.ModEntities.PACIENTE.get(),
+                    BlockPos.containing(cam.add(0, 0, 8)), level.random);
+            if (pac[0] != null) {
+                pac[0].setYRot(180f);
+                pac[0].setYBodyRot(180f);
+                pac[0].setYHeadRot(180f);
+            }
+        }));
+        SHOTS.add(() -> wait = 25);
+        SHOTS.add(() -> server.execute(() -> {
+            boolean ok = pac[0] != null && pac[0].jumps() == 0 && pac[0].watched();
+            log((ok ? "OK" : "FALLO") + " paciente congelado mientras lo miras (saltos " + (pac[0] == null ? -1 : pac[0].jumps()) + ")");
+            if (pac[0] != null) pacDist[0] = pac[0].distanceTo(sp);
+        }));
+        SHOTS.add(() -> grab(mc, "35_paciente"));
+        SHOTS.add(() -> server.execute(() -> SPSessionManager.teleport(sp, level, cam, 180f, 0f)));
+        SHOTS.add(() -> wait = 9);
+        SHOTS.add(() -> server.execute(() -> {
+            boolean ok = pac[0] != null && pac[0].jumps() > 0 && pac[0].distanceTo(sp) < pacDist[0] - 1;
+            log((ok ? "OK" : "FALLO") + " paciente avanza cuando no lo miras (saltos " + (pac[0] == null ? -1 : pac[0].jumps())
+                    + ", distancia " + String.format(java.util.Locale.ROOT, "%.1f -> %.1f", pacDist[0], pac[0] == null ? 0 : pac[0].distanceTo(sp)) + ")");
+            if (pac[0] != null) pac[0].debugForce(pac[0].poseId());
+            SPSessionManager.teleport(sp, level, cam, 0f, -14f);
+        }));
+        SHOTS.add(() -> wait = 15);
+        SHOTS.add(() -> grab(mc, "36_paciente_cerca"));
+        SHOTS.add(() -> server.execute(() -> { if (pac[0] != null) pac[0].discard(); }));
         // 9. Fase 12: levantarse tras la reanimacion, muerte instantanea en primera persona y muerte final
         SHOTS.add(() -> server.execute(() -> {
             com.smileprotocol.qte.QTEManager.clear(sp);

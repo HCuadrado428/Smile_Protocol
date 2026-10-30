@@ -160,5 +160,12 @@
     "sounds": [
       "smileprotocol:ambient/drip"
     ]
+  },
+  "paciente.crack": {
+    "subtitle": "subtitles.smileprotocol.paciente.crack",
+    "sounds": [
+      "smileprotocol:paciente/crack1",
+      "smileprotocol:paciente/crack2"
+    ]
   }
 }

@@ -51,6 +51,8 @@ public final class SmileProtocolFabricClient implements ClientModInitializer {
         net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(
                 com.smileprotocol.registry.ModEntities.SMILER_KILL.get(), ctx -> new com.smileprotocol.client.BerserkerRenderer<>(ctx, "smiler_kill"));
         net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(
+                com.smileprotocol.registry.ModEntities.PACIENTE.get(), com.smileprotocol.client.PacienteRenderer::new);
+        net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(
                 com.smileprotocol.registry.ModEntities.FLARE.get(), net.minecraft.client.renderer.entity.ThrownItemRenderer::new);
         net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(
                 com.smileprotocol.registry.ModEntities.THROWN_ITEM.get(), net.minecraft.client.renderer.entity.ThrownItemRenderer::new);

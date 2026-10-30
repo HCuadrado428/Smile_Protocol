@@ -3,7 +3,7 @@
 Elegidas en el cuestionario «Fichas de los smilers». Todas siguen la regla de familia (20.1): silueta negra y sonrisa roja emisiva.
 
 ## El Paciente
-Inspirado en los ángeles llorones de Doctor Who.
+Inspirado en los ángeles llorones de Doctor Who. *Implementado (fase 21):* modelo `tools/mob_models.py` (`paciente`), IA en `entity/Paciente.java`, muerte `PACIENTE_KILL`, aparece en `paciente_zones` (morgue y sala final).
 - **Aspecto:** muy alto y delgado (3,5 bloques), recto y rígido, brazos pegados al cuerpo. **Sin ojo**: solo la sonrisa, que se ensancha cuanto más cerca está.
 - **Movimiento:** salta de posición en posición cuando nadie lo mira (sin animación de andar); instantáneo si nadie mira, quieto del todo si alguien mira.
 - **Actitud:** paciente y acosador, te sigue por la planta sin prisa. **Cambia de objetivo si su víctima se aleja mucho.**
