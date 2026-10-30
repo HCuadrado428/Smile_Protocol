@@ -4,14 +4,26 @@
   "version": "${mod_version}",
   "name": "${mod_name}",
   "description": "${mod_description}",
-  "authors": ["${mod_authors}"],
+  "authors": [
+    "${mod_authors}"
+  ],
   "license": "${mod_license}",
   "environment": "*",
   "entrypoints": {
-    "main": ["com.smileprotocol.fabric.SmileProtocolFabric"],
-    "client": ["com.smileprotocol.fabric.client.SmileProtocolFabricClient"]
+    "main": [
+      "com.smileprotocol.fabric.SmileProtocolFabric"
+    ],
+    "client": [
+      "com.smileprotocol.fabric.client.SmileProtocolFabricClient"
+    ],
+    "voicechat": [
+      "com.smileprotocol.voice.SPVoicePlugin"
+    ]
   },
-  "mixins": ["smileprotocol.mixins.json", "smileprotocol.fabric.mixins.json"],
+  "mixins": [
+    "smileprotocol.mixins.json",
+    "smileprotocol.fabric.mixins.json"
+  ],
   "depends": {
     "fabricloader": ">=${fabric_loader_version}",
     "fabric-api": "*",

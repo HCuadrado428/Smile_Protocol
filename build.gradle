@@ -39,6 +39,12 @@ subprojects {
             url = 'https://maven.maxhenkel.de/repository/public'
             content { includeGroup('de.maxhenkel.voicechat') }
         }
+        // Simple Voice Chat completo para probar el plugin en las ejecuciones de Fabric
+        maven {
+            name = 'Modrinth'
+            url = 'https://api.modrinth.com/maven'
+            content { includeGroup('maven.modrinth') }
+        }
     }
 
     dependencies {

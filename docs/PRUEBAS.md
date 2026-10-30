@@ -223,6 +223,15 @@ La **batalla final contra Smiley** sigue pendiente de diseño (README 27); de mo
 5. **Sellada (morgue).** Una de las rejillas pone «Sellada: sin corriente»; mete un fusible en la caja del circuito `vent` y ya se puede retirar.
 6. **Ventilador (planta de energía).** A mitad del conducto hay un ventilador girando que no deja pasar; se para al dar corriente al circuito auxiliar (`aux`).
 
+## Voz: Simple Voice Chat (fase 18)
+
+Hace falta Simple Voice Chat en el servidor y en los clientes (es opcional: sin él todo lo demás funciona igual).
+
+1. **Hablar hace ruido.** Con la depuración activa (`/spadmin debug`), habla cerca de un mob: aparece el anillo de ruido. Susurrando (tecla de susurro de Simple Voice Chat) el radio es pequeño; hablando normal, medio; gritando, grande (`noise_voice_whisper`, `noise_voice`, `noise_voice_shout`).
+2. **Espectadores.** Al morir del todo pasas a un grupo de voz oculto «Espectadores …»: solo te oyen los otros muertos de tu partida y ya no oyes a los vivos. Al volver en el ascensor sales del grupo.
+3. **Sin grupos a mano.** Dentro de la partida, intentar entrar o salir de un grupo desde el menú de Simple Voice Chat no hace nada (en el lobby sí).
+4. **Voz ahogada.** Si un mob te agarra (o durante un remate) tus compañeros te oyen amortiguado.
+
 ## Depuración
 
 - `/spadmin debug on`: muestra el panel de estado (sesión, mods, lobby y ascensores). Solo lo ven los operadores.

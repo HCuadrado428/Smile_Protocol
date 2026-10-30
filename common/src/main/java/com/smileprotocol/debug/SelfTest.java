@@ -50,6 +50,15 @@ public final class SelfTest {
             List<ResourceLocation> seq = ZoneSequence.generate(server, 1234L, List.of());
             log("secuencia " + seq);
             if (seq.size() < 2) failures++;
+            // Voz (fase 18): silencio sin ruido, susurro < hablar < gritar
+            float silent = com.smileprotocol.voice.VoiceManager.radiusFor(-80, false);
+            float whisper = com.smileprotocol.voice.VoiceManager.radiusFor(-30, true);
+            float talk = com.smileprotocol.voice.VoiceManager.radiusFor(-30, false);
+            float shout = com.smileprotocol.voice.VoiceManager.radiusFor(-6, false);
+            boolean voiceOk = silent == 0 && whisper > 0 && whisper < talk && talk < shout;
+            log((voiceOk ? "voz" : "FALLO voz") + ": radios silencio=" + silent + " susurro=" + whisper + " hablar=" + talk
+                    + " gritar=" + shout + " (Simple Voice Chat " + (com.smileprotocol.voice.VoiceManager.available() ? "si" : "no") + ")");
+            if (!voiceOk) failures++;
 
             ServerLevel level = server.getLevel(SPDimension.SP_DIM);
             if (level == null) {

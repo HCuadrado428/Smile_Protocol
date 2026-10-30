@@ -126,6 +126,19 @@ public final class SPConfig {
         /** Espera entre lanzamientos (ticks). */
         public int throw_cooldown = 15;
 
+        // Voz (Simple Voice Chat, README 7.4 y 17.2)
+        /** Por debajo de este volumen (dBFS) la voz no hace ruido. */
+        public float voice_silence_db = -50;
+        /** Volumen de hablar normal y de gritar (dBFS); entre medias, el radio crece. */
+        public float voice_talk_db = -32;
+        public float voice_shout_db = -12;
+        /** Radio de ruido al susurrar, al hablar y al gritar. */
+        public float noise_voice_whisper = 3;
+        public float noise_voice = 9;
+        public float noise_voice_shout = 22;
+        /** Ticks minimos entre dos ruidos de voz del mismo jugador. */
+        public int voice_noise_interval = 10;
+
         // Eventos de laboratorio (README 14.7)
         /** Segundos minimos entre dos sustos para el mismo jugador. */
         public int jumpscare_cooldown = 20;

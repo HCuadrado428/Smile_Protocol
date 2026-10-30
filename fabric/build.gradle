@@ -17,6 +17,8 @@ dependencies {
     modImplementation "foundry.veil:veil-fabric-${minecraft_version}:${veil_version}"
     modImplementation "dev.kosmx.player-anim:player-animation-lib-fabric:${playeranimator_version}"
     compileOnly "de.maxhenkel.voicechat:voicechat-api:${voicechat_api_version}"
+    // Solo en runClient/runServer de Fabric: asi CI prueba el plugin de voz (y NeoForge, la partida sin el)
+    modLocalRuntime "maven.modrinth:simple-voice-chat:${voicechat_fabric_runtime}"
 
     compileOnly project(':common')
     commonJava project(path: ':common', configuration: 'commonJava')

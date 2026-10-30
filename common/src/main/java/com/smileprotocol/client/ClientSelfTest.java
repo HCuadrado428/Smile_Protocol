@@ -281,7 +281,7 @@ public final class ClientSelfTest {
         SHOTS.add(() -> server.execute(() -> {
             BlockEntity ventBe = find(level, z, vb -> vb instanceof com.smileprotocol.blockentity.VentBlockEntity
                     && vb.getBlockState().getBlock() instanceof com.smileprotocol.block.VentGrilleBlock
-                    && !b.getBlockState().getValue(com.smileprotocol.block.VentGrilleBlock.SEALED));
+                    && !vb.getBlockState().getValue(com.smileprotocol.block.VentGrilleBlock.SEALED));
             if (ventBe == null) {
                 log("FALLO rejilla de ventilacion: no hay ninguna en la zona");
                 return;
@@ -294,7 +294,7 @@ public final class ClientSelfTest {
             SPSessionManager.teleport(sp, level, Vec3.atBottomCenterOf(grille[0].above().relative(ventBack, 2)), ductDir[0].toYRot(), 45f);
         }));
         SHOTS.add(() -> wait = 30);
-        SHOTS.add(() -> grab(mc, "27_rejilla"));
+        SHOTS.add(() -> grab(mc, "30_rejilla"));
         SHOTS.add(() -> server.execute(() -> {
             if (grille[0] == null) return;
             BlockState vst = level.getBlockState(grille[0]);
@@ -303,7 +303,7 @@ public final class ClientSelfTest {
             log((ventOk ? "OK" : "FALLO") + " rejilla de ventilacion retirada");
         }));
         SHOTS.add(() -> wait = 10);
-        SHOTS.add(() -> grab(mc, "28_rejilla_abierta"));
+        SHOTS.add(() -> grab(mc, "31_rejilla_abierta"));
         SHOTS.add(() -> server.execute(() -> {
             if (grille[0] == null) return;
             SPSessionManager.teleport(sp, level, Vec3.atBottomCenterOf(grille[0].below().relative(ductDir[0])), ductDir[0].toYRot(), 0f);
@@ -314,7 +314,19 @@ public final class ClientSelfTest {
             boolean ventOk = sp.isVisuallyCrawling() && com.smileprotocol.motion.MotionManager.inDuct(sp);
             log((ventOk ? "OK" : "FALLO") + " gateando dentro del conducto (pose " + sp.getPose() + ")");
         }));
-        SHOTS.add(() -> grab(mc, "29_conducto"));
+        SHOTS.add(() -> grab(mc, "32_conducto"));
+        // 8e. Fase 18: la voz hace ruido (simulando un paquete del microfono) y Simple Voice Chat
+        SHOTS.add(() -> server.execute(() -> {
+            SPSessionManager.teleport(sp, level, cam, 0f, 0f);
+            com.smileprotocol.voice.VoiceManager.onVoice(sp.getUUID(), -14, false);
+        }));
+        SHOTS.add(() -> wait = 5);
+        SHOTS.add(() -> server.execute(() -> {
+            boolean heard = com.smileprotocol.noise.NoiseSystem.recent(level, sp.blockPosition(), 40).stream()
+                    .anyMatch(n -> n.type() == com.smileprotocol.noise.NoiseType.VOICE && n.radius() > 15);
+            log((heard ? "OK" : "FALLO") + " la voz hace ruido (grito)");
+            log("INFO Simple Voice Chat " + (com.smileprotocol.voice.VoiceManager.available() ? "cargado (plugin activo)" : "no instalado"));
+        }));
         // 9. Fase 12: levantarse tras la reanimacion, muerte instantanea en primera persona y muerte final
         SHOTS.add(() -> server.execute(() -> {
             com.smileprotocol.qte.QTEManager.clear(sp);
@@ -371,6 +383,15 @@ public final class ClientSelfTest {
         // grupo de uno: con el unico jugador muerto es game over (README 6.7)
         SHOTS.add(() -> wait = 50);
         SHOTS.add(() -> log((mc.screen instanceof GroupEndScreen ? "OK" : "FALLO") + " pantalla de GAME OVER"));
+        SHOTS.add(() -> server.execute(() -> {
+            if (!com.smileprotocol.voice.VoiceManager.available()) return;
+            if (!com.smileprotocol.voice.VoiceManager.connected(sp)) {
+                log("INFO voz: el cliente no tiene conexion de voz (sin audio en CI); grupo de espectadores sin probar");
+                return;
+            }
+            String run = com.smileprotocol.voice.VoiceManager.spectatorRun(sp);
+            log((run != null ? "OK" : "FALLO") + " voz: el muerto pasa al grupo de espectadores (" + run + ")");
+        }));
         SHOTS.add(() -> grab(mc, "27_game_over"));
     }
 
