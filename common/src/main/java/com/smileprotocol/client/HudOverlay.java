@@ -495,6 +495,7 @@ public final class HudOverlay {
 
     /** Muerto: rotulo y a quien se esta mirando (README 9.3). */
     private static void renderDead(GuiGraphics g, Font font, int w, int h) {
+        if (Minecraft.getInstance().screen instanceof GroupEndScreen) return;
         RenderSystem.setShaderColor(0f, 0f, 0f, 0.7f);
         g.blitSprite(VIGNETTE, 0, 0, w, h);
         RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
