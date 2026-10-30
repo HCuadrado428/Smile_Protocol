@@ -23,10 +23,17 @@ public final class ModEntities {
                     MobCategory.MONSTER).sized(0.9f, 1.95f).eyeHeight(1.75f).clientTrackingRange(10).fireImmune()
                     .build("smiler_test"));
 
+    /** Mob de pruebas de la muerte instantanea (fase 12): mismo modelo, los dos ojos abiertos. */
+    public static final Supplier<EntityType<com.smileprotocol.entity.SmilerTest.Killer>> SMILER_KILL = Services.PLATFORM.register(
+            BuiltInRegistries.ENTITY_TYPE, "smiler_kill", () -> EntityType.Builder.of(com.smileprotocol.entity.SmilerTest.Killer::new,
+                    MobCategory.MONSTER).sized(0.9f, 1.95f).eyeHeight(1.75f).clientTrackingRange(10).fireImmune()
+                    .build("smiler_kill"));
+
     private ModEntities() {}
 
     public static void init() {
         Services.PLATFORM.registerAttributes(BERSERKER, Berserker::attributes);
         Services.PLATFORM.registerAttributes(SMILER_TEST, com.smileprotocol.entity.SmilerTest::attributes);
+        Services.PLATFORM.registerAttributes(SMILER_KILL, com.smileprotocol.entity.SmilerTest::attributes);
     }
 }

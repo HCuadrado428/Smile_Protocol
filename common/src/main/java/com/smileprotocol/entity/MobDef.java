@@ -23,21 +23,24 @@ import com.google.gson.JsonObject;
  * @param qteTicks          duracion base del minijuego (se escala por el grupo)
  * @param qteFail           DOWN o DEATH si se falla
  * @param sightRange        alcance de la vista (0 = ciego)
+ * @param executionSeq      secuencia de remate ({@code SequenceKind}, README 9.3)
+ * @param killSeq           secuencia de muerte instantanea
  */
 public record MobDef(String id, float hearingMultiplier, float minNoise, String idleBehavior, float retargetRatio,
                      int searchTime, int windup, float strikeRadius, int recovery, double walkSpeed, double runSpeed,
                      String onCatch, boolean execution, boolean opensDoors, boolean checksHidingSpots,
-                     String qteType, int qteTicks, String qteFail, float sightRange) {
+                     String qteType, int qteTicks, String qteFail, float sightRange, String executionSeq, String killSeq) {
 
     public static MobDef berserkerDefaults() {
         return new MobDef("berserker", 1.5f, 5f, "WANDER", 1.5f, 120, 12, 2.5f, 30, 0.55, 1.35, "DOWN", true, true, false,
-                "MASH", 100, "DOWN", 0f);
+                "MASH", 100, "DOWN", 0f, "BERSERKER_EXECUTION", "SMILER_KILL");
     }
 
     static MobDef parse(String id, JsonObject o) {
         MobDef d = berserkerDefaults();
         JsonObject senses = obj(o, "senses"), hearing = obj(senses, "hearing"), ai = obj(o, "ai"),
-                strike = obj(o, "strike"), speed = obj(o, "speed"), qte = obj(o, "qte"), vision = obj(senses, "vision");
+                strike = obj(o, "strike"), speed = obj(o, "speed"), qte = obj(o, "qte"), vision = obj(senses, "vision"),
+                seq = obj(o, "sequences");
         return new MobDef(id,
                 f(hearing, "multiplier", d.hearingMultiplier), f(hearing, "min_noise", d.minNoise),
                 s(ai, "idle_behavior", d.idleBehavior), f(ai, "retarget_loudness_ratio", d.retargetRatio),
@@ -47,7 +50,24 @@ public record MobDef(String id, float hearingMultiplier, float minNoise, String 
                 s(o, "on_catch", d.onCatch), b(o, "execution", d.execution), b(ai, "opens_doors", d.opensDoors),
                 b(ai, "checks_hiding_spots", d.checksHidingSpots),
                 s(qte, "type", d.qteType), i(qte, "ticks", d.qteTicks), s(o, "qte_fail_result", d.qteFail),
-                b(vision, "enabled", false) ? f(vision, "range", 20f) : 0f);
+                b(vision, "enabled", false) ? f(vision, "range", 20f) : 0f,
+                s(seq, "execution", d.executionSeq), s(seq, "kill", d.killSeq));
+    }
+
+    public com.smileprotocol.sequence.SequenceKind executionSequence() {
+        return seq(executionSeq, com.smileprotocol.sequence.SequenceKind.BERSERKER_EXECUTION);
+    }
+
+    public com.smileprotocol.sequence.SequenceKind killSequence() {
+        return seq(killSeq, com.smileprotocol.sequence.SequenceKind.SMILER_KILL);
+    }
+
+    private static com.smileprotocol.sequence.SequenceKind seq(String name, com.smileprotocol.sequence.SequenceKind d) {
+        try {
+            return com.smileprotocol.sequence.SequenceKind.valueOf(name.toUpperCase(java.util.Locale.ROOT));
+        } catch (RuntimeException e) {
+            return d;
+        }
     }
 
     private static JsonObject obj(JsonObject o, String k) {

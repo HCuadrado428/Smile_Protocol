@@ -47,6 +47,15 @@ public abstract class CameraMixin {
             setRotation(com.smileprotocol.client.ClientSelfTest.TEST_CAM_YAW, com.smileprotocol.client.ClientSelfTest.TEST_CAM_PITCH);
             return;
         }
+        if (!this.detached) {
+            // Remate o muerte instantanea: la camara la lleva la secuencia (README 9.3)
+            float[] seq = com.smileprotocol.client.ClientSequence.camera(getPosition(), pt);
+            if (seq != null) {
+                setRotation(seq[0], seq[1]);
+                com.smileprotocol.client.light.Flashlight.update((Camera) (Object) this, pt);
+                return;
+            }
+        }
         com.smileprotocol.client.light.Flashlight.update((Camera) (Object) this, pt);
         if (this.detached) return;
         float yawOffset = ClientMotion.cameraYawOffset(entity, pt);

@@ -174,6 +174,10 @@ public class Berserker extends SmilerBase {
         super.customServerAiStep();
         if (!(level() instanceof ServerLevel level)) return;
         if (forced) return;
+        if (sequence() != null) {
+            getNavigation().stop();
+            return;
+        }
         if (tickCount % 20 == 0) {
             awake = !com.smileprotocol.config.SPConfig.get().mobs_wait_for_players
                     || level.getNearestPlayer(this, 72) instanceof ServerPlayer sp && SPPlayerData.inSP(sp);
@@ -274,9 +278,10 @@ public class Berserker extends SmilerBase {
                         && Math.hypot(p.getX() - c.x, p.getZ() - c.z) <= r);
         for (ServerPlayer p : hit) {
             if (DownedManager.isDowned(p)) {
-                if (def.execution()) DownedManager.execute(p, "berserker");
+                // remata al primero (una secuencia por mob); los demas siguen derribados
+                if (def.execution()) DownedManager.execute(p, this, def.executionSequence());
             } else if ("INSTANT_KILL".equalsIgnoreCase(def.onCatch())) {
-                p.hurt(level.damageSources().mobAttack(this), Float.MAX_VALUE);
+                if (!com.smileprotocol.sequence.SequenceManager.start(this, p, def.killSequence())) DownedManager.down(p, "berserker");
             } else {
                 DownedManager.down(p, "berserker");
                 p.push((p.getX() - c.x) * 0.3, 0.25, (p.getZ() - c.z) * 0.3);
@@ -338,6 +343,8 @@ public class Berserker extends SmilerBase {
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
         controllers.add(new AnimationController<>(this, "main", 4, st -> {
+            software.bernie.geckolib.animation.PlayState seq = sequenceAnimation(st);
+            if (seq != null) return seq;
             switch (state()) {
                 case STRIKE -> {
                     return st.setAndContinue(STRIKE_ANIM);

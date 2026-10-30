@@ -75,6 +75,7 @@ public final class SPEvents {
         com.smileprotocol.hide.HideManager.onLogout(player);
         com.smileprotocol.downed.DownedManager.clear(player);
         com.smileprotocol.qte.QTEManager.clear(player);
+        com.smileprotocol.sequence.SequenceManager.clear(player);
         com.smileprotocol.motion.MotionManager.onLogout(player);
     }
 
@@ -91,7 +92,7 @@ public final class SPEvents {
     }
 
     public static void onRespawn(ServerPlayer player) {
-        // Hasta la fase 12 (derribado y muerte) morir en la partida devuelve al jugador al lobby
+        // Morir dentro no pasa por aqui (DeathManager); si aun asi reaparece fuera, sale al lobby
         if (SPPlayerData.inSP(player) && !SPDimension.isSP(player.level())) {
             SPSessionManager.leave(player, SPSessionManager.Destination.LOBBY);
         } else {
@@ -118,6 +119,8 @@ public final class SPEvents {
         com.smileprotocol.hide.HideManager.tick(server);
         com.smileprotocol.downed.DownedManager.tick(server);
         com.smileprotocol.qte.QTEManager.tick(server);
+        com.smileprotocol.sequence.SequenceManager.tick(server);
+        com.smileprotocol.downed.DeathManager.tick(server);
         com.smileprotocol.mechanism.ZoneElevators.tick(server);
         com.smileprotocol.motion.Flashlights.tick(server);
         LobbyManager.tick(server);
@@ -166,7 +169,27 @@ public final class SPEvents {
 
     /** Sin dano en el lobby. */
     public static boolean cancelHurt(LivingEntity entity) {
-        return entity instanceof Player p && !p.level().isClientSide && LobbyProtection.blocksDamage(p);
+        if (!(entity instanceof Player p) || p.level().isClientSide) return false;
+        // durante un remate o una muerte instantanea la victima es invulnerable (README 9.3)
+        if (p instanceof ServerPlayer sp && com.smileprotocol.sequence.SequenceManager.inSequence(sp)) return true;
+        return LobbyProtection.blocksDamage(p);
+    }
+
+    /**
+     * Muerte por dano dentro de la partida (README 9.3): la vida a 0 derriba (si ya estaba
+     * derribado, o con {@code /kill} o el vacio, muere de verdad, sin la pantalla de muerte de
+     * vanilla). Devuelve true para cancelar la muerte de vanilla.
+     */
+    public static boolean interceptDeath(ServerPlayer p, net.minecraft.world.damagesource.DamageSource src) {
+        if (!SPPlayerData.inSP(p) || p.isCreative() || p.isSpectator()) return false;
+        p.setHealth(1f);
+        boolean lethal = src.is(net.minecraft.tags.DamageTypeTags.BYPASSES_INVULNERABILITY);
+        if (lethal || com.smileprotocol.downed.DownedManager.isDowned(p)) {
+            com.smileprotocol.downed.DeathManager.die(p, src.getMsgId());
+        } else {
+            com.smileprotocol.downed.DownedManager.down(p, src.getMsgId());
+        }
+        return true;
     }
 
     /** Sin regeneracion natural dentro (README 9.2). */

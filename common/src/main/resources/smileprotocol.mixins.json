@@ -9,7 +9,8 @@
     "LivingEntityMixin",
     "PlayerMixin",
     "ServerLevelMixin",
-    "ServerPlayerGameModeMixin"
+    "ServerPlayerGameModeMixin",
+    "ServerPlayerMixin"
   ],
   "client": [
     "client.CameraMixin",

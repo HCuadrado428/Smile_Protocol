@@ -154,6 +154,7 @@ public final class ClientSelfTest {
         Vec3 cam = e.add(0, 0, 30);
         Vec3 mobAt = cam.add(0, 0, 4);
         com.smileprotocol.entity.Berserker[] mob = {null};
+        com.smileprotocol.entity.SmilerTest[] killer = {null};
         SHOTS.add(() -> server.execute(() -> {
             com.smileprotocol.entity.Berserker b = com.smileprotocol.entity.MobManager.spawn(level,
                     com.smileprotocol.registry.ModEntities.BERSERKER.get(), BlockPos.containing(mobAt), level.random);
@@ -201,6 +202,59 @@ public final class ClientSelfTest {
         }));
         SHOTS.add(() -> wait = 50);
         SHOTS.add(() -> grab(mc, "19_agarre_qte"));
+        // 9. Fase 12: levantarse tras la reanimacion, muerte instantanea en primera persona y muerte final
+        SHOTS.add(() -> server.execute(() -> {
+            com.smileprotocol.qte.QTEManager.clear(sp);
+            com.smileprotocol.sequence.SequenceManager.clear(sp);
+            for (var m : level.getEntitiesOfClass(com.smileprotocol.entity.SPMonster.class,
+                    new net.minecraft.world.phys.AABB(cam, cam).inflate(40))) m.discard();
+            com.smileprotocol.downed.DownedManager.clear(sp);
+            sp.setHealth(sp.getMaxHealth());
+            SPSessionManager.teleport(sp, level, cam, 0f, 0f);
+            com.smileprotocol.downed.DownedManager.down(sp, "prueba");
+        }));
+        SHOTS.add(() -> wait = 30);
+        SHOTS.add(() -> server.execute(() -> {
+            com.smileprotocol.downed.DownedManager.revive(sp, null);
+            boolean ok = !com.smileprotocol.downed.DownedManager.isDowned(sp)
+                    && com.smileprotocol.motion.MotionManager.action(sp) == com.smileprotocol.motion.Action.GETUP
+                    && Math.abs(sp.getHealth() - sp.getMaxHealth() * 0.3f) < 1.01f
+                    && com.smileprotocol.downed.DownedManager.isProtected(sp);
+            log((ok ? "OK" : "FALLO") + " reanimacion: vida " + sp.getHealth() + "/" + sp.getMaxHealth() + ", protegido");
+        }));
+        SHOTS.add(() -> wait = 10);
+        SHOTS.add(() -> grab(mc, "20_levantandose"));
+        SHOTS.add(() -> server.execute(() -> {
+            // derribado y protegido: no se puede rematar
+            com.smileprotocol.downed.DownedManager.down(sp, "prueba");
+            log((com.smileprotocol.downed.DownedManager.canExecute(sp) ? "FALLO" : "OK") + " proteccion contra remates");
+            com.smileprotocol.downed.DownedManager.clear(sp);
+            sp.setHealth(sp.getMaxHealth());
+            sp.hurt(sp.damageSources().fall(), 1000f);
+            log((com.smileprotocol.downed.DownedManager.isDowned(sp) && sp.isAlive() ? "OK" : "FALLO") + " dano letal = derribo");
+            com.smileprotocol.downed.DownedManager.clear(sp);
+            sp.setHealth(sp.getMaxHealth());
+            SPSessionManager.teleport(sp, level, cam, 0f, 0f);
+            killer[0] = com.smileprotocol.entity.MobManager.spawn(level, com.smileprotocol.registry.ModEntities.SMILER_KILL.get(),
+                    BlockPos.containing(cam.add(0, 0, 2)), level.random);
+            if (killer[0] != null) {
+                killer[0].setNoAi(true);
+                boolean started = com.smileprotocol.sequence.SequenceManager.start(killer[0], sp,
+                        com.smileprotocol.sequence.SequenceKind.SMILER_KILL);
+                log((started ? "OK" : "FALLO") + " muerte instantanea empieza");
+            }
+        }));
+        SHOTS.add(() -> wait = 30);
+        SHOTS.add(() -> grab(mc, "21_muerte_instantanea"));
+        SHOTS.add(() -> server.execute(() -> log((sp.hurt(sp.damageSources().fall(), 1000f) ? "FALLO" : "OK")
+                + " invulnerable durante la secuencia")));
+        SHOTS.add(() -> wait = 50);
+        SHOTS.add(() -> server.execute(() -> {
+            boolean ok = com.smileprotocol.downed.DeathManager.isDead(sp) && sp.isSpectator() && sp.isAlive();
+            log((ok ? "OK" : "FALLO") + " muerte final: espectador del grupo");
+        }));
+        SHOTS.add(() -> wait = 5);
+        SHOTS.add(() -> grab(mc, "22_muerto"));
     }
 
     // Grabacion de animaciones -------------------------------------------------------------------
@@ -434,11 +488,96 @@ public final class ClientSelfTest {
         });
         mobScene(server, level, bz, null, bChest, P, com.smileprotocol.entity.Berserker.State.SEARCH, false, null, 0);
         record(mc, "berserker_escuchar", 80, null);
+        SHOTS.add(() -> server.execute(() -> { if (bz[0] != null) bz[0].discard(); }));
+
+        // Fase 12: levantarse, reanimar, ayudar, remates y muerte instantanea ------------------------
+        // (en la grabacion las secuencias no matan: el jugador tiene que seguir para las demas)
+        SHOTS.add(() -> com.smileprotocol.sequence.SequenceManager.TEST_NO_KILL = true);
+        SHOTS.add(() -> follow(-2, new Vec3(1.6, 1.3, 2.6), 0.6));
+        scene(server, level, sp, null, chest, P, -90f, () -> com.smileprotocol.downed.DownedManager.down(sp, "grabacion"));
+        SHOTS.add(() -> wait = 20);
+        record(mc, "jugador_levantarse_ayudado", 40, k -> {
+            if (k == 2) server.execute(() -> com.smileprotocol.downed.DownedManager.revive(sp, sp));
+        });
+        scene(server, level, sp, null, chest, P, -90f, () -> com.smileprotocol.downed.DownedManager.down(sp, "grabacion"));
+        SHOTS.add(() -> wait = 20);
+        record(mc, "jugador_levantarse_solo", 40, k -> {
+            if (k == 2) server.execute(() -> com.smileprotocol.downed.DownedManager.revive(sp, null));
+        });
+        SHOTS.add(() -> follow(-2, new Vec3(1.8, 1.4, 2.8), 0.7));
+        scene(server, level, sp, null, chest, P, -90f, () -> com.smileprotocol.motion.MotionManager.setAction(sp,
+                com.smileprotocol.motion.Action.INTERACT, com.smileprotocol.client.anim.PoseCalculator.INTERACT_REVIVE, false));
+        record(mc, "jugador_reanimar", 50, null);
+        scene(server, level, sp, null, chest, P, -90f, () -> com.smileprotocol.motion.MotionManager.setAction(sp,
+                com.smileprotocol.motion.Action.INTERACT, com.smileprotocol.client.anim.PoseCalculator.INTERACT_PULL, false));
+        record(mc, "jugador_ayudar_agarre", 40, null);
+        SHOTS.add(() -> server.execute(() -> com.smileprotocol.motion.MotionManager.setAction(sp, com.smileprotocol.motion.Action.NONE, 0, false)));
+
+        // Remates y muerte instantanea: el mob en P mirando al este; la victima queda delante
+        com.smileprotocol.entity.SPMonster[] ex = {null};
+        String[] names = {"remate_berserker", "remate_smiler", "muerte_instantanea"};
+        com.smileprotocol.sequence.SequenceKind[] kinds = {com.smileprotocol.sequence.SequenceKind.BERSERKER_EXECUTION,
+                com.smileprotocol.sequence.SequenceKind.SMILER_EXECUTION, com.smileprotocol.sequence.SequenceKind.SMILER_KILL};
+        for (int i = 0; i < kinds.length; i++) {
+            com.smileprotocol.sequence.SequenceKind kind = kinds[i];
+            int idx = i;
+            SHOTS.add(() -> server.execute(() -> {
+                com.smileprotocol.downed.DownedManager.clear(sp);
+                com.smileprotocol.motion.MotionManager.setAction(sp, com.smileprotocol.motion.Action.NONE, 0, false);
+                sp.setHealth(sp.getMaxHealth());
+                SPSessionManager.teleport(sp, level, P.add(1.8, 0, 0), 90f, 0f);
+                var type = idx == 0 ? com.smileprotocol.registry.ModEntities.BERSERKER.get()
+                        : idx == 1 ? com.smileprotocol.registry.ModEntities.SMILER_TEST.get() : com.smileprotocol.registry.ModEntities.SMILER_KILL.get();
+                ex[0] = com.smileprotocol.entity.MobManager.spawn(level, type, BlockPos.containing(P), level.random);
+                if (ex[0] != null) {
+                    ex[0].setNoAi(true);
+                    ex[0].moveTo(P.x, P.y, P.z, -90f, 0f);
+                    ex[0].setYBodyRot(-90f);
+                    ex[0].setYHeadRot(-90f);
+                }
+                if (kind.execution) com.smileprotocol.downed.DownedManager.down(sp, "grabacion");
+            }));
+            SHOTS.add(() -> wait = 12);
+            SHOTS.add(() -> placeCamera(P.add(1.0, 1.5, 4.6), P.add(1.0, 0.8, 0)));
+            record(mc, names[i], kind.ticks + 8, k -> {
+                if (k == 0) server.execute(() -> { if (ex[0] != null) com.smileprotocol.sequence.SequenceManager.start(ex[0], sp, kind); });
+            });
+            // de frente / en diagonal, la misma secuencia otra vez
+            SHOTS.add(() -> placeCamera(P.add(4.2, 1.6, 2.6), P.add(1.0, 0.8, 0)));
+            record(mc, names[i] + "_diagonal", kind.ticks + 8, k -> {
+                if (k == 0) server.execute(() -> {
+                    if (kind.execution) com.smileprotocol.downed.DownedManager.down(sp, "grabacion");
+                    if (ex[0] != null) com.smileprotocol.sequence.SequenceManager.start(ex[0], sp, kind);
+                });
+            });
+            SHOTS.add(() -> server.execute(() -> { if (ex[0] != null) ex[0].discard(); }));
+        }
+        // La muerte instantanea vista por la victima (camara y HUD de la secuencia)
+        SHOTS.add(() -> server.execute(() -> {
+            com.smileprotocol.downed.DownedManager.clear(sp);
+            com.smileprotocol.motion.MotionManager.setAction(sp, com.smileprotocol.motion.Action.NONE, 0, false);
+            SPSessionManager.teleport(sp, level, P.add(1.8, 0, 0), 90f, 0f);
+            ex[0] = com.smileprotocol.entity.MobManager.spawn(level, com.smileprotocol.registry.ModEntities.SMILER_KILL.get(),
+                    BlockPos.containing(P), level.random);
+            if (ex[0] != null) {
+                ex[0].setNoAi(true);
+                ex[0].moveTo(P.x, P.y, P.z, -90f, 0f);
+            }
+        }));
         SHOTS.add(() -> {
             TEST_CAM_POS = null;
             TEST_FOLLOW_ID = -1;
             mc.options.hideGui = false;
+            mc.options.setCameraType(net.minecraft.client.CameraType.FIRST_PERSON);
         });
+        SHOTS.add(() -> wait = 10);
+        record(mc, "muerte_instantanea_pov", 72, k -> {
+            if (k == 0) server.execute(() -> {
+                if (ex[0] != null) com.smileprotocol.sequence.SequenceManager.start(ex[0], sp, com.smileprotocol.sequence.SequenceKind.SMILER_KILL);
+            });
+        });
+        SHOTS.add(() -> server.execute(() -> { if (ex[0] != null) ex[0].discard(); }));
+        SHOTS.add(() -> com.smileprotocol.sequence.SequenceManager.TEST_NO_KILL = false);
     }
 
     /** Coloca la camara (mirando a {@code look}) y al jugador; {@code extra} corre en el servidor. */

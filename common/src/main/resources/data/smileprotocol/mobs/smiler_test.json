@@ -2,14 +2,29 @@
   "id": "smileprotocol:smiler_test",
   "family": "smiler",
   "based_on": "smiley",
-  "_comment": "Mob de pruebas (fase 11): ve, persigue y agarra con QTE. Solo aparece con /spadmin mob spawn smiler_test.",
+  "_comment": "Mob de pruebas (fases 11 y 12): ve, persigue y agarra con QTE; si fallas quedas derribado y vuelve a rematarte. Solo aparece con /spadmin mob spawn smiler_test.",
   "senses": {
-    "vision": { "enabled": true, "range": 20 },
-    "hearing": { "multiplier": 1.0, "min_noise": 6.0 }
+    "vision": {
+      "enabled": true,
+      "range": 20
+    },
+    "hearing": {
+      "multiplier": 1.0,
+      "min_noise": 6.0
+    }
   },
-  "speed": { "walk": 0.6, "run": 1.15 },
+  "speed": {
+    "walk": 0.6,
+    "run": 1.15
+  },
   "on_catch": "GRAB_QTE",
-  "qte": { "type": "MASH", "ticks": 100 },
+  "qte": {
+    "type": "MASH",
+    "ticks": 100
+  },
   "qte_fail_result": "DOWN",
-  "execution": false
+  "execution": true,
+  "sequences": {
+    "execution": "SMILER_EXECUTION"
+  }
 }

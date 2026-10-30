@@ -208,6 +208,46 @@ def heartbeat():
     return lowpass(x, 300)
 
 
+def crunch(seed):
+    """Remate: golpe carnoso y crujido de huesos que se astillan."""
+    r = np.random.default_rng(seed)
+    n = int(SR * 0.8)
+    tt = np.arange(n) / SR
+    thud = np.sin(2 * np.pi * (70 * np.exp(-tt * 8) + 38) * tt) * env(n, 0.001, 0.12) * 1.4
+    flesh = lowpass(noise(n, r), 1200) * env(n, 0.001, 0.07) * 1.3
+    bones = np.zeros(n)
+    k = int(SR * 0.015)
+    for _ in range(9):
+        m = int(SR * r.uniform(0.004, 0.012))
+        if k + m < n:
+            bones[k:k + m] += highpass(noise(m, r), 1800) * np.linspace(1, 0, m) * r.uniform(0.5, 1.0)
+        k += int(SR * r.uniform(0.008, 0.03))
+    wet = bandpass(noise(n, r), 600, 2) * env(n, 0.02, 0.25) * 0.5
+    return np.tanh((thud + flesh + bones + wet) * 1.4)
+
+
+def bite():
+    """Mordisco: chasquido de dientes, desgarro humedo y un gorgoteo."""
+    r = np.random.default_rng(91)
+    n = int(SR * 1.0)
+    tt = np.arange(n) / SR
+    snap = highpass(noise(n, r), 2500) * env(n, 0.0005, 0.015) * 1.5
+    tear = bandpass(noise(n, r), 1400, 1.5) * (env(n, 0.03, 0.35) * (0.6 + 0.4 * np.sin(2 * np.pi * 23 * tt)))
+    gurgle = bandpass(noise(n, r), 350, 6) * env(n, 0.15, 0.6) * (0.5 + 0.5 * np.sin(2 * np.pi * 9 * tt)) * 0.8
+    return np.tanh((snap + tear + gurgle) * 1.3)
+
+
+def revive():
+    """Reanimar: jadeo profundo al recuperar el aire."""
+    r = np.random.default_rng(81)
+    n = int(SR * 1.1)
+    tt = np.arange(n) / SR
+    air = bandpass(noise(n, r), 1100, 1.2) * np.sin(np.clip(tt / 0.55, 0, 1) * np.pi) ** 1.5
+    out = bandpass(noise(n, r), 700, 1.0) * np.sin(np.clip((tt - 0.6) / 0.45, 0, 1) * np.pi) ** 2 * 0.6
+    voice = np.sin(2 * np.pi * (140 - 30 * tt) * tt) * np.sin(np.clip(tt / 0.55, 0, 1) * np.pi) ** 3 * 0.15
+    return air + out + voice
+
+
 def main():
     for i in range(3):
         save(f"berserker/step{i + 1}", step(10 + i))
@@ -222,6 +262,10 @@ def main():
         save(f"player/groan{i + 1}", groan(70 + i))
     save("player/heartbeat", heartbeat())
     save("mob/grab", grab())
+    for i in range(2):
+        save(f"mob/crunch{i + 1}", crunch(100 + i))
+    save("mob/bite", bite())
+    save("player/revive", revive())
     print("sonidos escritos en", OUT)
 
 

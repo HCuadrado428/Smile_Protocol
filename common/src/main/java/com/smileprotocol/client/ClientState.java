@@ -26,6 +26,10 @@ public final class ClientState {
     /** Derribado (fase 11, minimo) y cuanto le queda antes de desangrarse. */
     public static boolean downed;
     public static float bleed;
+    /** Progreso de la reanimacion que recibe (0-1), o -1 si nadie lo reanima. */
+    public static float revive = -1f;
+    /** Muerto en la partida: espectador de los companeros (README 9.3). */
+    public static boolean dead;
 
     private static int fadeIn, fadeHold, fadeOut, fadeAge = -1;
 
@@ -97,5 +101,7 @@ public final class ClientState {
         debugLines = List.of();
         fadeAge = -1;
         downed = false;
+        revive = -1f;
+        dead = false;
     }
 }

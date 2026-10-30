@@ -136,9 +136,36 @@ public final class InteractionManager {
     @Nullable
     private static InteractionSpec entitySpec(ServerPlayer p, int entityId) {
         Entity e = p.level().getEntity(entityId);
+        if (e instanceof Player other && other != p) {
+            if (other.distanceToSqr(p) > PLAYER_REACH * PLAYER_REACH || !other.isAlive()) return null;
+            return playerSpec(other);
+        }
         if (!(e instanceof ItemEntity item) || !e.isAlive()) return null;
         if (e.position().distanceToSqr(p.getEyePosition()) > REACH * REACH) return null;
         return pickupSpec(item.getItem(), SPInventoryOps.isFull(p));
+    }
+
+    /** Distancia maxima a un companero para reanimarlo o ayudarlo. */
+    public static final double PLAYER_REACH = 2.6;
+
+    /**
+     * Interaccion con un companero (README 9.3, 18): reanimarlo si esta derribado o ayudarle a
+     * soltarse si lo tiene agarrado un mob. Null si no hay nada que hacer. Igual en los dos lados.
+     */
+    @Nullable
+    public static InteractionSpec playerSpec(Player other) {
+        if (other.isSpectator()) return null;
+        com.smileprotocol.motion.MotionView v = com.smileprotocol.motion.MotionStates.view(other);
+        SPConfig.Values cfg = SPConfig.get();
+        if (v.action() == Action.DOWNED) {
+            return InteractionSpec.of(Component.translatable("smileprotocol.interact.revive", other.getDisplayName()),
+                    cfg.revive_time, cfg.noise_revive, PoseCalculator.INTERACT_REVIVE);
+        }
+        if (v.action() == Action.GRABBED) {
+            return InteractionSpec.of(Component.translatable("smileprotocol.interact.help", other.getDisplayName()),
+                    cfg.qte_help_time, cfg.noise_revive, PoseCalculator.INTERACT_PULL);
+        }
+        return null;
     }
 
     /** Recoger un objeto: 0,3 s (README 10). Tambien la usa el cliente para el prompt. */
@@ -168,6 +195,11 @@ public final class InteractionManager {
                 done.add(e.getKey());
                 continue;
             }
+            if (MotionManager.action(p) != Action.INTERACT) {
+                // lo han agarrado, derribado... mientras interactuaba (README 9.3)
+                cancel(p, s, Component.empty());
+                continue;
+            }
             InteractionSpec spec = recompute(p, s);
             if (spec == null || spec.blocked()) {
                 cancel(p, s, spec == null ? Component.empty() : spec.prompt());
@@ -187,6 +219,19 @@ public final class InteractionManager {
                 NoiseSystem.emit(p.serverLevel(), targetPos(p, s), spec.noise() * 0.6f, NoiseType.INTERACT, p);
             }
             SPNetwork.sendTo(p, new Payloads.InteractState(true, (int) s.progress, spec.ticks(), waiting, spec.prompt()));
+            if (s.entity && p.level().getEntity(s.entityId) instanceof ServerPlayer other) {
+                // la victima ve que la reaniman; al agarrado, la ayuda suma
+                if (com.smileprotocol.downed.DownedManager.isDowned(other)) {
+                    com.smileprotocol.downed.DownedManager.reviveProgress(other, Math.min(1f, s.progress / spec.ticks()));
+                } else if (com.smileprotocol.qte.QTEManager.isGrabbed(other) && !waiting) {
+                    float step = (n > 1 ? 1f + 0.5f * (n - 1) : 1f) / spec.ticks();
+                    com.smileprotocol.qte.QTEManager.help(other, step / n);
+                    if (!com.smileprotocol.qte.QTEManager.isGrabbed(other)) {
+                        finish(p, s);
+                        continue;
+                    }
+                }
+            }
             if (s.progress >= spec.ticks()) finish(p, s);
         }
         for (UUID id : done) {
@@ -229,7 +274,13 @@ public final class InteractionManager {
         if (s.spec.noise() > 0) NoiseSystem.emit(p.serverLevel(), targetPos(p, s), s.spec.noise(), NoiseType.INTERACT, p);
         if (s.entity) {
             Entity e = p.level().getEntity(s.entityId);
-            if (e instanceof ItemEntity item && item.isAlive()) {
+            if (e instanceof ServerPlayer other) {
+                if (com.smileprotocol.downed.DownedManager.isDowned(other)) {
+                    com.smileprotocol.downed.DownedManager.revive(other, p);
+                    p.serverLevel().playSound(null, other.blockPosition(), com.smileprotocol.registry.ModSounds.PLAYER_REVIVE.get(),
+                            SoundSource.PLAYERS, 1f, 1f);
+                }
+            } else if (e instanceof ItemEntity item && item.isAlive()) {
                 if (SPInventoryOps.give(p, item.getItem())) {
                     item.discard();
                     p.serverLevel().playSound(null, p.blockPosition(), SoundEvents.ITEM_PICKUP, SoundSource.PLAYERS, 0.4f, 1.1f);

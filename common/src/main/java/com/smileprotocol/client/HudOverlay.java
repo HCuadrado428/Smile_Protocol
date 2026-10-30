@@ -102,7 +102,11 @@ public final class HudOverlay {
         }
 
         if (!mc.options.hideGui) {
-            if (inGame) {
+            if (inGame && ClientState.dead) {
+                renderDead(g, font, w, h);
+            } else if (inGame && ClientSequence.active()) {
+                renderSequence(g, w, h, partialTick);
+            } else if (inGame) {
                 if (ClientQTE.active()) {
                     renderQTE(g, font, w, h);
                 } else if (ClientState.downed) {
@@ -369,6 +373,51 @@ public final class HudOverlay {
         bar(g, BAR_BLOOD, 100, 8, bx, by, bw, 7, ClientState.bleed);
         Component hint = hud(Component.translatable("smileprotocol.downed.hint"));
         g.drawString(font, hint, cx - font.width(hint) / 2, by + 12, BONE_DIM, true);
+        if (ClientState.revive >= 0f) {
+            // un companero le esta reanimando
+            int ry = by + 30;
+            Component r = hud(Component.translatable("smileprotocol.downed.being_revived"));
+            g.drawString(font, r, cx - font.width(r) / 2, ry, READY, true);
+            g.blitSprite(BAR_LIGHT_EMPTY, bx + 20, ry + 11, bw - 40, 5);
+            bar(g, BAR_LIGHT, 64, 6, bx + 20, ry + 11, bw - 40, 5, ClientState.revive);
+        }
+    }
+
+    /**
+     * Remate o muerte instantanea (README 9.3): rojo que late con cada golpe, cada vez mas oscuro,
+     * y fundido a negro al final. Sin textos: solo lo que se ve.
+     */
+    private static void renderSequence(GuiGraphics g, int w, int h, float pt) {
+        float hit = ClientSequence.impact(pt);
+        float prog = ClientSequence.progress(pt);
+        RenderSystem.setShaderColor(0.2f, 0f, 0f, 0.55f + 0.35f * prog);
+        g.blitSprite(VIGNETTE, -20, -20, w + 40, h + 40);
+        RenderSystem.setShaderColor(1f, 1f, 1f, Mth.clamp(0.25f + 0.75f * hit + 0.3f * prog, 0f, 1f));
+        g.blitSprite(BLOOD_VIGNETTE, -10, -10, w + 20, h + 20);
+        RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
+        float black = Mth.clamp((prog - 0.8f) / 0.2f, 0f, 1f);
+        int a = Mth.clamp((int) (black * 255) + (int) (hit * 70), 0, 255);
+        if (a > 0) g.fill(0, 0, w, h, a << 24 | (black < 0.5f ? 0x200000 : 0));
+    }
+
+    /** Muerto: rotulo y a quien se esta mirando (README 9.3). */
+    private static void renderDead(GuiGraphics g, Font font, int w, int h) {
+        RenderSystem.setShaderColor(0f, 0f, 0f, 0.7f);
+        g.blitSprite(VIGNETTE, 0, 0, w, h);
+        RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
+        Component title = scrawl(Component.translatable("smileprotocol.downed.dead_title"));
+        g.pose().pushPose();
+        g.pose().translate(w / 2f, 18, 0);
+        g.pose().scale(1.8f, 1.8f, 1f);
+        g.drawString(font, title, -font.width(title) / 2, 0, 0xFFB01418, false);
+        g.pose().popPose();
+        Minecraft mc = Minecraft.getInstance();
+        Component line = mc.getCameraEntity() instanceof Player other && other != mc.player
+                ? Component.translatable("smileprotocol.downed.watching", other.getDisplayName())
+                : Component.translatable("smileprotocol.downed.no_one");
+        Component l1 = hud(line), l2 = hud(Component.translatable("smileprotocol.downed.dead_hint"));
+        g.drawString(font, l1, w / 2 - font.width(l1) / 2, h - 44, BONE, true);
+        g.drawString(font, l2, w / 2 - font.width(l2) / 2, h - 32, BONE_DIM, true);
     }
 
     /** Dibuja la parte llena de una barra (sprite recortado a la fraccion {@code k}). */

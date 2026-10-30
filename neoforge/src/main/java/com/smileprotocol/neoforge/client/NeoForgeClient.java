@@ -63,6 +63,8 @@ public final class NeoForgeClient {
             event.registerEntityRenderer(com.smileprotocol.registry.ModEntities.BERSERKER.get(), ctx -> new com.smileprotocol.client.BerserkerRenderer<>(ctx, "berserker"));
             event.registerEntityRenderer(com.smileprotocol.registry.ModEntities.SMILER_TEST.get(),
                     ctx -> new com.smileprotocol.client.BerserkerRenderer<>(ctx, "smiler_test"));
+            event.registerEntityRenderer(com.smileprotocol.registry.ModEntities.SMILER_KILL.get(),
+                    ctx -> new com.smileprotocol.client.BerserkerRenderer<>(ctx, "smiler_kill"));
         }
     }
 

@@ -127,7 +127,7 @@ public final class Payloads {
      * 1 dive, 2 vault (con el bloque que se salta).
      */
     public record MotionInput(int kind, int lean, boolean lookBack, BlockPos obstacle) implements CustomPacketPayload {
-        public static final int STATE = 0, DIVE = 1, VAULT = 2;
+        public static final int STATE = 0, DIVE = 1, VAULT = 2, SPECTATE = 3;
         public static final Type<MotionInput> TYPE = typeOf("motion_input");
         public static final StreamCodec<ByteBuf, MotionInput> CODEC = StreamCodec.composite(
                 ByteBufCodecs.VAR_INT, MotionInput::kind,
@@ -266,6 +266,36 @@ public final class Payloads {
                 SyncDowned::new);
 
         @Override public Type<SyncDowned> type() { return TYPE; }
+    }
+
+    /**
+     * S -> C: estado del derribado para la victima: si la estan reanimando (progreso 0-1, -1 si
+     * no) y si es espectador tras morir (README 9.3).
+     */
+    public record SyncRevive(float progress, boolean dead) implements CustomPacketPayload {
+        public static final Type<SyncRevive> TYPE = typeOf("sync_revive");
+        public static final StreamCodec<ByteBuf, SyncRevive> CODEC = StreamCodec.composite(
+                ByteBufCodecs.FLOAT, SyncRevive::progress,
+                ByteBufCodecs.BOOL, SyncRevive::dead,
+                SyncRevive::new);
+
+        @Override public Type<SyncRevive> type() { return TYPE; }
+    }
+
+    /**
+     * S -> C: empieza (o termina, con {@code ticks} 0) una secuencia de remate o de muerte
+     * instantanea (README 9.3). La recibe la victima para la camara y los efectos; las animaciones
+     * van por el estado sincronizado del jugador y del mob.
+     */
+    public record StartSequence(int kind, int mobId, int ticks) implements CustomPacketPayload {
+        public static final Type<StartSequence> TYPE = typeOf("start_sequence");
+        public static final StreamCodec<ByteBuf, StartSequence> CODEC = StreamCodec.composite(
+                ByteBufCodecs.VAR_INT, StartSequence::kind,
+                ByteBufCodecs.VAR_INT, StartSequence::mobId,
+                ByteBufCodecs.VAR_INT, StartSequence::ticks,
+                StartSequence::new);
+
+        @Override public Type<StartSequence> type() { return TYPE; }
     }
 
     /** S -> C: empieza el minijuego de escape (README 18). */

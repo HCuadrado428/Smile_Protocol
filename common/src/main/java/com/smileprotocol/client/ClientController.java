@@ -31,6 +31,11 @@ public final class ClientController {
             ClientState.downed = p.downed();
             ClientState.bleed = p.bleed();
         });
+        SPNetwork.setClientHandler(Payloads.SyncRevive.TYPE, p -> {
+            ClientState.revive = p.progress();
+            ClientState.dead = p.dead();
+        });
+        SPNetwork.setClientHandler(Payloads.StartSequence.TYPE, ClientSequence::start);
         SPNetwork.setClientHandler(Payloads.SyncFlashlight.TYPE, p -> com.smileprotocol.client.light.Flashlight.sync(p.entityId(), p.on(), p.battery()));
         com.smileprotocol.interact.ClientInventoryView.setProvider(ClientState::slot);
     }
@@ -46,6 +51,7 @@ public final class ClientController {
         ClientInteraction.reset();
         ClientHide.reset();
         ClientQTE.reset();
+        ClientSequence.reset();
         com.smileprotocol.client.light.Flashlight.reset();
         com.smileprotocol.client.light.DynamicLights.clear();
     }
@@ -57,7 +63,17 @@ public final class ClientController {
         ClientHide.tick(mc);
         ClientInteraction.tick(mc);
         ClientQTE.tick(mc);
+        ClientSequence.tick(mc);
         if (mc.player == null || !ClientState.inSmileProtocol()) return;
+        // Muerto: click izquierdo / derecho cambia de companero al que mira (README 9.3)
+        if (ClientState.dead && mc.player.isSpectator()) {
+            while (mc.options.keyAttack.consumeClick()) {
+                SPNetwork.sendToServer(new Payloads.MotionInput(Payloads.MotionInput.SPECTATE, 1, false, net.minecraft.core.BlockPos.ZERO));
+            }
+            while (mc.options.keyUse.consumeClick()) {
+                SPNetwork.sendToServer(new Payloads.MotionInput(Payloads.MotionInput.SPECTATE, -1, false, net.minecraft.core.BlockPos.ZERO));
+            }
+        }
 
         // F3 y F5 (README 8.2)
         if (mc.getDebugOverlay().showDebugScreen()) mc.getDebugOverlay().toggleOverlay();

@@ -87,7 +87,9 @@ public final class SPSessionManager {
     public static void leave(ServerPlayer player, Destination dest) {
         SPPlayerData data = SPPlayerData.of(player);
         boolean wasIn = data.inSP();
+        boolean wasDead = wasIn && com.smileprotocol.downed.DeathManager.isDead(player);
         if (wasIn) RunManager.onPlayerLeft(player, data.getGroupId());
+        com.smileprotocol.sequence.SequenceManager.clear(player);
         com.smileprotocol.hide.HideManager.forceExit(player, false);
         com.smileprotocol.downed.DownedManager.clear(player);
         com.smileprotocol.qte.QTEManager.clear(player);
@@ -120,6 +122,12 @@ public final class SPSessionManager {
             dest = Destination.LOBBY;
         }
 
+        if (wasDead) {
+            // muerto en la partida (espectador): vuelve a ser jugador al salir
+            if (player.isSpectator()) player.setGameMode(GameType.ADVENTURE);
+            player.setCamera(player);
+            com.smileprotocol.network.SPNetwork.sendTo(player, new com.smileprotocol.network.Payloads.SyncRevive(-1f, false));
+        }
         if (dest == Destination.LOBBY || (dest == Destination.STAY && SPDimension.isSP(player.level()))) {
             sendToLobby(player);
         }

@@ -32,6 +32,8 @@ public final class MotionManager {
     public static final int DIVE_SLIDE = 16;
     public static final int DIVE_TOTAL = 24;
     public static final int VAULT_TICKS = 10;
+    /** Lo que tarda en levantarse tras la reanimacion (README 9.3). */
+    public static final int GETUP_TICKS = 26;
 
     /** Estado de un jugador. Solo en memoria: al reconectarse vuelve a NONE. */
     static final class State {
@@ -99,6 +101,11 @@ public final class MotionManager {
     // Peticiones del cliente --------------------------------------------------------------
 
     public static void onInput(Payloads.MotionInput in, ServerPlayer p) {
+        if (in.kind() == Payloads.MotionInput.SPECTATE) {
+            // muerto: cambia de companero al que mira (lean = direccion)
+            if (SPPlayerData.inSP(p)) com.smileprotocol.downed.DeathManager.cycle(p, in.lean() < 0 ? -1 : 1);
+            return;
+        }
         if (!SPPlayerData.inSP(p) || p.isSpectator()) return;
         State s = state(p);
         switch (in.kind()) {
@@ -190,6 +197,10 @@ public final class MotionManager {
             sync(p, s, true);
         } else if (s.action == Action.VAULT && s.actionTicks >= VAULT_TICKS + 2) {
             s.action = Action.NONE;
+            sync(p, s, true);
+        } else if (s.action == Action.GETUP && s.actionTicks >= GETUP_TICKS) {
+            s.action = Action.NONE;
+            s.lowPose = false;
             sync(p, s, true);
         }
         if (s.lean != 0 && p.isSprinting()) {

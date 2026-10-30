@@ -388,7 +388,7 @@ public final class RunManager {
     public static void onPlayerLeft(ServerPlayer player, @Nullable UUID groupId) {
         if (groupId == null) return;
         Group g = group(player.server, groupId);
-        if (g == null || !g.isActive(player.getUUID())) return;
+        if (g == null || !g.isInRun(player.getUUID())) return;
         g.setStatus(player.getUUID(), MemberStatus.LEFT);
         RunData.get(player.server).changed();
         if (!g.state().isDone() && g.activeMembers().isEmpty()) {
@@ -403,7 +403,11 @@ public final class RunManager {
     public static boolean onRejoin(ServerPlayer player) {
         SPPlayerData d = SPPlayerData.of(player);
         Group g = d.getGroupId() == null ? null : group(player.server, d.getGroupId());
-        if (g == null || !g.isActive(player.getUUID())) return false;
+        if (g == null || !g.isInRun(player.getUUID())) return false;
+        if (g.isDead(player.getUUID())) {
+            com.smileprotocol.downed.DeathManager.onRejoinDead(player);
+            return true;
+        }
         ZonePlacement zone = g.current();
         ServerLevel level = player.server.getLevel(SPDimension.SP_DIM);
         // Si el grupo ha cambiado de zona mientras estaba fuera, a la entrada de la actual

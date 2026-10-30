@@ -57,5 +57,24 @@
     "sounds": [
       "smileprotocol:mob/grab"
     ]
+  },
+  "mob.crunch": {
+    "subtitle": "subtitles.smileprotocol.mob.crunch",
+    "sounds": [
+      "smileprotocol:mob/crunch1",
+      "smileprotocol:mob/crunch2"
+    ]
+  },
+  "mob.bite": {
+    "subtitle": "subtitles.smileprotocol.mob.bite",
+    "sounds": [
+      "smileprotocol:mob/bite"
+    ]
+  },
+  "player.revive": {
+    "subtitle": "subtitles.smileprotocol.player.revive",
+    "sounds": [
+      "smileprotocol:player/revive"
+    ]
   }
 }

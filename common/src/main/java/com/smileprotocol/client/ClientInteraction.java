@@ -127,8 +127,30 @@ public final class ClientInteraction {
             blockDist = bh.getLocation().distanceTo(eye);
         }
 
-        // Objetos del suelo (README 10: se recogen mirandolos)
+        // Companeros derribados o agarrados (README 9.3, 18): reanimar o ayudar
         Vec3 end = eye.add(look.scale(REACH));
+        double pr = InteractionManager.PLAYER_REACH;
+        net.minecraft.world.entity.player.Player mate = null;
+        double mateDist = Math.min(pr + 0.6, blockDist);
+        for (net.minecraft.world.entity.player.Player o : player.level().getEntitiesOfClass(net.minecraft.world.entity.player.Player.class,
+                player.getBoundingBox().inflate(pr + 1.0), o -> o != player && o.isAlive() && !o.isSpectator())) {
+            if (o.distanceTo(player) > pr) continue;
+            // tumbado la caja es baja: se agranda un poco para apuntarle facil
+            Optional<Vec3> hit = o.getBoundingBox().inflate(0.35, 0.25, 0.35).clip(eye, eye.add(look.scale(pr + 0.6)));
+            if (hit.isEmpty()) continue;
+            double d = hit.get().distanceTo(eye);
+            if (d < mateDist && InteractionManager.playerSpec(o) != null) {
+                mateDist = d;
+                mate = o;
+            }
+        }
+        if (mate != null) {
+            target = new Target(true, BlockPos.ZERO, mate.getId());
+            spec = InteractionManager.playerSpec(mate);
+            return;
+        }
+
+        // Objetos del suelo (README 10: se recogen mirandolos)
         AABB search = player.getBoundingBox().expandTowards(look.scale(REACH)).inflate(1.0);
         ItemEntity best = null;
         double bestDist = Math.min(REACH, blockDist);

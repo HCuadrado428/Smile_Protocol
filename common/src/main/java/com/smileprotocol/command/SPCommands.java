@@ -253,7 +253,8 @@ public final class SPCommands {
             for (Group g : r.groups()) {
                 StringBuilder names = new StringBuilder();
                 g.members().forEach((id, st) -> names.append(names.isEmpty() ? "" : ", ").append(g.name(id))
-                        .append(st == com.smileprotocol.run.MemberStatus.ACTIVE ? "" : " (fuera)"));
+                        .append(st == com.smileprotocol.run.MemberStatus.ACTIVE ? ""
+                                : st == com.smileprotocol.run.MemberStatus.DEAD ? " (muerto)" : " (fuera)"));
                 s.sendSuccess(() -> Component.literal("   " + g.label() + " · " + g.stateLabel() + " · hueco " + g.slot()
                         + " · " + names), false);
             }
@@ -424,10 +425,20 @@ public final class SPCommands {
         // Mobs (fase 11): aparecer uno, quitar los de alrededor y derribarse para probar
         root.then(Commands.literal("mob")
                 .then(Commands.literal("spawn").then(Commands.argument("type", StringArgumentType.word())
-                        .suggests((c, b) -> net.minecraft.commands.SharedSuggestionProvider.suggest(new String[]{"berserker", "smiler_test"}, b))
+                        .suggests((c, b) -> net.minecraft.commands.SharedSuggestionProvider.suggest(new String[]{"berserker", "smiler_test", "smiler_kill"}, b))
                         .executes(MechanismCommands::mobSpawn)))
                 .then(Commands.literal("clear").executes(MechanismCommands::mobClear))
-                .then(Commands.literal("down").executes(MechanismCommands::selfDown)));
+                .then(Commands.literal("down").executes(MechanismCommands::selfDown))
+                // remate y muerte instantanea del mob mas cercano (fase 12)
+                .then(Commands.literal("execute").then(Commands.argument("target", net.minecraft.commands.arguments.EntityArgument.player())
+                        .executes(c -> MechanismCommands.mobSequence(c, true))))
+                .then(Commands.literal("kill").then(Commands.argument("target", net.minecraft.commands.arguments.EntityArgument.player())
+                        .executes(c -> MechanismCommands.mobSequence(c, false)))));
+        // Derribado, reanimacion y muerte de un jugador (README 24.1)
+        root.then(Commands.literal("player").then(Commands.argument("target", net.minecraft.commands.arguments.EntityArgument.player())
+                .then(Commands.literal("down").executes(c -> MechanismCommands.playerState(c, "down")))
+                .then(Commands.literal("revive").executes(c -> MechanismCommands.playerState(c, "revive")))
+                .then(Commands.literal("kill").executes(c -> MechanismCommands.playerState(c, "kill")))));
 
         d.register(root);
     }

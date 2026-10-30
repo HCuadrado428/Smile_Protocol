@@ -1,0 +1,14 @@
+{
+  "id": "smileprotocol:smiler_kill",
+  "family": "smiler",
+  "based_on": "smiley",
+  "_comment": "Mob de pruebas (fase 12): ve, persigue y mata al instante con su secuencia (sin QTE ni derribo). Solo aparece con /spadmin mob spawn smiler_kill.",
+  "senses": {
+    "vision": { "enabled": true, "range": 20 },
+    "hearing": { "multiplier": 1.0, "min_noise": 6.0 }
+  },
+  "speed": { "walk": 0.6, "run": 1.1 },
+  "on_catch": "INSTANT_KILL",
+  "sequences": { "kill": "SMILER_KILL" },
+  "execution": false
+}

@@ -187,6 +187,7 @@ final class MechanismCommands {
         switch (type) {
             case "berserker" -> com.smileprotocol.entity.MobManager.spawn(level, com.smileprotocol.registry.ModEntities.BERSERKER.get(), pos, level.random);
             case "smiler_test" -> com.smileprotocol.entity.MobManager.spawn(level, com.smileprotocol.registry.ModEntities.SMILER_TEST.get(), pos, level.random);
+            case "smiler_kill" -> com.smileprotocol.entity.MobManager.spawn(level, com.smileprotocol.registry.ModEntities.SMILER_KILL.get(), pos, level.random);
             default -> {
                 ctx.getSource().sendFailure(Component.translatable("smileprotocol.command.mob.unknown", type));
                 return 0;
@@ -213,5 +214,45 @@ final class MechanismCommands {
     static int selfDown(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         com.smileprotocol.downed.DownedManager.down(ctx.getSource().getPlayerOrException(), "comando");
         return 1;
+    }
+
+    /** {@code /spadmin player <jugador> down|revive|kill}. */
+    static int playerState(CommandContext<CommandSourceStack> ctx, String what) throws CommandSyntaxException {
+        ServerPlayer p = net.minecraft.commands.arguments.EntityArgument.getPlayer(ctx, "target");
+        if (!SPPlayerData.inSP(p)) {
+            ctx.getSource().sendFailure(Component.translatable("smileprotocol.command.player.not_in_sp", p.getDisplayName()));
+            return 0;
+        }
+        switch (what) {
+            case "down" -> com.smileprotocol.downed.DownedManager.down(p, "comando");
+            case "revive" -> com.smileprotocol.downed.DownedManager.revive(p, null);
+            default -> com.smileprotocol.downed.DeathManager.die(p, "comando");
+        }
+        ctx.getSource().sendSuccess(() -> Component.translatable("smileprotocol.command.player." + what, p.getDisplayName()), true);
+        return 1;
+    }
+
+    /**
+     * {@code /spadmin mob execute|kill <jugador>}: el mob mas cercano al jugador empieza su remate
+     * (derribandolo antes si hace falta) o su muerte instantanea.
+     */
+    static int mobSequence(CommandContext<CommandSourceStack> ctx, boolean execution) throws CommandSyntaxException {
+        ServerPlayer p = net.minecraft.commands.arguments.EntityArgument.getPlayer(ctx, "target");
+        com.smileprotocol.entity.SPMonster mob = p.serverLevel().getEntitiesOfClass(com.smileprotocol.entity.SPMonster.class,
+                        p.getBoundingBox().inflate(24), m -> m.isAlive()).stream()
+                .min(java.util.Comparator.comparingDouble(m -> m.distanceToSqr(p))).orElse(null);
+        if (mob == null) {
+            ctx.getSource().sendFailure(Component.translatable("smileprotocol.command.mob.none"));
+            return 0;
+        }
+        boolean ok;
+        if (execution) {
+            com.smileprotocol.downed.DownedManager.down(p, "comando");
+            ok = com.smileprotocol.sequence.SequenceManager.start(mob, p, mob.def().executionSequence());
+        } else {
+            ok = com.smileprotocol.sequence.SequenceManager.start(mob, p, mob.def().killSequence());
+        }
+        if (ok) ctx.getSource().sendSuccess(() -> Component.translatable("smileprotocol.command.mob.execute", mob.getDisplayName(), p.getDisplayName()), true);
+        return ok ? 1 : 0;
     }
 }

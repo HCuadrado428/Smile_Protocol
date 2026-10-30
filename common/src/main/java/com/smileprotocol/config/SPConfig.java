@@ -103,11 +103,20 @@ public final class SPConfig {
         /** Segundos de linterna encendida con la bateria llena (README 10). */
         public int flashlight_battery_seconds = 420;
 
-        // Derribado (README 9.3; la reanimacion llega en la fase 12)
+        // Derribado, reanimacion y remates (README 9.3)
         public int bleed_out_time = 60;
         public int downed_noise_interval = 200;
         public float noise_crawl = 3.5f;
         public float noise_groan = 6;
+        /** Ticks que tarda un companero en reanimar (con varios se acorta). */
+        public int revive_time = 120;
+        /** Vida con la que se levanta (% de la maxima). */
+        public int revive_health_percent = 30;
+        /** Ticks de proteccion contra remates tras levantarse. */
+        public int revive_protection = 60;
+        public float noise_revive = 7;
+        /** Ticks de interaccion mantenida para liberar a un companero agarrado (README 18). */
+        public int qte_help_time = 40;
 
         // Mobs (README 20)
         /** Berserkers por planta segun la dificultad de la zona (0, 1, 2, 3, 4...), antes de escalar por el grupo. */
@@ -136,6 +145,10 @@ public final class SPConfig {
             required_ready_ratio = Math.min(1.0, Math.max(0.1, required_ready_ratio));
             max_dynamic_lights = Math.max(0, max_dynamic_lights);
             bleed_out_time = Math.max(5, bleed_out_time);
+            revive_time = Math.max(1, revive_time);
+            revive_health_percent = Math.max(1, Math.min(100, revive_health_percent));
+            revive_protection = Math.max(0, revive_protection);
+            qte_help_time = Math.max(1, qte_help_time);
             if (berserkers_by_difficulty == null || berserkers_by_difficulty.isEmpty()) {
                 berserkers_by_difficulty = new java.util.ArrayList<>(java.util.List.of(1, 2, 2, 3, 3));
             }

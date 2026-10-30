@@ -64,6 +64,8 @@ public final class QTEManager {
         float velocity;
         Vec3 anchor;
         Vec3 start;
+        /** Ayuda de un companero (0-1). */
+        float helped;
         float yaw;
 
         Session(UUID mob, QTEType type, int total, long seed, int difficulty, String fail) {
@@ -97,6 +99,7 @@ public final class QTEManager {
             return false;
         }
         HideManager.forceExit(p, true);
+        com.smileprotocol.interact.InteractionManager.stop(p, true);
         Group g = RunManager.groupOf(p);
         int ticks = g != null ? g.difficulty().scaleQte(baseTicks) : baseTicks;
         int difficulty = g != null ? Math.max(0, 4 - g.difficulty().groupSize()) : 1;
@@ -236,7 +239,10 @@ public final class QTEManager {
             p.push(away.x * 0.9, 0.25, away.z * 0.9);
             p.hurtMarked = true;
         } else if ("DEATH".equalsIgnoreCase(s.fail)) {
-            p.hurt(p.damageSources().genericKill(), Float.MAX_VALUE);
+            // muerte directa: con la secuencia de muerte del mob si la tiene (README 18.1)
+            if (!(mob instanceof SPMonster m && com.smileprotocol.sequence.SequenceManager.start(m, p, m.def().killSequence()))) {
+                com.smileprotocol.downed.DeathManager.die(p, "agarre");
+            }
         } else {
             DownedManager.down(p, "agarre");
         }
@@ -244,6 +250,20 @@ public final class QTEManager {
 
     private static void cleanup(ServerPlayer p, Session s) {
         MotionManager.clearAction(p, Action.GRABBED);
+    }
+
+    /**
+     * Un companero lo ayuda con la interaccion mantenida (README 18): cada tick suma progreso al
+     * minijuego como si la victima pulsara; con la ayuda completa, se libera.
+     */
+    public static void help(ServerPlayer p, float amount) {
+        Session s = SESSIONS.get(p.getUUID());
+        if (s == null) return;
+        s.helped += amount;
+        if (s.helped >= 1f) {
+            SESSIONS.remove(p.getUUID());
+            finish(p, s, true);
+        }
     }
 
     /** Al salir de la partida o desconectarse. */

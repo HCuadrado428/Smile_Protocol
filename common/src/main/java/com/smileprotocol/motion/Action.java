@@ -6,7 +6,11 @@ package com.smileprotocol.motion;
  * combinan con andar.
  */
 public enum Action {
-    NONE, DIVE, VAULT, HIDDEN, INTERACT, DOWNED, GRABBED;
+    NONE, DIVE, VAULT, HIDDEN, INTERACT, DOWNED, GRABBED,
+    /** Levantandose tras ser reanimado ({@code detail} 1 = con ayuda). */
+    GETUP,
+    /** Secuencia de remate o de muerte ({@code detail} = {@code SequenceKind}). */
+    SEQUENCE;
 
     private static final Action[] VALUES = values();
 

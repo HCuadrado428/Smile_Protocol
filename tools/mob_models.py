@@ -337,6 +337,116 @@ def animations():
         "arm_r": {"rotation": kf(wave(L, [ARM_HANG + 20, 0, -25], 15))},
         "arm_l": {"rotation": kf(wave(L, [ARM_HANG + 20, 0, 25], 15, math.pi))},
     }))
+    # EXECUTE (Berserker, remate, 64 ticks): levanta los brazos y aplasta al derribado tres veces
+    # (golpes en los ticks 20, 34 y 50, ver SequenceKind); tras el ultimo se queda encima jadeando
+    L = 3.2
+    RAISE_T, RAISE_A, RAISE_F = 5, -165, -40
+    SLAM_T, SLAM_A, SLAM_F = 60, -55, -65
+    A["execute"] = loop_anim(L, pose_bones({
+        "torso": {"rotation": kf([(0, [HUNCH, 0, 0]), (0.75, [RAISE_T, 0, 0]), (0.88, [RAISE_T - 4, 0, 0]),
+                                  (0.98, [SLAM_T, 0, 0]), (1.15, [SLAM_T + 4, 0, 0]), (1.45, [RAISE_T + 10, 0, 0]),
+                                  (1.62, [RAISE_T + 6, 0, 0]), (1.7, [SLAM_T, 0, 0]), (1.85, [SLAM_T + 4, 0, 0]),
+                                  (2.2, [RAISE_T - 6, 0, 0]), (2.38, [RAISE_T - 10, 0, 0]), (2.48, [SLAM_T + 6, 0, 0]),
+                                  (2.7, [SLAM_T + 8, 0, 0]), (2.95, [SLAM_T + 3, 0, 0]), (L, [SLAM_T + 6, 0, 0])])},
+        "neck": {"rotation": kf([(0, [NECK, 0, 0]), (0.75, [-5, 0, 0]), (0.98, [NECK - 12, 0, 0]), (1.45, [-8, 0, 0]),
+                                 (1.7, [NECK - 12, 0, 0]), (2.2, [5, 0, 0]), (2.48, [NECK - 16, 0, 0]), (L, [NECK - 10, 0, 0])])},
+        "head": {"rotation": kf([(0, [-12, 0, 0]), (0.75, [-35, 0, 0]), (0.98, [-5, 0, 0]), (1.45, [-30, 8, 6]),
+                                 (1.7, [-5, 0, 0]), (2.2, [-48, 0, 0]), (2.38, [-50, -6, -4]), (2.48, [-2, 0, 0]),
+                                 (2.8, [-8, 14, 18]), (L, [-6, 20, 22])])},
+        "arm_r": {"rotation": kf([(0, [ARM_HANG, 0, -6]), (0.75, [RAISE_A, 0, -30]), (0.88, [RAISE_A - 5, 0, -32]),
+                                  (0.98, [SLAM_A, 0, -6]), (1.15, [SLAM_A - 5, 0, -8]), (1.45, [RAISE_A + 10, 0, -26]),
+                                  (1.62, [RAISE_A + 5, 0, -28]), (1.7, [SLAM_A, 0, -6]), (1.85, [SLAM_A - 5, 0, -8]),
+                                  (2.2, [RAISE_A - 5, 0, -34]), (2.38, [RAISE_A - 10, 0, -36]), (2.48, [SLAM_A + 5, 0, -5]),
+                                  (L, [SLAM_A + 2, 0, -8])])},
+        "arm_l": {"rotation": kf([(0, [ARM_HANG, 0, 6]), (0.75, [RAISE_A, 0, 30]), (0.88, [RAISE_A - 5, 0, 32]),
+                                  (0.98, [SLAM_A, 0, 6]), (1.15, [SLAM_A - 5, 0, 8]), (1.45, [RAISE_A + 10, 0, 26]),
+                                  (1.62, [RAISE_A + 5, 0, 28]), (1.7, [SLAM_A, 0, 6]), (1.85, [SLAM_A - 5, 0, 8]),
+                                  (2.2, [RAISE_A - 5, 0, 34]), (2.38, [RAISE_A - 10, 0, 36]), (2.48, [SLAM_A + 5, 0, 5]),
+                                  (L, [SLAM_A + 2, 0, 8])])},
+        "forearm_r": {"rotation": kf([(0, [-12, 0, 0]), (0.75, [RAISE_F, 0, 0]), (0.98, [SLAM_F, 0, 0]), (1.45, [RAISE_F, 0, 0]),
+                                      (1.7, [SLAM_F, 0, 0]), (2.2, [RAISE_F - 10, 0, 0]), (2.48, [SLAM_F + 5, 0, 0]), (L, [SLAM_F, 0, 0])])},
+        "forearm_l": {"rotation": kf([(0, [-12, 0, 0]), (0.75, [RAISE_F, 0, 0]), (0.98, [SLAM_F, 0, 0]), (1.45, [RAISE_F, 0, 0]),
+                                      (1.7, [SLAM_F, 0, 0]), (2.2, [RAISE_F - 10, 0, 0]), (2.48, [SLAM_F + 5, 0, 0]), (L, [SLAM_F, 0, 0])])},
+        "hips": {"position": kf([(0, [0, -2.5, 0]), (0.75, [0, 0.5, 0]), (0.98, [0, -4, 0]), (1.45, [0, 0, 0]),
+                                 (1.7, [0, -4, 0]), (2.2, [0, 1.0, 0]), (2.48, [0, -5, 0]), (2.8, [0, -4.2, 0]),
+                                 (3.0, [0, -4.8, 0]), (L, [0, -4.3, 0])])},
+        "thigh_r": {"rotation": kf([(0, [-26, 0, 4]), (0.75, [-30, 0, 12]), (0.98, [-50, 0, 12]), (L, [-50, 0, 12])])},
+        "thigh_l": {"rotation": kf([(0, [-26, 0, -4]), (0.75, [-15, 0, -12]), (0.98, [-24, 0, -12]), (L, [-24, 0, -12])])},
+        "shin_r": {"rotation": kf([(0, [40, 0, 0]), (0.98, [70, 0, 0]), (L, [70, 0, 0])])},
+        "shin_l": {"rotation": kf([(0, [40, 0, 0]), (0.98, [50, 0, 0]), (L, [50, 0, 0])])},
+        **{f"finger{i}_{sd}": {"rotation": kf([(0, [10, 0, 0]), (0.75, [-10, 0, 0]), (0.98, [55, 0, 0]),
+                                                 (1.45, [-10, 0, 0]), (1.7, [55, 0, 0]), (2.2, [-15, 0, 0]),
+                                                 (2.48, [60, 0, 0]), (2.9, [40 + 6 * i, 0, 0]), (L, [55, 0, 0])])}
+           for i in range(4) for sd in "rl"},
+    }), loop="hold_on_last_frame")
+
+    # EXECUTE_SMILER (remate del smiler de pruebas, 60 ticks): se agacha sobre el derribado, le coge
+    # la cabeza, se la levanta, la sacude (tick 22) y se la retuerce de golpe (tick 42); la suelta
+    L = 3.0
+    A["execute_smiler"] = loop_anim(L, pose_bones({
+        "torso": {"rotation": kf([(0, [HUNCH, 0, 0]), (0.5, [72, 0, 0]), (0.62, [70, 0, 0]), (0.95, [42, 0, 0]),
+                                  (1.08, [46, 4, 0]), (1.14, [40, -4, 0]), (1.25, [42, 0, 0]), (1.9, [40, 0, 0]),
+                                  (2.05, [38, 0, 0]), (2.12, [44, 12, 0]), (2.3, [52, 8, 0]), (2.6, [60, 0, 0]),
+                                  (L, [50, 0, 0])])},
+        "neck": {"rotation": kf([(0, [NECK, 0, 0]), (0.5, [-30, 0, 0]), (1.1, [-20, 0, 0]), (2.1, [-26, 0, 0]),
+                                 (L, [NECK, 0, 0])])},
+        "head": {"rotation": kf([(0, [-12, 0, 0]), (0.5, [-35, 0, 0]), (1.0, [-18, 0, 0]), (1.12, [-26, 6, 10]),
+                                 (1.6, [-20, -8, -6]), (2.1, [-30, 0, 0]), (2.2, [-14, 10, 24]), (2.6, [-20, 14, 30]),
+                                 (L, [-18, 8, 26])])},
+        "arm_r": {"rotation": kf([(0, [ARM_HANG, 0, -6]), (0.5, [0, 0, -10]), (0.62, [2, 0, -12]), (0.95, [22, 0, -12]),
+                                  (1.08, [26, 6, -14]), (1.14, [18, -6, -10]), (1.25, [22, 0, -12]), (1.6, [20, 4, -12]),
+                                  (2.0, [22, 0, -12]), (2.1, [22, 34, -26]), (2.3, [16, 30, -22]), (2.5, [-10, 10, -8]),
+                                  (L, [ARM_HANG + 10, 0, -6])])},
+        "arm_l": {"rotation": kf([(0, [ARM_HANG, 0, 6]), (0.5, [0, 0, 10]), (0.62, [2, 0, 12]), (0.95, [22, 0, 12]),
+                                  (1.08, [26, 6, 14]), (1.14, [18, -6, 10]), (1.25, [22, 0, 12]), (1.6, [20, 4, 12]),
+                                  (2.0, [22, 0, 12]), (2.1, [22, 34, 26]), (2.3, [16, 30, 22]), (2.5, [-10, 10, 8]),
+                                  (L, [ARM_HANG + 10, 0, 6])])},
+        "forearm_r": {"rotation": kf([(0, [-12, 0, 0]), (0.5, [-105, 0, 0]), (0.95, [-105, 0, 0]), (2.1, [-110, 0, 0]),
+                                      (2.5, [-40, 0, 0]), (L, [-15, 0, 0])])},
+        "forearm_l": {"rotation": kf([(0, [-12, 0, 0]), (0.5, [-105, 0, 0]), (0.95, [-105, 0, 0]), (2.1, [-110, 0, 0]),
+                                      (2.5, [-40, 0, 0]), (L, [-15, 0, 0])])},
+        "hips": {"position": kf([(0, [0, -2.5, 0]), (0.5, [0, -5, 0]), (0.95, [0, -3, 0]), (2.1, [0, -3, 0]),
+                                 (2.6, [0, -4.5, 0]), (L, [0, -3, 0])])},
+        "thigh_r": {"rotation": kf([(0, [-26, 0, 4]), (0.5, [-55, 0, 10]), (0.95, [-40, 0, 8]), (2.6, [-48, 0, 8]), (L, [-30, 0, 4])])},
+        "thigh_l": {"rotation": kf([(0, [-26, 0, -4]), (0.5, [-55, 0, -10]), (0.95, [-40, 0, -8]), (2.6, [-48, 0, -8]), (L, [-30, 0, -4])])},
+        "shin_r": {"rotation": kf([(0, [40, 0, 0]), (0.5, [85, 0, 0]), (0.95, [62, 0, 0]), (2.6, [75, 0, 0]), (L, [45, 0, 0])])},
+        "shin_l": {"rotation": kf([(0, [40, 0, 0]), (0.5, [85, 0, 0]), (0.95, [62, 0, 0]), (2.6, [75, 0, 0]), (L, [45, 0, 0])])},
+        **{f"finger{i}_{sd}": {"rotation": kf([(0, [10, 0, 0]), (0.5, [-15, 0, 0]), (0.62, [70 - 5 * i, 0, 0]),
+                                                 (2.4, [70 - 5 * i, 0, 0]), (2.55, [-5, 0, 0]), (L, [15, 0, 0])])}
+           for i in range(4) for sd in "rl"},
+    }), loop="hold_on_last_frame")
+
+    # KILL (muerte instantanea, 64 ticks): agarra por los hombros (como "grab"), levanta a la victima
+    # del suelo (ticks 6-18, la sube el servidor 0,55 bloques), muerde la cara (30), desgarra
+    # sacudiendo la cabeza, vuelve a morder (40), la sostiene inerte y la suelta (52-57)
+    L = 3.2
+    A["kill"] = loop_anim(L, pose_bones({
+        "torso": {"rotation": kf([(0, [25, 0, 0]), (0.3, [25, 0, 0]), (0.9, [20, 0, 0]), (1.35, [17, 0, 0]),
+                                  (1.5, [30, 0, 0]), (1.75, [27, 6, 0]), (1.95, [27, -6, 0]), (2.0, [32, 0, 0]),
+                                  (2.3, [20, 0, 0]), (2.6, [18, 0, 0]), (2.85, [34, 0, 0]), (L, [HUNCH, 0, 0])])},
+        "neck": {"rotation": kf([(0, [-10, 0, 0]), (1.3, [-24, 0, 0]), (1.5, [12, 0, 0]), (1.6, [10, 14, 0]),
+                                 (1.7, [10, -14, 0]), (1.8, [10, 14, 0]), (1.9, [10, -10, 0]), (2.0, [14, 0, 0]),
+                                 (2.3, [-16, 0, 0]), (2.6, [-20, 0, 0]), (L, [NECK, 0, 0])])},
+        "head": {"rotation": kf([(0, [-8, 0, 0]), (0.9, [-14, 0, 0]), (1.3, [-35, 0, 0]), (1.5, [18, 0, 0]),
+                                 (1.6, [16, 20, 12]), (1.7, [16, -20, -12]), (1.8, [16, 20, 12]), (1.9, [16, -16, -10]),
+                                 (2.0, [22, 0, 0]), (2.3, [-30, 0, -8]), (2.6, [-34, 6, -14]), (2.85, [-12, 0, 0]),
+                                 (L, [-12, 0, 0])])},
+        "arm_r": {"rotation": kf([(0, [-2, 0, 0]), (0.3, [-2, 0, 0]), (0.9, [-5, 0, 0]), (1.5, [-6, 0, 0]),
+                                  (1.6, [-3, 3, 0]), (1.7, [-8, -3, 0]), (1.9, [-4, 3, 0]), (2.6, [-5, 0, 0]),
+                                  (2.75, [-25, 0, -18]), (2.85, [ARM_HANG + 10, 0, -14]), (L, [ARM_HANG, 0, -6])])},
+        "arm_l": {"rotation": kf([(0, [-2, 0, 0]), (0.3, [-2, 0, 0]), (0.9, [-5, 0, 0]), (1.5, [-6, 0, 0]),
+                                  (1.6, [-3, -3, 0]), (1.7, [-8, 3, 0]), (1.9, [-4, -3, 0]), (2.6, [-5, 0, 0]),
+                                  (2.75, [-25, 0, 18]), (2.85, [ARM_HANG + 10, 0, 14]), (L, [ARM_HANG, 0, 6])])},
+        "forearm_r": {"rotation": kf([(0, [-108, 0, 0]), (0.3, [-108, 0, 0]), (0.9, [-120, 0, 0]), (2.6, [-120, 0, 0]),
+                                      (2.75, [-60, 0, 0]), (L, [-12, 0, 0])])},
+        "forearm_l": {"rotation": kf([(0, [-108, 0, 0]), (0.3, [-108, 0, 0]), (0.9, [-120, 0, 0]), (2.6, [-120, 0, 0]),
+                                      (2.75, [-60, 0, 0]), (L, [-12, 0, 0])])},
+        "hips": {"position": kf([(0, [0, -2.5, 0]), (0.3, [0, -2.5, 0]), (0.9, [0, 0, 0]), (2.6, [0, 0, 0]),
+                                 (2.85, [0, -3.5, 0]), (L, [0, -2.5, 0])])},
+        **{f"finger{i}_{sd}": {"rotation": kf([(0, [70 - 6 * i, 0, 0]), (2.6, [75 - 6 * i, 0, 0]), (2.72, [-10, 0, 0]),
+                                                 (L, [10, 0, 0])])}
+           for i in range(4) for sd in "rl"},
+    }), loop="hold_on_last_frame")
     out = {"format_version": "1.8.0", "animations": A}
     p = ROOT / "animations/entity/berserker.animation.json"
     p.parent.mkdir(parents=True, exist_ok=True)
@@ -436,8 +546,8 @@ def render_pose(anim, t, size=420, yaw=200, pitch=-12):
     return img
 
 
-def smiler_test():
-    """Variante del mob de pruebas: mismo modelo, el ojo derecho abierto y brillando."""
+def smiler_test(out="smiler_test", eyes=(0.27,)):
+    """Variante del mob de pruebas: mismo modelo, el ojo derecho (o los dos) abierto y brillando."""
     geo = json.loads((ROOT / "geo/entity/berserker.geo.json").read_text())["minecraft:geometry"][0]
     head = next(b for b in geo["bones"] if b["name"] == "head")["cubes"][0]
     u, v = head["uv"]["north"]["uv"]
@@ -446,20 +556,20 @@ def smiler_test():
     for name in ("berserker", "berserker_glowmask"):
         im = Image.open(ROOT / f"textures/entity/{name}.png").convert("RGBA")
         px = im.load()
-        ex, ey = u + w * 0.27, v + h * 0.36
-        for y in range(int((ey - 1.2) * S), int((ey + 1.2) * S) + 1):
-            for x in range(int((ex - 1.5) * S), int((ex + 1.5) * S) + 1):
-                d = math.hypot((x / S - ex) / 1.5, (y / S - ey) / 1.1)
-                if d <= 1:
-                    px[x, y] = (255, 40, 30, 255) if d < 0.45 else (190, 14, 18, 255)
-                elif name == "berserker_glowmask" and d <= 1.2:
-                    pass
-        im.save(ROOT / f"textures/entity/{name.replace('berserker', 'smiler_test')}.png")
+        for fx in eyes:
+            ex, ey = u + w * fx, v + h * 0.36
+            for y in range(int((ey - 1.2) * S), int((ey + 1.2) * S) + 1):
+                for x in range(int((ex - 1.5) * S), int((ex + 1.5) * S) + 1):
+                    d = math.hypot((x / S - ex) / 1.5, (y / S - ey) / 1.1)
+                    if d <= 1:
+                        px[x, y] = (255, 40, 30, 255) if d < 0.45 else (190, 14, 18, 255)
+        im.save(ROOT / f"textures/entity/{name.replace('berserker', out)}.png")
 
 
 def main():
     tw, th, nf = berserker()
     smiler_test()
+    smiler_test("smiler_kill", (0.27, 0.73))
     A = animations()
     print(f"berserker textura {tw * gm.SCALE}x{th * gm.SCALE} caras={nf} animaciones={list(A)}")
     if len(sys.argv) > 1:

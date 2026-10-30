@@ -21,9 +21,58 @@ public abstract class SPMonster extends PathfinderMob implements GeoEntity {
 
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
 
+    /** Secuencia de remate o muerte en marcha (ordinal + 1; 0 = ninguna), para la animacion. */
+    private static final net.minecraft.network.syncher.EntityDataAccessor<Byte> SEQUENCE =
+            net.minecraft.network.syncher.SynchedEntityData.defineId(SPMonster.class, net.minecraft.network.syncher.EntityDataSerializers.BYTE);
+    /** Cliente: ultima secuencia animada, para reiniciar la animacion al empezar otra. */
+    private int animatedSequence;
+
     protected SPMonster(EntityType<? extends PathfinderMob> type, Level level) {
         super(type, level);
         setPersistenceRequired();
+    }
+
+    @Override
+    protected void defineSynchedData(net.minecraft.network.syncher.SynchedEntityData.Builder b) {
+        super.defineSynchedData(b);
+        b.define(SEQUENCE, (byte) 0);
+    }
+
+    /** La empieza {@code SequenceManager}: el mob se queda quieto y reproduce su animacion. */
+    public void startSequence(com.smileprotocol.sequence.SequenceKind kind, net.minecraft.server.level.ServerPlayer victim) {
+        getNavigation().stop();
+        entityData.set(SEQUENCE, (byte) (kind.ordinal() + 1));
+    }
+
+    public void endSequence() {
+        entityData.set(SEQUENCE, (byte) 0);
+        onSequenceEnd();
+    }
+
+    /** Despues de rematar o matar (para volver a su IA). */
+    protected void onSequenceEnd() {}
+
+    @javax.annotation.Nullable
+    public com.smileprotocol.sequence.SequenceKind sequence() {
+        int v = entityData.get(SEQUENCE);
+        return v <= 0 ? null : com.smileprotocol.sequence.SequenceKind.of(v - 1);
+    }
+
+    /**
+     * Para los controladores de GeckoLib: si hay una secuencia, su animacion (se reproduce una vez
+     * y se queda en el ultimo fotograma). Devuelve null si no hay.
+     */
+    @javax.annotation.Nullable
+    protected software.bernie.geckolib.animation.PlayState sequenceAnimation(
+            software.bernie.geckolib.animation.AnimationState<? extends SPMonster> st) {
+        com.smileprotocol.sequence.SequenceKind k = sequence();
+        int id = k == null ? 0 : k.ordinal() + 1;
+        if (id != animatedSequence) {
+            animatedSequence = id;
+            st.getController().forceAnimationReset();
+        }
+        if (k == null) return null;
+        return st.setAndContinue(software.bernie.geckolib.animation.RawAnimation.begin().thenPlayAndHold(k.anim));
     }
 
     /** Id de su ficha en {@code data/smileprotocol/mobs}. */

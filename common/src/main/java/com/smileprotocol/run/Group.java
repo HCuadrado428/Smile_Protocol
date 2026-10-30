@@ -68,6 +68,14 @@ public final class Group {
 
     public boolean isActive(UUID player) { return members.get(player) == MemberStatus.ACTIVE; }
 
+    /** Sigue en la partida: vivo o muerto espectando (README 9.3). */
+    public boolean isInRun(UUID player) {
+        MemberStatus st = members.get(player);
+        return st == MemberStatus.ACTIVE || st == MemberStatus.DEAD;
+    }
+
+    public boolean isDead(UUID player) { return members.get(player) == MemberStatus.DEAD; }
+
     public void setStatus(UUID player, MemberStatus status) {
         if (members.containsKey(player)) members.put(player, status);
     }
