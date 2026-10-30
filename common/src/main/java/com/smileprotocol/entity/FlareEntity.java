@@ -64,7 +64,7 @@ public class FlareEntity extends Entity implements ItemSupplier {
         Vec3 v = getDeltaMovement();
         if (!onGround()) v = v.add(0, -0.04, 0);
         move(MoverType.SELF, v);
-        v = getDeltaMovement().multiply(onGround() ? 0.6 : 0.98, 0.98, onGround() ? 0.6 : 0.98);
+        v = getDeltaMovement().multiply(onGround() ? 0.4 : 0.9, 0.98, onGround() ? 0.4 : 0.9);
         setDeltaMovement(v);
         int left = burnLeft();
         if (level().isClientSide) {

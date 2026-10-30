@@ -177,8 +177,9 @@ public final class UseManager {
                 FlareEntity f = ModEntities.FLARE.get().create(p.serverLevel());
                 if (f != null) {
                     Vec3 look = p.getLookAngle().multiply(1, 0, 1).normalize();
-                    f.moveTo(p.getX() + look.x * 0.5, p.getEyeY() - 0.4, p.getZ() + look.z * 0.5, p.getYRot(), 0);
-                    f.setDeltaMovement(look.x * 0.25, 0.1, look.z * 0.25);
+                    // se suelta a los pies, un poco por delante
+                    f.moveTo(p.getX() + look.x * 0.6, p.getY() + 0.5, p.getZ() + look.z * 0.6, p.getYRot(), 0);
+                    f.setDeltaMovement(look.x * 0.12, 0.05, look.z * 0.12);
                     f.setBurnTime((int) u.def.amount());
                     p.serverLevel().addFreshEntity(f);
                     p.serverLevel().playSound(null, p.blockPosition(), SoundEvents.FIRECHARGE_USE, SoundSource.PLAYERS, 0.8f, 1.3f);

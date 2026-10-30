@@ -227,7 +227,7 @@ public final class ClientSelfTest {
                     sp.getBoundingBox().inflate(4)).isEmpty();
             log((ok ? "OK" : "FALLO") + " bengala encendida");
             com.smileprotocol.motion.Flashlights.set(sp, false);
-            SPSessionManager.teleport(sp, level, sp.position(), sp.getYRot() + 180f, 30f);
+            SPSessionManager.teleport(sp, level, sp.position().add(sp.getLookAngle().multiply(-1.5, 0, -1.5)), sp.getYRot(), 35f);
         }));
         SHOTS.add(() -> wait = 15);
         SHOTS.add(() -> grab(mc, "24_bengala"));
