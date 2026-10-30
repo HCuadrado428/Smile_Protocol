@@ -254,6 +254,144 @@ MAT.update({"plaster": plaster(), "plaster_hi": plaster((142, 137, 128)), "banda
             "wristband": wristband(), "tube": tube(), "face_plaster": face_plaster(), "autopsy": autopsy()})
 
 
+def muscle(base=(92, 26, 38)):
+    """El Rastreador: sin piel. Fibras de musculo morado y rojo oscuro, humedas, con tendones palidos."""
+    def m(f):
+        ax = f.Y if not f.side else f.Y + 0.3 * f.X
+        fib = 0.75 + 0.25 * np.sin((f.X + f.Z) * 7 + noise3(f.X, f.Y * 0.3, f.Z, 0.7, 401) * 5)
+        c = np.zeros((f.h, f.w, 3)) + base
+        c *= fib[..., None]
+        c = c * (0.8 + 0.35 * f.n(0.5, 3, 402))[..., None]
+        wet = sstep(0.7, 0.92, f.n(0.9, 2, 403))
+        c = c + wet[..., None] * 38
+        ten = sstep(0.8, 0.9, noise3(f.X * 3, ax * 0.25, f.Z * 3, 1.0, 404))
+        c = c * (1 - ten[..., None]) + np.array([196, 170, 150]) * ten[..., None]
+        return c, np.ones((f.h, f.w))
+    return m
+
+
+def bone():
+    def m(f):
+        c = np.zeros((f.h, f.w, 3)) + (196, 184, 160)
+        c *= (0.75 + 0.3 * f.n(0.8, 3, 411))[..., None]
+        dirt = sstep(0.55, 0.85, f.n(0.6, 2, 412))
+        c = c * (1 - 0.5 * dirt[..., None]) + np.array([90, 30, 26]) * 0.5 * dirt[..., None]
+        return c, np.ones((f.h, f.w))
+    return m
+
+
+def rastreador_head():
+    """Cabeza: craneo sin piel, sin ojos, encias rojas que brillan sobre la mandibula partida."""
+    mu = muscle((80, 22, 34))
+
+    def gum(f):
+        if f.face != "north":
+            return np.zeros((f.h, f.w))
+        px = np.floor(f.U * gm.SCALE).astype(int)
+        py = np.floor(f.V * gm.SCALE).astype(int)
+        H = int(f.h)
+        return ((py >= H - 3) & (py <= H - 2) & (px >= 1) & (px <= int(f.w) - 2)).astype(float)
+
+    def mat(f):
+        c, a = mu(f)
+        if f.face != "north":
+            return c, a
+        px = np.floor(f.U * gm.SCALE).astype(int)
+        py = np.floor(f.V * gm.SCALE).astype(int)
+        H = int(f.h)
+        # dientes de arriba: hilera de agujas palidas bajo las encias
+        teeth = (py == H - 1) & (px % 2 == 1)
+        c = np.where(teeth[..., None], np.array([216, 204, 184]), c)
+        c = np.where(gum(f)[..., None] > 0, np.array([206, 20, 26]), c)
+        # cuencas vacias, solo carne
+        for fx in (0.3, 0.7):
+            d = np.hypot((f.U - f.w / gm.SCALE * fx) / 0.9, (f.V - f.h / gm.SCALE * 0.35) / 0.6)
+            c = c * np.where(d < 1, 0.4, 1.0)[..., None]
+        return c, a
+
+    mat.glowmask = gum
+    return mat
+
+
+def palm_eye():
+    """El ojo rojo en la palma de la mano: lo unico que ve."""
+    mu = muscle()
+
+    def eye(f):
+        w, h = f.w / gm.SCALE, f.h / gm.SCALE
+        return (np.hypot((f.U - w / 2) / (w * 0.36), (f.V - h / 2) / (h * 0.3)) < 1).astype(float)
+
+    def mat(f):
+        c, a = mu(f)
+        e = eye(f)
+        c = np.where(e[..., None] > 0, np.array([235, 34, 30]), c)
+        w, h = f.w / gm.SCALE, f.h / gm.SCALE
+        pupil = np.hypot((f.U - w / 2) / 0.35, (f.V - h / 2) / 0.6) < 1
+        c = np.where(pupil[..., None], np.array([30, 0, 0]), c)
+        return c, a
+
+    mat.glowmask = lambda f: eye(f) * (1 - (np.hypot((f.U - f.w / gm.SCALE / 2) / 0.35, (f.V - f.h / gm.SCALE / 2) / 0.6) < 1))
+    return mat
+
+
+MAT.update({"muscle": muscle(), "muscle_dk": muscle((62, 16, 28)), "bone": bone(),
+            "rastreador_head": rastreador_head(), "palm_eye": palm_eye()})
+
+
+def rastreador():
+    """El Rastreador (docs/SMILERS.md): 2,2 bloques, delgado y agil, sin piel, espalda arqueada con
+    pua de hueso en cada vertebra, cabeza adelantada con la mandibula partida en dos y el ojo rojo
+    en la palma de la mano derecha. Garras largas para correr a cuatro patas."""
+    g = Geo("rastreador", 61, folder="entity", glow=("rastreador_head", "palm_eye"), ao=False)
+    g.bone("root")
+    g.bone("hips", "root", (0, 19, 0))
+    g.cube("hips", (-3, 17, -2), (6, 4, 4), "muscle")
+    g.bone("torso", "hips", (0, 21, 0))
+    g.cube("torso", (-2.4, 21, -1.8), (4.8, 5, 3.6), "muscle_dk")
+    g.cube("torso", (-3.6, 26, -2.4), (7.2, 7, 4.8), "muscle")
+    for i in range(3):
+        g.cube("torso", (-3.8, 27 + i * 1.8, -2.75), (7.6, 0.7, 0.5), "bone")                # costillas al aire
+    for i in range(6):
+        h = 1.2 + 1.6 * (1 - abs(i - 3) / 3)
+        g.cube("torso", (-0.4, 22 + i * 2, 2.0), (0.8, 0.9, h), "bone",
+               rotation=(-35, 0, 0), pivot=(0, 22.4 + i * 2, 2.0))                          # puas del espinazo
+    g.bone("neck", "torso", (0, 33, -1.2))
+    g.cube("neck", (-1.2, 32.5, -2.4), (2.4, 3.2, 2.4), "muscle_dk")
+    g.bone("head", "neck", (0, 35.5, -1.8))
+    g.cube("head", (-2.6, 35, -6.8), (5.2, 4.2, 6.5), "rastreador_head")                    # craneo largo, de hocico
+    g.cube("head", (-2.2, 39.2, -5.5), (4.4, 1, 5), "bone")                                 # hueso del craneo a la vista
+    for side, sx in (("r", 1), ("l", -1)):
+        g.bone(f"jaw_{side}", "head", (sx * 1.2, 35.2, -1.2))
+        g.cube(f"jaw_{side}", (sx * 1.2 - (1.4 if sx > 0 else 0), 34, -6.6), (1.4, 1.2, 5.6), "muscle")
+        for k in range(4):
+            g.cube(f"jaw_{side}", (sx * 1.2 - (0.9 if sx > 0 else -0.4) + 0.1, 35.1, -6.3 + k * 1.2), (0.4, 0.9, 0.4), "bone")
+    for side, sx in (("r", 1), ("l", -1)):
+        g.bone(f"arm_{side}", "torso", (sx * 3.8, 32, 0))
+        g.cube(f"arm_{side}", (sx * 3.8 - 1, 22, -1), (2, 10.5, 2), "muscle")
+        g.bone(f"forearm_{side}", f"arm_{side}", (sx * 3.8, 22.5, 0))
+        g.cube(f"forearm_{side}", (sx * 3.8 - 0.8, 12, -0.8), (1.6, 11, 1.6), "muscle_dk")
+        g.cube(f"forearm_{side}", (sx * 3.8 - 0.3, 14, 0.6), (0.6, 6, 0.6), "bone")          # hueso que asoma
+        g.bone(f"hand_{side}", f"forearm_{side}", (sx * 3.8, 12.5, 0))
+        g.cube(f"hand_{side}", (sx * 3.8 - 0.8, 9, -1.8), (1.6, 3.6, 3.6), "muscle")
+        if side == "r":
+            g.cube(f"hand_{side}", (sx * 3.8 - 0.95, 9.3, -1.5), (0.15, 3, 3), "palm_eye",
+                   skip=("north", "south", "up", "down", "east"))                          # palma: el ojo
+        for i, z in enumerate((-1.5, -0.4, 0.7)):
+            g.bone(f"finger{i}_{side}", f"hand_{side}", (sx * 3.8, 9.2, z + 0.3))
+            g.cube(f"finger{i}_{side}", (sx * 3.8 - 0.3, 5, z), (0.6, 4.4, 0.6), "muscle_dk")
+            g.cube(f"finger{i}_{side}", (sx * 3.8 - 0.25, 2.2, z + 0.05), (0.5, 3, 0.5), "claw")
+    for side, sx in (("r", 1), ("l", -1)):
+        g.bone(f"thigh_{side}", "hips", (sx * 2, 18, 0))
+        g.cube(f"thigh_{side}", (sx * 2 - 1.3, 10, -1.3), (2.6, 8.5, 2.6), "muscle")
+        g.bone(f"shin_{side}", f"thigh_{side}", (sx * 2, 10.5, 0))
+        g.cube(f"shin_{side}", (sx * 2 - 0.9, 2, -0.9), (1.8, 9, 1.8), "muscle_dk")
+        g.bone(f"foot_{side}", f"shin_{side}", (sx * 2, 2, 0))
+        g.cube(f"foot_{side}", (sx * 2 - 1, 0, -2.6), (2, 2, 3.6), "muscle")
+        for k in range(3):
+            g.cube(f"foot_{side}", (sx * 2 - 0.9 + k * 0.7, 0, -4), (0.5, 0.8, 1.6), "claw")
+    return g.save()
+
+
 GRIN = [
     "R................R",
     "RR..............RR",
@@ -797,6 +935,123 @@ def animations():
     return A
 
 
+def rastreador_animations():
+    """Patrulla de pie y encorvado, persigue a cuatro patas, busca alzando la mano del ojo, jadea
+    al cansarse, agarra (QTE) y remata arrancando la cabeza (execute_smiler, mismos tiempos)."""
+    T, NK = 30, -18
+
+    def base(extra):
+        b = {
+            "torso": {"rotation": kf([(0, [T, 0, 0])])},
+            "neck": {"rotation": kf([(0, [NK, 0, 0])])},
+            "head": {"rotation": kf([(0, [-10, 0, 0])])},
+            "jaw_r": {"rotation": kf([(0, [8, 0, -6])])}, "jaw_l": {"rotation": kf([(0, [8, 0, 6])])},
+            "arm_r": {"rotation": kf([(0, [-22, 0, -4])])}, "arm_l": {"rotation": kf([(0, [-22, 0, 4])])},
+            "forearm_r": {"rotation": kf([(0, [-20, 0, 0])])}, "forearm_l": {"rotation": kf([(0, [-20, 0, 0])])},
+            "thigh_r": {"rotation": kf([(0, [-22, 0, 3])])}, "thigh_l": {"rotation": kf([(0, [-22, 0, -3])])},
+            "shin_r": {"rotation": kf([(0, [38, 0, 0])])}, "shin_l": {"rotation": kf([(0, [38, 0, 0])])},
+            "foot_r": {"rotation": kf([(0, [-16, 0, 0])])}, "foot_l": {"rotation": kf([(0, [-16, 0, 0])])},
+            "hips": {"position": kf([(0, [0, -1.5, 0])])},
+        }
+        for k, v in extra.items():
+            b.setdefault(k, {}).update(v)
+        return b
+
+    A = {}
+    L = 2.6
+    A["idle"] = loop_anim(L, base({
+        "torso": {"rotation": kf(wave(L, [T, 0, 0], 2))},
+        "head": {"rotation": kf([(0, [-10, 0, 0]), (0.8, [-10, 0, 0]), (0.85, [-4, 30, 10]), (1.3, [-4, 30, 10]),
+                                 (1.35, [-10, -25, -8]), (1.9, [-10, -25, -8]), (1.95, [-10, 0, 0]), (L, [-10, 0, 0])])},
+        "jaw_r": {"rotation": kf(wave(L, [10, 0, -8], 6, 0, 8))}, "jaw_l": {"rotation": kf(wave(L, [10, 0, 8], 6, 0, 8))},
+        **{f"finger{i}_r": {"rotation": kf(wave(L, [10, 0, 0], 14, i))} for i in range(3)},
+    }))
+    L = 1.2
+    A["walk"] = loop_anim(L, base({
+        "thigh_r": {"rotation": kf(wave(L, [-22, 0, 3], 24))}, "thigh_l": {"rotation": kf(wave(L, [-22, 0, -3], 24, math.pi))},
+        "shin_r": {"rotation": kf(wave(L, [38, 0, 0], 20, -1.2))}, "shin_l": {"rotation": kf(wave(L, [38, 0, 0], 20, math.pi - 1.2))},
+        "arm_r": {"rotation": kf(wave(L, [-22, 0, -4], 12, math.pi))}, "arm_l": {"rotation": kf(wave(L, [-22, 0, 4], 12))},
+        "head": {"rotation": kf(multi(L, [-10, 0, 0], [3, 10, 4], [0, 0.7, 1.4]))},
+        "hips": {"position": kf(wave(L, [0, -1.5, 0], 0.6, 0, 8, 1))},
+    }))
+    # RUN: a cuatro patas, galope (brazos como patas delanteras)
+    L = 0.5
+    R = 78
+    A["run"] = loop_anim(L, base({
+        "torso": {"rotation": kf(wave(L, [R, 0, 0], 6))},
+        "neck": {"rotation": kf([(0, [-58, 0, 0])])}, "head": {"rotation": kf(wave(L, [-12, 0, 0], 6, 1))},
+        "jaw_r": {"rotation": kf([(0, [22, 0, -14])])}, "jaw_l": {"rotation": kf([(0, [22, 0, 14])])},
+        "arm_r": {"rotation": kf(wave(L, [-R + 5, 0, -4], 38))}, "arm_l": {"rotation": kf(wave(L, [-R + 5, 0, 4], 38, 0.6))},
+        "forearm_r": {"rotation": kf(wave(L, [-10, 0, 0], 20, -1))}, "forearm_l": {"rotation": kf(wave(L, [-10, 0, 0], 20, -0.4))},
+        "thigh_r": {"rotation": kf(wave(L, [-30, 0, 3], 40, math.pi))}, "thigh_l": {"rotation": kf(wave(L, [-30, 0, -3], 40, math.pi + 0.6))},
+        "shin_r": {"rotation": kf(wave(L, [50, 0, 0], 28, math.pi - 1))}, "shin_l": {"rotation": kf(wave(L, [50, 0, 0], 28, math.pi - 0.4))},
+        "hips": {"position": kf(wave(L, [0, -5, 0], 1.2, 0, 8, 1))},
+    }))
+    # SEARCH: de pie, alza la mano del ojo y barre la sala con la palma por delante
+    L = 3.0
+    A["search"] = loop_anim(L, base({
+        "torso": {"rotation": kf(wave(L, [12, 0, 0], 2))},
+        "arm_r": {"rotation": kf([(0, [-100, -40, 0]), (1.5, [-100, 40, 0]), (L, [-100, -40, 0])])},
+        "forearm_r": {"rotation": kf([(0, [-10, 0, 0])])},
+        "hand_r": {"rotation": kf([(0, [0, -90, 0])])},
+        "head": {"rotation": kf([(0, [-6, -20, 0]), (1.5, [-6, 20, 0]), (L, [-6, -20, 0])])},
+        **{f"finger{i}_r": {"rotation": kf([(0, [-20, 0, 0])])} for i in range(3)},
+    }))
+    # TIRED: se para jadeando con las manos en las rodillas
+    L = 0.8
+    A["tired"] = loop_anim(L, base({
+        "torso": {"rotation": kf(wave(L, [52, 0, 0], 4))},
+        "neck": {"rotation": kf([(0, [-30, 0, 0])])},
+        "arm_r": {"rotation": kf([(0, [-38, 0, -2])])}, "arm_l": {"rotation": kf([(0, [-38, 0, 2])])},
+        "forearm_r": {"rotation": kf([(0, [-2, 0, 0])])}, "forearm_l": {"rotation": kf([(0, [-2, 0, 0])])},
+        "jaw_r": {"rotation": kf(wave(L, [26, 0, -18], 8))}, "jaw_l": {"rotation": kf(wave(L, [26, 0, 18], 8))},
+        "hips": {"position": kf(wave(L, [0, -2.5, 0], 0.5, 0, 8, 1))},
+    }))
+    L = 0.6
+    A["grab"] = loop_anim(L, base({
+        "torso": {"rotation": kf(wave(L, [20, 0, 0], 4))},
+        "arm_r": {"rotation": kf(multi(L, [-70, 0, -6], [6, 4, 0], [0, 1, 0]))},
+        "arm_l": {"rotation": kf(multi(L, [-70, 0, 6], [6, -4, 0], [0, 1, 0]))},
+        "forearm_r": {"rotation": kf([(0, [-60, 0, 0])])}, "forearm_l": {"rotation": kf([(0, [-60, 0, 0])])},
+        "jaw_r": {"rotation": kf(wave(L, [38, 0, -26], 10))}, "jaw_l": {"rotation": kf(wave(L, [38, 0, 26], 10))},
+        "head": {"rotation": kf(multi(L, [-4, 0, 0], [6, 14, 10], [0, 1.2, 2]))},
+    }))
+    L = 1.0
+    A["stunned"] = loop_anim(L, base({
+        "torso": {"rotation": kf(multi(L, [8, 0, 0], [6, 12, 10], [0, 0.8, 1.6]))},
+        "head": {"rotation": kf(multi(L, [-25, 0, 0], [8, 22, 18], [0.5, 2, 1]))},
+        "arm_r": {"rotation": kf(wave(L, [10, 0, -30], 14))}, "arm_l": {"rotation": kf(wave(L, [10, 0, 30], 14, math.pi))},
+    }))
+    # EXECUTE_SMILER (74 ticks): se echa sobre el derribado, le coge la cabeza (12-20), aprieta (22),
+    # la retuerce (34-40) y la arranca (44); se queda olfateandola con la mandibula abierta
+    L = 3.7
+    A["execute_smiler"] = {"loop": "hold_on_last_frame", "animation_length": L, "bones": base({
+        "torso": {"rotation": kf([(0, [T, 0, 0]), (0.5, [80, 0, 0]), (1.0, [70, 0, 0]), (1.7, [72, 16, 0]),
+                                  (2.15, [74, 22, 0]), (2.25, [40, 0, 0]), (2.5, [25, 0, 0]), (L, [25, 0, 0])])},
+        "neck": {"rotation": kf([(0, [NK, 0, 0]), (0.5, [-50, 0, 0]), (2.2, [-50, 0, 0]), (2.5, [-10, 0, 0])])},
+        "jaw_r": {"rotation": kf([(0, [8, 0, -6]), (0.6, [30, 0, -24]), (2.2, [30, 0, -24]), (2.5, [42, 0, -30]),
+                                  (3.0, [20, 0, -12]), (L, [36, 0, -26])])},
+        "jaw_l": {"rotation": kf([(0, [8, 0, 6]), (0.6, [30, 0, 24]), (2.2, [30, 0, 24]), (2.5, [42, 0, 30]),
+                                  (3.0, [20, 0, 12]), (L, [36, 0, 26])])},
+        "arm_r": {"rotation": kf([(0, [-22, 0, -4]), (0.5, [-70, 0, -8]), (1.0, [-60, 0, -8]), (2.0, [-60, 60, -24]),
+                                  (2.2, [-62, 66, -26]), (2.3, [-110, 30, -10]), (2.5, [-80, 20, -6]), (L, [-80, 20, -6])])},
+        "arm_l": {"rotation": kf([(0, [-22, 0, 4]), (0.5, [-70, 0, 8]), (1.0, [-60, 0, 8]), (2.0, [-60, 60, 24]),
+                                  (2.2, [-62, 66, 26]), (2.3, [-40, 0, 30]), (L, [-22, 0, 8])])},
+        "forearm_r": {"rotation": kf([(0, [-20, 0, 0]), (0.5, [-50, 0, 0]), (2.5, [-80, 0, 0]), (L, [-90, 0, 0])])},
+        "forearm_l": {"rotation": kf([(0, [-20, 0, 0]), (0.5, [-50, 0, 0]), (2.2, [-50, 0, 0]), (L, [-20, 0, 0])])},
+        "hips": {"position": kf([(0, [0, -1.5, 0]), (0.5, [0, -4.5, 0]), (2.2, [0, -4, 0]), (2.5, [0, -1.5, 0])])},
+        "thigh_r": {"rotation": kf([(0, [-22, 0, 3]), (0.5, [-60, 0, 10]), (2.2, [-55, 0, 8]), (2.5, [-22, 0, 3])])},
+        "thigh_l": {"rotation": kf([(0, [-22, 0, -3]), (0.5, [-60, 0, -10]), (2.2, [-55, 0, -8]), (2.5, [-22, 0, -3])])},
+        "shin_r": {"rotation": kf([(0, [38, 0, 0]), (0.5, [90, 0, 0]), (2.2, [85, 0, 0]), (2.5, [38, 0, 0])])},
+        "shin_l": {"rotation": kf([(0, [38, 0, 0]), (0.5, [90, 0, 0]), (2.2, [85, 0, 0]), (2.5, [38, 0, 0])])},
+        **{f"finger{i}_{sd}": {"rotation": kf([(0, [10, 0, 0]), (0.5, [-15, 0, 0]), (0.62, [70, 0, 0]), (L, [70, 0, 0])])}
+           for i in range(3) for sd in "rl"},
+    })}
+    out = {"format_version": "1.8.0", "animations": A}
+    (ROOT / "animations/entity/rastreador.animation.json").write_text(json.dumps(out, indent=1) + "\n", encoding="utf-8")
+    return A
+
+
 # Vista previa con huesos y animacion ---------------------------------------------------------------
 
 def _rot(rx, ry, rz):
@@ -916,6 +1171,8 @@ def main():
     A = animations()
     pw, ph, pn = paciente()
     P = paciente_animations()
+    rastreador()
+    rastreador_animations()
     print(f"paciente textura {pw * gm.SCALE}x{ph * gm.SCALE} caras={pn} animaciones={list(P)}")
     if len(sys.argv) > 2:
         frames = [("pose0", 200), ("pose0", 110), ("pose1", 160), ("pose2", 130), ("pose3", 200), ("pose4", 160)]

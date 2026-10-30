@@ -4,10 +4,10 @@ Elegidas en el cuestionario «Fichas de los smilers».
 
 **Regla de familia (revisada):** Smiley es el único que es una silueta negra pura. Los demás comparten solo lo rojo que brilla (la sonrisa y/o el ojo); el resto del aspecto es libre y debe ser grotesco y propio de cada uno:
 - **El Paciente:** escayola pálida y agrietada como una estatua, vendas manchadas sobre las cuencas, incisión de autopsia en Y cosida en el pecho, pulsera de hospital y una vía que le cuelga del brazo.
-- **El Rastreador** *(propuesta)*: sin piel, músculo morado y tendones a la vista, púas de hueso en el espinazo y la mandíbula partida; el ojo rojo en la palma.
-- **El Ahorcado** *(propuesta)*: muñeco hecho de sábanas de hospital cosidas, relleno que se sale, cables enredados; ojo de botón rojo y sonrisa cosida con hilo rojo.
-- **Apagón** *(propuesta)*: ceniza y humo gris que se deshacen, brazos de sombra larguísimos y muchos ojos rojos que se abren y se cierran.
-- **Berserker** *(propuesta, rehacer)*: piel carbonizada y agrietada sobre un cuerpo hinchado, costuras y grapas, el ojo cosido.
+- **El Rastreador**: sin piel, músculo morado y tendones a la vista, púas de hueso en el espinazo y la mandíbula partida; el ojo rojo en la palma.
+- **El Ahorcado**: muñeco hecho de sábanas de hospital cosidas, relleno que se sale, cables enredados; ojo de botón rojo y sonrisa cosida con hilo rojo.
+- **Apagón**: ceniza y humo gris que se deshacen, brazos de sombra larguísimos y muchos ojos rojos que se abren y se cierran.
+- **Berserker** (rehacer): piel carbonizada y agrietada sobre un cuerpo hinchado, costuras y grapas, el ojo cosido.
 
 ## El Paciente
 Inspirado en los ángeles llorones de Doctor Who. *Implementado (fase 21):* modelo `tools/mob_models.py` (`paciente`), IA en `entity/Paciente.java`, muerte `PACIENTE_KILL`, aparece en `paciente_zones` (morgue y sala final).
@@ -21,6 +21,7 @@ Inspirado en los ángeles llorones de Doctor Who. *Implementado (fase 21):* mode
 - **Dónde:** pasillos largos y morgue.
 
 ## El Rastreador (acechador de pasillo)
+*Implementado (fase 21):* modelo `rastreador`, IA en `entity/Rastreador.java`, aparece en `rastreador_zones` (oficinas y almacén). Pendiente: seguirte por los conductos.
 - **Aspecto:** 2,2 bloques, delgado y ágil, espalda arqueada y cabeza adelantada. **Ojo en la palma de la mano**, que levanta para buscar. Garras que arañan las paredes y dejan marcas.
 - **Movimiento:** de pie al patrullar, a cuatro patas al perseguir. Más rápido que el jugador corriendo, pero se cansa a los 8 s.
 - **Actitud:** cazador metódico: patrulla, oye, mira, persigue y revisa.

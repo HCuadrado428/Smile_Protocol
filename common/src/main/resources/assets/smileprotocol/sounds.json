@@ -167,5 +167,23 @@
       "smileprotocol:paciente/crack1",
       "smileprotocol:paciente/crack2"
     ]
+  },
+  "rastreador.screech": {
+    "subtitle": "subtitles.smileprotocol.rastreador.screech",
+    "sounds": [
+      "smileprotocol:rastreador/screech"
+    ]
+  },
+  "rastreador.pant": {
+    "subtitle": "subtitles.smileprotocol.rastreador.pant",
+    "sounds": [
+      "smileprotocol:rastreador/pant"
+    ]
+  },
+  "rastreador.scratch": {
+    "subtitle": "subtitles.smileprotocol.rastreador.scratch",
+    "sounds": [
+      "smileprotocol:rastreador/scratch"
+    ]
   }
 }

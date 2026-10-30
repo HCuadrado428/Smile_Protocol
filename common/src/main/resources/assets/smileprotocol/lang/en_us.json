@@ -353,5 +353,9 @@
   "subtitles.smileprotocol.ambient.creak": "Structure creaks",
   "subtitles.smileprotocol.ambient.drip": "Dripping",
   "subtitles.smileprotocol.paciente.crack": "Bones crack",
-  "entity.smileprotocol.paciente": "The Patient"
+  "entity.smileprotocol.paciente": "The Patient",
+  "subtitles.smileprotocol.rastreador.screech": "Screech",
+  "subtitles.smileprotocol.rastreador.pant": "Panting",
+  "subtitles.smileprotocol.rastreador.scratch": "Claws scrape metal",
+  "entity.smileprotocol.rastreador": "The Tracker"
 }

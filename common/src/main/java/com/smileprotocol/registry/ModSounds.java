@@ -36,6 +36,9 @@ public final class ModSounds {
     public static final Supplier<SoundEvent> AMBIENT_CREAK = register("ambient.creak");
     public static final Supplier<SoundEvent> AMBIENT_DRIP = register("ambient.drip");
     public static final Supplier<SoundEvent> PACIENTE_CRACK = register("paciente.crack");
+    public static final Supplier<SoundEvent> RASTREADOR_SCREECH = register("rastreador.screech");
+    public static final Supplier<SoundEvent> RASTREADOR_PANT = register("rastreador.pant");
+    public static final Supplier<SoundEvent> RASTREADOR_SCRATCH = register("rastreador.scratch");
 
     private ModSounds() {}
 

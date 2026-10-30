@@ -452,6 +452,41 @@ def crack(seed):
     return x
 
 
+def screech():
+    """El Rastreador te ve: chillido agudo y aspero que se quiebra."""
+    r = np.random.default_rng(311)
+    n = int(SR * 0.9)
+    tt = np.arange(n) / SR
+    f = 1500 + 600 * np.sin(np.clip(tt / 0.5, 0, 1) * np.pi) - 700 * np.clip((tt - 0.55) / 0.35, 0, 1)
+    ph = 2 * np.pi * np.cumsum(f) / SR
+    v = np.sign(np.sin(ph)) * 0.35 + np.sin(ph * 1.5) * 0.3 + bandpass(noise(n, r), 2600, 1.4) * 0.5
+    e = np.clip(tt / 0.04, 0, 1) * np.clip((0.9 - tt) / 0.3, 0, 1)
+    return bandpass(v * e, 1800, 0.8)
+
+
+def pant():
+    """Jadeo humedo y rapido del Rastreador cansado."""
+    r = np.random.default_rng(321)
+    n = int(SR * 1.6)
+    tt = np.arange(n) / SR
+    puff = np.maximum(0, np.sin(2 * np.pi * 3.2 * tt)) ** 3
+    return bandpass(noise(n, r), 900, 1.0) * puff + lowpass(noise(n, r), 300) * puff * 0.4
+
+
+def scratch():
+    """Garras que arañan metal: abre un escondite."""
+    r = np.random.default_rng(331)
+    n = int(SR * 0.8)
+    tt = np.arange(n) / SR
+    x = np.zeros(n)
+    for t0 in (0.0, 0.25, 0.45):
+        k = int(t0 * SR)
+        m = int(SR * 0.22)
+        f = 2400 - 900 * np.arange(m) / m
+        x[k:k + m] += np.sin(2 * np.pi * np.cumsum(f) / SR) * env(m, 0.005, 0.15) * 0.5 + highpass(noise(m, r), 3000) * env(m, 0.002, 0.1)
+    return x
+
+
 def main():
     for i in range(3):
         save(f"berserker/step{i + 1}", step(10 + i))
@@ -490,6 +525,9 @@ def save_new():
     for i in range(2):
         save(f"ambient/creak{i + 1}", creak(200 + i))
     save("ambient/drip", drip())
+    save("rastreador/screech", screech())
+    save("rastreador/pant", pant())
+    save("rastreador/scratch", scratch())
     save("paciente/crack1", crack(301))
     save("paciente/crack2", crack(302))
     print("sonidos escritos en", OUT)

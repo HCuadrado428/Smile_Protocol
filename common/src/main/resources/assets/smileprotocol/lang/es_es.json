@@ -353,5 +353,9 @@
   "subtitles.smileprotocol.ambient.creak": "La estructura cruje",
   "subtitles.smileprotocol.ambient.drip": "Goteo",
   "subtitles.smileprotocol.paciente.crack": "Crujido de huesos",
-  "entity.smileprotocol.paciente": "El Paciente"
+  "entity.smileprotocol.paciente": "El Paciente",
+  "subtitles.smileprotocol.rastreador.screech": "Un chillido",
+  "subtitles.smileprotocol.rastreador.pant": "Jadeo",
+  "subtitles.smileprotocol.rastreador.scratch": "Arañazos en el metal",
+  "entity.smileprotocol.rastreador": "El Rastreador"
 }

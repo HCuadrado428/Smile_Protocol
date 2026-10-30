@@ -136,7 +136,8 @@ public class Berserker extends SmilerBase {
     // Oido -----------------------------------------------------------------------------------
 
     /** Lo llama {@link MobManager} con cada ruido de su nivel. */
-    void hear(ServerLevel level, NoiseEvent e) {
+    @Override
+    public void hear(ServerLevel level, NoiseEvent e) {
         if (!isAlive() || !awake || getUUID().equals(e.source())) return;
         if (e.type() == NoiseType.STRIKE) return;
         // Solo los ruidos de su propia instancia

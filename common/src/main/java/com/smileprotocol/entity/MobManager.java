@@ -36,8 +36,8 @@ public final class MobManager {
 
     private static void onNoise(ServerLevel level, NoiseEvent e) {
         double reach = Math.max(8, e.radius() * 2.0);
-        for (Berserker b : level.getEntitiesOfClass(Berserker.class, new AABB(e.pos(), e.pos()).inflate(reach))) {
-            b.hear(level, e);
+        for (SPMonster m : level.getEntitiesOfClass(SPMonster.class, new AABB(e.pos(), e.pos()).inflate(reach))) {
+            m.hear(level, e);
         }
     }
 
@@ -87,6 +87,17 @@ public final class MobManager {
             m.discard();
         }
         SPDebug.log("mobs: sin sitio para el paciente en " + zoneId);
+    }
+
+    /** El Rastreador: uno en las plantas de {@code rastreador_zones}, lejos de la llegada. */
+    public static void spawnRastreador(ServerLevel level, net.minecraft.resources.ResourceLocation zoneId, List<BlockPos> points,
+                                       Vec3 entry, RandomSource rnd) {
+        if (!SPConfig.get().rastreador_zones.contains(zoneId.getPath())) return;
+        List<BlockPos> far = new ArrayList<>();
+        for (BlockPos p : points) if (Vec3.atBottomCenterOf(p).distanceTo(entry) > 36) far.add(p);
+        if (far.isEmpty()) return;
+        BlockPos p = far.get(rnd.nextInt(far.size()));
+        if (spawn(level, ModEntities.RASTREADOR.get(), p, rnd) != null) SPDebug.log("mobs: rastreador en " + p.toShortString());
     }
 
     public static <T extends SPMonster> T spawn(ServerLevel level, EntityType<T> type, BlockPos pos, RandomSource rnd) {

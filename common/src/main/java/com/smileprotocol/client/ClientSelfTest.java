@@ -423,6 +423,42 @@ public final class ClientSelfTest {
         SHOTS.add(() -> wait = 15);
         SHOTS.add(() -> grab(mc, "36_paciente_cerca"));
         SHOTS.add(() -> server.execute(() -> { if (pac[0] != null) pac[0].discard(); }));
+        // 8h. Fase 21: el Rastreador no ve por la espalda; de frente te ve y persigue a cuatro patas
+        com.smileprotocol.entity.Rastreador[] ras = {null};
+        SHOTS.add(() -> server.execute(() -> {
+            SPSessionManager.teleport(sp, level, cam, 0f, 0f);
+            ras[0] = com.smileprotocol.entity.MobManager.spawn(level, com.smileprotocol.registry.ModEntities.RASTREADOR.get(),
+                    BlockPos.containing(cam.add(0, 0, 9)), level.random);
+            if (ras[0] != null) {
+                ras[0].setYRot(0f);
+                ras[0].setYBodyRot(0f);
+                ras[0].setYHeadRot(0f);
+                ras[0].setNoAi(false);
+            }
+        }));
+        SHOTS.add(() -> wait = 10);
+        SHOTS.add(() -> server.execute(() -> {
+            boolean ok = ras[0] != null && ras[0].state() != com.smileprotocol.entity.Rastreador.State.CHASE;
+            log((ok ? "OK" : "FALLO") + " rastreador no te ve por la espalda (" + (ras[0] == null ? "-" : ras[0].state()) + ")");
+            if (ras[0] != null) {
+                ras[0].getNavigation().stop();
+                ras[0].setYRot(180f);
+                ras[0].setYBodyRot(180f);
+                ras[0].setYHeadRot(180f);
+            }
+        }));
+        SHOTS.add(() -> wait = 10);
+        SHOTS.add(() -> server.execute(() -> {
+            boolean ok = ras[0] != null && ras[0].state() == com.smileprotocol.entity.Rastreador.State.CHASE;
+            log((ok ? "OK" : "FALLO") + " rastreador te ve y persigue (" + (ras[0] == null ? "-" : ras[0].state()) + ")");
+        }));
+        SHOTS.add(() -> grab(mc, "37_rastreador"));
+        SHOTS.add(() -> server.execute(() -> {
+            if (ras[0] != null) {
+                com.smileprotocol.qte.QTEManager.clear(sp);
+                ras[0].discard();
+            }
+        }));
         // 9. Fase 12: levantarse tras la reanimacion, muerte instantanea en primera persona y muerte final
         SHOTS.add(() -> server.execute(() -> {
             com.smileprotocol.qte.QTEManager.clear(sp);

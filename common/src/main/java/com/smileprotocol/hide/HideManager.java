@@ -85,6 +85,19 @@ public final class HideManager {
         return h != null && h.holding;
     }
 
+    /** Escondite donde esta el jugador (null si no esta escondido). */
+    @javax.annotation.Nullable
+    public static BlockPos spotOf(ServerPlayer p) {
+        Hidden h = HIDDEN.get(p.getUUID());
+        return h == null ? null : h.spot;
+    }
+
+    /** Quien esta dentro de un escondite. */
+    public static java.util.List<UUID> occupantsOf(BlockPos spot) {
+        Set<UUID> s = OCCUPANTS.get(spot);
+        return s == null ? java.util.List.of() : java.util.List.copyOf(s);
+    }
+
     public static boolean isCompromised(BlockPos spot) {
         return COMPROMISED.contains(spot);
     }

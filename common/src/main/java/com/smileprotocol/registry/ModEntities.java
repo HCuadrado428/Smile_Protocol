@@ -35,6 +35,12 @@ public final class ModEntities {
                     MobCategory.MONSTER).sized(0.8f, 3.4f).eyeHeight(3.2f).clientTrackingRange(12).fireImmune()
                     .build("paciente"));
 
+    /** El Rastreador (fase 21): 2,2 bloques encorvado; la caja de 2 pasa por las puertas. */
+    public static final Supplier<EntityType<com.smileprotocol.entity.Rastreador>> RASTREADOR = Services.PLATFORM.register(
+            BuiltInRegistries.ENTITY_TYPE, "rastreador", () -> EntityType.Builder.of(com.smileprotocol.entity.Rastreador::new,
+                    MobCategory.MONSTER).sized(0.7f, 1.95f).eyeHeight(1.8f).clientTrackingRange(12).fireImmune()
+                    .build("rastreador"));
+
     /** Bengala encendida (fase 13). */
     public static final Supplier<EntityType<com.smileprotocol.entity.FlareEntity>> FLARE = Services.PLATFORM.register(
             BuiltInRegistries.ENTITY_TYPE, "flare", () -> EntityType.Builder.<com.smileprotocol.entity.FlareEntity>of(
@@ -54,5 +60,6 @@ public final class ModEntities {
         Services.PLATFORM.registerAttributes(SMILER_TEST, com.smileprotocol.entity.SmilerTest::attributes);
         Services.PLATFORM.registerAttributes(SMILER_KILL, com.smileprotocol.entity.SmilerTest::attributes);
         Services.PLATFORM.registerAttributes(PACIENTE, com.smileprotocol.entity.Paciente::attributes);
+        Services.PLATFORM.registerAttributes(RASTREADOR, com.smileprotocol.entity.Rastreador::attributes);
     }
 }

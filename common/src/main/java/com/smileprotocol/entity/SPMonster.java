@@ -94,6 +94,9 @@ public abstract class SPMonster extends PathfinderMob implements GeoEntity {
         return st.setAndContinue(software.bernie.geckolib.animation.RawAnimation.begin().thenPlayAndHold(k.anim));
     }
 
+    /** Un ruido de su instancia (README 17.1). Por defecto, sordo. */
+    public void hear(net.minecraft.server.level.ServerLevel level, com.smileprotocol.noise.NoiseEvent e) {}
+
     /** Id de su ficha en {@code data/smileprotocol/mobs}. */
     public abstract String defId();
 

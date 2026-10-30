@@ -1,0 +1,39 @@
+{
+  "id": "smileprotocol:rastreador",
+  "family": "smiler",
+  "based_on": "smiley",
+  "_comment": "El Rastreador (docs/SMILERS.md): patrulla, oye, ve en cono de 20 bloques, persigue a cuatro patas (se cansa a los 8 s, rastreador_stamina), revisa escondites y agarra con QTE MASH; remata.",
+  "size": {
+    "width": 0.7,
+    "height": 1.95
+  },
+  "senses": {
+    "vision": {
+      "enabled": true,
+      "range": 20
+    },
+    "hearing": {
+      "multiplier": 1.0,
+      "min_noise": 6.0
+    }
+  },
+  "speed": {
+    "walk": 0.55,
+    "run": 1.35
+  },
+  "on_catch": "GRAB_QTE",
+  "qte": {
+    "type": "MASH",
+    "ticks": 100
+  },
+  "qte_fail_result": "DOWN",
+  "execution": true,
+  "ai": {
+    "checks_hiding_spots": true
+  },
+  "can_enter_vents": true,
+  "causes_interference": false,
+  "sequences": {
+    "execution": "SMILER_EXECUTION"
+  }
+}

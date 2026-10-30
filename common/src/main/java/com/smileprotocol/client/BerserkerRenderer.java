@@ -18,7 +18,12 @@ public class BerserkerRenderer<T extends com.smileprotocol.entity.SPMonster> ext
 
     /** Otro smiler con el mismo esqueleto y animaciones y su propia textura. */
     public BerserkerRenderer(EntityRendererProvider.Context ctx, String texture) {
-        super(ctx, new DefaultedEntityGeoModel<T>(SmileProtocol.id("berserker"), true) {
+        this(ctx, "berserker", texture);
+    }
+
+    /** Otro smiler con su propio modelo y animaciones (geo/animations/textures con ese nombre). */
+    public BerserkerRenderer(EntityRendererProvider.Context ctx, String model, String texture) {
+        super(ctx, new DefaultedEntityGeoModel<T>(SmileProtocol.id(model), true) {
             @Override
             public net.minecraft.resources.ResourceLocation getTextureResource(T animatable) {
                 return SmileProtocol.id("textures/entity/" + texture + ".png");

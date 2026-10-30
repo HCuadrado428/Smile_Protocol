@@ -180,6 +180,10 @@ public final class SPConfig {
         public float paciente_view_angle = 50;
         /** Si su victima esta mas lejos que esto y hay otra mas cerca, cambia. */
         public float paciente_retarget_distance = 24;
+        // El Rastreador
+        public java.util.List<String> rastreador_zones = new java.util.ArrayList<>(java.util.List.of("lab_offices", "lab_storage"));
+        /** Ticks que aguanta corriendo antes de cansarse. */
+        public int rastreador_stamina = 160;
         public java.util.List<Integer> berserkers_by_difficulty = new java.util.ArrayList<>(java.util.List.of(1, 2, 2, 3, 3));
         /** Los mobs no se mueven hasta que el grupo llega a su planta. */
         public boolean mobs_wait_for_players = true;
