@@ -1,0 +1,29 @@
+=== player-animation-lib-fabric*.jar -> /home/runner/.gradle/caches/modules-2/files-2.1/dev.kosmx.player-anim/player-animation-lib-fabric/2.0.4+1.21.1/2985c208766cde078a39c22b5ad989b74b7bc490/player-animation-lib-fabric-2.0.4+1.21.1.jar
+--- dev.kosmx.playerAnim.api.TransformType
+Compiled from "TransformType.java"
+public final class dev.kosmx.playerAnim.api.TransformType extends java.lang.Enum<dev.kosmx.playerAnim.api.TransformType> {
+  public static final dev.kosmx.playerAnim.api.TransformType POSITION;
+  public static final dev.kosmx.playerAnim.api.TransformType ROTATION;
+  public static final dev.kosmx.playerAnim.api.TransformType BEND;
+  public static final dev.kosmx.playerAnim.api.TransformType SCALE;
+  private static final dev.kosmx.playerAnim.api.TransformType[] $VALUES;
+  public static dev.kosmx.playerAnim.api.TransformType[] values();
+  public static dev.kosmx.playerAnim.api.TransformType valueOf(java.lang.String);
+  private dev.kosmx.playerAnim.api.TransformType();
+  private static dev.kosmx.playerAnim.api.TransformType[] $values();
+  static {};
+}
+--- dev.kosmx.playerAnim.core.util.Vec3f
+Compiled from "Vec3f.java"
+public class dev.kosmx.playerAnim.core.util.Vec3f extends dev.kosmx.playerAnim.core.util.Vector3<java.lang.Float> {
+  public static final dev.kosmx.playerAnim.core.util.Vec3f ZERO;
+  public dev.kosmx.playerAnim.core.util.Vec3f(float, float, float);
+  public double squaredDistanceTo(dev.kosmx.playerAnim.core.util.Vec3d);
+  public dev.kosmx.playerAnim.core.util.Vec3f scale(float);
+  public dev.kosmx.playerAnim.core.util.Vec3f add(dev.kosmx.playerAnim.core.util.Vec3f);
+  public float dotProduct(dev.kosmx.playerAnim.core.util.Vec3f);
+  public dev.kosmx.playerAnim.core.util.Vec3f crossProduct(dev.kosmx.playerAnim.core.util.Vec3f);
+  public dev.kosmx.playerAnim.core.util.Vec3f subtract(dev.kosmx.playerAnim.core.util.Vec3f);
+  public double distanceTo(dev.kosmx.playerAnim.core.util.Vec3d);
+  static {};
+}
