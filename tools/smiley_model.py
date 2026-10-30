@@ -65,11 +65,105 @@ def art(rows, glowing):
     return mat
 
 
+def void(base=(9, 8, 10)):
+    """Piel de Smiley: negro casi puro, pero no plano. Brillo aceitoso que se mueve con la luz,
+    tendones algo mas claros bajo la piel, estrias de piel estirada a lo largo de los miembros y
+    manchas mas negras que el negro (los huecos por donde se funde en las paredes)."""
+    from mob_models import veins, sstep as ss, noise3 as n3
+
+    def m(f):
+        c = np.zeros((f.h, f.w, 3)) + base
+        c *= (0.7 + 0.6 * f.n(0.5, 3, 501))[..., None]
+        # estrias: lineas finas y algo onduladas a lo largo del miembro
+        stretch = np.abs(np.sin(f.Y * 0.35 + n3(f.X, f.Y * 0.1, f.Z, 0.7, 502) * 5 + (f.X + f.Z) * 3.1))
+        c *= (1 - 0.35 * ss(0.12, 0.0, stretch))[..., None]
+        # tendones y venas un poco mas claros (solo se ven con luz)
+        v = veins(f, 503, freq=0.9, width=0.025)
+        c = c + v[..., None] * np.array([9, 8, 11])
+        # brillo grasiento azulado
+        sheen = ss(0.6, 0.85, f.n(0.3, 2, 504)) * (0.6 + 0.4 * f.n(2.0, 1, 505))
+        c = c + sheen[..., None] * np.array([10, 11, 15])
+        # manchas de vacio: mas negras, con bordes que gotean
+        hole = ss(0.7, 0.78, f.n(0.25, 3, 506))
+        c *= (1 - 0.75 * hole)[..., None]
+        c += (f.white()[..., None] - 0.5) * 1.2
+        return np.clip(c, 0, 255), np.ones((f.h, f.w))
+    return m
+
+
+def void_face():
+    """Cabeza: la misma piel, con la cuenca del ojo hundida, regueros rojo negruzco que bajan del ojo
+    (no brillan) y la piel tirante alrededor de la boca."""
+    sk = void((10, 9, 11))
+    from mob_models import sstep as ss
+
+    def m(f):
+        c, a = sk(f)
+        if f.face != "north":
+            return c, a
+        w, h = f.w / mm.gm.SCALE, f.h / mm.gm.SCALE
+        # el ojo (lado +X): en la cara north de la cabeza U crece hacia -X, asi que el ojo esta a la izquierda (U pequeno)
+        ex, ey = w * 0.22, h * 0.32
+        r = np.hypot((f.U - ex) / 2.2, (f.V - ey) / 1.6)
+        c *= (0.45 + 0.55 * ss(0.6, 1.2, r))[..., None]                         # cuenca hundida
+        # regueros desde el ojo hacia abajo
+        for k, (dx, ln) in enumerate(((-0.6, 4.2), (0.2, 6.0), (0.9, 3.0))):
+            x0 = ex + dx + 0.15 * np.sin(f.V * 1.7 + k)
+            on = (np.abs(f.U - x0) < 0.18 + 0.08 * (f.V - ey) / ln) & (f.V > ey + 0.6) & (f.V < ey + 0.6 + ln)
+            fade = np.clip(1 - (f.V - ey - 0.6) / ln, 0, 1)
+            c = np.where(on[..., None], c * (1 - fade[..., None]) + np.array([46, 4, 7]) * fade[..., None], c)
+        # arrugas de tirantez que salen de la boca hacia las comisuras
+        mouth_y = h * 0.62
+        for k in range(4):
+            yy = mouth_y + (k - 1.5) * 0.7 - 0.25 * ((f.U - w / 2) / (w / 2)) ** 2 * 3
+            line = (np.abs(f.V - yy) < 0.1) & (np.abs(f.U - w / 2) > w * 0.36)
+            c = np.where(line[..., None], c * 0.55, c)
+        return c, a
+    return m
+
+
+def void_hair():
+    """Pelo: mechones finos con raices mas oscuras, reflejos fríos y puntas abiertas."""
+    from mob_models import sstep as ss, noise3 as n3
+
+    def m(f):
+        c = np.zeros((f.h, f.w, 3)) + (11, 10, 12)
+        ax = f.X + f.Z if f.side else f.X
+        fine = 0.5 + 0.5 * np.sin(ax * 14.0 + n3(f.X, f.Y * 0.15, f.Z, 0.9, 611) * 7)
+        coarse = 0.5 + 0.5 * np.sin(ax * 4.3 + n3(f.X, f.Y * 0.1, f.Z, 0.5, 612) * 4)
+        c *= (0.55 + 0.35 * fine + 0.3 * coarse)[..., None]
+        # reflejo frio en franja (como pelo mojado)
+        band = ss(0.55, 0.9, n3(f.X * 0.3, f.Y * 0.6, f.Z * 0.3, 1.0, 613)) * fine
+        c = c + band[..., None] * np.array([14, 16, 22])
+        a = np.ones((f.h, f.w))
+        if f.side:
+            low = f.Y - f.Y.min()
+            cut = 0.3 + 1.6 * n3(ax * 3.0, 0, 0, 1.0, 614) + 0.6 * (fine < 0.3)
+            a = np.where(low < cut, 0, a)
+            c *= (0.75 + 0.25 * ss(0, 3, low))[..., None]
+        return np.clip(c, 0, 255), a
+    return m
+
+
+def nail():
+    """Unas largas: negras y brillantes, el filo algo mas claro."""
+    from mob_models import sstep as ss
+
+    def m(f):
+        t = ss(f.Y.max() if f.Y.size else 1, f.Y.min() if f.Y.size else 0, f.Y)
+        c = np.zeros((f.h, f.w, 3)) + (14, 13, 15)
+        c = c + (t ** 2)[..., None] * np.array([34, 32, 36])
+        c = c + ss(0.7, 0.95, f.n(1.5, 1, 621))[..., None] * 10
+        return c, np.ones((f.h, f.w))
+    return m
+
+
 MAT.update({
-    "void": mm.skin((9, 8, 9)),          # mas negro que los demas: es un hueco en la luz
-    "void_hi": mm.skin((14, 13, 14)),
-    "nail": mm.skin((24, 22, 23)),
-    "void_hair": mm.hair(),
+    "void": void(),            # mas negro que los demas: es un hueco en la luz
+    "void_hi": void((15, 14, 16)),
+    "void_face": void_face(),
+    "nail": nail(),
+    "void_hair": void_hair(),
     "smiley_smile": art(SMILE, "RTW"),
     "smiley_eye": art(EYE, "RYW"),
 })
@@ -91,7 +185,7 @@ def smiley():
     g.bone("neck", "torso", (0, 47, -0.2))
     g.cube("neck", (-0.9, 46.5, -1.1), (1.8, 6, 1.8), "void")                       # cuello largo
     g.bone("head", "neck", (0, 52.3, -0.4))
-    g.cube("head", (-3.4, 53, -4), (6.8, 9.5, 7), "void")                           # cabeza alargada
+    g.cube("head", (-3.4, 53, -4), (6.8, 9.5, 7), "void_face")                           # cabeza alargada
     g.cube("head", (-3, 51.5, -3.7), (6, 1.8, 6), "void")                           # mandibula
     g.bone("smile", "head", (0, 55.6, -4.1))
     g.cube("smile", (-5, 53.8, -4.25), (10, 4, 0.2), "smiley_smile")              # mas ancha que la cara
