@@ -161,6 +161,23 @@ public final class ClientSelfTest {
             SPSessionManager.teleport(sp, level, cam, 0f, 0f);
         }));
         SHOTS.add(() -> wait = 40);
+        SHOTS.add(() -> {
+            // Diagnostico de GeckoLib: animaciones cargadas y la que esta sonando
+            var anims = software.bernie.geckolib.cache.GeckoLibCache.getBakedAnimations()
+                    .get(SmileProtocol.id("animations/entity/berserker.animation.json"));
+            log("animaciones berserker: " + (anims == null ? "NO CARGADAS" : anims.animations().keySet()));
+            if (mc.level != null) {
+                for (var ent : mc.level.entitiesForRendering()) {
+                    if (ent instanceof com.smileprotocol.entity.Berserker b) {
+                        var mgr = b.getAnimatableInstanceCache().getManagerForId(b.getId());
+                        var ctl = mgr.getAnimationControllers().get("main");
+                        log("berserker " + b.getId() + " estado=" + b.state() + " anim="
+                                + (ctl == null ? "sin controlador" : ctl.getCurrentAnimation() == null ? "ninguna"
+                                : ctl.getCurrentAnimation().animation().name()));
+                    }
+                }
+            }
+        });
         SHOTS.add(() -> grab(mc, "15_berserker"));
         Vec3 diag = mobAt.add(0.9, 0.2, -2.4);
         float dyaw = (float) Math.toDegrees(-Math.atan2(mobAt.x - diag.x, mobAt.z - diag.z));
