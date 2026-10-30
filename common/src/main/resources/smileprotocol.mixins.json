@@ -18,7 +18,8 @@
     "client.GameRendererMixin",
     "client.KeyboardInputMixin",
     "client.MinecraftMixin",
-    "client.MouseHandlerMixin"
+    "client.MouseHandlerMixin",
+    "client.PostChainAccessor"
   ],
   "injectors": {
     "defaultRequire": 1

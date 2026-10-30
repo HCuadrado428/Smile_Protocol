@@ -239,6 +239,11 @@ Hace falta Simple Voice Chat en el servidor y en los clientes (es opcional: sin 
 4. **Fuera de la pantalla.** Si el marcador queda detrás o fuera, se ve más pequeño pegado al borde.
 5. **Walkie** (con Simple Voice Chat). Empiezas con uno. Con él en la mano y sin nada delante, mantén el clic derecho para encenderlo o apagarlo. Con él en la mano y encendido, mantén **B** para hablar: la HUD pone «TRANSMITIENDO» y tus compañeros con el walkie encendido (en cualquier hueco) te oyen con sonido de radio, estén donde estén; a ellos les sale «Se oye: tu nombre» y su walkie cruje (eso hace ruido). Los muertos del grupo también lo oyen. Cerca de un mob con `causes_interference` el sonido se corta y chisporrotea.
 
+## Ambientación (fase 20)
+
+1. **Tensión.** Acércate a un Berserker (o deja que te agarren, o cae derribado): la imagen se desatura, los bordes se separan en rojo y azul, ondula un poco, sale grano y la viñeta late. Al alejarte vuelve a la normalidad poco a poco. Se quita con `tension_shader: false` o se suaviza con `tension_strength`.
+2. **Ambiente.** Dentro de la partida suena un zumbido grave constante que de vez en cuando se apaga del todo unos segundos (silencio) y que baja cuando hay tensión. Cada 20-60 s cruje la estructura o gotea algo a unos metros (con Sound Physics Remastered se oye el eco de la sala). Se quita con `ambience: false`.
+
 ## Depuración
 
 - `/spadmin debug on`: muestra el panel de estado (sesión, mods, lobby y ascensores). Solo lo ven los operadores.

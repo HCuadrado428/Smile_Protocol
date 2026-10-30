@@ -139,6 +139,14 @@ public final class SPConfig {
         /** Ticks minimos entre dos ruidos de voz del mismo jugador. */
         public int voice_noise_interval = 10;
 
+        // Ambientacion (README 21)
+        /** Shader de tension (aberracion, distorsion, grano) con mobs cerca, QTE o derribado. */
+        public boolean tension_shader = true;
+        /** Multiplicador de su intensidad (0 a 1,5). */
+        public float tension_strength = 1f;
+        /** Zumbido de ambiente con silencios, crujidos y goteos. */
+        public boolean ambience = true;
+
         // Walkies (README 17.3) y marcadores (8.4)
         public boolean walkie_enabled = true;
         /** Ruido del crujido del walkie al recibir, alrededor del que lo lleva. */

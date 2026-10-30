@@ -391,6 +391,53 @@ def marker_ping():
     return lowpass(a + b * 0.8, 2500)
 
 
+def drone():
+    """Zumbido del laboratorio para el ambiente en bucle: red electrica, ventilacion lejana y un
+    gemido metalico que va y viene. Empieza y acaba igual para que el bucle no se note."""
+    r = np.random.default_rng(191)
+    L = 16.0
+    n = int(SR * L)
+    tt = np.arange(n) / SR
+    hum = sum(np.sin(2 * np.pi * f * tt) * a for f, a in ((50, 0.5), (100, 0.35), (150, 0.12), (200, 0.06)))
+    hum *= 0.8 + 0.2 * np.sin(2 * np.pi * tt / L * 3)
+    air = lowpass(noise(n, r), 400) * 1.2 * (0.7 + 0.3 * np.sin(2 * np.pi * tt / L * 2 + 1))
+    moan_f = 63 + 6 * np.sin(2 * np.pi * tt / L * 4)
+    moan = np.sin(2 * np.pi * np.cumsum(moan_f) / SR) * (0.5 + 0.5 * np.sin(2 * np.pi * tt / L)) ** 4 * 0.6
+    x = hum * 0.5 + air + moan
+    # bucle: se funde el final con el principio
+    f = int(SR * 1.0)
+    x[:f] = x[:f] * np.linspace(0, 1, f) + x[-f:] * np.linspace(1, 0, f)
+    return x[:-f]
+
+
+def creak(seed):
+    """Crujido metalico lejano de la estructura."""
+    r = np.random.default_rng(seed)
+    n = int(SR * 1.8)
+    tt = np.arange(n) / SR
+    f = 180 + 60 * np.sin(np.clip(tt / 1.6, 0, 1) * np.pi) + r.uniform(-30, 30)
+    ph = 2 * np.pi * np.cumsum(f) / SR
+    grind = np.sign(np.sin(ph)) * (0.5 + 0.5 * np.sin(2 * np.pi * 23 * tt + r.uniform(0, 6))) ** 3
+    x = bandpass(grind, 700, 3) + bandpass(grind, 1600, 5) * 0.4
+    e = np.clip(tt / 0.3, 0, 1) * np.clip((1.8 - tt) / 0.7, 0, 1)
+    x = lowpass(x * e, 1800)
+    d = int(SR * 0.17)
+    x[d:] += x[:-d] * 0.5
+    return x
+
+
+def drip():
+    """Gota que cae en un charco, con eco."""
+    n = int(SR * 0.9)
+    tt = np.arange(n) / SR
+    f = 1400 * np.exp(-tt * 30) + 700
+    x = np.sin(2 * np.pi * np.cumsum(f) / SR) * env(n, 0.001, 0.05)
+    for k, g in ((0.11, 0.4), (0.23, 0.2), (0.37, 0.1)):
+        d = int(SR * k)
+        x[d:] += x[:-d] * g
+    return x
+
+
 def main():
     for i in range(3):
         save(f"berserker/step{i + 1}", step(10 + i))
@@ -425,6 +472,10 @@ def save_new():
     save("walkie/click", walkie_click())
     save("walkie/crackle", walkie_crackle())
     save("ui/marker", marker_ping())
+    save("ambient/drone", drone())
+    for i in range(2):
+        save(f"ambient/creak{i + 1}", creak(200 + i))
+    save("ambient/drip", drip())
     print("sonidos escritos en", OUT)
 
 

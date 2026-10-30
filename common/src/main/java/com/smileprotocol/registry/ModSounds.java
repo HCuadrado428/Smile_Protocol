@@ -32,6 +32,9 @@ public final class ModSounds {
     public static final Supplier<SoundEvent> WALKIE_CLICK = register("walkie.click");
     public static final Supplier<SoundEvent> WALKIE_CRACKLE = register("walkie.crackle");
     public static final Supplier<SoundEvent> UI_MARKER = register("ui.marker");
+    public static final Supplier<SoundEvent> AMBIENT_DRONE = register("ambient.drone");
+    public static final Supplier<SoundEvent> AMBIENT_CREAK = register("ambient.creak");
+    public static final Supplier<SoundEvent> AMBIENT_DRIP = register("ambient.drip");
 
     private ModSounds() {}
 

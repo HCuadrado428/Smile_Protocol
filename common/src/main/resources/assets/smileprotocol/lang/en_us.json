@@ -349,5 +349,7 @@
   "smileprotocol.marker.clear": "Clear",
   "subtitles.smileprotocol.walkie.click": "Walkie clicks",
   "subtitles.smileprotocol.walkie.crackle": "Radio crackles",
-  "subtitles.smileprotocol.ui.marker": "Team marker"
+  "subtitles.smileprotocol.ui.marker": "Team marker",
+  "subtitles.smileprotocol.ambient.creak": "Structure creaks",
+  "subtitles.smileprotocol.ambient.drip": "Dripping"
 }

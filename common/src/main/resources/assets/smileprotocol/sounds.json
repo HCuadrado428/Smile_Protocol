@@ -139,5 +139,26 @@
     "sounds": [
       "smileprotocol:ui/marker"
     ]
+  },
+  "ambient.drone": {
+    "sounds": [
+      {
+        "name": "smileprotocol:ambient/drone",
+        "stream": true
+      }
+    ]
+  },
+  "ambient.creak": {
+    "subtitle": "subtitles.smileprotocol.ambient.creak",
+    "sounds": [
+      "smileprotocol:ambient/creak1",
+      "smileprotocol:ambient/creak2"
+    ]
+  },
+  "ambient.drip": {
+    "subtitle": "subtitles.smileprotocol.ambient.drip",
+    "sounds": [
+      "smileprotocol:ambient/drip"
+    ]
   }
 }

@@ -349,5 +349,7 @@
   "smileprotocol.marker.clear": "Despejado",
   "subtitles.smileprotocol.walkie.click": "Clic del walkie",
   "subtitles.smileprotocol.walkie.crackle": "Crujido de radio",
-  "subtitles.smileprotocol.ui.marker": "Marcador de equipo"
+  "subtitles.smileprotocol.ui.marker": "Marcador de equipo",
+  "subtitles.smileprotocol.ambient.creak": "La estructura cruje",
+  "subtitles.smileprotocol.ambient.drip": "Goteo"
 }

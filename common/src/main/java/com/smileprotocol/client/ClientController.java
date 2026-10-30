@@ -68,6 +68,8 @@ public final class ClientController {
         ClientScare.reset();
         ClientMarkers.reset();
         ClientWalkie.reset();
+        ClientTension.reset();
+        ClientAmbience.reset();
         com.smileprotocol.client.light.Flashlight.reset();
         com.smileprotocol.client.light.DynamicLights.clear();
         com.smileprotocol.client.light.FlareLights.clear();
@@ -81,6 +83,8 @@ public final class ClientController {
         ClientInteraction.tick(mc);
         ClientMarkers.tick(mc);
         ClientWalkie.tick(mc);
+        ClientTension.tick(mc);
+        ClientAmbience.tick(mc);
         ClientQTE.tick(mc);
         ClientSequence.tick(mc);
         ClientScare.tick();
