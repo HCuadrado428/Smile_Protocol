@@ -366,8 +366,196 @@ class Floor:
                 k += 1
         return k
 
+    # Salas singulares: una por planta, la que le da su caracter ------------------------------------------
+    def inner(self, room, m=1):
+        """Celdas interiores dejando m de margen con las paredes."""
+        return range(room["x0"] + m, room["x1"] - m + 1), range(room["z0"] + m, room["z1"] - m + 1)
+
+    def setp(self, x, y, z, block, **props):
+        """Coloca algo en la sala si la celda esta libre (no tapa puertas ni marcadores)."""
+        if y == 1 and ((x, z) in self.used or self.solid(x, 1, z)):
+            return False
+        if y > 1 and (self.solid(x, y, z) or not self.solid(x, y - 1, z)):
+            return False
+        self.t.set(x, y, z, block, **props)
+        if y == 1:
+            self.used.add((x, z))
+        return True
+
+    def sp_reception(self, room):
+        """Recepcion: mostrador en L con sillas detras, sala de espera con filas de sillas, plantas
+        muertas en las esquinas y un rotulo de la empresa."""
+        x0, z0, x1, z1 = room["x0"], room["z0"], room["x1"], room["z1"]
+        cz = z0 + (z1 - z0) // 3
+        for x in range(x0 + 3, x0 + 3 + min(8, x1 - x0 - 6)):
+            self.setp(x, 1, cz, "minecraft:polished_diorite")
+        for z in range(z0 + 2, cz):
+            self.setp(x0 + 3, 1, z, "minecraft:polished_diorite")
+        for x in range(x0 + 4, x0 + 3 + min(8, x1 - x0 - 6), 2):
+            self.setp(x, 1, cz - 1, "minecraft:spruce_stairs", facing="south")
+        # sala de espera: filas de sillas mirando al mostrador
+        for z in range(cz + 3, z1 - 1, 3):
+            for x in range(x0 + 2, x1 - 1):
+                if (x - x0) % 6 != 5:
+                    self.setp(x, 1, z, "minecraft:dark_oak_stairs", facing="north")
+        for (x, z) in ((x0, z0), (x1, z0), (x0, z1), (x1, z1)):
+            self.setp(x, 1, z, "minecraft:potted_dead_bush")
+        # rotulo en la pared del fondo
+        self.t.set((x0 + x1) // 2, 3, z0, "minecraft:birch_wall_sign", nbt=sign_nbt("SMILE", "PROTOCOL", "Recepcion"), facing="south")
+
+    def sp_warehouse(self, room):
+        """Nave del almacen: estanterias de cajas hasta el techo en filas con pasillos de dos, alguna
+        caida en medio del pasillo y cadenas colgando."""
+        r = self.rnd
+        xs, zs = self.inner(room, 1)
+        for z in list(zs)[::4]:
+            for x in xs:
+                if (x - room["x0"]) % 9 in (0, 1):          # cortes para cruzar entre filas
+                    continue
+                h = 3 if r.random() < 0.7 else 2
+                for y in range(1, h + 1):
+                    if not self.setp(x, y, z, f"{MOD}:lab_crate") and y == 1:
+                        break
+                if r.random() < 0.08:
+                    self.setp(x, 1, z + 2, f"{MOD}:lab_crate")        # caida en el pasillo
+        for x in list(xs)[2::6]:
+            for z in list(zs)[2::4]:
+                if not self.solid(x, 4, z):
+                    self.t.set(x, 4, z, "minecraft:chain", axis="y")
+
+    def sp_openoffice(self, room):
+        """Oficina diafana: cubiculos de mamparas de dos de alto con mesa y silla; se ve por encima
+        agachado no."""
+        xs, zs = self.inner(room, 2)
+        xs, zs = list(xs), list(zs)
+        for bx in xs[::4]:
+            for bz in zs[::4]:
+                if bx + 3 > room["x1"] - 1 or bz + 3 > room["z1"] - 1:
+                    continue
+                # mampara en L: lado norte y oeste, con hueco de entrada
+                for k in range(3):
+                    for y in (1, 2):
+                        self.setp(bx + k, y, bz, "minecraft:light_gray_wool")
+                        if k < 2:
+                            self.setp(bx, y, bz + k + 1, "minecraft:light_gray_wool")
+                self.setp(bx + 1, 1, bz + 1, "minecraft:spruce_slab", type="top")
+                self.setp(bx + 2, 1, bz + 1, "minecraft:spruce_stairs", facing="north")
+                if self.rnd.random() < 0.5:
+                    self.t.set(bx + 1, 2, bz + 1, "minecraft:flower_pot")
+
+    def sp_coldroom(self, room):
+        """Camaras frigorificas: las paredes forradas de nichos de acero, mesas de autopsia en el
+        centro con su desague, y escarcha por el suelo."""
+        x0, z0, x1, z1 = room["x0"], room["z0"], room["x1"], room["z1"]
+        for x in range(x0, x1 + 1):
+            for z in (z0, z1):
+                if (x, z) in self.used:
+                    continue
+                for y in (1, 2, 3):
+                    self.t.set(x, y, z, "minecraft:iron_block" if (x + y) % 2 else f"{MOD}:lab_metal_wall")
+                self.used.add((x, z))
+        for x in range(x0 + 3, x1 - 2, 4):
+            self.gurney(x, (z0 + z1) // 2 - 1, "south")
+            if (x, (z0 + z1) // 2 + 2) not in self.used:
+                self.t.set(x, 0, (z0 + z1) // 2 + 2, "minecraft:iron_trapdoor", facing="north", half="top", open=False)
+        for _ in range(int((x1 - x0) * (z1 - z0) * 0.03)):
+            x, z = self.rnd.randint(x0 + 1, x1 - 1), self.rnd.randint(z0 + 1, z1 - 1)
+            if self.free(x, z):
+                self.t.set(x, 1, z, "minecraft:snow", layers=1)
+
+    def sp_turbine(self, room):
+        """Sala de turbinas: maquinas enormes de 2x2 y tres de alto con cadenas y tuberias por el
+        techo, franjas de peligro alrededor."""
+        xs, zs = self.inner(room, 2)
+        for bx in list(xs)[::5]:
+            for bz in list(zs)[::5]:
+                if bx + 1 > room["x1"] - 2 or bz + 1 > room["z1"] - 2:
+                    continue
+                if any((bx + dx, bz + dz) in self.used for dx in (0, 1) for dz in (0, 1)):
+                    continue
+                for dx in (0, 1):
+                    for dz in (0, 1):
+                        self.t.fill(bx + dx, 1, bz + dz, bx + dx, 3, bz + dz, f"{MOD}:lab_machine")
+                        self.t.set(bx + dx, 4, bz + dz, f"{MOD}:lab_pipes")
+                        self.used.add((bx + dx, bz + dz))
+                for dx in (-1, 2):
+                    for dz in range(-1, 3):
+                        if not self.solid(bx + dx, 1, bz + dz):
+                            self.t.set(bx + dx, 0, bz + dz, f"{MOD}:lab_hazard")
+        for x in range(room["x0"], room["x1"] + 1):
+            if not self.solid(x, 4, room["z0"] + 1):
+                self.t.set(x, 4, room["z0"] + 1, f"{MOD}:lab_pipes")
+
+    def sp_garden(self, room):
+        """Jardin del invernadero, comido por la vegetacion: parterres de tierra con helechos y
+        azaleas, arbustos de hojas, enredaderas en las paredes y una fuente seca en el centro."""
+        r = self.rnd
+        x0, z0, x1, z1 = room["x0"], room["z0"], room["x1"], room["z1"]
+        cx, cz = (x0 + x1) // 2, (z0 + z1) // 2
+        for x in range(x0 + 2, x1 - 1):
+            for z in range(z0 + 2, z1 - 1):
+                if (x, z) in self.used or abs(x - cx) <= 1 and abs(z - cz) <= 1:
+                    continue
+                bed = ((x - x0) % 6 in (2, 3)) and ((z - z0) % 7 not in (0,))
+                if bed:
+                    self.t.set(x, 0, z, "minecraft:rooted_dirt")
+                    p = r.random()
+                    if p < 0.35:
+                        self.setp(x, 1, z, "minecraft:fern")
+                    elif p < 0.5:
+                        self.setp(x, 1, z, "minecraft:azalea_leaves", persistent=True, distance=1, waterlogged=False)
+                    elif p < 0.6:
+                        self.setp(x, 1, z, "minecraft:flowering_azalea")
+                    elif p < 0.7:
+                        self.setp(x, 1, z, "minecraft:dead_bush")
+                elif r.random() < 0.12 and self.free(x, z):
+                    self.t.set(x, 1, z, "minecraft:moss_carpet")
+        # fuente seca
+        for dx in (-1, 0, 1):
+            for dz in (-1, 0, 1):
+                if dx or dz:
+                    self.setp(cx + dx, 1, cz + dz, "minecraft:mossy_stone_brick_slab", type="bottom")
+        self.setp(cx, 1, cz, "minecraft:mossy_stone_brick_wall")
+        # enredaderas colgando de las paredes
+        for x in range(x0, x1 + 1):
+            for (z, face) in ((z0, "north"), (z1, "south")):
+                if r.random() < 0.4 and (x, z) not in self.used:
+                    for y in range(4, 4 - r.randint(1, 3), -1):
+                        if not self.solid(x, y, z):
+                            self.t.set(x, y, z, "minecraft:vine", **{face: True})
+
+    def sp_cryo(self, room):
+        """Camara de criogenia: un anillo de capsulas alrededor de una consola, columnas de hielo y
+        escarcha."""
+        cx, cz = (room["x0"] + room["x1"]) // 2, (room["z0"] + room["z1"]) // 2
+        rad = max(3, min(room["x1"] - room["x0"], room["z1"] - room["z0"]) // 2 - 2)
+        import math as _m
+        for k in range(10):
+            a = k / 10 * 2 * _m.pi
+            x, z = int(round(cx + _m.cos(a) * rad)), int(round(cz + _m.sin(a) * rad))
+            if (x, z) in self.used or self.solid(x, 1, z):
+                continue
+            self.t.set(x, 0, z, "minecraft:sea_lantern")
+            self.t.fill(x, 1, z, x, 3, z, "minecraft:light_blue_stained_glass")
+            self.t.set(x, 4, z, f"{MOD}:lab_metal_wall")
+            self.used.add((x, z))
+        for dx in (0, 1):
+            self.setp(cx + dx, 1, cz, f"{MOD}:lab_server")
+        for (dx, dz) in ((-rad - 1, -rad - 1), (rad + 1, -rad - 1), (-rad - 1, rad + 1), (rad + 1, rad + 1)):
+            x, z = cx + dx, cz + dz
+            if room["x0"] < x < room["x1"] and room["z0"] < z < room["z1"] and (x, z) not in self.used:
+                self.t.fill(x, 1, z, x, 4, z, "minecraft:packed_ice")
+                self.used.add((x, z))
+        for _ in range(30):
+            x, z = self.rnd.randint(room["x0"], room["x1"]), self.rnd.randint(room["z0"], room["z1"])
+            if self.free(x, z):
+                self.t.set(x, 1, z, "minecraft:snow", layers=1)
+
     def furnish(self, room):
         kind, r = room["kind"], self.rnd
+        if kind in LABELS_SPECIAL:
+            getattr(self, "sp_" + kind)(room)
+            return
         x0, z0, x1, z1 = room["x0"], room["z0"], room["x1"], room["z1"]
         spots = self.wall_spots(room)
         if kind == "lab":
@@ -790,8 +978,23 @@ class Plan(Floor):
             self.carve(x0, z0, x1, z1, th["room_floor"].get(kind, th["floor"]), corridor=False)
             self.rooms.append({"id": i, "x0": x0, "z0": z0, "x1": x1, "z1": z1, "kind": kind,
                                "doors": [], "door": None, "side": "s"})
+        self.pick_special()
         self.connect_rooms()
         self.place_cabins()
+
+    def pick_special(self):
+        """La sala singular de la planta (docs/PRUEBAS.md, mapa): la mas grande que tenga buena forma."""
+        for kind in self.theme.get("special", []):
+            ok = [r for r in self.rooms if r["kind"] not in LABELS_SPECIAL and r["x1"] - r["x0"] >= 10 and r["z1"] - r["z0"] >= 10]
+            if not ok:
+                continue
+            room = max(ok, key=lambda r: (r["x1"] - r["x0"] + 1) * (r["z1"] - r["z0"] + 1))
+            room["kind"] = kind
+            fl = f"{MOD}:" + SPECIAL_FLOOR[kind]
+            if fl:
+                for x in range(room["x0"], room["x1"] + 1):
+                    for z in range(room["z0"], room["z1"] + 1):
+                        self.t.set(x, 0, z, fl)
 
     def corridor_at(self, x, z):
         for (x0, z0, x1, z1, _) in self.corr:
@@ -1009,7 +1212,12 @@ def sign_nbt(*lines):
     return Compound({"id": String("minecraft:sign"), "front_text": text, "back_text": empty, "is_waxed": Byte(1)})
 
 
-LABELS = {"lab": "LAB", "office": "DESPACHO", "storage": "ALMACEN", "morgue": "MORGUE", "lockers": "VESTUARIO",
+SPECIAL_FLOOR = {"reception": "lab_tile_floor_dark", "warehouse": "lab_concrete_floor", "openoffice": "lab_linoleum",
+                 "coldroom": "lab_morgue_floor", "turbine": "lab_grate", "garden": "lab_moss_floor", "cryo": "lab_tile_floor_dark"}
+LABELS_SPECIAL = {"reception", "warehouse", "openoffice", "coldroom", "turbine", "garden", "cryo"}
+LABELS = {"reception": "RECEPCION", "warehouse": "NAVE", "openoffice": "OFICINAS", "coldroom": "CAMARAS",
+          "turbine": "TURBINAS", "garden": "JARDIN", "cryo": "CRIOGENIA",
+          "lab": "LAB", "office": "DESPACHO", "storage": "ALMACEN", "morgue": "MORGUE", "lockers": "VESTUARIO",
           "ward": "SALA", "server": "SERVIDORES", "machine": "MAQUINAS", "break": "DESCANSO"}
 
 
@@ -1032,21 +1240,21 @@ def theme(**kw):
 
 
 THEMES = {
-    "start": theme(room_floor={"office": "lab_wood_floor", "lockers": "lab_tile_floor_dark", "storage": "lab_concrete_floor"},
+    "start": theme(special=["reception"], room_floor={"office": "lab_wood_floor", "lockers": "lab_tile_floor_dark", "storage": "lab_concrete_floor"},
                    blood=0.6),
-    "storage": theme(wall="lab_concrete_wall", wall_low="lab_concrete_wall", ceiling="lab_ceiling_concrete",
+    "storage": theme(special=["warehouse"], wall="lab_concrete_wall", wall_low="lab_concrete_wall", ceiling="lab_ceiling_concrete",
                      corridor_floor="lab_concrete_floor", floor="lab_concrete_floor",
                      room_floor={"machine": "lab_grate", "office": "lab_linoleum"}),
-    "offices": theme(wall="lab_plaster_blue", wall_low="lab_wall_tiles_white",
+    "offices": theme(special=["openoffice"], wall="lab_plaster_blue", wall_low="lab_wall_tiles_white",
                      room_floor={"office": "lab_wood_floor", "break": "lab_linoleum"}),
-    "morgue": theme(wall="lab_plaster_green", wall_low="lab_wall_tiles_teal", corridor_floor="lab_tile_floor_dark",
+    "morgue": theme(special=["coldroom"], wall="lab_plaster_green", wall_low="lab_wall_tiles_teal", corridor_floor="lab_tile_floor_dark",
                     room_floor={"morgue": "lab_morgue_floor", "ward": "lab_morgue_floor"}, blood=1.6),
-    "generators": theme(wall="lab_metal_wall", wall_low="lab_concrete_wall", ceiling="lab_ceiling_concrete",
+    "generators": theme(special=["turbine"], wall="lab_metal_wall", wall_low="lab_concrete_wall", ceiling="lab_ceiling_concrete",
                         corridor_floor="lab_concrete_floor", floor="lab_concrete_floor",
                         room_floor={"machine": "lab_grate", "server": "lab_tile_floor_dark"}),
-    "greenhouse": theme(wall="lab_plaster_green", wall_low="lab_wall_tiles", corridor_floor="lab_moss_floor",
+    "greenhouse": theme(special=["garden"], wall="lab_plaster_green", wall_low="lab_wall_tiles", corridor_floor="lab_moss_floor",
                         floor="lab_moss_floor", room_floor={"office": "lab_wood_floor"}),
-    "final": theme(wall="lab_wall_tiles_white", wall_low="lab_wall_tiles_teal", corridor_floor="lab_tile_floor_dark",
+    "final": theme(special=["cryo"], wall="lab_wall_tiles_white", wall_low="lab_wall_tiles_teal", corridor_floor="lab_tile_floor_dark",
                    room_floor={"lab": "lab_morgue_floor"}, blood=2.0),
 }
 
@@ -1201,7 +1409,8 @@ def verify(path):
 
     def ok(b):
         return b is None or any(k in b for k in ("_door", "slab", "barrel", "gurney", "curtain", "iron_block", "iron_bars",
-                                                   "lab_crate", "lab_debris", "lab_pipes", "blood_floor", "wall_decal",
+                                                   "lab_crate", "lab_debris", "lab_pipes", "blood_floor", "wall_decal", "snow", "carpet", "fern",
+                                                   "dead_bush",
                                                    "wall_writing"))
 
     def passable(x, z):

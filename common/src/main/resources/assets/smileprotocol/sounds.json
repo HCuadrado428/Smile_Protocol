@@ -233,5 +233,29 @@
     "sounds": [
       "smileprotocol:smiley/smear"
     ]
+  },
+  "music.smiley1": {
+    "sounds": [
+      {
+        "name": "smileprotocol:music/smiley_phase1",
+        "stream": true
+      }
+    ]
+  },
+  "music.smiley2": {
+    "sounds": [
+      {
+        "name": "smileprotocol:music/smiley_phase2",
+        "stream": true
+      }
+    ]
+  },
+  "music.smiley3": {
+    "sounds": [
+      {
+        "name": "smileprotocol:music/smiley_phase3",
+        "stream": true
+      }
+    ]
   }
 }

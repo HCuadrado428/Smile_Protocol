@@ -566,6 +566,8 @@ public final class ClientSelfTest {
         }));
         SHOTS.add(() -> wait = 105);
         SHOTS.add(() -> grab(mc, "44_smiley_intro"));
+        SHOTS.add(() -> log((ClientBossMusic.playing() == 1 ? "OK" : "FALLO") + " musica del jefe: suena la fase 1 ("
+                + ClientBossMusic.playing() + ")"));
         SHOTS.add(() -> server.execute(() -> {
             boolean phases = com.smileprotocol.entity.SmileyFight.phaseFor(0) == 1 && com.smileprotocol.entity.SmileyFight.phaseFor(1) == 2
                     && com.smileprotocol.entity.SmileyFight.phaseFor(2) == 3 && com.smileprotocol.entity.SmileyFight.phaseFor(3) == 3;

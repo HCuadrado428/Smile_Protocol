@@ -275,6 +275,8 @@ Al bajar un ascensor se crea una **partida** (`R1`, `R2`...) con uno o varios **
 - a ambos lados hay unas 45 salas (laboratorios, despachos, almacenes, morgue, vestuarios, servidores…), cada una con su puerta y su cartel;
 - al fondo está el vestíbulo del ascensor de salida.
 
+Cada planta tiene además una **sala singular**, la más grande con buena forma: la recepción con su mostrador y sala de espera (`start_corridor`), una nave de estanterías de cajas hasta el techo (`lab_storage`), oficinas diáfanas con cubículos de mamparas (`lab_offices`), cámaras frigoríficas forradas de nichos de acero con mesas de autopsia y escarcha (`lab_morgue`), la sala de turbinas con máquinas de tres de alto (`lab_generators`), un jardín comido por la vegetación con una fuente seca (`lab_greenhouse`) y la cámara de criogenia con un anillo de cápsulas (`final_room`). Su cartel lo dice (RECEPCION, NAVE, OFICINAS, CAMARAS, TURBINAS, JARDIN, CRIOGENIA).
+
 Las plantas son `start_corridor`, `lab_storage`, `lab_offices`, `lab_morgue`, `lab_generators`, `lab_greenhouse` y `final_room` (intermedias) y la sala del jefe `smiley_lab` (final). Cada partida elige **3 intermedias** al azar.
 
 **Qué comprobar:**

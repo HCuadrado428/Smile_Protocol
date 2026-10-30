@@ -85,6 +85,7 @@ public final class ClientController {
         ClientWalkie.tick(mc);
         ClientTension.tick(mc);
         ClientAmbience.tick(mc);
+        ClientBossMusic.tick(mc);
         ClientQTE.tick(mc);
         ClientSequence.tick(mc);
         ClientScare.tick();

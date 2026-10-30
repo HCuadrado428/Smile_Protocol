@@ -47,6 +47,9 @@ public final class ModSounds {
     public static final Supplier<SoundEvent> SMILEY_WHISPER = register("smiley.whisper");
     public static final Supplier<SoundEvent> SMILEY_LAUGH = register("smiley.laugh");
     public static final Supplier<SoundEvent> SMILEY_SMEAR = register("smiley.smear");
+    public static final Supplier<SoundEvent> MUSIC_SMILEY_1 = register("music.smiley1");
+    public static final Supplier<SoundEvent> MUSIC_SMILEY_2 = register("music.smiley2");
+    public static final Supplier<SoundEvent> MUSIC_SMILEY_3 = register("music.smiley3");
 
     private ModSounds() {}
 

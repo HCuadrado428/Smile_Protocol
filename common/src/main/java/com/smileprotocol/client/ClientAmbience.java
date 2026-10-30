@@ -67,7 +67,7 @@ public final class ClientAmbience {
             nextSilence = 1800 + RNG.nextInt(2400);
         }
         float tension = ClientTension.level(1f);
-        drone.target = silence > 0 ? 0f : 0.32f * (1f - 0.6f * tension);
+        drone.target = silence > 0 || ClientBossMusic.active() ? 0f : 0.32f * (1f - 0.6f * tension);
 
         if (--nextOneShot <= 0) {
             nextOneShot = 400 + RNG.nextInt(800);

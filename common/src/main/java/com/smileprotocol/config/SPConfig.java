@@ -146,6 +146,8 @@ public final class SPConfig {
         public float tension_strength = 1f;
         /** Zumbido de ambiente con silencios, crujidos y goteos. */
         public boolean ambience = true;
+        /** Volumen de la musica de Smiley (0 la quita). */
+        public float boss_music_volume = 0.8f;
 
         // Walkies (README 17.3) y marcadores (8.4)
         public boolean walkie_enabled = true;
