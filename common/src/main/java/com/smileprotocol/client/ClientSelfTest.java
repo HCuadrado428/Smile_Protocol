@@ -291,6 +291,15 @@ public final class ClientSelfTest {
         record(mc, "jugador_agachado", 60, k -> { o.keyUp.setDown(true); o.keyShift.setDown(true); });
         SHOTS.add(() -> { o.keyUp.setDown(false); o.keyShift.setDown(false); });
 
+        SHOTS.add(() -> follow(-2, fQ, 0.7));
+        scene(server, level, sp, null, chest, P, -90f, null);
+        record(mc, "jugador_agachado_quieto", 50, k -> o.keyShift.setDown(true));
+        SHOTS.add(() -> { o.keyShift.setDown(false); follow(-2, fSide, 0.9); });
+
+        scene(server, level, sp, null, chest, P.add(-3.5, 0, 0), -90f, () -> sp.setHealth(4f));
+        record(mc, "jugador_poca_vida", 60, k -> o.keyUp.setDown(true));
+        SHOTS.add(() -> { o.keyUp.setDown(false); server.execute(() -> sp.setHealth(sp.getMaxHealth())); });
+
         scene(server, level, sp, null, chest, P.add(-6, 0, 0), -90f, null);
         record(mc, "jugador_dive", 40, k -> {
             o.keyUp.setDown(k < 34);

@@ -31,6 +31,17 @@ public abstract class PlayerMixin {
         }
     }
 
+    /** Agachado a cuatro patas: menos de un bloque de alto para pasar por los conductos (README 12.9). */
+    @org.spongepowered.asm.mixin.Unique
+    private static final net.minecraft.world.entity.EntityDimensions SMILEPROTOCOL_CRAWL =
+            net.minecraft.world.entity.EntityDimensions.scalable(0.6f, 0.95f).withEyeHeight(0.78f);
+
+    @Inject(method = "getDefaultDimensions", at = @At("HEAD"), cancellable = true)
+    private void smileprotocol$crawlDimensions(Pose pose, CallbackInfoReturnable<net.minecraft.world.entity.EntityDimensions> cir) {
+        Player self = (Player) (Object) this;
+        if (pose == Pose.CROUCHING && com.smileprotocol.dimension.SPDimension.isSP(self.level())) cir.setReturnValue(SMILEPROTOCOL_CRAWL);
+    }
+
     @Inject(method = "dropEquipment", at = @At("HEAD"), cancellable = true)
     private void smileprotocol$dropEquipment(CallbackInfo ci) {
         Player self = (Player) (Object) this;

@@ -59,8 +59,16 @@ public final class PalBridge {
         public Vec3f get3DTransform(String part, TransformType type, float tickDelta, Vec3f value0) {
             float[] d = pose.get(part);
             if (d == null) return value0;
-            if (type == TransformType.ROTATION) return value0.add(new Vec3f(d[0], d[1], d[2]));
-            if (type == TransformType.POSITION) return value0.add(new Vec3f(d[3], d[4], d[5]));
+            boolean[] abs = pose.flags(part);
+            if (type == TransformType.ROTATION) {
+                Vec3f r = new Vec3f(d[0], d[1], d[2]);
+                return abs != null && abs[0] ? r : value0.add(r);
+            }
+            if (type == TransformType.POSITION) {
+                Vec3f p = new Vec3f(d[3], d[4], d[5]);
+                return abs != null && abs[1] ? p : value0.add(p);
+            }
+            if (type == TransformType.BEND) return value0.add(new Vec3f(d[6], d[7], 0f));
             return value0;
         }
     }

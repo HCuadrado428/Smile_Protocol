@@ -1,0 +1,1 @@
+player-animation-lib-fabric*.jar dev.kosmx.playerAnim.api.TransformType,dev.kosmx.playerAnim.core.util.Vec3f
