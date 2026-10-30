@@ -1102,7 +1102,7 @@ El **primer smiler** que se implementa. Un mob **ciego** que solo se guía por e
 **Aspecto** (variación de Smiley, 20.1):
 - Más bajo que Smiley: unos **2,5 bloques**, **encorvado**, con brazos largos que casi arrastran. Mantiene la **silueta negra**, el pelo largo, las manos grandes con dedos afilados y la **sonrisa roja**.
 - **Su ojo rojo está apagado o cerrado**: es ciego. Es lo que lo distingue a simple vista de un smiler que sí ve.
-- Hitbox propuesta: **0,9 de ancho × 2,6 de alto**.
+- Hitbox propuesta: **0,9 de ancho × 2,6 de alto**. *Implementado (fase 11):* la caja es de **0,9 × 1,95** para que pase por las puertas del laboratorio (se agacha); el modelo mide unos 2,5 bloques encorvado. El derribo de esta fase es el mínimo (arrastrarse, ruido, desangrado y remate); la reanimación llega en la fase 12.
 
 **Sentidos:**
 - **Vista: ninguna.** No ve a los jugadores, ni la linterna, ni a nadie asomándose (12.6), por mucho que se acerque.

@@ -1,4 +1,4 @@
-# Cómo probar lo implementado (fases 1 a 10)
+# Cómo probar lo implementado (fases 1 a 11)
 
 ## Preparar el entorno
 
@@ -110,6 +110,24 @@ Taquillas, armarios (caben 2), contenedores, camillas (se entra tumbado) y corti
 4. **Clic derecho** para salir.
 
 Con `/spadmin hide set <tipo>` conviertes el bloque que miras en escondite.
+
+## Berserker y derribo (fase 11)
+
+El Berserker es ciego: solo oye. Corre al sitio donde sonó el ruido y golpea **esa zona**, no a ti.
+
+1. **Aparece solo en las plantas.** 1 en la recepción y 2 o 3 en las demás plantas (más o menos según el tamaño del grupo), siempre lejos de la llegada. No se mueve hasta que el grupo está cerca. Con `/spadmin debug on` se ven los anillos de ruido.
+2. **Uno a mano.** `/spadmin mob spawn berserker` lo pone donde estás; `/spadmin mob clear` quita los de alrededor.
+3. **Agachado no te oye.** Andar agachado (radio 3 × 1,5 = 4,5) queda por debajo de su umbral de 5. Andar normal (8 × 1,5 = 12) o correr sí lo atrae. Las paredes atenúan el ruido.
+4. **La luz no le importa.** Puedes iluminarlo con la linterna a un metro: no reacciona.
+5. **Golpe de área.** Al llegar al punto se yergue con los brazos arriba (unos 0,6 s de aviso) y golpea un radio de 2,5 bloques. Si te apartas antes del golpe, falla. Si sigues dentro, caes **derribado**.
+6. **Cambio de objetivo.** Mientras va hacia un ruido solo cambia de objetivo si oye otro un 50 % más fuerte. Haz ruido en un lado (`/spadmin noise test 12`) y luego en otro más flojo: no cambia.
+7. **Después del golpe** se queda 1,5 s recuperándose y luego escucha unos 6 s girando la cabeza. Si nadie hace ruido, vuelve a merodear.
+8. **Escondites.** No los revisa, pero si haces ruido dentro (por ejemplo, al quedarte sin aliento), golpea ese sitio y te saca derribado.
+9. **Puertas.** Abre las puertas normales del laboratorio (haciendo ruido). Las de seguridad, con llave o tarjeta, le cortan el paso.
+10. **Derribado (mínimo).** Te arrastras muy despacio, se oye al arrastrarte y gimes de vez en cuando. Tienes 60 s antes de desangrarte. Si el Berserker te oye, viene y te **remata**. Para probarlo sin mob: `/spadmin mob down`.
+    - La reanimación por los compañeros, la jeringa y las animaciones propias son de la fase 12. De momento, derribado acaba en muerte y vuelta al lobby.
+
+**Configuración nueva:** `bleed_out_time`, `downed_noise_interval`, `noise_crawl`, `noise_groan`, `berserkers_by_difficulty` y `mobs_wait_for_players`. La ficha del mob está en `data/smileprotocol/mobs/berserker.json`.
 
 ## Depuración
 
