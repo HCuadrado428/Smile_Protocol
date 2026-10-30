@@ -207,10 +207,10 @@ public final class MotionManager {
         if (p.onGround() && s.action != Action.HIDDEN && moved > 0.01 && moved < 2) {
             s.stride += moved;
             boolean crawl = s.action == Action.DOWNED;
-            double strideLen = crawl ? 0.8 : p.isSprinting() ? 2.2 : p.isCrouching() ? 1.2 : 1.7;
+            double strideLen = crawl ? 0.8 : p.isSprinting() ? 2.2 : p.isCrouching() || p.isVisuallyCrawling() ? 1.2 : 1.7;
             if (s.stride >= strideLen) {
                 s.stride = 0;
-                float r = crawl ? cfg.noise_crawl : p.isCrouching() ? cfg.noise_crouch_walk : p.isSprinting() ? cfg.noise_sprint : cfg.noise_walk;
+                float r = crawl ? cfg.noise_crawl : p.isCrouching() || p.isVisuallyCrawling() ? cfg.noise_crouch_walk : p.isSprinting() ? cfg.noise_sprint : cfg.noise_walk;
                 NoiseType t = crawl ? NoiseType.CRAWL : p.isSprinting() ? NoiseType.SPRINT : NoiseType.FOOTSTEP;
                 NoiseSystem.emit(p.serverLevel(), pos, r, t, p);
             }

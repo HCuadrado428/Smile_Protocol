@@ -59,7 +59,7 @@ La configuración está en `config/smileprotocol.json`.
 
 Dentro de una partida:
 - **Correr** con Ctrl hace más ruido que andar, y **agachado** casi no hace.
-- **Agachado = en cuclillas**: con Shift vas muy encogido, de puntillas con la espalda curvada y los brazos recogidos, dando pasitos sigilosos. Mides menos de un bloque (0,95), así que cabes por huecos y conductos de ventilación de 1 bloque de alto. Si sueltas Shift debajo de algo bajo, sigues agachado hasta que haya sitio para levantarte.
+- **Agachado = el de vanilla** (Shift). **Conductos:** al acercarte a un hueco de un bloque de alto te tumbas solo con el gateo de Minecraft (0,6 de alto) y entras; dentro sigues gateando hasta que haya sitio para levantarte. Gatear hace el mismo ruido que ir agachado.
 - **Dive**: corriendo, pulsa **Shift**. Te deslizas tumbado unos metros y cabes por debajo de las tuberías caídas de los pasillos transversales. Tiene 3 s de espera.
 - **Vault**: corriendo o andando hacia un obstáculo de 1 bloque (barriles, losas, escombros), pulsa **Espacio** y lo saltas apoyando la mano.
 - **Mirar atrás**: mantén **C**. Gira la cámara, no la dirección en que corres.

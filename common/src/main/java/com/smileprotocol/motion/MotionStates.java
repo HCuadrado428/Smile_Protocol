@@ -26,4 +26,30 @@ public final class MotionStates {
     public static boolean forceLowPose(Player player) {
         return view(player).lowPose();
     }
+
+    /**
+     * Conducto o hueco de un bloque de alto justo delante (README 12.9): al acercarse a el, el
+     * jugador se tumba con el gateo de vanilla (pose {@code SWIMMING} fuera del agua, 0,6 de alto)
+     * y entra. Dentro, vanilla le mantiene gateando hasta que haya sitio para levantarse. Se calcula
+     * igual en el cliente y en el servidor (posicion, giro y bloques).
+     */
+    public static boolean ventAhead(Player player) {
+        if (!com.smileprotocol.dimension.SPDimension.isSP(player.level()) || !player.onGround()
+                || player.isSpectator() || player.getAbilities().flying || player.isPassenger()
+                || view(player).action() != Action.NONE) return false;
+        net.minecraft.world.level.Level level = player.level();
+        float yaw = player.getYRot() * net.minecraft.util.Mth.DEG_TO_RAD;
+        double dx = -net.minecraft.util.Mth.sin(yaw), dz = net.minecraft.util.Mth.cos(yaw);
+        for (double reach : new double[]{0.45, 0.75}) {
+            net.minecraft.core.BlockPos feet = net.minecraft.core.BlockPos.containing(
+                    player.getX() + dx * reach, player.getY() + 0.1, player.getZ() + dz * reach);
+            if (feet.equals(player.blockPosition())) continue;
+            if (free(level, feet) && !free(level, feet.above())) return true;
+        }
+        return false;
+    }
+
+    private static boolean free(net.minecraft.world.level.Level level, net.minecraft.core.BlockPos pos) {
+        return level.getBlockState(pos).getCollisionShape(level, pos).isEmpty();
+    }
 }

@@ -288,18 +288,37 @@ public final class ClientSelfTest {
         SHOTS.add(() -> { o.keyUp.setDown(false); o.keySprint.setDown(false); });
 
         scene(server, level, sp, null, chest, P.add(-3.5, 0, 0), -90f, null);
-        record(mc, "jugador_agachado", 60, k -> { o.keyUp.setDown(true); o.keyShift.setDown(true); });
-        SHOTS.add(() -> follow(-2, new Vec3(0, 0.55, 2.2), 0.5));
-        record(mc, "jugador_agachado_andar_lado", 30, k -> { o.keyUp.setDown(true); o.keyShift.setDown(true); });
-        SHOTS.add(() -> follow(-2, fSide, 0.9));
+        record(mc, "jugador_agachado", 45, k -> { o.keyUp.setDown(true); o.keyShift.setDown(true); });
         SHOTS.add(() -> { o.keyUp.setDown(false); o.keyShift.setDown(false); });
 
-        SHOTS.add(() -> follow(-2, fQ, 0.7));
-        scene(server, level, sp, null, chest, P, -90f, null);
-        record(mc, "jugador_agachado_quieto", 50, k -> o.keyShift.setDown(true));
-        SHOTS.add(() -> follow(-2, new Vec3(0, 0.55, 2.2), 0.5));
-        record(mc, "jugador_agachado_lado", 30, k -> o.keyShift.setDown(true));
-        SHOTS.add(() -> { o.keyShift.setDown(false); follow(-2, fSide, 0.9); });
+        // Conducto de un bloque de alto: al llegar se tumba a gatear (vanilla) y lo atraviesa.
+        // El lado que da a la camara es de cristal para verlo dentro.
+        BlockPos duct = base.above().offset(1, 0, 0);
+        SHOTS.add(() -> server.execute(() -> {
+            net.minecraft.world.level.block.state.BlockState wall = com.smileprotocol.registry.ModBlocks.building("lab_plaster").defaultBlockState();
+            for (int dx = 0; dx < 3; dx++) {
+                for (int dz = -2; dz <= 1; dz++) {
+                    for (int dy = 0; dy <= 2; dy++) {
+                        boolean hole = dz == 0 && dy == 0;
+                        boolean glass = dz == 1 && dy <= 1;
+                        level.setBlockAndUpdate(duct.offset(dx, dy, dz), hole ? net.minecraft.world.level.block.Blocks.AIR.defaultBlockState()
+                                : glass ? net.minecraft.world.level.block.Blocks.GLASS.defaultBlockState() : wall);
+                    }
+                }
+            }
+        }));
+        scene(server, level, sp, P.add(1.0, 1.3, 4.6), P.add(1.5, 0.5, 0), P.add(-2.5, 0, 0), -90f, null);
+        record(mc, "jugador_conducto", 80, k -> o.keyUp.setDown(true));
+        SHOTS.add(() -> {
+            o.keyUp.setDown(false);
+            follow(-2, fSide, 0.9);
+            server.execute(() -> {
+                for (int dx = 0; dx < 3; dx++)
+                    for (int dz = -2; dz <= 1; dz++)
+                        for (int dy = 0; dy <= 2; dy++)
+                            level.setBlockAndUpdate(duct.offset(dx, dy, dz), net.minecraft.world.level.block.Blocks.AIR.defaultBlockState());
+            });
+        });
 
         scene(server, level, sp, null, chest, P.add(-3.5, 0, 0), -90f, () -> sp.setHealth(4f));
         record(mc, "jugador_poca_vida", 60, k -> o.keyUp.setDown(true));
