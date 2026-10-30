@@ -269,7 +269,7 @@ public final class Payloads {
     }
 
     /** S -> C: empieza el minijuego de escape (README 18). */
-    public record StartQTE(int type, int ticks, long seed, int target, int difficulty) implements CustomPacketPayload {
+    public record StartQTE(int qteType, int ticks, long seed, int target, int difficulty) implements CustomPacketPayload {
         public static final Type<StartQTE> TYPE = typeOf("start_qte");
         public static final StreamCodec<ByteBuf, StartQTE> CODEC = new StreamCodec<>() {
             @Override
@@ -279,7 +279,7 @@ public final class Payloads {
 
             @Override
             public void encode(ByteBuf b, StartQTE p) {
-                b.writeByte(p.type());
+                b.writeByte(p.qteType());
                 b.writeInt(p.ticks());
                 b.writeLong(p.seed());
                 b.writeInt(p.target());

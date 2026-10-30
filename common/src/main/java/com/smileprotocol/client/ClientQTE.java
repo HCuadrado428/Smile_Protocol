@@ -33,7 +33,7 @@ public final class ClientQTE {
 
     public static void start(Payloads.StartQTE p) {
         active = true;
-        type = QTEType.values()[Math.max(0, Math.min(QTEType.values().length - 1, p.type()))];
+        type = QTEType.values()[Math.max(0, Math.min(QTEType.values().length - 1, p.qteType()))];
         total = Math.max(1, p.ticks());
         seed = p.seed();
         target = Math.max(1, p.target());
