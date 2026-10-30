@@ -52,6 +52,11 @@ public abstract class CameraMixin {
             float[] seq = com.smileprotocol.client.ClientSequence.camera(getPosition(), pt);
             if (seq != null) {
                 setRotation(seq[0], seq[1]);
+                if (seq[2] > 0) {
+                    float y = seq[0] * Mth.DEG_TO_RAD, x = seq[1] * Mth.DEG_TO_RAD;
+                    Vec3 look = new Vec3(-Mth.sin(y) * Mth.cos(x), -Mth.sin(x), Mth.cos(y) * Mth.cos(x));
+                    setPosition(getPosition().subtract(look.scale(seq[2])));
+                }
                 com.smileprotocol.client.light.Flashlight.update((Camera) (Object) this, pt);
                 return;
             }
