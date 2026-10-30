@@ -31,7 +31,18 @@ public abstract class CameraMixin {
     private void smileprotocol$setup(BlockGetter level, Entity entity, boolean detached, boolean reverse, float pt, CallbackInfo ci) {
         Vec3 testCam = com.smileprotocol.client.ClientSelfTest.TEST_CAM_POS;
         if (testCam != null) {
-            // Grabacion de animaciones: camara fija mirando al jugador o al mob
+            // Grabacion de animaciones: camara fija, o siguiendo al jugador o a un mob
+            Entity follow = com.smileprotocol.client.ClientSelfTest.followed();
+            if (follow != null) {
+                Vec3 b = follow.getPosition(pt);
+                Vec3 cam = b.add(com.smileprotocol.client.ClientSelfTest.TEST_FOLLOW_OFFSET);
+                Vec3 look = b.add(0, com.smileprotocol.client.ClientSelfTest.TEST_FOLLOW_LOOK_Y, 0);
+                double dx = look.x - cam.x, dy = look.y - cam.y, dz = look.z - cam.z;
+                setPosition(cam);
+                setRotation((float) Math.toDegrees(Math.atan2(-dx, dz)),
+                        (float) -Math.toDegrees(Math.atan2(dy, Math.sqrt(dx * dx + dz * dz))));
+                return;
+            }
             setPosition(testCam);
             setRotation(com.smileprotocol.client.ClientSelfTest.TEST_CAM_YAW, com.smileprotocol.client.ClientSelfTest.TEST_CAM_PITCH);
             return;

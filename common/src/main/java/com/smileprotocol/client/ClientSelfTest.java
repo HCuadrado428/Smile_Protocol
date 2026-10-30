@@ -209,6 +209,25 @@ public final class ClientSelfTest {
     public static volatile Vec3 TEST_CAM_POS;
     public static volatile float TEST_CAM_YAW, TEST_CAM_PITCH;
 
+    /** Seguir a una entidad: -1 nadie, -2 el jugador local, otro numero el id del mob. */
+    public static volatile int TEST_FOLLOW_ID = -1;
+    public static volatile Vec3 TEST_FOLLOW_OFFSET = Vec3.ZERO;
+    public static volatile double TEST_FOLLOW_LOOK_Y;
+
+    public static net.minecraft.world.entity.Entity followed() {
+        Minecraft mc = Minecraft.getInstance();
+        if (TEST_FOLLOW_ID == -2) return mc.player;
+        if (TEST_FOLLOW_ID < 0 || mc.level == null) return null;
+        return mc.level.getEntity(TEST_FOLLOW_ID);
+    }
+
+    private static void follow(int id, Vec3 offset, double lookY) {
+        TEST_FOLLOW_OFFSET = offset;
+        TEST_FOLLOW_LOOK_Y = lookY;
+        TEST_FOLLOW_ID = id;
+        TEST_CAM_POS = Vec3.ZERO;
+    }
+
     public static boolean recording() {
         return TEST_CAM_POS != null;
     }
@@ -250,14 +269,17 @@ public final class ClientSelfTest {
         var o = mc.options;
 
         // Jugador ---------------------------------------------------------------------------------
-        scene(server, level, sp, threeQ, chest, P, -90f, null);
+        Vec3 fQ = new Vec3(1.5, 1.3, 2.5), fSide = new Vec3(0, 1.05, 3.3);
+        SHOTS.add(() -> follow(-2, fQ, 0.95));
+        scene(server, level, sp, null, chest, P, -90f, null);
         record(mc, "jugador_quieto", 40, null);
 
-        scene(server, level, sp, side, chest, P.add(-4.5, 0, 0), -90f, null);
+        SHOTS.add(() -> follow(-2, fSide, 0.9));
+        scene(server, level, sp, null, chest, P.add(-4.5, 0, 0), -90f, null);
         record(mc, "jugador_andar", 45, k -> o.keyUp.setDown(true));
         SHOTS.add(() -> o.keyUp.setDown(false));
 
-        scene(server, level, sp, side, chest, P.add(-5, 0, 0), -90f, null);
+        scene(server, level, sp, null, chest, P.add(-5, 0, 0), -90f, null);
         record(mc, "jugador_correr", 30, k -> {
             o.keyUp.setDown(true);
             o.keySprint.setDown(true);
@@ -265,11 +287,11 @@ public final class ClientSelfTest {
         });
         SHOTS.add(() -> { o.keyUp.setDown(false); o.keySprint.setDown(false); });
 
-        scene(server, level, sp, side, chest, P.add(-3.5, 0, 0), -90f, null);
+        scene(server, level, sp, null, chest, P.add(-3.5, 0, 0), -90f, null);
         record(mc, "jugador_agachado", 60, k -> { o.keyUp.setDown(true); o.keyShift.setDown(true); });
         SHOTS.add(() -> { o.keyUp.setDown(false); o.keyShift.setDown(false); });
 
-        scene(server, level, sp, side, chest, P.add(-6, 0, 0), -90f, null);
+        scene(server, level, sp, null, chest, P.add(-6, 0, 0), -90f, null);
         record(mc, "jugador_dive", 40, k -> {
             o.keyUp.setDown(k < 34);
             o.keySprint.setDown(k < 12);
@@ -279,7 +301,7 @@ public final class ClientSelfTest {
         SHOTS.add(() -> { o.keyUp.setDown(false); o.keySprint.setDown(false); o.keyShift.setDown(false); });
 
         SHOTS.add(() -> server.execute(() -> level.setBlockAndUpdate(BlockPos.containing(P), com.smileprotocol.registry.ModBlocks.building("lab_crate").defaultBlockState())));
-        scene(server, level, sp, side, chest, P.add(-3, 0, 0), -90f, null);
+        scene(server, level, sp, null, chest, P.add(-3, 0, 0), -90f, null);
         record(mc, "jugador_vault", 32, k -> {
             o.keyUp.setDown(k < 26);
             o.keyJump.setDown(k == 5 || k == 6);
@@ -290,14 +312,15 @@ public final class ClientSelfTest {
             server.execute(() -> level.setBlockAndUpdate(BlockPos.containing(P), net.minecraft.world.level.block.Blocks.AIR.defaultBlockState()));
         });
 
-        scene(server, level, sp, side, chest, P.add(-3.5, 0, 0), -90f, null);
+        scene(server, level, sp, null, chest, P.add(-3.5, 0, 0), -90f, null);
         record(mc, "jugador_mirar_atras", 45, k -> {
             o.keyUp.setDown(true);
             if (k == 8) ClientMotion.TEST_KEYS.add(com.smileprotocol.config.SPConfig.get().key_look_back);
         });
         SHOTS.add(() -> { o.keyUp.setDown(false); ClientMotion.TEST_KEYS.clear(); });
 
-        scene(server, level, sp, threeQ, chest, P, -90f, null);
+        SHOTS.add(() -> follow(-2, fQ, 0.95));
+        scene(server, level, sp, null, chest, P, -90f, null);
         record(mc, "jugador_asomarse", 56, k -> {
             ClientMotion.TEST_KEYS.clear();
             if (k >= 4 && k < 28) ClientMotion.TEST_KEYS.add(com.smileprotocol.config.SPConfig.get().key_lean_left);
@@ -311,13 +334,14 @@ public final class ClientSelfTest {
                 com.smileprotocol.client.anim.PoseCalculator.INTERACT_CARD};
         for (int i = 0; i < names.length; i++) {
             int kind = kinds[i];
-            scene(server, level, sp, threeQ, chest, P, -90f, () -> com.smileprotocol.motion.MotionManager.setAction(sp,
+            scene(server, level, sp, null, chest, P, -90f, () -> com.smileprotocol.motion.MotionManager.setAction(sp,
                     com.smileprotocol.motion.Action.INTERACT, kind, false));
             record(mc, "jugador_interactuar_" + names[i], 40, null);
             SHOTS.add(() -> server.execute(() -> com.smileprotocol.motion.MotionManager.clearAction(sp, com.smileprotocol.motion.Action.INTERACT)));
         }
 
-        scene(server, level, sp, side, P.add(0, 0.4, 0), P.add(-2.5, 0, 0), -90f, () -> com.smileprotocol.downed.DownedManager.down(sp, "grabacion"));
+        SHOTS.add(() -> follow(-2, new Vec3(0.6, 1.0, 2.4), 0.25));
+        scene(server, level, sp, null, chest, P.add(-2.5, 0, 0), -90f, () -> com.smileprotocol.downed.DownedManager.down(sp, "grabacion"));
         record(mc, "jugador_derribado", 70, k -> o.keyUp.setDown(true));
         SHOTS.add(() -> {
             o.keyUp.setDown(false);
@@ -326,12 +350,13 @@ public final class ClientSelfTest {
 
         // Agarre con el mob de pruebas (jugador y mob a la vez)
         com.smileprotocol.entity.SmilerTest[] tester = {null};
-        scene(server, level, sp, P.add(1.5, 1.3, 5.5), P.add(1.2, 1.1, 0), P, -90f, () -> {
+        scene(server, level, sp, P.add(1.6, 1.5, 4.0), P.add(1.4, 1.1, 0), P, -90f, () -> {
             tester[0] = com.smileprotocol.entity.MobManager.spawn(level, com.smileprotocol.registry.ModEntities.SMILER_TEST.get(),
                     BlockPos.containing(P.add(4, 0, 0)), level.random);
             if (tester[0] != null) tester[0].moveTo(P.x + 4, P.y, P.z, 90f, 0f);
         });
         record(mc, "agarre_qte", 70, null);
+        SHOTS.add(() -> { if (tester[0] != null) follow(tester[0].getId(), new Vec3(1.8, 1.7, 3.2), 1.2); });
         record(mc, "smiler_aturdido", 40, k -> {
             if (k == 0) server.execute(() -> {
                 com.smileprotocol.qte.QTEManager.clear(sp);
@@ -352,20 +377,26 @@ public final class ClientSelfTest {
             bz[0] = com.smileprotocol.entity.MobManager.spawn(level, com.smileprotocol.registry.ModEntities.BERSERKER.get(),
                     BlockPos.containing(P), level.random);
         }));
-        mobScene(server, level, bz, bQ, bChest, P, com.smileprotocol.entity.Berserker.State.PATROL, false, null, 0);
+        SHOTS.add(() -> wait = 6);
+        Vec3 fbQ = new Vec3(2.0, 1.8, 3.4), fbSide = new Vec3(0, 1.6, 4.4);
+        SHOTS.add(() -> { if (bz[0] != null) follow(bz[0].getId(), fbQ, 1.25); });
+        mobScene(server, level, bz, null, bChest, P, com.smileprotocol.entity.Berserker.State.PATROL, false, null, 0);
         record(mc, "berserker_quieto", 64, null);
-        mobScene(server, level, bz, bSide, bChest, P.add(-5, 0, 0), com.smileprotocol.entity.Berserker.State.PATROL, false, P.add(6, 0, 0), 0.55);
+        SHOTS.add(() -> { if (bz[0] != null) follow(bz[0].getId(), fbSide, 1.2); });
+        mobScene(server, level, bz, null, bChest, P.add(-5, 0, 0), com.smileprotocol.entity.Berserker.State.PATROL, false, P.add(6, 0, 0), 0.55);
         record(mc, "berserker_andar", 70, null);
-        mobScene(server, level, bz, bSide, bChest, P.add(-6, 0, 0), com.smileprotocol.entity.Berserker.State.INVESTIGATE, true, P.add(7, 0, 0), 1.35);
+        mobScene(server, level, bz, null, bChest, P.add(-6, 0, 0), com.smileprotocol.entity.Berserker.State.INVESTIGATE, true, P.add(7, 0, 0), 1.35);
         record(mc, "berserker_correr", 34, null);
-        mobScene(server, level, bz, bQ, bChest, P, com.smileprotocol.entity.Berserker.State.STRIKE, false, null, 0);
+        SHOTS.add(() -> { if (bz[0] != null) follow(bz[0].getId(), fbQ, 1.25); });
+        mobScene(server, level, bz, null, bChest, P, com.smileprotocol.entity.Berserker.State.STRIKE, false, null, 0);
         record(mc, "berserker_golpe", 64, k -> {
             if (k == 22) server.execute(() -> { if (bz[0] != null) bz[0].debugForce(com.smileprotocol.entity.Berserker.State.RECOVER, false, null, 0); });
         });
-        mobScene(server, level, bz, bQ, bChest, P, com.smileprotocol.entity.Berserker.State.SEARCH, false, null, 0);
+        mobScene(server, level, bz, null, bChest, P, com.smileprotocol.entity.Berserker.State.SEARCH, false, null, 0);
         record(mc, "berserker_escuchar", 80, null);
         SHOTS.add(() -> {
             TEST_CAM_POS = null;
+            TEST_FOLLOW_ID = -1;
             mc.options.hideGui = false;
         });
     }
@@ -397,6 +428,8 @@ public final class ClientSelfTest {
     }
 
     private static void placeCamera(Vec3 cam, Vec3 look) {
+        if (cam == null) return; // la escena usa camara que sigue
+        TEST_FOLLOW_ID = -1;
         double dx = look.x - cam.x, dy = look.y - cam.y, dz = look.z - cam.z;
         TEST_CAM_YAW = (float) Math.toDegrees(Math.atan2(-dx, dz));
         TEST_CAM_PITCH = (float) -Math.toDegrees(Math.atan2(dy, Math.sqrt(dx * dx + dz * dz)));
