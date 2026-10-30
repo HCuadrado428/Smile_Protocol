@@ -179,7 +179,8 @@ public final class ClientSelfTest {
             SPSessionManager.teleport(sp, level, cam, 0f, 0f);
         }));
         SHOTS.add(() -> wait = 40);
-        SHOTS.add(() -> log((ClientTension.level(1f) > 0.3f ? "OK" : "FALLO") + " shader de tension con el Berserker cerca ("
+        SHOTS.add(() -> log((ClientTension.level(1f) > 0.3f && ClientTension.rendered() && !ClientTension.failed() ? "OK" : "FALLO")
+                + " shader de tension con el Berserker cerca (dibujado " + ClientTension.rendered() + ", error " + ClientTension.failed() + ", "
                 + String.format(java.util.Locale.ROOT, "%.2f", ClientTension.level(1f)) + ")"));
         SHOTS.add(() -> grab(mc, "15_berserker"));
         // de lado: se gira el mob (el pasillo es estrecho para mover la camara)

@@ -25,8 +25,19 @@ public final class ClientTension {
     private static boolean failed;
     private static int width, height;
     private static float level, prev;
+    private static boolean rendered;
 
     private ClientTension() {}
+
+    /** El shader fallo al cargar o al dibujarse (y se ha desactivado). */
+    public static boolean failed() {
+        return failed;
+    }
+
+    /** Se ha dibujado al menos una vez. */
+    public static boolean rendered() {
+        return rendered;
+    }
 
     public static float level(float pt) {
         return Mth.lerp(pt, prev, level);
@@ -74,6 +85,7 @@ public final class ClientTension {
                 pass.getEffect().safeGetUniform("Pulse").set(pulse);
             }
             chain.process(pt);
+            rendered = true;
             mc.getMainRenderTarget().bindWrite(false);
         } catch (Exception e) {
             failed = true;

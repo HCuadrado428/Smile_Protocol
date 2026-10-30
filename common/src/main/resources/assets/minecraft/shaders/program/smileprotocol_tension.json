@@ -1,7 +1,7 @@
 {
   "blend": { "func": "add", "srcrgb": "one", "dstrgb": "zero" },
   "vertex": "sobel",
-  "fragment": "smileprotocol:tension",
+  "fragment": "smileprotocol_tension",
   "attributes": ["Position"],
   "samplers": [{ "name": "InSampler" }],
   "uniforms": [
