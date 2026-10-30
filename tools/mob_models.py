@@ -72,8 +72,8 @@ def claw():
 
 
 def face():
-    """Cara: piel negra, sonrisa roja enorme (brilla) y el ojo derecho cosido y apagado."""
-    sk = skin()
+    """Cara: piel carbonizada, sonrisa roja enorme (brilla) y el ojo derecho cosido y apagado."""
+    sk = char((30, 25, 23))
 
     def smile_mask(f):
         if f.face != "north":
@@ -112,6 +112,39 @@ def face():
 
     mat.glowmask = smile_mask
     return mat
+
+
+def char(base=(66, 54, 48)):
+    """Berserker: piel carbonizada y abombada, grietas por donde se ve la carne viva (rojo oscuro, no
+    brilla), ampollas, ceniza y costuras viejas con grapas."""
+    def m(f):
+        n = f.n(0.5, 4, 701)
+        c = np.zeros((f.h, f.w, 3)) + base
+        c *= (0.7 + 0.5 * n)[..., None]
+        scale = 0.5 + 0.5 * np.sin(f.X * 5 + noise3(f.X, f.Y, f.Z, 0.9, 702) * 5) * np.sin(f.Y * 5)
+        c *= (0.85 + 0.2 * scale)[..., None]
+        cr = np.abs(noise3(f.X * 0.8, f.Y * 0.8, f.Z * 0.8, 1.0, 703) - 0.5)
+        crack = (cr < 0.018) & (f.n(0.4, 2, 707) > 0.4)
+        edge = (cr < 0.032) & ~crack & (f.n(0.4, 2, 707) > 0.4)
+        c = np.where(edge[..., None], c * 0.5, c)
+        c = np.where(crack[..., None], np.array([84, 18, 14]) * (0.7 + 0.4 * f.n(2.0, 1, 704))[..., None], c)
+        blis = sstep(0.84, 0.9, f.n(1.3, 2, 705))
+        c = c * (1 - blis[..., None]) + np.array([150, 110, 90]) * blis[..., None]
+        ashy = sstep(0.55, 0.85, f.n(0.7, 3, 706)) * 0.5
+        c = c * (1 - ashy[..., None]) + np.array([96, 92, 88]) * ashy[..., None]
+        c += (f.white()[..., None] - 0.5) * 8
+        return c, np.ones((f.h, f.w))
+    return m
+
+
+def staple():
+    def m(f):
+        c = np.zeros((f.h, f.w, 3)) + (128, 126, 122)
+        c *= (0.7 + 0.4 * f.n(2, 1, 711))[..., None]
+        rust = sstep(0.55, 0.8, f.n(1.5, 2, 712))
+        c = c * (1 - rust[..., None]) + np.array([110, 52, 24]) * rust[..., None]
+        return c, np.ones((f.h, f.w))
+    return m
 
 
 def face_blind():
@@ -726,6 +759,7 @@ def grin():
     return mat
 
 
+MAT.update({"char": char(), "char_hi": char((80, 66, 58)), "staple": staple()})
 MAT.update({"skin": skin(), "skin_hi": skin((22, 20, 21)), "hair": hair(), "claw": claw(), "face": face(),
             "face_blind": face_blind(), "grin": grin()})
 
@@ -867,22 +901,31 @@ def berserker():
     g = Geo("berserker", 77, folder="entity", glow=("face",), ao=False)
     g.bone("root")
     g.bone("hips", "root", (0, 22, 0))
-    g.cube("hips", (-4, 19.5, -2.5), (8, 5, 5), "skin")
+    g.cube("hips", (-4, 19.5, -2.5), (8, 5, 5), "char")
     # torso: vientre hundido, pecho ancho, costillas y espinazo marcados
     g.bone("torso", "hips", (0, 24, 0))
-    g.cube("torso", (-3.5, 24, -2), (7, 7, 4.5), "skin")
-    g.cube("torso", (-6, 31, -3.2), (12, 9, 6.5), "skin")
+    g.cube("torso", (-3.5, 24, -2), (7, 7, 4.5), "char")
+    g.cube("torso", (-6, 31, -3.2), (12, 9, 6.5), "char")
     for i in range(3):
-        g.cube("torso", (-5.6, 32 + i * 2.4, -3.6), (11.2, 0.9, 0.6), "skin_hi")     # costillas
+        g.cube("torso", (-5.6, 32 + i * 2.4, -3.6), (11.2, 0.9, 0.6), "char_hi")     # costillas
     for i in range(5):
-        g.cube("torso", (-0.8, 25 + i * 3, 2.3 + (0.6 if i > 1 else 0)), (1.6, 1.6, 1.2), "skin_hi")  # vertebras
-    g.cube("torso", (-7, 37.5, -2.5), (14, 3, 5), "skin")                            # hombros huesudos
+        g.cube("torso", (-0.8, 25 + i * 3, 2.3 + (0.6 if i > 1 else 0)), (1.6, 1.6, 1.2), "char_hi")  # vertebras
+    g.cube("torso", (-7, 37.5, -2.5), (14, 3, 5), "char")                            # hombros huesudos
+    # cuerpo hinchado: tripa abombada y bultos en la espalda y el hombro
+    g.cube("torso", (-4.4, 24.5, -3.2), (8.8, 6.5, 5.2), "char", inflate=0)
+    g.cube("torso", (-3.2, 33, 2.6), (5, 5, 2), "char_hi")
+    g.cube("torso", (4, 35.5, -1.8), (3.4, 3.4, 3.6), "char")
+    # costura vieja que cruza el pecho y la tripa, con grapas
+    for k in range(7):
+        g.cube("torso", (-3.4 + k * 1.1, 27 + k * 1.5, -3.45), (0.9, 0.25, 0.3), "staple")
+    for k in range(4):
+        g.cube("torso", (1.2, 24.8 + k * 1.4, -3.45), (0.25, 0.9, 0.3), "staple")
     # cuello y cabeza (algo pequena para el cuerpo, colgando hacia delante)
     g.bone("neck", "torso", (0, 40, -1))
-    g.cube("neck", (-1.5, 39.5, -2.5), (3, 4, 3), "skin")
+    g.cube("neck", (-1.5, 39.5, -2.5), (3, 4, 3), "char")
     g.bone("head", "neck", (0, 43, -1.5))
     g.cube("head", (-4, 43, -5.5), (8, 9, 8), "face")
-    g.cube("head", (-3.6, 41.6, -5.2), (7.2, 2, 6), "skin")                          # mandibula
+    g.cube("head", (-3.6, 41.6, -5.2), (7.2, 2, 6), "char")                          # mandibula
     # pelo largo: casquete y mechones que caen por detras y por los lados de la cara
     g.bone("hair", "head", (0, 51, -1.5))
     g.cube("hair", (-4.4, 50.5, -5.9), (8.8, 2.2, 8.8), "hair")
@@ -896,28 +939,30 @@ def berserker():
     for side, sx in (("r", 1), ("l", -1)):
         sh = (sx * 7.5, 38.5, -0.5)
         g.bone(f"arm_{side}", "torso", sh)
-        g.cube(f"arm_{side}", (sx * 7.5 - 1.5, 24.5, -2), (3, 15, 3), "skin")
+        g.cube(f"arm_{side}", (sx * 7.5 - 1.5, 24.5, -2), (3, 15, 3), "char")
         g.bone(f"forearm_{side}", f"arm_{side}", (sx * 7.5, 25, -0.5))
-        g.cube(f"forearm_{side}", (sx * 7.5 - 1.2, 10, -1.7), (2.4, 15.5, 2.4), "skin")
-        g.cube(f"forearm_{side}", (sx * 7.5 - 1.4, 22.5, -1.9), (2.8, 2.5, 2.8), "skin_hi")  # codo
+        g.cube(f"forearm_{side}", (sx * 7.5 - 1.2, 10, -1.7), (2.4, 15.5, 2.4), "char")
+        g.cube(f"forearm_{side}", (sx * 7.5 - 1.4, 22.5, -1.9), (2.8, 2.5, 2.8), "char_hi")  # codo
+        for k in range(3):
+            g.cube(f"arm_{side}", (sx * 7.5 - 0.5, 28 + k * 3, -2.15), (1, 0.25, 0.3), "staple")  # grapas
         g.bone(f"hand_{side}", f"forearm_{side}", (sx * 7.5, 10.5, -0.5))
-        g.cube(f"hand_{side}", (sx * 7.5 - 2, 6.5, -3), (4, 4.5, 5), "skin")
+        g.cube(f"hand_{side}", (sx * 7.5 - 2, 6.5, -3), (4, 4.5, 5), "char")
         for i, z in enumerate((-2.7, -1.4, -0.1, 1.2)):
             ln = (7.5, 8.5, 8.0, 6.5)[i]
             g.bone(f"finger{i}_{side}", f"hand_{side}", (sx * 7.5, 6.8, z + 0.4))
-            g.cube(f"finger{i}_{side}", (sx * 7.5 - 0.4, 6.8 - ln * 0.55, z), (0.8, ln * 0.55, 0.8), "skin")
+            g.cube(f"finger{i}_{side}", (sx * 7.5 - 0.4, 6.8 - ln * 0.55, z), (0.8, ln * 0.55, 0.8), "char")
             g.cube(f"finger{i}_{side}", (sx * 7.5 - 0.3, 6.8 - ln, z + 0.05), (0.6, ln * 0.45 + 0.1, 0.7), "claw")
         g.cube(f"hand_{side}", (sx * 7.5 - sx * 2.6 - 0.4, 6, -3.2), (0.8, 4, 0.8), "claw")  # pulgar
 
     # piernas largas y delgadas, pies con garras
     for side, sx in (("r", 1), ("l", -1)):
         g.bone(f"thigh_{side}", "hips", (sx * 2.6, 21, 0))
-        g.cube(f"thigh_{side}", (sx * 2.6 - 1.6, 11, -1.6), (3.2, 10.5, 3.2), "skin")
+        g.cube(f"thigh_{side}", (sx * 2.6 - 1.6, 11, -1.6), (3.2, 10.5, 3.2), "char")
         g.bone(f"shin_{side}", f"thigh_{side}", (sx * 2.6, 11.5, 0))
-        g.cube(f"shin_{side}", (sx * 2.6 - 1.3, 1.5, -1.2), (2.6, 10.5, 2.6), "skin")
-        g.cube(f"shin_{side}", (sx * 2.6 - 1.5, 10.2, -1.6), (3, 2, 3), "skin_hi")     # rodilla
+        g.cube(f"shin_{side}", (sx * 2.6 - 1.3, 1.5, -1.2), (2.6, 10.5, 2.6), "char")
+        g.cube(f"shin_{side}", (sx * 2.6 - 1.5, 10.2, -1.6), (3, 2, 3), "char_hi")     # rodilla
         g.bone(f"foot_{side}", f"shin_{side}", (sx * 2.6, 1.5, 0))
-        g.cube(f"foot_{side}", (sx * 2.6 - 1.6, 0, -4.5), (3.2, 1.6, 6), "skin")
+        g.cube(f"foot_{side}", (sx * 2.6 - 1.6, 0, -4.5), (3.2, 1.6, 6), "char")
         for i in range(3):
             g.cube(f"foot_{side}", (sx * 2.6 - 1.4 + i * 1.1, 0, -6.3), (0.7, 0.9, 2), "claw")
     return g.save()

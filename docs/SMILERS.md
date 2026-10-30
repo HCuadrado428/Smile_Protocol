@@ -7,7 +7,7 @@ Elegidas en el cuestionario «Fichas de los smilers».
 - **El Rastreador**: sin piel, músculo morado y tendones a la vista, púas de hueso en el espinazo y la mandíbula partida; el ojo rojo en la palma.
 - **El Ahorcado**: muñeco hecho de sábanas de hospital cosidas, relleno que se sale, cables enredados; ojo de botón rojo y sonrisa cosida con hilo rojo.
 - **Apagón**: ceniza y humo gris que se deshacen, brazos de sombra larguísimos y muchos ojos rojos que se abren y se cierran.
-- **Berserker** (rehacer): piel carbonizada y agrietada sobre un cuerpo hinchado, costuras y grapas, el ojo cosido.
+- **Berserker** (rehecho): piel carbonizada y agrietada sobre un cuerpo hinchado, costuras y grapas, el ojo cosido.
 
 ## El Paciente
 Inspirado en los ángeles llorones de Doctor Who. *Implementado (fase 21):* modelo `tools/mob_models.py` (`paciente`), IA en `entity/Paciente.java`, muerte `PACIENTE_KILL`, aparece en `paciente_zones` (morgue y sala final).
