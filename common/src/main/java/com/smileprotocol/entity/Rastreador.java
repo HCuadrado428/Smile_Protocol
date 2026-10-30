@@ -116,6 +116,12 @@ public class Rastreador extends SmilerBase implements QTEManager.Grabber {
         entityData.set(STATE, (byte) s.ordinal());
     }
 
+    /** Pruebas: vuelve a su IA. */
+    public void debugRelease() {
+        forced = false;
+        setState(State.PATROL);
+    }
+
     @Override
     protected void customServerAiStep() {
         super.customServerAiStep();
@@ -324,6 +330,11 @@ public class Rastreador extends SmilerBase implements QTEManager.Grabber {
                     return (v.length() < 3 || flat.dot(look) > cos) && canSee(p);
                 })
                 .min(Comparator.comparingDouble(this::distanceToSqr)).orElse(null);
+    }
+
+    /** Pruebas: si ahora mismo, con su orientacion actual, veria a ese jugador. */
+    public boolean wouldSee(ServerPlayer p) {
+        return level() instanceof ServerLevel sl && see(sl, def()) == p;
     }
 
     private boolean canSee(ServerPlayer p) {

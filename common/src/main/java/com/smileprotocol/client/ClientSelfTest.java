@@ -429,25 +429,26 @@ public final class ClientSelfTest {
             SPSessionManager.teleport(sp, level, cam, 0f, 0f);
             ras[0] = com.smileprotocol.entity.MobManager.spawn(level, com.smileprotocol.registry.ModEntities.RASTREADOR.get(),
                     BlockPos.containing(cam.add(0, 0, 9)), level.random);
-            if (ras[0] != null) {
-                ras[0].setYRot(0f);
-                ras[0].setYBodyRot(0f);
-                ras[0].setYHeadRot(0f);
-                ras[0].setNoAi(false);
-            }
+            if (ras[0] != null) ras[0].debugForce(com.smileprotocol.entity.Rastreador.State.PATROL);
         }));
-        SHOTS.add(() -> wait = 10);
+        SHOTS.add(() -> wait = 5);
         SHOTS.add(() -> server.execute(() -> {
-            boolean ok = ras[0] != null && ras[0].state() != com.smileprotocol.entity.Rastreador.State.CHASE;
-            log((ok ? "OK" : "FALLO") + " rastreador no te ve por la espalda (" + (ras[0] == null ? "-" : ras[0].state()) + ")");
-            if (ras[0] != null) {
-                ras[0].getNavigation().stop();
-                ras[0].setYRot(180f);
-                ras[0].setYBodyRot(180f);
-                ras[0].setYHeadRot(180f);
+            if (ras[0] == null) {
+                log("FALLO rastreador: no aparece");
+                return;
             }
+            for (float y : new float[]{0f, 180f}) {
+                ras[0].setYRot(y);
+                ras[0].setYBodyRot(y);
+                ras[0].setYHeadRot(y);
+                boolean sees = ras[0].wouldSee(sp);
+                boolean ok = y == 0f ? !sees : sees;
+                log((ok ? "OK" : "FALLO") + (y == 0f ? " rastreador no te ve por la espalda" : " rastreador te ve de frente"));
+            }
+            // con la IA: de frente, persigue
+            ras[0].debugRelease();
         }));
-        SHOTS.add(() -> wait = 10);
+        SHOTS.add(() -> wait = 12);
         SHOTS.add(() -> server.execute(() -> {
             boolean ok = ras[0] != null && ras[0].state() == com.smileprotocol.entity.Rastreador.State.CHASE;
             log((ok ? "OK" : "FALLO") + " rastreador te ve y persigue (" + (ras[0] == null ? "-" : ras[0].state()) + ")");
