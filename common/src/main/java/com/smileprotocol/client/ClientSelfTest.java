@@ -508,6 +508,36 @@ public final class ClientSelfTest {
             sp.setHealth(sp.getMaxHealth());
             if (ah[0] != null) ah[0].discard();
         }));
+        // 8j. Fase 21: Apagon retrocede ante la linterna y se come la bateria
+        com.smileprotocol.entity.Apagon[] apg = {null};
+        float[] bat = {0};
+        SHOTS.add(() -> server.execute(() -> {
+            SPSessionManager.teleport(sp, level, cam, 0f, 0f);
+            com.smileprotocol.motion.Flashlights.recharge(sp, 1f);
+            com.smileprotocol.motion.Flashlights.set(sp, false);
+            apg[0] = com.smileprotocol.entity.MobManager.spawn(level, com.smileprotocol.registry.ModEntities.APAGON.get(),
+                    BlockPos.containing(cam.add(0, 0, 6)), level.random);
+        }));
+        SHOTS.add(() -> wait = 15);
+        SHOTS.add(() -> grab(mc, "41_apagon"));
+        SHOTS.add(() -> server.execute(() -> {
+            bat[0] = com.smileprotocol.motion.Flashlights.battery(sp);
+            com.smileprotocol.motion.Flashlights.set(sp, true);
+        }));
+        SHOTS.add(() -> wait = 15);
+        SHOTS.add(() -> server.execute(() -> {
+            boolean recoil = apg[0] != null && apg[0].state() == com.smileprotocol.entity.Apagon.State.RECOIL;
+            float now = com.smileprotocol.motion.Flashlights.battery(sp);
+            log((recoil ? "OK" : "FALLO") + " apagon retrocede ante la linterna (" + (apg[0] == null ? "-" : apg[0].state()) + ")");
+            log((now < bat[0] - 0.02f ? "OK" : "FALLO") + " apagon se come la bateria ("
+                    + String.format(java.util.Locale.ROOT, "%.2f -> %.2f", bat[0], now) + ")");
+        }));
+        SHOTS.add(() -> grab(mc, "42_apagon_linterna"));
+        SHOTS.add(() -> server.execute(() -> {
+            com.smileprotocol.motion.Flashlights.set(sp, false);
+            com.smileprotocol.qte.QTEManager.clear(sp);
+            if (apg[0] != null) apg[0].discard();
+        }));
         // 9. Fase 12: levantarse tras la reanimacion, muerte instantanea en primera persona y muerte final
         SHOTS.add(() -> server.execute(() -> {
             com.smileprotocol.qte.QTEManager.clear(sp);

@@ -515,6 +515,31 @@ def toy_laugh():
     return x
 
 
+def hiss():
+    """Apagon iluminado: siseo de brasa que se apaga con un quejido grave debajo."""
+    r = np.random.default_rng(351)
+    n = int(SR * 1.0)
+    tt = np.arange(n) / SR
+    h = highpass(noise(n, r), 3000) * np.clip(1 - tt / 1.0, 0, 1) ** 1.5
+    moan = np.sin(2 * np.pi * (90 - 30 * tt) * tt) * np.sin(np.clip(tt / 0.9, 0, 1) * np.pi) * 0.4
+    return h * 0.6 + moan
+
+
+def whisper():
+    """Susurros que vienen de todas partes: rafagas de aire con formantes de voz."""
+    r = np.random.default_rng(361)
+    n = int(SR * 3.0)
+    tt = np.arange(n) / SR
+    x = np.zeros(n)
+    for k in range(9):
+        t0 = r.uniform(0, 2.4)
+        a = int(t0 * SR)
+        m = int(SR * r.uniform(0.25, 0.6))
+        seg = bandpass(noise(m, r), r.uniform(900, 2600), 4) * np.sin(np.linspace(0, np.pi, m)) ** 2
+        x[a:a + m] += seg[:max(0, min(m, n - a))]
+    return x
+
+
 def main():
     for i in range(3):
         save(f"berserker/step{i + 1}", step(10 + i))
@@ -553,6 +578,8 @@ def save_new():
     for i in range(2):
         save(f"ambient/creak{i + 1}", creak(200 + i))
     save("ambient/drip", drip())
+    save("apagon/hiss", hiss())
+    save("apagon/whisper", whisper())
     save("ahorcado/creak", creak_rope())
     save("ahorcado/laugh", toy_laugh())
     save("rastreador/screech", screech())

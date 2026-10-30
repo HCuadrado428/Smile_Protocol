@@ -47,6 +47,12 @@ public final class ModEntities {
                     MobCategory.MONSTER).sized(0.6f, 1.2f).eyeHeight(1.0f).clientTrackingRange(10).fireImmune()
                     .build("ahorcado"));
 
+    /** Apagon (fase 21): humo con ojos; la caja es fija, el dibujo crece a oscuras. */
+    public static final Supplier<EntityType<com.smileprotocol.entity.Apagon>> APAGON = Services.PLATFORM.register(
+            BuiltInRegistries.ENTITY_TYPE, "apagon", () -> EntityType.Builder.of(com.smileprotocol.entity.Apagon::new,
+                    MobCategory.MONSTER).sized(0.8f, 1.95f).eyeHeight(1.7f).clientTrackingRange(12).fireImmune()
+                    .build("apagon"));
+
     /** Bengala encendida (fase 13). */
     public static final Supplier<EntityType<com.smileprotocol.entity.FlareEntity>> FLARE = Services.PLATFORM.register(
             BuiltInRegistries.ENTITY_TYPE, "flare", () -> EntityType.Builder.<com.smileprotocol.entity.FlareEntity>of(
@@ -68,5 +74,6 @@ public final class ModEntities {
         Services.PLATFORM.registerAttributes(PACIENTE, com.smileprotocol.entity.Paciente::attributes);
         Services.PLATFORM.registerAttributes(RASTREADOR, com.smileprotocol.entity.Rastreador::attributes);
         Services.PLATFORM.registerAttributes(AHORCADO, com.smileprotocol.entity.Ahorcado::attributes);
+        Services.PLATFORM.registerAttributes(APAGON, com.smileprotocol.entity.Apagon::attributes);
     }
 }

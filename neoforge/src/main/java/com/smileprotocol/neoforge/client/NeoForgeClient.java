@@ -70,6 +70,7 @@ public final class NeoForgeClient {
                     ctx -> new com.smileprotocol.client.BerserkerRenderer<>(ctx, "rastreador", "rastreador"));
             event.registerEntityRenderer(com.smileprotocol.registry.ModEntities.AHORCADO.get(),
                     ctx -> new com.smileprotocol.client.BerserkerRenderer<>(ctx, "ahorcado", "ahorcado"));
+            event.registerEntityRenderer(com.smileprotocol.registry.ModEntities.APAGON.get(), com.smileprotocol.client.ApagonRenderer::new);
             event.registerEntityRenderer(com.smileprotocol.registry.ModEntities.FLARE.get(), net.minecraft.client.renderer.entity.ThrownItemRenderer::new);
             event.registerEntityRenderer(com.smileprotocol.registry.ModEntities.THROWN_ITEM.get(), net.minecraft.client.renderer.entity.ThrownItemRenderer::new);
         }

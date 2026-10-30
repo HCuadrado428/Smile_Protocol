@@ -192,6 +192,7 @@ final class MechanismCommands {
                 var m = com.smileprotocol.entity.MobManager.spawn(level, com.smileprotocol.registry.ModEntities.AHORCADO.get(), pos.above(2), level.random);
                 if (m != null) m.hangAt(m.position());
             }
+            case "apagon" -> com.smileprotocol.entity.MobManager.spawn(level, com.smileprotocol.registry.ModEntities.APAGON.get(), pos, level.random);
             case "rastreador" -> com.smileprotocol.entity.MobManager.spawn(level, com.smileprotocol.registry.ModEntities.RASTREADOR.get(), pos, level.random);
             case "paciente" -> com.smileprotocol.entity.MobManager.spawn(level, com.smileprotocol.registry.ModEntities.PACIENTE.get(), pos, level.random);
             default -> {

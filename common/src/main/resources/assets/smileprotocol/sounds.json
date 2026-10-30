@@ -197,5 +197,17 @@
     "sounds": [
       "smileprotocol:ahorcado/laugh"
     ]
+  },
+  "apagon.hiss": {
+    "subtitle": "subtitles.smileprotocol.apagon.hiss",
+    "sounds": [
+      "smileprotocol:apagon/hiss"
+    ]
+  },
+  "apagon.whisper": {
+    "subtitle": "subtitles.smileprotocol.apagon.whisper",
+    "sounds": [
+      "smileprotocol:apagon/whisper"
+    ]
   }
 }

@@ -214,6 +214,7 @@ public final class LabActions {
             case "smiler_test" -> com.smileprotocol.registry.ModEntities.SMILER_TEST.get();
             case "smiler_kill" -> com.smileprotocol.registry.ModEntities.SMILER_KILL.get();
             case "ahorcado" -> com.smileprotocol.registry.ModEntities.AHORCADO.get();
+            case "apagon" -> com.smileprotocol.registry.ModEntities.APAGON.get();
             case "rastreador" -> com.smileprotocol.registry.ModEntities.RASTREADOR.get();
             case "paciente" -> com.smileprotocol.registry.ModEntities.PACIENTE.get();
             default -> com.smileprotocol.registry.ModEntities.BERSERKER.get();

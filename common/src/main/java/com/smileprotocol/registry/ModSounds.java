@@ -41,6 +41,8 @@ public final class ModSounds {
     public static final Supplier<SoundEvent> RASTREADOR_SCRATCH = register("rastreador.scratch");
     public static final Supplier<SoundEvent> AHORCADO_CREAK = register("ahorcado.creak");
     public static final Supplier<SoundEvent> AHORCADO_LAUGH = register("ahorcado.laugh");
+    public static final Supplier<SoundEvent> APAGON_HISS = register("apagon.hiss");
+    public static final Supplier<SoundEvent> APAGON_WHISPER = register("apagon.whisper");
 
     private ModSounds() {}
 

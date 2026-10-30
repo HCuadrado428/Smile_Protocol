@@ -120,6 +120,17 @@ public final class MobManager {
         SPDebug.log("mobs: " + k + " ahorcados en " + zoneId);
     }
 
+    /** Apagon: uno en las plantas de {@code apagon_zones}, lejos de la llegada. */
+    public static void spawnApagon(ServerLevel level, net.minecraft.resources.ResourceLocation zoneId, List<BlockPos> points,
+                                   Vec3 entry, RandomSource rnd) {
+        if (!SPConfig.get().apagon_zones.contains(zoneId.getPath())) return;
+        List<BlockPos> far = new ArrayList<>();
+        for (BlockPos p : points) if (Vec3.atBottomCenterOf(p).distanceTo(entry) > 36) far.add(p);
+        if (far.isEmpty()) return;
+        BlockPos p = far.get(rnd.nextInt(far.size()));
+        if (spawn(level, ModEntities.APAGON.get(), p, rnd) != null) SPDebug.log("mobs: apagon en " + p.toShortString());
+    }
+
     public static <T extends SPMonster> T spawn(ServerLevel level, EntityType<T> type, BlockPos pos, RandomSource rnd) {
         T mob = type.create(level);
         if (mob == null) return null;

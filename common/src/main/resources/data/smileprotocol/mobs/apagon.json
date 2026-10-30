@@ -1,0 +1,32 @@
+{
+  "id": "smileprotocol:apagon",
+  "family": "smiler",
+  "based_on": "smiley",
+  "_comment": "Apagon (docs/SMILERS.md): siente a quien esta a oscuras y va a por el mas separado; la linterna la hace retroceder y le come la bateria; apaga las luces; agarre HOLD.",
+  "size": {
+    "width": 0.8,
+    "height": 1.95
+  },
+  "senses": {
+    "vision": {
+      "enabled": false
+    },
+    "hearing": {
+      "multiplier": 0.0,
+      "min_noise": 999.0
+    }
+  },
+  "speed": {
+    "walk": 0.45,
+    "run": 1.4
+  },
+  "on_catch": "GRAB_QTE",
+  "qte": {
+    "type": "HOLD",
+    "ticks": 100
+  },
+  "qte_fail_result": "DOWN",
+  "execution": false,
+  "can_enter_vents": false,
+  "causes_interference": true
+}

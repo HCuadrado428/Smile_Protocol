@@ -38,6 +38,13 @@ public final class Flashlights {
         return BATTERY.getOrDefault(p.getUUID(), 1f);
     }
 
+    /** Gasta bateria de golpe (Apagon se la come cuando le apuntas). */
+    public static void drain(ServerPlayer p, float amount) {
+        float b = Math.max(0f, battery(p) - amount);
+        BATTERY.put(p.getUUID(), b);
+        if (b <= 0f && isOn(p)) set(p, false);
+    }
+
     /** Recarga (al empezar la partida; las baterias como consumible llegan en la fase 13). */
     public static void recharge(ServerPlayer p, float amount) {
         BATTERY.put(p.getUUID(), Math.min(1f, battery(p) + amount));

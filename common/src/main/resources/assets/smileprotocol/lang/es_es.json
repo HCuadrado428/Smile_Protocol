@@ -360,5 +360,8 @@
   "entity.smileprotocol.rastreador": "El Rastreador",
   "subtitles.smileprotocol.ahorcado.creak": "Una cuerda cruje arriba",
   "subtitles.smileprotocol.ahorcado.laugh": "Risa de juguete",
-  "entity.smileprotocol.ahorcado": "El Ahorcado"
+  "entity.smileprotocol.ahorcado": "El Ahorcado",
+  "subtitles.smileprotocol.apagon.hiss": "Algo sisea en la luz",
+  "subtitles.smileprotocol.apagon.whisper": "Susurros",
+  "entity.smileprotocol.apagon": "Apagón"
 }
