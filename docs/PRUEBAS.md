@@ -59,7 +59,7 @@ La configuración está en `config/smileprotocol.json`.
 
 Dentro de una partida:
 - **Correr** con Ctrl hace más ruido que andar, y **agachado** casi no hace.
-- **Agachado = a cuatro patas**: con Shift vas de rodillas y con las manos en el suelo. Mides menos de un bloque (0,95), así que cabes por huecos y conductos de ventilación de 1 bloque de alto. Si sueltas Shift debajo de algo bajo, sigues a cuatro patas hasta que haya sitio para levantarte.
+- **Agachado = en cuclillas**: con Shift vas muy encogido, de puntillas con la espalda curvada y los brazos recogidos, dando pasitos sigilosos. Mides menos de un bloque (0,95), así que cabes por huecos y conductos de ventilación de 1 bloque de alto. Si sueltas Shift debajo de algo bajo, sigues agachado hasta que haya sitio para levantarte.
 - **Dive**: corriendo, pulsa **Shift**. Te deslizas tumbado unos metros y cabes por debajo de las tuberías caídas de los pasillos transversales. Tiene 3 s de espera.
 - **Vault**: corriendo o andando hacia un obstáculo de 1 bloque (barriles, losas, escombros), pulsa **Espacio** y lo saltas apoyando la mano.
 - **Mirar atrás**: mantén **C**. Gira la cámara, no la dirección en que corres.
@@ -128,7 +128,7 @@ El Berserker es ciego: solo oye. Corre al sitio donde sonó el ruido y golpea **
 10. **Derribado (mínimo).** Te arrastras muy despacio, se oye al arrastrarte y gimes de vez en cuando. Tienes 60 s antes de desangrarte. Si el Berserker te oye, viene y te **remata**. Para probarlo sin mob: `/spadmin mob down`.
     - La reanimación por los compañeros, la jeringa y las animaciones propias son de la fase 12. De momento, derribado acaba en muerte y vuelta al lobby.
 
-11. **Agarre y QTE (mob de pruebas).** `/spadmin mob spawn smiler_test` pone un smiler que **sí ve**: te persigue y, si te alcanza, te agarra. Sale el minijuego:
+11. **Agarre y QTE (mob de pruebas).** `/spadmin mob spawn smiler_test` pone un smiler que **sí ve**: te persigue y, si te alcanza, te agarra: te arrastra hasta sus manos, te sujeta por los hombros pegado a él y te sacude. Sale el minijuego:
     - **MASH:** machaca ESPACIO (es el que usa el mob de pruebas; se cambia en `data/smileprotocol/mobs/smiler_test.json`, campo `qte.type`);
     - **TIMING:** ESPACIO cuando la marca pasa por la zona (3 aciertos; 2 fallos y fuera);
     - **SEQUENCE:** las teclas W A S D en el orden que se muestra (una mala quita tiempo);

@@ -31,7 +31,7 @@ public abstract class PlayerMixin {
         }
     }
 
-    /** Agachado a cuatro patas: menos de un bloque de alto para pasar por los conductos (README 12.9). */
+    /** Agachado en cuclillas: menos de un bloque de alto para pasar por los conductos (README 12.9). */
     @org.spongepowered.asm.mixin.Unique
     private static final net.minecraft.world.entity.EntityDimensions SMILEPROTOCOL_CRAWL =
             net.minecraft.world.entity.EntityDimensions.scalable(0.6f, 0.95f).withEyeHeight(0.78f);

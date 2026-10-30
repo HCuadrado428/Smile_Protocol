@@ -316,17 +316,18 @@ def animations():
         "finger1_r": {"rotation": kf(wave(L, [15, 0, 0], 18, 1.0, 12))},
         "finger3_l": {"rotation": kf(wave(L, [15, 0, 0], 18, 2.0, 12))},
     }))
-    # GRAB (mob de pruebas): los brazos sujetan a alguien delante y lo sacuden
+    # GRAB (mob de pruebas): sujeta a la victima por los hombros pegada al pecho (las manos quedan a
+    # ~1,17 bloques delante y 1,3 de alto, donde el QTE coloca al jugador) y la sacude
     L = 0.8
     A["grab"] = loop_anim(L, pose_bones({
-        "torso": {"rotation": kf(wave(L, [HUNCH - 10, 0, 0], 4))},
-        "arm_r": {"rotation": kf(wave(L, [-HUNCH - 55, 15, -10], 8))},
-        "arm_l": {"rotation": kf(wave(L, [-HUNCH - 55, -15, 10], 8, math.pi))},
-        "forearm_r": {"rotation": kf([(0, [-35, 0, 0])])},
-        "forearm_l": {"rotation": kf([(0, [-35, 0, 0])])},
-        "head": {"rotation": kf(multi(L, [-20, 0, 0], [6, 10, 8], [0, 1.3, 2.1], 8))},
-        "finger0_r": {"rotation": kf([(0, [45, 0, 0])])}, "finger1_r": {"rotation": kf([(0, [50, 0, 0])])},
-        "finger0_l": {"rotation": kf([(0, [45, 0, 0])])}, "finger1_l": {"rotation": kf([(0, [50, 0, 0])])},
+        "torso": {"rotation": kf(wave(L, [25, 0, 0], 4))},
+        "neck": {"rotation": kf([(0, [-10, 0, 0])])},
+        "arm_r": {"rotation": kf(multi(L, [-2, 0, 0], [5, 3, 0], [0, 1.0, 0]))},
+        "arm_l": {"rotation": kf(multi(L, [-2, 0, 0], [5, -3, 0], [0, 1.0, 0]))},
+        "forearm_r": {"rotation": kf(wave(L, [-108, 0, 0], 4, 0.5))},
+        "forearm_l": {"rotation": kf(wave(L, [-108, 0, 0], 4, 0.5))},
+        "head": {"rotation": kf(multi(L, [-8, 0, 0], [6, 12, 10], [0, 1.3, 2.1], 8))},
+        **{f"finger{i}_{s}": {"rotation": kf([(0, [70 - 6 * i, 0, 0])])} for i in range(4) for s in "rl"},
     }))
     # STUNNED: se tambalea hacia atras con la cabeza dando sacudidas
     L = 1.2

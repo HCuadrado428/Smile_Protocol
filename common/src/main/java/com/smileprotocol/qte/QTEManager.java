@@ -63,6 +63,7 @@ public final class QTEManager {
         float needle = 0.3f;
         float velocity;
         Vec3 anchor;
+        Vec3 start;
         float yaw;
 
         Session(UUID mob, QTEType type, int total, long seed, int difficulty, String fail) {
@@ -76,6 +77,10 @@ public final class QTEManager {
     }
 
     private static final Map<UUID, Session> SESSIONS = new HashMap<>();
+    /** Distancia del mob a la que queda el jugador agarrado (donde estan las manos). */
+    public static final double GRAB_DISTANCE = 1.17;
+    /** Ticks que tarda en arrastrar al jugador hasta las manos. */
+    private static final int PULL_TICKS = 5;
 
     private QTEManager() {}
 
@@ -104,12 +109,16 @@ public final class QTEManager {
             case HOLD -> Math.round(ticks * 0.45f);
         };
         Vec3 look = Vec3.directionFromRotation(0, mob.getYRot());
-        s.anchor = mob.position().add(look.scale(1.35));
+        // Las manos del mob sujetan a la victima por los hombros a ~1,17 bloques delante del pecho
+        // (animacion "grab"): el jugador es arrastrado hasta ahi en los primeros ticks.
+        s.anchor = mob.position().add(look.scale(GRAB_DISTANCE));
+        s.start = p.position();
         s.yaw = mob.getYRot() + 180f;
         SESSIONS.put(p.getUUID(), s);
         MotionManager.setAction(p, Action.GRABBED, 0, false);
         p.setSprinting(false);
-        SPSessionManager.teleport(p, p.serverLevel(), s.anchor, s.yaw, -28f);
+        p.setDeltaMovement(Vec3.ZERO);
+        SPSessionManager.teleport(p, p.serverLevel(), s.start, s.yaw, -28f);
         p.serverLevel().playSound(null, p.blockPosition(), ModSounds.MOB_GRAB.get(), SoundSource.HOSTILE, 1.2f, 1f);
         if (mob instanceof Grabber gr) gr.onGrabStart(p);
         SPNetwork.sendTo(p, new Payloads.StartQTE(type.ordinal(), ticks, seed, s.target, difficulty));
@@ -179,7 +188,14 @@ public final class QTEManager {
                 continue;
             }
             s.elapsed++;
-            if (p.position().distanceToSqr(s.anchor) > 0.01) SPSessionManager.teleport(p, p.serverLevel(), s.anchor, p.getYRot(), p.getXRot());
+            if (s.elapsed <= PULL_TICKS) {
+                // arrastrado hacia las manos (suave al final) mirando a la cara del mob
+                float k = s.elapsed / (float) PULL_TICKS;
+                k = 1f - (1f - k) * (1f - k);
+                SPSessionManager.teleport(p, p.serverLevel(), s.start.lerp(s.anchor, k), s.yaw, -28f);
+            } else if (p.position().distanceToSqr(s.anchor) > 0.01) {
+                SPSessionManager.teleport(p, p.serverLevel(), s.anchor, p.getYRot(), p.getXRot());
+            }
             if (s.elapsed % 14 == 0) {
                 p.serverLevel().playSound(null, p.blockPosition(), ModSounds.PLAYER_HEARTBEAT.get(), SoundSource.PLAYERS, 0.8f, 1.2f);
             }

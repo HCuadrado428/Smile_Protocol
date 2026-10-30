@@ -18,8 +18,8 @@ import java.util.Map;
  * <ul>
  *   <li>un incremento sobre la pose vanilla (rotacion en radianes y posicion en pixeles), para lo que
  *   se superpone al paso normal (respirar, girar el torso al andar, cojear...);</li>
- *   <li>o valores absolutos, para las posturas que no tienen nada que ver con la vanilla (gatear a
- *   cuatro patas agachado, el dive, el arrastrarse derribado);</li>
+ *   <li>o valores absolutos, para las posturas que no tienen nada que ver con la vanilla (ir en
+ *   cuclillas agachado, el dive, el arrastrarse derribado);</li>
  *   <li>y un doblez de codo o rodilla (BEND de PlayerAnimator).</li>
  * </ul>
  * Coordenadas del modelo: Y hacia abajo, -Z hacia delante, el suelo esta en Y = 24. Rotacion X
@@ -229,36 +229,51 @@ public final class PoseCalculator {
     }
 
     /**
-     * Agachado = a cuatro patas (la caja mide menos de un bloque para meterse por los conductos,
-     * README 12.9). Postura absoluta: torso horizontal a ~0,6 bloques del suelo, manos y rodillas
-     * apoyadas, la cabeza baja y alerta. Al moverse, mano y rodilla contrarias avanzan a la vez.
+     * Agachado = en cuclillas, muy encogido (la caja mide menos de un bloque para meterse por los
+     * conductos, README 12.9). Postura absoluta: de puntillas con las rodillas abiertas, la espalda
+     * curvada hacia delante, los brazos recogidos delante del pecho y la cabeza baja y alerta. Al
+     * moverse da pasitos cortos y sigilosos balanceando el peso de un pie al otro.
      */
     private static void crawl(Pose pose, float time, float speed, float phase, float headPitch) {
-        float shoulder = 14.5f;        // altura del pivote de los hombros (Y del modelo; el suelo es 24)
-        float s = Mth.sin(phase) * speed;
-        float lift = Math.max(0, Mth.cos(phase)) * speed;
-        float lift2 = Math.max(0, -Mth.cos(phase)) * speed;
-        float breath = Mth.sin(time * 0.12f) * 0.03f * (1 - speed);
-        pose.setRot(TORSO, PI / 2 - 0.08f + breath, 0.06f * s, 0.05f * s);
-        pose.setPos(TORSO, 0, shoulder - 0.4f * Math.abs(s), 0);
-        // Cabeza delante de los hombros, mirando al frente (sigue un poco la mirada del jugador)
+        float c = Mth.cos(phase), sn = Mth.sin(phase);
+        float s = sn * speed;
+        float lift = Math.max(0, c) * speed, lift2 = Math.max(0, -c) * speed;
+        float still = 1f - speed;
+        float breath = Mth.sin(time * 0.11f);
+        float bob = 0.5f * Math.abs(c) * speed;
+        float sway = 0.07f * s;
+
+        // Caderas a ~0,4 bloques del suelo (Y del modelo; el suelo es 24), algo por detras del centro
+        float hipY = 17.4f - bob, hipZ = 4.2f;
+        float back = 1.22f + 0.025f * breath * still;               // espalda curvada hacia delante
+        float shY = hipY - 12f * Mth.cos(back), shZ = hipZ - 12f * Mth.sin(back);
+        pose.setRot(TORSO, back, 0.08f * s, sway);
+        pose.setPos(TORSO, 0.4f * s, shY, shZ);
+
+        // Cabeza: adelantada y baja, mira al frente (sigue algo la mirada) y vigila a los lados quieto
         float hp = Mth.clamp(headPitch * Mth.DEG_TO_RAD, -0.6f, 0.6f);
-        pose.setRot(HEAD, -0.05f + hp * 0.6f, 0.08f * s, 0);
-        pose.setPos(HEAD, 0, shoulder + 2.2f, -1.6f);
-        // Brazos: casi verticales, las manos delante; avanzan alternando
-        pose.setRot(RIGHT_ARM, -0.55f - 0.45f * s, 0, 0.12f);
-        pose.setRot(LEFT_ARM, -0.55f + 0.45f * s, 0, -0.12f);
-        pose.setPos(RIGHT_ARM, -5f, shoulder + 0.5f - 0.8f * lift, 0.5f);
-        pose.setPos(LEFT_ARM, 5f, shoulder + 0.5f - 0.8f * lift2, 0.5f);
-        pose.bend(RIGHT_ARM, 0, -0.35f - 0.4f * lift);
-        pose.bend(LEFT_ARM, 0, -0.35f - 0.4f * lift2);
-        // Piernas: de rodillas (muslo hacia abajo, espinilla apoyada hacia atras); la contraria a cada brazo
-        pose.setRot(RIGHT_LEG, -0.05f + 0.4f * s, 0, 0.06f);
-        pose.setRot(LEFT_LEG, -0.05f - 0.4f * s, 0, -0.06f);
-        pose.setPos(RIGHT_LEG, -1.9f, shoulder + 2.6f - 1.0f * lift2, 10.6f);
-        pose.setPos(LEFT_LEG, 1.9f, shoulder + 2.6f - 1.0f * lift, 10.6f);
-        pose.bend(RIGHT_LEG, 0, 1.5f - 0.3f * lift2);
-        pose.bend(LEFT_LEG, 0, 1.5f - 0.3f * lift);
+        float glance = Mth.sin(time * 0.037f) * Mth.sin(time * 0.021f + 0.7f);
+        pose.setRot(HEAD, -0.2f + hp * 0.55f + 0.03f * breath, 0.6f * glance * glance * glance * still - 0.06f * s, -sway * 0.5f);
+        pose.setPos(HEAD, 0.4f * s, shY + 0.9f, shZ - 0.5f);
+
+        // Brazos recogidos: codos pegados, antebrazos delante del pecho; oscilan un poco al paso
+        float ay = shY + 2f * Mth.cos(back), az = shZ + 2f * Mth.sin(back);
+        pose.setRot(RIGHT_ARM, -0.25f + 0.18f * s + 0.03f * breath * still, 0.3f, 0.08f);
+        pose.setRot(LEFT_ARM, -0.25f - 0.18f * s + 0.03f * breath * still, -0.3f, -0.08f);
+        pose.setPos(RIGHT_ARM, -4.6f + 0.4f * s, ay, az);
+        pose.setPos(LEFT_ARM, 4.6f + 0.4f * s, ay, az);
+        pose.bend(RIGHT_ARM, 0, -1.45f + 0.15f * s);
+        pose.bend(LEFT_ARM, 0, -1.45f - 0.15f * s);
+
+        // Piernas: muslos casi horizontales hacia delante y abiertos, espinillas inclinadas, de
+        // puntillas. Al dar el paso el pie avanza y se levanta un poco.
+        float th = -1.35f;
+        pose.setRot(RIGHT_LEG, th - 0.3f * s - 0.15f * lift2, 0.32f, 0.05f);
+        pose.setRot(LEFT_LEG, th + 0.3f * s - 0.15f * lift, -0.32f, -0.05f);
+        pose.setPos(RIGHT_LEG, -1.9f, hipY, hipZ);
+        pose.setPos(LEFT_LEG, 1.9f, hipY, hipZ);
+        pose.bend(RIGHT_LEG, 0, 2.25f + 0.25f * s - 0.2f * lift2);
+        pose.bend(LEFT_LEG, 0, 2.25f - 0.25f * s - 0.2f * lift);
     }
 
     // Acciones ----------------------------------------------------------------------------------
