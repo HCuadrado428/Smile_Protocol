@@ -127,6 +127,14 @@ El Berserker es ciego: solo oye. Corre al sitio donde sonó el ruido y golpea **
 10. **Derribado (mínimo).** Te arrastras muy despacio, se oye al arrastrarte y gimes de vez en cuando. Tienes 60 s antes de desangrarte. Si el Berserker te oye, viene y te **remata**. Para probarlo sin mob: `/spadmin mob down`.
     - La reanimación por los compañeros, la jeringa y las animaciones propias son de la fase 12. De momento, derribado acaba en muerte y vuelta al lobby.
 
+11. **Agarre y QTE (mob de pruebas).** `/spadmin mob spawn smiler_test` pone un smiler que **sí ve**: te persigue y, si te alcanza, te agarra. Sale el minijuego:
+    - **MASH:** machaca ESPACIO (es el que usa el mob de pruebas; se cambia en `data/smileprotocol/mobs/smiler_test.json`, campo `qte.type`);
+    - **TIMING:** ESPACIO cuando la marca pasa por la zona (3 aciertos; 2 fallos y fuera);
+    - **SEQUENCE:** las teclas W A S D en el orden que se muestra (una mala quita tiempo);
+    - **HOLD:** mantén ESPACIO para llevar la marca a la zona, que se mueve.
+    Si te sueltas, te empuja hacia atrás y el mob queda aturdido unos segundos. Si fallas, caes derribado. Con un **dive** justo cuando te va a coger, lo esquivas. El tiempo del minijuego crece en grupos pequeños (2 jugadores: ×1,4). El servidor valida las pulsaciones: no se puede hacer trampa con macros de más de 40 por segundo.
+12. **Sonidos.** Pasos, respiración, chasquidos al oír algo, olfateo, el chillido del aviso y el golpe del Berserker, el quejido del derribado, el latido y el agarre son propios (provisionales, generados con `tools/sounds.py`). Activa los subtítulos para verlos.
+
 **Configuración nueva:** `bleed_out_time`, `downed_noise_interval`, `noise_crawl`, `noise_groan`, `berserkers_by_difficulty` y `mobs_wait_for_players`. La ficha del mob está en `data/smileprotocol/mobs/berserker.json`.
 
 ## Depuración

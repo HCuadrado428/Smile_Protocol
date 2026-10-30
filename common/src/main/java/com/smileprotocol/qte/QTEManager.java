@@ -104,12 +104,12 @@ public final class QTEManager {
             case HOLD -> Math.round(ticks * 0.45f);
         };
         Vec3 look = Vec3.directionFromRotation(0, mob.getYRot());
-        s.anchor = mob.position().add(look.scale(0.95));
+        s.anchor = mob.position().add(look.scale(1.35));
         s.yaw = mob.getYRot() + 180f;
         SESSIONS.put(p.getUUID(), s);
         MotionManager.setAction(p, Action.GRABBED, 0, false);
         p.setSprinting(false);
-        SPSessionManager.teleport(p, p.serverLevel(), s.anchor, s.yaw, 10f);
+        SPSessionManager.teleport(p, p.serverLevel(), s.anchor, s.yaw, -28f);
         p.serverLevel().playSound(null, p.blockPosition(), ModSounds.MOB_GRAB.get(), SoundSource.HOSTILE, 1.2f, 1f);
         if (mob instanceof Grabber gr) gr.onGrabStart(p);
         SPNetwork.sendTo(p, new Payloads.StartQTE(type.ordinal(), ticks, seed, s.target, difficulty));
@@ -179,7 +179,7 @@ public final class QTEManager {
                 continue;
             }
             s.elapsed++;
-            if (p.position().distanceToSqr(s.anchor) > 0.01) SPSessionManager.teleport(p, p.serverLevel(), s.anchor, s.yaw, 10f);
+            if (p.position().distanceToSqr(s.anchor) > 0.01) SPSessionManager.teleport(p, p.serverLevel(), s.anchor, p.getYRot(), p.getXRot());
             if (s.elapsed % 14 == 0) {
                 p.serverLevel().playSound(null, p.blockPosition(), ModSounds.PLAYER_HEARTBEAT.get(), SoundSource.PLAYERS, 0.8f, 1.2f);
             }

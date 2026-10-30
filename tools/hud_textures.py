@@ -90,7 +90,7 @@ def blood_vignette():
                     stack.append((x, y, ang + r.choice([-1, 1]) * r.uniform(0.5, 1.1), ln * 0.5, wd * 0.7))
     v = np.asarray(veins, dtype=float) / 255
     v *= smoothstep(0.35, 0.95, d)
-    a = np.maximum(m * 0.9, v * 0.85)
+    a = np.maximum(m * 0.5, v * 0.85)
     cv.a = np.clip(a, 0, 1)
     col = np.zeros((S, S, 3)) + (120, 6, 8)
     col = col * (0.6 + 0.6 * fbm(S, S, r, base=6, octaves=3, periodic=False))[..., None]
