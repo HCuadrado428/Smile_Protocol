@@ -473,6 +473,11 @@ def rastreador():
         g.cube(f"foot_{side}", (sx * 2 - 1, 0, -2.6), (2, 2, 3.6), "muscle")
         for k in range(3):
             g.cube(f"foot_{side}", (sx * 2 - 0.9 + k * 0.7, 0, -4), (0.5, 0.8, 1.6), "claw")
+    split(g, "torso", "chest", (0, 26, 0), lambda c: c["origin"][1] >= 26 and c["mat"] != "bone" or 
+          (c["mat"] == "bone" and c["origin"][1] >= 26 and c["origin"][2] < 0))
+    for bn in ("neck", "arm_r", "arm_l"):
+        reparent(g, bn, "chest")
+    finger_tips(g, n=3)
     return g.save()
 
 
@@ -714,6 +719,9 @@ def apagon():
         for i, z in enumerate((-1, 0, 1)):
             g.bone(f"finger{i}_{side}", f"hand_{side}", (sx * 4.6, -4.8, z * 0.8))
             g.cube(f"finger{i}_{side}", (sx * 4.6 - 0.2, -13, z * 0.8 - 0.2), (0.4, 8.4, 0.4), "shadow")
+    split(g, "tail", "tail2", (0, 10, 0), lambda c: c["origin"][1] < 9.9)
+    split(g, "tail2", "tail3", (0, 6, 0), lambda c: c["origin"][1] < 5.9)
+    split(g, "tail3", "tail4", (0, 2.5, 0), lambda c: c["origin"][1] < 2.4)
     return g.save()
 
 
@@ -848,6 +856,15 @@ def paciente():
         g.bone(f"foot_{side}", f"shin_{side}", (sx * 1.6, 1, 0))
         g.cube(f"foot_{side}", (sx * 1.6 - 0.9, 0, -2.2), (1.8, 1, 3.4), "plaster")
         g.cube(f"foot_{side}", (sx * 1.6 - 0.6, 0, -4.4), (1.2, 0.7, 2.3), "plaster")          # pie largo y puntiagudo
+    split(g, "torso", "chest", (0, 35, 0), lambda c: c["origin"][1] >= 35)
+    for bn in ("neck", "arm_r", "arm_l"):
+        reparent(g, bn, "chest")
+    split(g, "head", "jaw", (0, 52.2, 0.6), lambda c: abs(c["origin"][1] - 50.6) < 0.01)
+    split(g, "hair", "hair_back", (0, 61, 2.5), lambda c: c["origin"][2] > 2)
+    split(g, "hair", "hair_l", (-3.3, 61, 0), lambda c: c["origin"][0] < -3 and c["size"][1] > 3)
+    split(g, "hair", "hair_r", (3.3, 61, 0), lambda c: c["origin"][0] > 2.8 and c["size"][1] > 3)
+    split(g, "hair", "hair_front", (0, 61, -3.9), lambda c: c["origin"][2] < -3.8)
+    finger_tips(g)
     return g.save()
 
 
@@ -893,6 +910,100 @@ def paciente_animations():
     p = ROOT / "animations/entity/paciente.animation.json"
     p.write_text(json.dumps(out, indent=1) + "\n", encoding="utf-8")
     return A
+
+
+# Esqueleto mas fino --------------------------------------------------------------------------------
+#
+# Huesos extra que no mueven los que ya existen (los remates estan medidos con las manos): pecho,
+# mandibula, mechones de pelo, falanges y tramos de cola. Las animaciones los usan con movimiento
+# secundario (enrich).
+
+def _bone(g, name):
+    return next(b for b in g.bones if b["name"] == name)
+
+
+def split(g, src, new, pivot, test, parent=None):
+    """Pasa a un hueso nuevo (hijo de src o de parent) los cubos de src que cumplen test."""
+    b = _bone(g, src)
+    moved = [c for c in b["cubes"] if test(c)]
+    if not moved:
+        return
+    b["cubes"] = [c for c in b["cubes"] if not test(c)]
+    g.bone(new, parent or src, pivot)
+    _bone(g, new)["cubes"] = moved
+
+
+def reparent(g, name, parent):
+    _bone(g, name)["parent"] = parent
+
+
+def finger_tips(g, sides="rl", n=4, tip_mat="claw"):
+    for sd in sides:
+        for i in range(n):
+            name = f"finger{i}_{sd}"
+            if not any(b["name"] == name for b in g.bones):
+                continue
+            tips = [c for c in _bone(g, name)["cubes"] if c["mat"] == tip_mat]
+            if not tips:
+                continue
+            top = max(c["origin"][1] + c["size"][1] for c in tips)
+            piv = _bone(g, name)["pivot"]
+            split(g, name, f"{name}_tip", (piv[0], top, piv[2]), lambda c: c["mat"] == tip_mat)
+
+
+SEQUENCE_ANIMS = {"execute", "execute_smiler", "kill", "kill_paciente"}
+
+
+def enrich(A, bones):
+    """Movimiento secundario en los huesos nuevos, sin tocar lo que cada animacion ya define."""
+    have = set(bones)
+    for name, an in A.items():
+        if name.startswith("pose"):
+            continue        # el Paciente es una estatua: ni un pelo se mueve
+        L = float(an["animation_length"])
+        if L < 0.1:
+            L = 2.0
+            an["animation_length"] = L
+            an["loop"] = True
+        bb = an["bones"]
+        fast = 2.2 if name in ("run", "crawl") else 1.4 if name in ("walk", "move", "strike", "grab") else 1.0
+        violent = name in SEQUENCE_ANIMS or name in ("strike", "grab")
+        for k, (bn, amp, ph) in enumerate((("hair_back", (6, 0, 3), 0.0), ("hair_l", (4, 0, 7), 0.7),
+                                           ("hair_r", (4, 0, -7), 1.3), ("hair_front", (5, 0, 2), 2.0))):
+            if bn in have and bn not in bb:
+                bb[bn] = {"rotation": kf(multi(L, [4, 0, 0], [a * fast for a in amp], [ph, ph, ph + 0.5]))}
+        if "jaw" in have and "jaw" not in bb:
+            bb["jaw"] = {"rotation": kf(wave(L, [22 if violent else 4, 0, 0], 10 if violent else 3, 0.4, 8))}
+        if "chest" in have and "chest" not in bb and name not in SEQUENCE_ANIMS:
+            bb["chest"] = {"rotation": kf(wave(L, [0, 0, 0], 2.0 * fast, 0, 8))}
+        for t, amp in (("tail2", 8), ("tail3", 12), ("tail4", 16)):
+            if t in have and t not in bb:
+                bb[t] = {"rotation": kf(multi(L, [0, 0, 0], [amp * fast, 0, amp * 0.6 * fast],
+                                             [int(t[-1]) * 0.8, 0, int(t[-1]) * 0.8 + 1]))}
+        # falanges: siguen al dedo (70 %) y se crispan un poco
+        for b in have:
+            if not b.endswith("_tip") or b in bb:
+                continue
+            parent = b[:-4]
+            src = bb.get(parent, {}).get("rotation")
+            if src:
+                bb[b] = {"rotation": {t: [round(v * 0.7, 2) if j == 0 else 0 for j, v in enumerate(val)] for t, val in src.items()}}
+            else:
+                bb[b] = {"rotation": kf(wave(L, [12, 0, 0], 8, hash(b) % 6, 8))}
+    return A
+
+
+def bones_of(name):
+    geo = json.loads((ROOT / f"geo/entity/{name}.geo.json").read_text())["minecraft:geometry"][0]
+    return [b["name"] for b in geo["bones"]]
+
+
+def rewrite_anims(name):
+    p = ROOT / f"animations/entity/{name}.animation.json"
+    data = json.loads(p.read_text())
+    enrich(data["animations"], bones_of(name))
+    p.write_text(json.dumps(data, indent=1) + "\n", encoding="utf-8")
+    return data["animations"]
 
 
 # Berserker ----------------------------------------------------------------------------------------------
@@ -965,6 +1076,15 @@ def berserker():
         g.cube(f"foot_{side}", (sx * 2.6 - 1.6, 0, -4.5), (3.2, 1.6, 6), "char")
         for i in range(3):
             g.cube(f"foot_{side}", (sx * 2.6 - 1.4 + i * 1.1, 0, -6.3), (0.7, 0.9, 2), "claw")
+    # esqueleto fino: pecho, mandibula, mechones y falanges
+    split(g, "torso", "chest", (0, 31, 0), lambda c: c["origin"][1] >= 31)
+    for b in ("neck", "arm_r", "arm_l"):
+        reparent(g, b, "chest")
+    split(g, "head", "jaw", (0, 43.4, 0.5), lambda c: abs(c["origin"][1] - 41.6) < 0.01)
+    split(g, "hair", "hair_back", (0, 51, 2.5), lambda c: abs(c["origin"][2] - 2.2) < 0.01)
+    split(g, "hair", "hair_l", (-4.3, 51.5, -2), lambda c: abs(c["origin"][0] + 4.7) < 0.01)
+    split(g, "hair", "hair_r", (4.3, 51.5, -2), lambda c: abs(c["origin"][0] - 3.9) < 0.01)
+    finger_tips(g)
     return g.save()
 
 
@@ -1632,6 +1752,8 @@ def main():
     ahorcado_animations()
     apagon()
     apagon_animations()
+    for n in ("berserker", "paciente", "rastreador", "apagon"):
+        rewrite_anims(n)
     print(f"paciente textura {pw * gm.SCALE}x{ph * gm.SCALE} caras={pn} animaciones={list(P)}")
     if len(sys.argv) > 2:
         frames = [("pose0", 200), ("pose0", 110), ("pose1", 160), ("pose2", 130), ("pose3", 200), ("pose4", 160)]
