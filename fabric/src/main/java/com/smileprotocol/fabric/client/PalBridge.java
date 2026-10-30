@@ -50,13 +50,32 @@ public final class PalBridge {
             return pose.isActive() || com.smileprotocol.client.ClientState.inSmileProtocol();
         }
 
+        private long lastLog;
+
         @Override
         public void setupAnim(float tickDelta) {
             PoseCalculator.compute(player, tickDelta, pose);
+            if (com.smileprotocol.client.ClientSelfTest.recording() && net.minecraft.Util.getMillis() - lastLog > 1500) {
+                lastLog = net.minecraft.Util.getMillis();
+                float[] ra = pose.get(PoseCalculator.RIGHT_ARM);
+                com.smileprotocol.SmileProtocol.LOGGER.info("CLIENTTEST PAL setupAnim activo={} brazoD={}", pose.isActive(),
+                        ra == null ? "null" : java.util.Arrays.toString(ra));
+            }
         }
+
+        private long lastT;
 
         @Override
         public Vec3f get3DTransform(String part, TransformType type, float tickDelta, Vec3f value0) {
+            if (com.smileprotocol.client.ClientSelfTest.recording() && "rightArm".equals(part) && type == TransformType.ROTATION
+                    && net.minecraft.Util.getMillis() - lastT > 1500) {
+                lastT = net.minecraft.Util.getMillis();
+                com.smileprotocol.SmileProtocol.LOGGER.info("CLIENTTEST PAL get3DTransform rightArm valor0={},{},{}", value0.getX(), value0.getY(), value0.getZ());
+            }
+            return transform(part, type, value0);
+        }
+
+        private Vec3f transform(String part, TransformType type, Vec3f value0) {
             float[] d = pose.get(part);
             if (d == null) return value0;
             boolean[] abs = pose.flags(part);
