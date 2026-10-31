@@ -147,6 +147,7 @@ public final class InstanceManager {
         /** Bloques de la plantilla ordenados por Z (se coloca de delante a atras) y por donde va. */
         @Nullable List<StructureTemplate.StructureBlockInfo> blocks;
         int cursor;
+        boolean chunksReady;
 
         PlaceJob(Group group, int index, int sub, ResourceLocation zoneId, @Nullable ZoneDef def, BlockPos origin,
                  @Nullable StructureTemplate template) {
@@ -165,6 +166,11 @@ public final class InstanceManager {
 
         public int index() {
             return index;
+        }
+
+        @Nullable
+        public BoundingBox box() {
+            return box;
         }
 
         /** De 0 a 1: cuanto lleva pegado. */
@@ -237,6 +243,11 @@ public final class InstanceManager {
         if (job.blocksDone || job.template == null || job.box == null) {
             job.blocksDone = true;
             return true;
+        }
+        // durante el viaje se espera a que el servidor cargue los chunks (pedidos con el ticket, sin parones)
+        if (slices < Integer.MAX_VALUE / BLOCKS_PER_SLICE && !job.chunksReady) {
+            job.chunksReady = chunksReady(level, job.box);
+            if (!job.chunksReady) return false;
         }
         if (job.blocks != null) {
             // directo: cada bloque con su estado y, si tiene, los datos de su entidad de bloque
@@ -564,6 +575,16 @@ public final class InstanceManager {
     }
 
     // Tickets de chunks ------------------------------------------------------------------------
+
+    /** Estan cargados todos los chunks de la caja. */
+    public static boolean chunksReady(ServerLevel level, BoundingBox box) {
+        for (int cx = box.minX() >> 4; cx <= box.maxX() >> 4; cx++) {
+            for (int cz = box.minZ() >> 4; cz <= box.maxZ() >> 4; cz++) {
+                if (!level.getChunkSource().hasChunk(cx, cz)) return false;
+            }
+        }
+        return true;
+    }
 
     private static void addTicket(ServerLevel level, BoundingBox box) {
         ServerChunkCache cache = level.getChunkSource();

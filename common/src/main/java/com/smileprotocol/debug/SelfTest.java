@@ -164,15 +164,23 @@ public final class SelfTest {
             log("FALLO construccion por partes: no empieza");
             return 1;
         }
+        // los chunks los carga el servidor durante el viaje; aqui se fuerzan antes de medir
+        long c0 = System.nanoTime();
+        var b = job.box();
+        for (int cx = b.minX() >> 4; cx <= b.maxX() >> 4; cx++) for (int cz = b.minZ() >> 4; cz <= b.maxZ() >> 4; cz++) level.getChunk(cx, cz);
+        long chunkMs = (System.nanoTime() - c0) / 1_000_000;
         int ticks = 0;
-        long worst = 0;
+        long worst = 0, first = 0, sum = 0;
         float last = -1;
         boolean monotonic = true;
         int slices = Math.max(1, com.smileprotocol.config.SPConfig.get().zone_build_slices_per_tick);
         while (!job.blocksDone() && ticks < 2000) {
             long t0 = System.nanoTime();
             InstanceManager.stepPlace(level, job, slices);
-            worst = Math.max(worst, System.nanoTime() - t0);
+            long dt = System.nanoTime() - t0;
+            if (ticks == 0) first = dt;
+            else worst = Math.max(worst, dt);
+            sum += dt;
             if (job.progress() < last) monotonic = false;
             last = job.progress();
             ticks++;
@@ -181,7 +189,8 @@ public final class SelfTest {
         boolean ok = z != null && z.exitCabin() != null && !z.marker("entry").isEmpty() && monotonic && job.blocksDone()
                 && !level.getBlockState(BlockPos.containing(z.entry()).below()).isAir();
         log((ok ? "construccion por partes" : "FALLO construccion por partes") + ": " + ticks + " ticks (" + ticks / 20.0
-                + " s de viaje) con " + slices + " rebanadas por tick, peor tick " + worst / 1_000_000 + " ms");
+                + " s de viaje) con " + slices + " tandas por tick; primer tick " + first / 1_000_000 + " ms, peor de los demas "
+                + worst / 1_000_000 + " ms, media " + (sum / Math.max(1, ticks)) / 1_000_000 + " ms (chunks: " + chunkMs + " ms)");
         if (z != null) g.setCurrent(z);
         InstanceManager.release(server, g);
         return ok ? 0 : 1;
