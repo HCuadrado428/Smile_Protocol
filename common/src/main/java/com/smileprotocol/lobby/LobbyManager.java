@@ -267,7 +267,7 @@ public final class LobbyManager {
         }
         setDoors(overworld, def, rt, false);
         for (ServerPlayer p : group) {
-            SPNetwork.sendTo(p, new Payloads.ScreenFade(15, 40, 20));
+            // sin pantalla negra: se quedan en la cabina mientras baja (RunManager.tickDescents)
             SPNetwork.sendTo(p, Payloads.SyncReady.hidden());
         }
         SPDebug.log("ascensor " + def.id() + ": baja con " + group.size() + " jugadores");
@@ -289,7 +289,7 @@ public final class LobbyManager {
             case MEGA -> com.smileprotocol.difficulty.RunRules.decode(SPConfig.get().event_rules);
             default -> com.smileprotocol.difficulty.RunRules.DEFAULT;
         };
-        RunManager.StartResult result = RunManager.start(server, type, def.id(), group, rt.forced, rules);
+        RunManager.StartResult result = RunManager.start(server, type, def.id(), group, rt.forced, rules, true);
         rt.forced = false;
         if (!result.ok()) {
             SPDebug.log("ascensor " + def.id() + ": no se pudo bajar: " + result.message().getString());
@@ -303,7 +303,9 @@ public final class LobbyManager {
         }
         // Quien no ha entrado en ningun grupo se queda en el lobby
         for (ServerPlayer p : group) {
-            if (!SPPlayerData.inSP(p)) {
+            boolean in = false;
+            for (com.smileprotocol.run.Group g : result.run().groups()) in |= g.isMember(p.getUUID());
+            if (!in) {
                 p.displayClientMessage(Component.translatable("smileprotocol.run.left_out").withStyle(ChatFormatting.GOLD), false);
                 SPNetwork.sendTo(p, new Payloads.ScreenFade(0, 0, 10));
             }

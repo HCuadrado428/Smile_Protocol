@@ -60,7 +60,7 @@ void main() {
             blur += sampleRGB(uv - c * 0.012 * float(i) * k, off);
         }
         blur /= 7.0;
-        col = mix(col, blur, smoothstep(0.35, 0.95, r) * k);
+        col = mix(col, blur, smoothstep(0.45, 1.0, r) * k * 0.85);
         // imagen doble que tiembla con el latido
         vec3 ghost = texture(DiffuseSampler, uv + vec2(0.006, -0.003) * (0.5 + Pulse) * k).rgb;
         col = mix(col, max(col, ghost), 0.25 * k);
@@ -71,17 +71,20 @@ void main() {
     vec3 graded = mix(vec3(g), col, 0.82);                                   // algo menos de color
     graded *= vec3(0.96, 1.0, 1.04);                                         // sombras frias
     graded = mix(graded, graded * vec3(1.06, 1.02, 0.9), smoothstep(0.45, 1.0, g));   // luces amarillentas
-    graded = max(graded - 0.025, 0.0) * 1.04;                                // negros aplastados
+    graded = max(graded - 0.015, 0.0) * 1.03;                                // negros aplastados
     col = mix(col, graded, b);
+
+    // con tension se levantan un poco las sombras: se sigue viendo por donde huir
+    col = mix(col, pow(col, vec3(0.88)), 0.6 * k);
 
     // --- tension: desaturacion enfermiza hacia el rojo ---
     g = dot(col, vec3(0.299, 0.587, 0.114));
-    col = mix(col, vec3(g) * vec3(1.12, 0.92, 0.84), 0.55 * k);
+    col = mix(col, vec3(g) * vec3(1.12, 0.92, 0.84), 0.40 * k);
 
     // grano de pelicula (mas grueso con tension)
     float grainSize = mix(1.4, 2.2, k);
     float n = hash(floor(uv * InSize / grainSize) + fract(Time * 37.0) * 311.0) - 0.5;
-    col += n * (0.035 * b + 0.08 * k) * (1.0 - g * 0.5);
+    col += n * (0.03 * b + 0.05 * k) * (1.0 - g * 0.5);
 
     // polvo y rayas de pelicula, de vez en cuando
     if (Calm < 0.5) {
@@ -94,9 +97,9 @@ void main() {
 
     // vineta: suave siempre; con tension, cerrada y latiendo en rojo
     float v = smoothstep(0.55, 1.15, r);
-    col *= 1.0 - v * 0.45 * b;
+    col *= 1.0 - v * 0.35 * b;
     float vt = smoothstep(0.30, 0.95, r);
-    col *= 1.0 - vt * (0.45 + 0.25 * Pulse) * k;
+    col *= 1.0 - vt * (0.32 + 0.18 * Pulse) * k;
     col += vec3(0.32, 0.0, 0.0) * vt * Pulse * k * 0.35;
 
     fragColor = vec4(clamp(col, 0.0, 1.0), 1.0);

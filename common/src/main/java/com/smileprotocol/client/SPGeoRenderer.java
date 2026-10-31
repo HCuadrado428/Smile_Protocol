@@ -77,9 +77,16 @@ public class SPGeoRenderer<T extends AnimatedBlockEntity> extends GeoBlockRender
         return Direction.SOUTH;
     }
 
+    /** Solo lo que ocupa dos bloques (puertas, camilla, taquillas) necesita dibujarse aunque su bloque no se vea. */
     @Override
     public boolean shouldRenderOffScreen(T be) {
-        return true;
+        return be instanceof LabDoorBlockEntity || be instanceof HideBlockEntity;
+    }
+
+    /** Rendimiento: los muebles y mecanismos pequenos no se dibujan de lejos (no se ven a oscuras). */
+    @Override
+    public int getViewDistance() {
+        return 48;
     }
 
     /** NeoForge: la caja de recorte cubre las piezas de dos bloques (puertas, camilla). */

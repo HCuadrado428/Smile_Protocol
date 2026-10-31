@@ -60,6 +60,21 @@ public final class Group {
     public int slot() { return slot; }
     public com.smileprotocol.difficulty.RunRules rules() { return rules; }
 
+    // Combate contra Smiley de la planta en curso (se guarda para sobrevivir a un reinicio)
+    private int bossZone = -1;
+    private CompoundTag boss = new CompoundTag();
+
+    public int bossZone() { return bossZone; }
+    public CompoundTag bossData() { return boss; }
+
+    /** Guarda el estado del combate. Devuelve true si ha cambiado. */
+    public boolean setBoss(int zone, CompoundTag data) {
+        if (zone == bossZone && data.equals(boss)) return false;
+        bossZone = zone;
+        boss = data;
+        return true;
+    }
+
     // Mision de la planta en curso (se guarda para sobrevivir a un reinicio del servidor)
     private int missionZone = -1;
     private int missionStep;
@@ -157,6 +172,12 @@ public final class Group {
         t.put("Sequence", seq);
         t.put("Difficulty", difficulty.save());
         t.putString("Rules", rules.encode());
+        if (bossZone >= 0) {
+            CompoundTag bt = new CompoundTag();
+            bt.putInt("Zone", bossZone);
+            bt.put("Data", boss);
+            t.put("Boss", bt);
+        }
         if (missionZone >= 0) {
             CompoundTag mission = new CompoundTag();
             mission.putInt("Zone", missionZone);
@@ -205,6 +226,11 @@ public final class Group {
         }
         g.zoneIndex = t.getInt("ZoneIndex");
         g.rules = com.smileprotocol.difficulty.RunRules.decode(t.getString("Rules"));
+        if (t.contains("Boss")) {
+            CompoundTag bt = t.getCompound("Boss");
+            g.bossZone = bt.getInt("Zone");
+            g.boss = bt.getCompound("Data");
+        }
         if (t.contains("Mission")) {
             CompoundTag mission = t.getCompound("Mission");
             g.missionZone = mission.getInt("Zone");

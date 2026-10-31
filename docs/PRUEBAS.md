@@ -210,6 +210,8 @@ Disparadores: `fuse_inserted`, `fuse_removed`, `fuse_moved`, `circuit_powered`, 
 ## Ascensores de zona, game over y fin de partida (fase 16)
 
 - **Viaje en ascensor.** Al salir el ascensor de una planta, los que están dentro **no ven pantalla negra**: se quedan en la cabina, que baja (zumbido, traqueteo, algún golpe de los cables, la luz parpadea) mientras se construye la planta siguiente por partes. Abajo, en la barra de acción, «▼ Bajando a la planta N… %». Al frenar hay un golpe, un fundido muy corto y aparecen en la cabina de la planta nueva en el mismo sitio y mirando hacia las puertas, que se abren con un «ding». Los que se quedaron fuera lo ven todo negro y llegan igual. Dura al menos `elevator_ride_time` (8 s); si la planta tarda más en construirse, el viaje se alarga. Con `preload_next_zone = true` vuelve el comportamiento antiguo (la siguiente se construye de antemano).
+- **Bajada desde el lobby.** Igual al salir del ascensor del lobby: sin pantalla negra, la cabina baja (traqueteo, «▼ Bajando a la planta 1… %») mientras se construye la planta de entrada, y al frenar aparecéis en la cabina de abajo. Si se reinicia el servidor a mitad de bajada, la construcción vuelve a empezar y la partida sigue.
+- **Combate contra Smiley tras un reinicio.** Con la intro ya hecha (y algún generador encendido), reinicia el servidor: Smiley no vuelve a presentarse, las luces que se apagaron siguen apagadas, el ascensor llamado sigue llamado y la fase sigue los generadores encendidos.
 
 1. **Los muertos vuelven en el ascensor.** Cuando el grupo sube, los compañeros muertos (espectadores) aparecen dentro de la cabina con los demás, curados, pero **pierden lo que llevaban** (salvo la linterna), igual que los heridos, los derribados y los que se quedaron fuera (`elevator_strip`).
 2. **Viaje:** pantalla negra y la cabina tiembla al salir y al frenar.
@@ -279,6 +281,7 @@ Hace falta Simple Voice Chat en el servidor y en los clientes (es opcional: sin 
 - **Fluorescentes.** Al dar corriente a un circuito, cada tubo arranca a golpes (unos destellos) antes de quedarse fijo; no todos a la vez ni igual. Encendidos tienen un rizado muy leve, cada uno su intensidad y su tono (unos más verdes, otros más azulados). Al quitar la corriente se apagan casi de golpe.
 - **Linterna.** El haz sale de la mano (algo a la derecha y por debajo de los ojos), sigue a la mirada con un poco de retraso y se balancea al andar. Las de los demás, como antes, desde su cabeza.
 - **Bengalas.** La luz roja tiembla como una llama y su centro baila un poco.
+- **Rendimiento.** Los muebles y mecanismos pequeños con GeckoLib ya no se dibujan de lejos (48 bloques) ni cuando su bloque está fuera de la vista; el Imitador busca jugadores cada 4 ticks salvo cuando ataca; las plantas se construyen por partes (la prueba del servidor dice cuánto tarda el peor tick).
 - **Sombras.** Las luces de Veil no proyectan sombras de los bloques; no se ha podido añadir.
 
 ## Muebles animados

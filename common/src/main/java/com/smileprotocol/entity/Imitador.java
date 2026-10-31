@@ -58,6 +58,8 @@ public class Imitador extends SmilerBase {
     private int nextMimic = 200;
     private int repath;
     private int mimics;
+    @Nullable private List<ServerPlayer> cached;
+    private boolean cachedSeen;
 
     public Imitador(EntityType<? extends PathfinderMob> type, Level level) {
         super(type, level);
@@ -101,13 +103,18 @@ public class Imitador extends SmilerBase {
         super.customServerAiStep();
         if (!(level() instanceof ServerLevel level) || sequence() != null) return;
         timer++;
-        List<ServerPlayer> players = players(level);
+        // rendimiento: la busqueda de jugadores y las miradas, cada 4 ticks (salvo cuando ataca)
+        if (cached == null || state() == State.HUNT || tickCount % 4 == 0) {
+            cached = players(level);
+            cachedSeen = state() != State.HUNT && Paciente.observed(level, getBoundingBox());
+        }
+        List<ServerPlayer> players = cached;
         if (target == null || !valid(target)) target = players.stream().min(Comparator.comparingDouble(this::distanceToSqr)).orElse(null);
         if (target == null) {
             getNavigation().stop();
             return;
         }
-        boolean seen = state() != State.HUNT && Paciente.observed(level, getBoundingBox()) && nearestDistance(players) < 20;
+        boolean seen = state() != State.HUNT && cachedSeen && nearestDistance(players) < 20;
         if (seen && state() != State.FLEE) {
             flee(level);
             return;

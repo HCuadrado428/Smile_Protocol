@@ -14,6 +14,7 @@ import com.smileprotocol.player.SPPlayerData;
 import com.smileprotocol.session.SPSessionManager;
 import com.smileprotocol.zone.ZoneSequence;
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
@@ -26,6 +27,7 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -172,6 +174,16 @@ public final class RunManager {
 
     public static StartResult start(MinecraftServer server, RunType type, String elevatorId,
                                     List<ServerPlayer> players, boolean force, com.smileprotocol.difficulty.RunRules rules) {
+        return start(server, type, elevatorId, players, force, rules, false);
+    }
+
+    /**
+     * {@code descend}: la primera planta se construye por partes mientras los jugadores bajan en la cabina
+     * del lobby (la partida queda en DESCENT hasta que esta lista); si no, se construye ya y entran ya.
+     */
+    public static StartResult start(MinecraftServer server, RunType type, String elevatorId,
+                                    List<ServerPlayer> players, boolean force, com.smileprotocol.difficulty.RunRules rules,
+                                    boolean descend) {
         ServerLevel level = server.getLevel(SPDimension.SP_DIM);
         if (level == null) return new StartResult(null, Component.translatable("smileprotocol.run.no_dimension"));
         RunData data = RunData.get(server);
@@ -242,18 +254,51 @@ public final class RunManager {
         if (type != RunType.TUTORIAL) data.lastSequence.put(elevatorId, sequence);
         data.changed();
 
-        // Primero se colocan todas las zonas de entrada; si alguna falla no baja nadie
-        for (Group g : run.groups()) {
-            if (InstanceManager.placeFirst(level, g) == null) {
-                SmileProtocol.LOGGER.error("No se pudo colocar la zona de entrada de {}", g.label());
-                for (Group other : run.groups()) InstanceManager.release(server, other);
-                run.setState(RunState.ENDED);
-                run.setClosed(true);
-                data.runs.remove(runId);
-                data.changed();
-                return new StartResult(null, Component.translatable("smileprotocol.run.place_failed"));
+        if (descend) {
+            // Bajando: las plantas de entrada se construyen durante el viaje (tickDescents)
+            List<InstanceManager.PlaceJob> jobs = new ArrayList<>();
+            for (Group g : run.groups()) {
+                InstanceManager.PlaceJob job = InstanceManager.beginPlace(level, g, 0, 0);
+                if (job == null) {
+                    for (Group other : run.groups()) InstanceManager.release(server, other);
+                    run.setState(RunState.ENDED);
+                    run.setClosed(true);
+                    data.runs.remove(runId);
+                    data.changed();
+                    return new StartResult(null, Component.translatable("smileprotocol.run.place_failed"));
+                }
+                jobs.add(job);
             }
+            DESCENTS.put(runId, new Descent(jobs));
+            run.setState(RunState.DESCENT);
+            data.changed();
+        } else {
+            // Primero se colocan todas las zonas de entrada; si alguna falla no baja nadie
+            for (Group g : run.groups()) {
+                if (InstanceManager.placeFirst(level, g) == null) {
+                    SmileProtocol.LOGGER.error("No se pudo colocar la zona de entrada de {}", g.label());
+                    for (Group other : run.groups()) InstanceManager.release(server, other);
+                    run.setState(RunState.ENDED);
+                    run.setClosed(true);
+                    data.runs.remove(runId);
+                    data.changed();
+                    return new StartResult(null, Component.translatable("smileprotocol.run.place_failed"));
+                }
+            }
+            enterPlayers(server, level, data, run);
         }
+        com.smileprotocol.debug.Playtest.count("partida " + type.name().toLowerCase() + " (" + rules.encode() + ")");
+
+        StringBuilder sizes = new StringBuilder();
+        for (Group g : run.groups()) sizes.append(sizes.isEmpty() ? "" : "+").append(g.members().size());
+        SPDebug.log("partida " + runId + " " + type + " desde " + elevatorId + " reglas=" + rules.encode() + " grupos=" + sizes + " semilla=" + seed
+                + " zonas=" + sequence);
+        return new StartResult(run, Component.translatable("smileprotocol.run.started", runId, run.groups().size(), sizes.toString()));
+    }
+
+    /** Mete a los jugadores de cada grupo en la cabina de su planta de entrada y arranca la partida. */
+    private static void enterPlayers(MinecraftServer server, ServerLevel level, RunData data, Run run) {
+        RunType type = run.type();
         for (Group g : run.groups()) {
             ZonePlacement entry = g.current();
             for (UUID id : g.members().keySet()) {
@@ -268,22 +313,146 @@ public final class RunManager {
                 p.sendSystemMessage(Component.translatable("smileprotocol.run.joined", g.label(), g.members().size(),
                         Component.translatable("smileprotocol.run.type." + type.name().toLowerCase())).withStyle(ChatFormatting.DARK_AQUA));
             }
+            level.playSound(null, BlockPos.containing(entry != null ? entry.entry() : net.minecraft.world.phys.Vec3.ZERO),
+                    net.minecraft.sounds.SoundEvents.NOTE_BLOCK_BELL.value(), net.minecraft.sounds.SoundSource.BLOCKS, 1f, 1.2f);
         }
         run.setState(RunState.RUNNING);
         data.changed();
-        com.smileprotocol.debug.Playtest.count("partida " + type.name().toLowerCase() + " (" + rules.encode() + ")");
+    }
 
-        StringBuilder sizes = new StringBuilder();
-        for (Group g : run.groups()) sizes.append(sizes.isEmpty() ? "" : "+").append(g.members().size());
-        SPDebug.log("partida " + runId + " " + type + " desde " + elevatorId + " reglas=" + rules.encode() + " grupos=" + sizes + " semilla=" + seed
-                + " zonas=" + sequence);
-        return new StartResult(run, Component.translatable("smileprotocol.run.started", runId, run.groups().size(), sizes.toString()));
+    // Bajada desde el lobby ---------------------------------------------------------------------
+
+    /** Una partida que esta bajando: sus plantas de entrada, a medio construir. */
+    private static final class Descent {
+        final List<InstanceManager.PlaceJob> jobs;
+        int ticks;
+        int arriveAt = -1;
+
+        Descent(List<InstanceManager.PlaceJob> jobs) {
+            this.jobs = jobs;
+        }
+
+        boolean built() {
+            for (InstanceManager.PlaceJob j : jobs) if (!j.blocksDone()) return false;
+            return true;
+        }
+
+        float progress() {
+            float p = 0;
+            for (InstanceManager.PlaceJob j : jobs) p += j.progress();
+            return jobs.isEmpty() ? 1 : p / jobs.size();
+        }
+    }
+
+    private static final Map<String, Descent> DESCENTS = new java.util.HashMap<>();
+
+    /** Partidas bajando en este momento (pruebas). */
+    public static boolean descending(String runId) {
+        return DESCENTS.containsKey(runId);
+    }
+
+    /**
+     * Cada tick: los jugadores siguen en la cabina del lobby, que baja (traqueteo, zumbido), mientras se
+     * construyen sus plantas. Cuando estan y ha pasado el tiempo minimo, frena y entran.
+     */
+    private static void tickDescents(MinecraftServer server) {
+        RunData data = RunData.get(server);
+        ServerLevel level = server.getLevel(SPDimension.SP_DIM);
+        if (level == null) return;
+        // tras un reinicio a mitad de bajada se vuelve a empezar la construccion
+        for (Run r : openRuns(data)) {
+            if (r.state() != RunState.DESCENT || DESCENTS.containsKey(r.id())) continue;
+            List<InstanceManager.PlaceJob> jobs = new ArrayList<>();
+            for (Group g : r.groups()) {
+                InstanceManager.PlaceJob j = InstanceManager.beginPlace(level, g, 0, 0);
+                if (j != null) jobs.add(j);
+            }
+            DESCENTS.put(r.id(), new Descent(jobs));
+        }
+        if (DESCENTS.isEmpty()) return;
+        int total = Math.max(2, SPConfig.get().elevator_ride_time) * 20;
+        int slices = Math.max(1, SPConfig.get().zone_build_slices_per_tick);
+        for (var it = DESCENTS.entrySet().iterator(); it.hasNext(); ) {
+            var en = it.next();
+            Run run = data.runs.get(en.getKey());
+            Descent d = en.getValue();
+            if (run == null || run.closed()) {
+                it.remove();
+                continue;
+            }
+            d.ticks++;
+            for (InstanceManager.PlaceJob j : d.jobs) {
+                if (!j.blocksDone()) {
+                    InstanceManager.stepPlace(level, j, slices);
+                    break;          // una planta a la vez: el tick no se dispara con muchos grupos
+                }
+            }
+            List<ServerPlayer> riders = new ArrayList<>();
+            for (Group g : run.groups()) {
+                for (UUID id : g.members().keySet()) {
+                    ServerPlayer p = server.getPlayerList().getPlayer(id);
+                    if (p != null && !SPPlayerData.inSP(p)) riders.add(p);
+                }
+            }
+            if (d.arriveAt < 0) {
+                if (d.ticks % 40 == 1) {
+                    for (ServerPlayer p : riders) p.serverLevel().playSound(null, p.blockPosition(),
+                            net.minecraft.sounds.SoundEvents.MINECART_INSIDE, net.minecraft.sounds.SoundSource.BLOCKS, 0.3f, 0.45f);
+                }
+                if (d.ticks % 25 == 0) com.smileprotocol.labevent.LabActions.scare(riders, com.smileprotocol.labevent.LabActions.SCARE_SHAKE, 0.12f);
+                if (d.ticks % 10 == 0) {
+                    int pct = Math.round(Math.min(d.progress(), Math.min(1f, d.ticks / (float) total)) * 100);
+                    Component bar = Component.translatable("smileprotocol.zone_elevator.riding", 1, pct);
+                    for (ServerPlayer p : riders) p.displayClientMessage(bar, true);
+                }
+                if (d.ticks >= total && d.built()) {
+                    for (ServerPlayer p : riders) {
+                        SPNetwork.sendTo(p, new Payloads.ScreenFade(4, 8, 10));
+                        p.serverLevel().playSound(null, p.blockPosition(), net.minecraft.sounds.SoundEvents.ANVIL_LAND,
+                                net.minecraft.sounds.SoundSource.BLOCKS, 0.3f, 0.5f);
+                    }
+                    com.smileprotocol.labevent.LabActions.scare(riders, com.smileprotocol.labevent.LabActions.SCARE_SHAKE, 0.5f);
+                    d.arriveAt = d.ticks + 5;
+                }
+                continue;
+            }
+            if (d.ticks < d.arriveAt) continue;
+            it.remove();
+            boolean ok = true;
+            for (int k = 0; k < d.jobs.size(); k++) {
+                InstanceManager.PlaceJob j = d.jobs.get(k);
+                Group g = run.groups().get(k);
+                ZonePlacement p = InstanceManager.finishPlace(level, j);
+                if (p == null) {
+                    ok = false;
+                    break;
+                }
+                InstanceManager.openEntry(level, p);
+                g.setCurrent(p);
+                g.setZoneIndex(0);
+                g.setState(GroupState.INTRO);
+            }
+            if (!ok) {
+                SmileProtocol.LOGGER.error("No se pudo colocar la zona de entrada de la partida {}", run.id());
+                for (Group other : run.groups()) InstanceManager.release(server, other);
+                run.setState(RunState.ENDED);
+                run.setClosed(true);
+                data.runs.remove(run.id());
+                data.changed();
+                for (ServerPlayer p : riders) p.displayClientMessage(Component.translatable("smileprotocol.run.place_failed")
+                        .withStyle(ChatFormatting.RED), false);
+                continue;
+            }
+            enterPlayers(server, level, data, run);
+            SPDebug.log("partida " + run.id() + ": llega abajo tras " + d.ticks + " ticks");
+        }
     }
 
     // Tick ---------------------------------------------------------------------------------
 
     public static void tick(MinecraftServer server) {
         InstanceManager.tick(server);
+        tickDescents(server);
         if (server.getTickCount() % 20 != 0) return;
 
         RunData data = RunData.get(server);
@@ -291,7 +460,8 @@ public final class RunManager {
         SPConfig.Values cfg = SPConfig.get();
 
         for (Run run : openRuns(data)) {
-            if (run.state() == RunState.RUNNING || run.state() == RunState.DESCENT) {
+            if (run.state() == RunState.DESCENT) continue;     // aun bajando: tickDescents
+            if (run.state() == RunState.RUNNING) {
                 for (Group g : run.groups()) if (!g.state().isDone()) checkGroup(server, data, g, now);
                 if (run.allGroupsDone()) {
                     run.setState(RunState.ENDED);

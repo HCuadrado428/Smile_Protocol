@@ -99,6 +99,9 @@ public final class SelfTest {
                 }
                 failures += loadTest(server, level);
                 failures += buildTest(server, level);
+                boolean boss = com.smileprotocol.entity.SmileyFight.saveRoundTrip();
+                log((boss ? "combate guardado" : "FALLO combate guardado") + ": el estado del combate contra Smiley se guarda y se recupera");
+                if (!boss) failures++;
                 // Limpieza de lo colocado (en este mismo tick)
                 for (int i = 0; i < 400; i++) InstanceManager.tick(server);
             }

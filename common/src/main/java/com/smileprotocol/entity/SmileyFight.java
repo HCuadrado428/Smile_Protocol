@@ -67,6 +67,56 @@ public final class SmileyFight {
         long relightAt = -1;
         final List<BlockPos> darkened = new ArrayList<>();
         final List<BlockPos> introDark = new ArrayList<>();
+
+        /** Lo que hace falta para seguir el combate tras un reinicio del servidor. */
+        net.minecraft.nbt.CompoundTag save() {
+            net.minecraft.nbt.CompoundTag t = new net.minecraft.nbt.CompoundTag();
+            t.putBoolean("Started", started);
+            t.putBoolean("Called", called);
+            t.putBoolean("Arrived", arrived);
+            t.putBoolean("PermaDark", permaDark);
+            t.putBoolean("CameoDone", cameoDone);
+            if (smiley != null) t.putUUID("Smiley", smiley);
+            t.putLongArray("Darkened", darkened.stream().mapToLong(BlockPos::asLong).toArray());
+            t.putLongArray("IntroDark", introDark.stream().mapToLong(BlockPos::asLong).toArray());
+            return t;
+        }
+
+        void load(net.minecraft.nbt.CompoundTag t) {
+            started = t.getBoolean("Started");
+            called = t.getBoolean("Called");
+            arrived = t.getBoolean("Arrived");
+            permaDark = t.getBoolean("PermaDark");
+            cameoDone = t.getBoolean("CameoDone");
+            smiley = t.hasUUID("Smiley") ? t.getUUID("Smiley") : null;
+            for (long l : t.getLongArray("Darkened")) darkened.add(BlockPos.of(l));
+            for (long l : t.getLongArray("IntroDark")) introDark.add(BlockPos.of(l));
+        }
+    }
+
+    /** Pruebas: el estado del combate se guarda y se recupera igual. */
+    public static boolean saveRoundTrip() {
+        St a = new St();
+        a.started = true;
+        a.arrived = true;
+        a.permaDark = true;
+        a.smiley = UUID.randomUUID();
+        a.darkened.add(new BlockPos(1, 2, 3));
+        St b = new St();
+        b.load(a.save());
+        return b.started && !b.called && b.arrived && b.permaDark && a.smiley.equals(b.smiley) && b.darkened.equals(a.darkened)
+                && a.save().equals(b.save());
+    }
+
+    /** Estado del combate de la planta del grupo; tras un reinicio se recupera del grupo guardado. */
+    private static St st(InstanceContext ctx) {
+        return ctx.state(KEY, () -> {
+            St s = new St();
+            var server = com.smileprotocol.ServerRef.get();
+            Group g = server == null ? null : ctx.group(server);
+            if (g != null && g.bossZone() == g.zoneIndex()) s.load(g.bossData());
+            return s;
+        });
     }
 
     private SmileyFight() {}
@@ -74,7 +124,7 @@ public final class SmileyFight {
     @Nullable
     private static St state(ServerLevel level, BlockPos pos) {
         InstanceContext ctx = InstanceContext.at(level, pos);
-        return ctx == null ? null : ctx.state(KEY, St::new);
+        return ctx == null ? null : st(ctx);
     }
 
     public static boolean isArena(@Nullable ZonePlacement z) {
@@ -106,7 +156,9 @@ public final class SmileyFight {
                 ZonePlacement z = g.current();
                 InstanceContext ctx = InstanceContext.forGroup(server, g.id());
                 if (ctx == null) continue;
-                St st = ctx.state(KEY, St::new);
+                St st = st(ctx);
+                // se guarda con el grupo: tras un reinicio el combate sigue donde estaba
+                if (isArena(z) && g.setBoss(g.zoneIndex(), st.save())) com.smileprotocol.run.RunData.get(server).changed();
                 List<ServerPlayer> players = players(server, g, z);
                 if (players.isEmpty()) continue;
                 if (st.relightAt > 0 && now >= st.relightAt) {
@@ -214,7 +266,7 @@ public final class SmileyFight {
     public static void event(ServerLevel level, Group g, ZonePlacement z, List<ServerPlayer> players, String arg) {
         InstanceContext ctx = InstanceContext.forGroup(level.getServer(), g.id());
         if (ctx == null) return;
-        St st = ctx.state(KEY, St::new);
+        St st = st(ctx);
         switch (arg) {
             case "elevator" -> {
                 st.called = true;
@@ -253,7 +305,7 @@ public final class SmileyFight {
         if (!isArena(g.current())) return false;
         InstanceContext ctx = InstanceContext.forGroup(server, g.id());
         if (ctx == null) return false;
-        return !ctx.state(KEY, St::new).arrived;
+        return !st(ctx).arrived;
     }
 
     // Apariciones en las demas plantas --------------------------------------------------------------
@@ -295,7 +347,7 @@ public final class SmileyFight {
         if (g == null || g.current() == null) return false;
         InstanceContext ctx = InstanceContext.forGroup(level.getServer(), g.id());
         if (ctx == null) return false;
-        St st = ctx.state(KEY, St::new);
+        St st = st(ctx);
         st.cameoDone = false;
         st.cameoAt = 0;
         cameo(level, g.current(), st, List.of(p), level.getServer().getTickCount());
@@ -356,7 +408,7 @@ public final class SmileyFight {
     public static String debugLine(MinecraftServer server, Group g) {
         InstanceContext ctx = InstanceContext.forGroup(server, g.id());
         if (ctx == null) return "";
-        St st = ctx.state(KEY, St::new);
+        St st = st(ctx);
         return "smiley: " + (isArena(g.current()) ? "sala" + (st.started ? " empezada" : "") + (st.called ? " ascensor llamado" : "")
                 + (st.arrived ? " encerrado" : "") : "aparicion " + (st.cameoDone ? "hecha" : "pendiente"));
     }
