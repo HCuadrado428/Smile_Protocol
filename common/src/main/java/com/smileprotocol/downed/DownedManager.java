@@ -73,6 +73,7 @@ public final class DownedManager {
             return;
         }
         com.smileprotocol.score.ScoreManager.onDowned(p);
+        com.smileprotocol.debug.Playtest.count("derribo por " + (cause == null || cause.isEmpty() ? "?" : cause));
         HideManager.forceExit(p, true);
         com.smileprotocol.qte.QTEManager.clear(p);
         com.smileprotocol.interact.InteractionManager.stop(p, true);

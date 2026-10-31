@@ -91,6 +91,16 @@ public final class SPCommands {
                     }
                     return 1;
                 }))
+                .then(Commands.literal("nota").then(Commands.argument("texto", StringArgumentType.greedyString()).executes(c -> {
+                    ServerPlayer p = c.getSource().getPlayerOrException();
+                    if (!com.smileprotocol.debug.Playtest.active()) {
+                        c.getSource().sendFailure(Component.translatable("smileprotocol.playtest.inactive"));
+                        return 0;
+                    }
+                    com.smileprotocol.debug.Playtest.note(p, StringArgumentType.getString(c, "texto"));
+                    c.getSource().sendSuccess(() -> Component.translatable("smileprotocol.playtest.noted"), false);
+                    return 1;
+                })))
                 .then(Commands.literal("logros").executes(c -> {
                     ServerPlayer p = c.getSource().getPlayerOrException();
                     for (Component l : com.smileprotocol.score.ScoreManager.achievementLines(p)) c.getSource().sendSuccess(() -> l, false);
@@ -158,6 +168,23 @@ public final class SPCommands {
                         .then(Commands.argument("run", StringArgumentType.word()).suggests(RUNS)
                                 .executes(SPCommands::endRun))));
 
+        root.then(Commands.literal("playtest")
+                .then(Commands.literal("start").executes(c -> {
+                    var f = com.smileprotocol.debug.Playtest.start(c.getSource().getServer(), c.getSource().getTextName());
+                    c.getSource().getServer().getPlayerList().broadcastSystemMessage(
+                            Component.translatable("smileprotocol.playtest.started").withStyle(ChatFormatting.AQUA), false);
+                    c.getSource().sendSuccess(() -> Component.literal(f.toString()), true);
+                    return 1;
+                }))
+                .then(Commands.literal("stop").executes(c -> {
+                    var f = com.smileprotocol.debug.Playtest.stop(c.getSource().getServer());
+                    if (f == null) {
+                        c.getSource().sendFailure(Component.translatable("smileprotocol.playtest.inactive"));
+                        return 0;
+                    }
+                    c.getSource().sendSuccess(() -> Component.translatable("smileprotocol.playtest.stopped", f.toString()), true);
+                    return 1;
+                })));
         root.then(Commands.literal("records").then(Commands.literal("clear").executes(c -> {
             com.smileprotocol.score.ScoreData.get(c.getSource().getServer()).clearTop();
             com.smileprotocol.score.ScoreManager.refreshBoard(c.getSource().getServer());

@@ -509,5 +509,9 @@
   "smileprotocol.soundphysics.disabled": "Sound Physics Remastered is disabled: echoes and sounds muffled behind walls are part of the game. Turn it on in its config.",
   "smileprotocol.soundphysics.voice": "Sound Physics Remastered isn't processing voice (simple_voice_chat_integration=false): your teammates will sound without echo or occlusion.",
   "entity.smileprotocol.gemelo": "Twin",
-  "entity.smileprotocol.imitador": "Mimic"
+  "entity.smileprotocol.imitador": "Mimic",
+  "smileprotocol.playtest.started": "A playtest session has started: everything is being logged. If something looks wrong, type /sp nota <what happened>.",
+  "smileprotocol.playtest.stopped": "Playtest session over. Log and summary in %s",
+  "smileprotocol.playtest.inactive": "No playtest session is running",
+  "smileprotocol.playtest.noted": "Note saved. Thanks!"
 }

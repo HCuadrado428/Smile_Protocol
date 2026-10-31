@@ -216,6 +216,20 @@ public final class ClientSelfTest {
             log((!f.isEmpty() && com.smileprotocol.registry.ModSounds.FLOOR_MUSIC.containsKey(f) ? "OK" : "FALLO")
                     + " musica de planta: el cliente sabe que esta en " + f + " (sonando: «" + ClientFloorMusic.playing() + "»)");
         });
+        // Sesion de prueba: registro, notas de los jugadores y resumen
+        SHOTS.add(() -> server.execute(() -> {
+            var f = com.smileprotocol.debug.Playtest.start(server, "prueba");
+            com.smileprotocol.debug.Playtest.note(sp, "la puerta del fondo no se abre");
+            com.smileprotocol.debug.Playtest.count("derribo por prueba");
+            com.smileprotocol.debug.Playtest.stop(server);
+            String txt = "";
+            try {
+                txt = java.nio.file.Files.readString(f);
+            } catch (java.io.IOException ignored) {
+            }
+            boolean ok = txt.contains("NOTA de " + sp.getGameProfile().getName()) && txt.contains("Resumen") && txt.contains("derribo por prueba: 1");
+            log((ok ? "OK" : "FALLO") + " sesion de prueba: notas y resumen en " + f.getFileName());
+        }));
         // Persistencia: la mision sigue donde estaba tras perder la memoria (reinicio) y se guarda en el grupo
         SHOTS.add(() -> server.execute(() -> {
             int before = com.smileprotocol.mission.MissionManager.currentStep(server, g);

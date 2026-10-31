@@ -79,6 +79,7 @@ public final class SPDebug {
 
     /** Escribe una linea en sp-debug.log. */
     public static void log(String message) {
+        Playtest.record(message);
         String line = "[" + LocalDateTime.now().format(TIME) + "] " + message + System.lineSeparator();
         MinecraftServer server = ServerRef.get();
         if (server == null) return;

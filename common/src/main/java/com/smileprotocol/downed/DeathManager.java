@@ -45,6 +45,7 @@ public final class DeathManager {
             if (!SPPlayerData.inSP(p)) p.hurt(p.damageSources().genericKill(), Float.MAX_VALUE);
             return;
         }
+        com.smileprotocol.debug.Playtest.count("muerte" + (cause == null || cause.isEmpty() ? "" : " por " + cause));
         DownedManager.clear(p);
         com.smileprotocol.qte.QTEManager.clear(p);
         com.smileprotocol.interact.InteractionManager.stop(p, true);

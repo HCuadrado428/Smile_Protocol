@@ -271,6 +271,7 @@ public final class RunManager {
         }
         run.setState(RunState.RUNNING);
         data.changed();
+        com.smileprotocol.debug.Playtest.count("partida " + type.name().toLowerCase() + " (" + rules.encode() + ")");
 
         StringBuilder sizes = new StringBuilder();
         for (Group g : run.groups()) sizes.append(sizes.isEmpty() ? "" : "+").append(g.members().size());
@@ -347,6 +348,8 @@ public final class RunManager {
 
     private static void finishGroup(MinecraftServer server, Group g, GroupState state, long now) {
         if (g.state().isDone()) return;
+        com.smileprotocol.debug.Playtest.count("grupo " + (state == GroupState.COMPLETED ? "escapado" : "eliminado")
+                + (state == GroupState.COMPLETED ? "" : " en planta " + (g.zoneIndex() + 1)));
         g.setState(state);
         g.setEndTime(now);
         RunData.get(server).changed();
