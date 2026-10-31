@@ -152,7 +152,9 @@ public class Rastreador extends SmilerBase implements QTEManager.Grabber {
         if (cooldown > 0) cooldown--;
         // La vista manda: si ve a alguien (y no esta agarrando ni cansado), va a por el
         State s = state();
-        if (s != State.GRAB && s != State.STUNNED && s != State.TIRED && s != State.CHASE && cooldown == 0 && tickCount % 4 == 0) {
+        // mira cada 4 ticks, y siempre justo al cambiar de estado (antes de echar a andar hacia otro lado)
+        if (s != State.GRAB && s != State.STUNNED && s != State.TIRED && s != State.CHASE && s != State.VENT && cooldown == 0
+                && (tickCount % 4 == 0 || timer <= 1)) {
             ServerPlayer seen = see(level, def);
             if (seen != null) {
                 target = seen;
