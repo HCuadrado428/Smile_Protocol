@@ -211,6 +211,11 @@ public final class ClientSelfTest {
             if (com.smileprotocol.voice.WalkieManager.enabled()) log((slot >= 0 ? "OK" : "FALLO") + " walkie en el equipo inicial");
             if (slot >= 0) com.smileprotocol.interact.SPInventoryOps.take(sp, slot);
         }));
+        SHOTS.add(() -> {
+            String f = ClientFloorMusic.floor();
+            log((!f.isEmpty() && com.smileprotocol.registry.ModSounds.FLOOR_MUSIC.containsKey(f) ? "OK" : "FALLO")
+                    + " musica de planta: el cliente sabe que esta en " + f + " (sonando: «" + ClientFloorMusic.playing() + "»)");
+        });
         // Persistencia: la mision sigue donde estaba tras perder la memoria (reinicio) y se guarda en el grupo
         SHOTS.add(() -> server.execute(() -> {
             int before = com.smileprotocol.mission.MissionManager.currentStep(server, g);

@@ -19,6 +19,7 @@ public final class ClientController {
     /** Al arrancar el cliente: manejadores de los paquetes que llegan del servidor. */
     public static void init() {
         SPNetwork.setClientHandler(Payloads.SyncState.TYPE, ClientState::applyState);
+        SPNetwork.setClientHandler(Payloads.SetFloor.TYPE, p -> ClientFloorMusic.setFloor(p.zone()));
         SPNetwork.setClientHandler(Payloads.SyncReady.TYPE, p -> ClientState.ready = p.show() ? p : null);
         SPNetwork.setClientHandler(Payloads.SyncBoards.TYPE, p -> ClientState.applyBoards(p.boards()));
         SPNetwork.setClientHandler(Payloads.ScreenFade.TYPE, p -> ClientState.startFade(p.fadeIn(), p.hold(), p.fadeOut()));
@@ -63,6 +64,7 @@ public final class ClientController {
 
     public static void onLeave() {
         SoundPhysicsCheck.reset();
+        ClientFloorMusic.reset();
         ClientState.reset();
         ClientMotion.reset();
         ClientInteraction.reset();
@@ -102,6 +104,7 @@ public final class ClientController {
         ClientTension.tick(mc);
         ClientAmbience.tick(mc);
         ClientBossMusic.tick(mc);
+        ClientFloorMusic.tick(mc);
         ClientQTE.tick(mc);
         ClientSequence.tick(mc);
         ClientScare.tick();

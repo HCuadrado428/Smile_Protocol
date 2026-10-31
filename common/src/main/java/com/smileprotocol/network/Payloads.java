@@ -243,6 +243,14 @@ public final class Payloads {
     }
 
     /** C -> S: opciones de accesibilidad que valida el servidor (README 24.2): minijuego asistido. */
+    /** S -> C: la planta en la que esta el jugador (para su musica); vacio al salir. */
+    public record SetFloor(String zone) implements CustomPacketPayload {
+        public static final Type<SetFloor> TYPE = typeOf("set_floor");
+        public static final StreamCodec<ByteBuf, SetFloor> CODEC = ByteBufCodecs.STRING_UTF8.map(SetFloor::new, SetFloor::zone);
+
+        @Override public Type<SetFloor> type() { return TYPE; }
+    }
+
     /** Cliente -> servidor: reglas elegidas en la cabina de un ascensor pequeno (F7 dentro). */
     public record SetRules(String rules) implements CustomPacketPayload {
         public static final Type<SetRules> TYPE = typeOf("set_rules");

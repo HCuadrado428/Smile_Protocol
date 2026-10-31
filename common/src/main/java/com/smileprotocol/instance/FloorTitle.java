@@ -27,6 +27,7 @@ public final class FloorTitle {
     public static void show(ServerPlayer p, int index, ResourceLocation zoneId) {
         ZoneDef def = ZoneCatalog.get(p.server, zoneId);
         String name = def != null ? def.name() : zoneId.getPath();
+        com.smileprotocol.network.SPNetwork.sendTo(p, new com.smileprotocol.network.Payloads.SetFloor(zoneId.getPath()));
         p.connection.send(new ClientboundSetTitlesAnimationPacket(20, 70, 30));
         p.connection.send(new ClientboundSetTitleTextPacket(
                 Component.translatable("smileprotocol.floor.title", index + 1)

@@ -266,6 +266,12 @@ Hace falta Simple Voice Chat en el servidor y en los clientes (es opcional: sin 
 2. **Registrar.** Escritorios, archivadores, botiquines, carros de herramientas y cajas de suministros se registran: mírales y mantén el clic derecho (sale el texto, p. ej. «Registrar los cajones»). Hace algo de ruido. Al acabar se abren (cajón fuera, puertas abiertas, tapa quitada) y a veces sueltan algo delante: latas, botellas, pilas, botiquines, bengalas, adrenalina o un fusible fundido; muchas veces nada («No hay nada útil.»). Un mueble abierto ya no se puede registrar.
 3. **Botín por planta.** Cada planta tiene su tabla (`data/smileprotocol/search_loot/<planta>.json`): en la morgue salen más botiquines, en energía más pilas... y en los botiquines siempre es más fácil encontrar curas. Cada partida coloca la planta de nuevo, así que vuelven a estar cerrados.
 
+## Música de cada planta
+
+- Al llegar a cada planta suena muy bajo su ambiente (recepción: piano apagado; almacén: chapa lejana; oficinas: la nana desafinada; morgue: coro frío; energía: zumbido eléctrico; jardín: gotas; criogenia: cristales; Laboratorio Cero: pulso y la nana muy lejos; tutorial: colchón tranquilo). Al cambiar de planta se funde con la siguiente.
+- Baja cuando sube la tensión y casi desaparece mientras suena la música de Smiley.
+- `floor_music_volume` en la configuración (0 = sin música). Se oye con el deslizador «Música» de Minecraft.
+
 ## Reinicios, voz ahogada y Sound Physics
 
 - **Reinicio a mitad de planta.** Abre la puerta roja de la planta de almacenes (objetivo en «Pon los fusibles…») y reinicia el servidor. Al volver, el objetivo del HUD sigue en el mismo paso; puertas, válvulas y fusibles siguen como estaban. Las reglas de la partida también se mantienen.

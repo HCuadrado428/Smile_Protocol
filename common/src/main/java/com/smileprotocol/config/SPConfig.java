@@ -175,6 +175,8 @@ public final class SPConfig {
         public boolean ambience = true;
         /** Volumen de la musica de Smiley (0 la quita). */
         public float boss_music_volume = 0.8f;
+        /** Musica de ambiente de cada planta (0 = sin musica). */
+        public float floor_music_volume = 0.5f;
 
         // Walkies (README 17.3) y marcadores (8.4)
         public boolean walkie_enabled = true;

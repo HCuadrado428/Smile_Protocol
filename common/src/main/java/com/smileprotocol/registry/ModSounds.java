@@ -50,6 +50,15 @@ public final class ModSounds {
     public static final Supplier<SoundEvent> MUSIC_SMILEY_1 = register("music.smiley1");
     public static final Supplier<SoundEvent> MUSIC_SMILEY_2 = register("music.smiley2");
     public static final Supplier<SoundEvent> MUSIC_SMILEY_3 = register("music.smiley3");
+    /** Musica de ambiente de cada planta (tools/floor_music.py), por el nombre de la zona. */
+    public static final java.util.Map<String, Supplier<SoundEvent>> FLOOR_MUSIC = new java.util.LinkedHashMap<>();
+
+    static {
+        for (String z : new String[]{"start_corridor", "lab_storage", "lab_offices", "lab_morgue", "lab_generators",
+                "lab_greenhouse", "final_room", "smiley_lab", "tutorial"}) {
+            FLOOR_MUSIC.put(z, register("music.floor." + z));
+        }
+    }
 
     private ModSounds() {}
 

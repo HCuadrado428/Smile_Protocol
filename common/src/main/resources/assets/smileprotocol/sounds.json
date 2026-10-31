@@ -257,5 +257,77 @@
         "stream": true
       }
     ]
+  },
+  "music.floor.start_corridor": {
+    "sounds": [
+      {
+        "name": "smileprotocol:music/floor/start_corridor",
+        "stream": true
+      }
+    ]
+  },
+  "music.floor.lab_storage": {
+    "sounds": [
+      {
+        "name": "smileprotocol:music/floor/lab_storage",
+        "stream": true
+      }
+    ]
+  },
+  "music.floor.lab_offices": {
+    "sounds": [
+      {
+        "name": "smileprotocol:music/floor/lab_offices",
+        "stream": true
+      }
+    ]
+  },
+  "music.floor.lab_morgue": {
+    "sounds": [
+      {
+        "name": "smileprotocol:music/floor/lab_morgue",
+        "stream": true
+      }
+    ]
+  },
+  "music.floor.lab_generators": {
+    "sounds": [
+      {
+        "name": "smileprotocol:music/floor/lab_generators",
+        "stream": true
+      }
+    ]
+  },
+  "music.floor.lab_greenhouse": {
+    "sounds": [
+      {
+        "name": "smileprotocol:music/floor/lab_greenhouse",
+        "stream": true
+      }
+    ]
+  },
+  "music.floor.final_room": {
+    "sounds": [
+      {
+        "name": "smileprotocol:music/floor/final_room",
+        "stream": true
+      }
+    ]
+  },
+  "music.floor.smiley_lab": {
+    "sounds": [
+      {
+        "name": "smileprotocol:music/floor/smiley_lab",
+        "stream": true
+      }
+    ]
+  },
+  "music.floor.tutorial": {
+    "sounds": [
+      {
+        "name": "smileprotocol:music/floor/tutorial",
+        "stream": true
+      }
+    ]
   }
 }
