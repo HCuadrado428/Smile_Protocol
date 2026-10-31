@@ -512,5 +512,6 @@
   "smileprotocol.playtest.started": "Empieza una sesión de prueba: lo que pase se apunta. Si veis algo raro, escribid /sp nota <qué ha pasado>.",
   "smileprotocol.playtest.stopped": "Sesión de prueba terminada. Registro y resumen en %s",
   "smileprotocol.playtest.inactive": "No hay ninguna sesión de prueba en marcha",
-  "smileprotocol.playtest.noted": "Nota guardada. ¡Gracias!"
+  "smileprotocol.playtest.noted": "Nota guardada. ¡Gracias!",
+  "smileprotocol.zone_elevator.riding": "▼ Bajando a la planta %s… %s %%"
 }

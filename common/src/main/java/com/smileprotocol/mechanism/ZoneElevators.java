@@ -60,6 +60,11 @@ public final class ZoneElevators {
         final Set<UUID> insideAtDeparture = new HashSet<>();
         final Set<UUID> hurtAtDeparture = new HashSet<>();
         final Set<UUID> showing = new HashSet<>();
+        /** Planta siguiente que se esta construyendo durante el viaje. */
+        @javax.annotation.Nullable com.smileprotocol.instance.InstanceManager.PlaceJob job;
+        /** Posicion de cada uno dentro de la cabina al salir (dx, dy, dz, giro), para dejarlos igual al llegar. */
+        final Map<UUID, double[]> offsets = new HashMap<>();
+        int arriveAt = -1;
     }
 
     private static final Map<UUID, State> STATES = new HashMap<>();
@@ -174,6 +179,17 @@ public final class ZoneElevators {
         com.smileprotocol.mission.MissionManager.onDepart(server, g);
     }
 
+    /** Centro del suelo de la cabina de salida. */
+    private static net.minecraft.world.phys.Vec3 cabinCenter(ZonePlacement z) {
+        BoundingBox b = z.exitCabin();
+        if (b == null) return z.entry();
+        return new net.minecraft.world.phys.Vec3((b.minX() + b.maxX() + 1) / 2.0, b.minY(), (b.minZ() + b.maxZ() + 1) / 2.0);
+    }
+
+    /**
+     * Sale el ascensor: los de dentro se quedan en la cabina, que baja de verdad (tiembla, zumba, la luz
+     * parpadea) mientras se construye la planta siguiente. Los que se quedaron fuera lo ven todo negro.
+     */
     private static void depart(MinecraftServer server, ServerLevel level, Group g, State s,
                                List<ServerPlayer> players, List<ServerPlayer> inside) {
         depart0(server, g);
@@ -181,29 +197,107 @@ public final class ZoneElevators {
         setDoors(level, z, s, false);
         s.insideAtDeparture.clear();
         s.hurtAtDeparture.clear();
-        for (ServerPlayer p : inside) s.insideAtDeparture.add(p.getUUID());
+        s.offsets.clear();
+        net.minecraft.world.phys.Vec3 c = cabinCenter(z);
+        for (ServerPlayer p : inside) {
+            s.insideAtDeparture.add(p.getUUID());
+            s.offsets.put(p.getUUID(), new double[]{p.getX() - c.x, p.getY() - c.y, p.getZ() - c.z, p.getYRot(), p.getXRot()});
+        }
         for (ServerPlayer p : players) if (p.getHealth() < p.getMaxHealth()) s.hurtAtDeparture.add(p.getUUID());
-        int ride = Math.max(2, SPConfig.get().elevator_ride_time) * 20;
-        s.ride = ride;
+        s.ride = 0;
         s.moved = false;
+        s.arriveAt = -1;
         s.countdown = -1;
         hideHud(server, s);
-        BlockPos center = z.exitCabin() != null ? z.exitCabin().getCenter() : BlockPos.containing(z.entry());
+        // la planta siguiente se empieza a construir ahora (si no estaba ya)
+        int next = g.zoneIndex() + 1;
+        s.job = null;
+        if (next <= g.lastIndex() && (g.next() == null || g.next().index() != next)) {
+            s.job = com.smileprotocol.instance.InstanceManager.beginPlace(level, g, next, 1 - z.sub());
+        }
+        BlockPos center = BlockPos.containing(c);
         level.playSound(null, center, SoundEvents.PISTON_CONTRACT, SoundSource.BLOCKS, 1f, 0.5f);
-        // Pantalla negra durante el viaje (README 6.5, punto 7)
-        for (ServerPlayer p : players) SPNetwork.sendTo(p, new Payloads.ScreenFade(15, ride - 25, 20));
-        com.smileprotocol.labevent.LabActions.scare(players, com.smileprotocol.labevent.LabActions.SCARE_SHAKE, 0.8f);
-        SPDebug.log(g.label() + ": ascensor de la zona " + g.zoneIndex() + " sale con " + inside.size() + "/" + players.size());
+        level.playSound(null, center, SoundEvents.IRON_DOOR_CLOSE, SoundSource.BLOCKS, 0.9f, 0.6f);
+        // la luz de la cabina parpadea durante el viaje
+        BoundingBox cab = z.exitCabin();
+        if (cab != null) {
+            for (BlockPos lp : BlockPos.betweenClosed(cab.minX() - 1, cab.maxY(), cab.minZ() - 1, cab.maxX() + 1, cab.maxY() + 2, cab.maxZ() + 1)) {
+                var st = level.getBlockState(lp);
+                if (st.getBlock() instanceof com.smileprotocol.block.FluorescentLightBlock) {
+                    level.setBlock(lp, st.setValue(com.smileprotocol.block.FluorescentLightBlock.FLICKERS, true), 3);
+                }
+            }
+        }
+        int total = Math.max(2, SPConfig.get().elevator_ride_time) * 20;
+        for (ServerPlayer p : players) {
+            if (!s.insideAtDeparture.contains(p.getUUID())) SPNetwork.sendTo(p, new Payloads.ScreenFade(15, total + 40, 20));
+        }
+        com.smileprotocol.labevent.LabActions.scare(inside, com.smileprotocol.labevent.LabActions.SCARE_SHAKE, 0.6f);
+        SPDebug.log(g.label() + ": ascensor de la zona " + g.zoneIndex() + " sale con " + inside.size() + "/" + players.size()
+                + (s.job != null ? " (construyendo la zona " + next + ")" : ""));
     }
 
+    /** El viaje: la cabina baja, se construye la planta y, cuando esta y ha pasado el tiempo minimo, se llega. */
     private static void tickRide(MinecraftServer server, ServerLevel level, Group g, State s) {
-        s.ride--;
+        s.ride++;
         int total = Math.max(2, SPConfig.get().elevator_ride_time) * 20;
-        if (!s.moved && s.ride <= total - 18) {
+        if (s.job != null && !s.job.blocksDone()) {
+            com.smileprotocol.instance.InstanceManager.stepPlace(level, s.job, Math.max(1, SPConfig.get().zone_build_slices_per_tick));
+        }
+        List<ServerPlayer> riders = new ArrayList<>();
+        for (UUID id : s.insideAtDeparture) {
+            ServerPlayer p = server.getPlayerList().getPlayer(id);
+            if (p != null && SPPlayerData.inSP(p)) riders.add(p);
+        }
+        ZonePlacement z = g.current();
+        BlockPos center = BlockPos.containing(cabinCenter(z));
+        if (s.arriveAt < 0) {
+            // zumbido del motor, traqueteo y algun golpe de los cables
+            if (s.ride % 40 == 1) level.playSound(null, center, SoundEvents.MINECART_INSIDE, SoundSource.BLOCKS, 0.35f, 0.45f);
+            if (s.ride % 25 == 0) com.smileprotocol.labevent.LabActions.scare(riders, com.smileprotocol.labevent.LabActions.SCARE_SHAKE, 0.12f);
+            if (s.ride % 97 == 50) level.playSound(null, center, SoundEvents.CHAIN_BREAK, SoundSource.BLOCKS, 0.5f, 0.5f);
+            if (s.ride % 10 == 0) {
+                float built = s.job == null ? 1f : s.job.progress();
+                int pct = Math.round(Math.min(built, Math.min(1f, s.ride / (float) total)) * 100);
+                Component bar = Component.translatable("smileprotocol.zone_elevator.riding", g.zoneIndex() + 2, pct);
+                for (ServerPlayer p : riders) p.displayClientMessage(bar, true);
+            }
+            boolean ready = s.job == null || s.job.blocksDone();
+            if (s.ride >= total && ready) {
+                // frena: golpe y un fundido cortito para cambiar de cabina sin que se note
+                if (s.job != null) {
+                    ZonePlacement p = com.smileprotocol.instance.InstanceManager.finishPlace(level, s.job);
+                    g.setNext(p);
+                    s.job = null;
+                }
+                level.playSound(null, center, SoundEvents.ANVIL_LAND, SoundSource.BLOCKS, 0.3f, 0.5f);
+                com.smileprotocol.labevent.LabActions.scare(riders, com.smileprotocol.labevent.LabActions.SCARE_SHAKE, 0.5f);
+                for (ServerPlayer p : riders) SPNetwork.sendTo(p, new Payloads.ScreenFade(4, 6, 10));
+                s.arriveAt = s.ride + 5;
+            }
+            return;
+        }
+        if (s.ride >= s.arriveAt && !s.moved) {
             s.moved = true;
             arrive(server, level, g, s);
+            s.ride = -1;
         }
-        if (s.ride <= 0) s.ride = -1;
+    }
+
+    /** Pone a cada uno en la cabina de llegada donde estaba en la de salida (la cabina gira media vuelta). */
+    private static void placeRiders(MinecraftServer server, ServerLevel level, Group g, State s) {
+        ZonePlacement z = g.current();
+        if (z == null) return;
+        net.minecraft.world.phys.Vec3 e = z.entry();
+        for (Map.Entry<UUID, double[]> en : s.offsets.entrySet()) {
+            ServerPlayer p = server.getPlayerList().getPlayer(en.getKey());
+            if (p == null || !SPPlayerData.inSP(p) || !g.isActive(p.getUUID())) continue;
+            double[] o = en.getValue();
+            double dx = net.minecraft.util.Mth.clamp(-o[0], -2.2, 2.2), dz = net.minecraft.util.Mth.clamp(-o[2], -2.2, 2.2);
+            com.smileprotocol.session.SPSessionManager.teleport(p, level, new net.minecraft.world.phys.Vec3(e.x + dx, e.y, e.z + dz),
+                    (float) o[3] + 180f, (float) o[4]);
+        }
+        level.playSound(null, BlockPos.containing(e), SoundEvents.NOTE_BLOCK_BELL.value(), SoundSource.BLOCKS, 1f, 1.2f);
     }
 
     /** Llegada a la zona siguiente: curar, penalizar, teletransportar (README 6.5, puntos 3 a 7). */
@@ -237,6 +331,7 @@ public final class ZoneElevators {
         Component result = RunManager.setZone(server, g, next);
         // El rotulo de la planta lo pone InstanceManager al llegar (FloorTitle)
         SPDebug.log(result.getString());
+        if (!g.state().isDone()) placeRiders(server, level, g, s);
     }
 
     /** Quita curaciones y objetos; se conserva el equipo base (linterna y walkie, README 6.5). */

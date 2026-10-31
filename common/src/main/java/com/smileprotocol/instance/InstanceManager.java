@@ -22,6 +22,7 @@ import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.TicketType;
+import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
@@ -129,18 +130,65 @@ public final class InstanceManager {
      * Coloca la zona {@code index} de la secuencia del grupo en el sub-hueco {@code sub}.
      * Si hay una limpieza pendiente en ese sub-hueco, se termina antes.
      */
+    /**
+     * Colocacion de una zona por partes (mientras el grupo baja en el ascensor): se pega la plantilla
+     * por rebanadas a lo largo de Z, unas cuantas por tick, y al final se reparten fusibles, objetos y mobs.
+     */
+    public static final class PlaceJob {
+        final Group group;
+        final int index, sub;
+        final ResourceLocation zoneId;
+        @Nullable final ZoneDef def;
+        final BlockPos origin;
+        @Nullable final StructureTemplate template;
+        @Nullable BoundingBox box;
+        int nextZ;
+        boolean blocksDone;
+
+        PlaceJob(Group group, int index, int sub, ResourceLocation zoneId, @Nullable ZoneDef def, BlockPos origin,
+                 @Nullable StructureTemplate template) {
+            this.group = group;
+            this.index = index;
+            this.sub = sub;
+            this.zoneId = zoneId;
+            this.def = def;
+            this.origin = origin;
+            this.template = template;
+        }
+
+        public boolean blocksDone() {
+            return blocksDone;
+        }
+
+        public int index() {
+            return index;
+        }
+
+        /** De 0 a 1: cuanto lleva pegado. */
+        public float progress() {
+            if (blocksDone || box == null) return 1f;
+            return Mth.clamp((nextZ - box.minZ()) / (float) Math.max(1, box.getZSpan()), 0f, 1f);
+        }
+    }
+
+    /** Filas de Z que se pegan en cada rebanada. */
+    private static final int SLICE = 4;
+
+    private static StructurePlaceSettings settings() {
+        return new StructurePlaceSettings().setIgnoreEntities(false).setKnownShape(true)
+                .addProcessor(BlockIgnoreProcessor.STRUCTURE_BLOCK);
+    }
+
+    /** Empieza a colocar la zona {@code index} en el sub-hueco {@code sub}. Null si no hay tal zona. */
     @Nullable
-    public static ZonePlacement place(ServerLevel level, Group group, int index, int sub) {
+    public static PlaceJob beginPlace(ServerLevel level, Group group, int index, int sub) {
         MinecraftServer server = level.getServer();
         RunData data = RunData.get(server);
         if (index < 0 || index >= group.sequence().size()) return null;
         finishClears(level, data, group.slot(), sub);
-
         ResourceLocation zoneId = group.sequence().get(index);
         ZoneDef def = ZoneCatalog.get(server, zoneId);
         BlockPos origin = subOrigin(group.slot(), sub);
-        int maxSize = SPConfig.get().zone_spacing - 16;
-
         StructureTemplate template = null;
         if (def != null) {
             Optional<StructureTemplate> t = server.getStructureManager().get(def.template());
@@ -149,25 +197,72 @@ public final class InstanceManager {
         } else {
             SmileProtocol.LOGGER.error("No existe la zona {}", zoneId);
         }
+        PlaceJob job = new PlaceJob(group, index, sub, zoneId, def, origin, template);
+        if (template != null) {
+            Vec3i size = template.getSize();
+            int maxSize = SPConfig.get().zone_spacing - 16;
+            if (size.getX() > maxSize || size.getZ() > maxSize) {
+                SmileProtocol.LOGGER.warn("Zona {}: la plantilla mide {}x{}, mas que zone_spacing - 16 ({}); puede solaparse",
+                        zoneId, size.getX(), size.getZ(), maxSize);
+            }
+            job.box = template.getBoundingBox(settings(), origin);
+            job.nextZ = job.box.minZ();
+            addTicket(level, job.box);
+        } else {
+            job.blocksDone = true;
+        }
+        return job;
+    }
+
+    /** Pega hasta {@code slices} rebanadas. Devuelve true cuando ya estan todos los bloques. */
+    public static boolean stepPlace(ServerLevel level, PlaceJob job, int slices) {
+        if (job.blocksDone || job.template == null || job.box == null) {
+            job.blocksDone = true;
+            return true;
+        }
+        BoundingBox b = job.box;
+        for (int i = 0; i < slices && job.nextZ <= b.maxZ(); i++) {
+            int z1 = Math.min(b.maxZ(), job.nextZ + SLICE - 1);
+            StructurePlaceSettings st = settings().setBoundingBox(new BoundingBox(b.minX(), b.minY(), job.nextZ, b.maxX(), b.maxY(), z1));
+            job.template.placeInWorld(level, job.origin, job.origin, st,
+                    RandomSource.create(job.group.id().getLeastSignificantBits() ^ job.index), Block.UPDATE_CLIENTS);
+            job.nextZ = z1 + 1;
+        }
+        if (job.nextZ > b.maxZ()) job.blocksDone = true;
+        return job.blocksDone;
+    }
+
+    /**
+     * Coloca la zona {@code index} de la secuencia del grupo en el sub-hueco {@code sub}, de una vez.
+     * Si hay una limpieza pendiente en ese sub-hueco, se termina antes.
+     */
+    @Nullable
+    public static ZonePlacement place(ServerLevel level, Group group, int index, int sub) {
+        PlaceJob job = beginPlace(level, group, index, sub);
+        if (job == null) return null;
+        stepPlace(level, job, Integer.MAX_VALUE);
+        return finishPlace(level, job);
+    }
+
+    /** Marcadores, entrada, cajas, fusibles, objetos y mobs de una zona ya pegada. */
+    @Nullable
+    public static ZonePlacement finishPlace(ServerLevel level, PlaceJob job) {
+        stepPlace(level, job, Integer.MAX_VALUE);
+        MinecraftServer server = level.getServer();
+        RunData data = RunData.get(server);
+        Group group = job.group;
+        int index = job.index, sub = job.sub;
+        ResourceLocation zoneId = job.zoneId;
+        ZoneDef def = job.def;
+        BlockPos origin = job.origin;
+        StructureTemplate template = job.template;
 
         BoundingBox box;
         Map<String, List<BlockPos>> markers = new LinkedHashMap<>();
         Float markerYaw = null;
         if (template != null) {
-            Vec3i size = template.getSize();
-            if (size.getX() > maxSize || size.getZ() > maxSize) {
-                SmileProtocol.LOGGER.warn("Zona {}: la plantilla mide {}x{}, mas que zone_spacing - 16 ({}); puede solaparse",
-                        zoneId, size.getX(), size.getZ(), maxSize);
-            }
-            StructurePlaceSettings settings = new StructurePlaceSettings()
-                    .setIgnoreEntities(false)
-                    .setKnownShape(true)
-                    .addProcessor(BlockIgnoreProcessor.STRUCTURE_BLOCK);
-            box = template.getBoundingBox(settings, origin);
-            addTicket(level, box);
-            template.placeInWorld(level, origin, origin, settings, RandomSource.create(group.id().getLeastSignificantBits() ^ index),
-                    Block.UPDATE_CLIENTS);
-            for (StructureTemplate.StructureBlockInfo info : template.filterBlocks(origin, settings, Blocks.STRUCTURE_BLOCK)) {
+            box = job.box;
+            for (StructureTemplate.StructureBlockInfo info : template.filterBlocks(origin, settings(), Blocks.STRUCTURE_BLOCK)) {
                 CompoundTag nbt = info.nbt();
                 if (nbt == null) continue;
                 String meta = nbt.getString("metadata").trim();
@@ -356,8 +451,8 @@ public final class InstanceManager {
             budget = left[0];
         }
 
-        // Precarga: una zona por tick como mucho
-        if (server.getTickCount() % 10 == 0) {
+        // Precarga (desactivada por defecto: la planta se construye mientras baja el ascensor)
+        if (SPConfig.get().preload_next_zone && server.getTickCount() % 10 == 0) {
             for (Run r : RunManager.openRuns(data)) {
                 for (Group g : r.groups()) {
                     if (g.state().isDone() || g.current() == null || g.next() != null) continue;

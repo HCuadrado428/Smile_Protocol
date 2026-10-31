@@ -11,6 +11,7 @@ import com.smileprotocol.dimension.SPDimension;
 import com.smileprotocol.hide.HideTypes;
 import com.smileprotocol.instance.InstanceManager;
 import com.smileprotocol.instance.ZonePlacement;
+import net.minecraft.core.BlockPos;
 import com.smileprotocol.run.Group;
 import com.smileprotocol.run.GroupManager;
 import com.smileprotocol.zone.ZoneCatalog;
@@ -97,6 +98,7 @@ public final class SelfTest {
                     failures += testZone(server, level, id, slot++);
                 }
                 failures += loadTest(server, level);
+                failures += buildTest(server, level);
                 // Limpieza de lo colocado (en este mismo tick)
                 for (int i = 0; i < 400; i++) InstanceManager.tick(server);
             }
@@ -145,6 +147,41 @@ public final class SelfTest {
                 + (groups.isEmpty() ? 0 : ms / groups.size()) + " ms cada una), mobs=" + mobs + " luces=" + lights);
         for (Group g : groups) InstanceManager.release(server, g);
         return fails;
+    }
+
+    /**
+     * Construccion por partes (la planta se construye mientras baja el ascensor): la mas grande, por
+     * rebanadas, como en el viaje; cuantos ticks harian falta y lo que tarda el peor de ellos.
+     */
+    private static int buildTest(MinecraftServer server, ServerLevel level) {
+        ResourceLocation id = ResourceLocation.tryParse("smileprotocol:lab_storage");
+        Group g = new Group(UUID.randomUUID(), "BUILD", 970, List.of(id), DifficultyScaler.forGroup(server, 4), 970);
+        var job = InstanceManager.beginPlace(level, g, 0, 0);
+        if (job == null) {
+            log("FALLO construccion por partes: no empieza");
+            return 1;
+        }
+        int ticks = 0;
+        long worst = 0;
+        float last = -1;
+        boolean monotonic = true;
+        int slices = Math.max(1, com.smileprotocol.config.SPConfig.get().zone_build_slices_per_tick);
+        while (!job.blocksDone() && ticks < 2000) {
+            long t0 = System.nanoTime();
+            InstanceManager.stepPlace(level, job, slices);
+            worst = Math.max(worst, System.nanoTime() - t0);
+            if (job.progress() < last) monotonic = false;
+            last = job.progress();
+            ticks++;
+        }
+        ZonePlacement z = InstanceManager.finishPlace(level, job);
+        boolean ok = z != null && z.exitCabin() != null && !z.marker("entry").isEmpty() && monotonic && job.blocksDone()
+                && !level.getBlockState(BlockPos.containing(z.entry()).below()).isAir();
+        log((ok ? "construccion por partes" : "FALLO construccion por partes") + ": " + ticks + " ticks (" + ticks / 20.0
+                + " s de viaje) con " + slices + " rebanadas por tick, peor tick " + worst / 1_000_000 + " ms");
+        if (z != null) g.setCurrent(z);
+        InstanceManager.release(server, g);
+        return ok ? 0 : 1;
     }
 
     private static int testZone(MinecraftServer server, ServerLevel level, ResourceLocation id, int slot) {

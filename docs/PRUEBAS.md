@@ -209,6 +209,8 @@ Disparadores: `fuse_inserted`, `fuse_removed`, `fuse_moved`, `circuit_powered`, 
 
 ## Ascensores de zona, game over y fin de partida (fase 16)
 
+- **Viaje en ascensor.** Al salir el ascensor de una planta, los que están dentro **no ven pantalla negra**: se quedan en la cabina, que baja (zumbido, traqueteo, algún golpe de los cables, la luz parpadea) mientras se construye la planta siguiente por partes. Abajo, en la barra de acción, «▼ Bajando a la planta N… %». Al frenar hay un golpe, un fundido muy corto y aparecen en la cabina de la planta nueva en el mismo sitio y mirando hacia las puertas, que se abren con un «ding». Los que se quedaron fuera lo ven todo negro y llegan igual. Dura al menos `elevator_ride_time` (8 s); si la planta tarda más en construirse, el viaje se alarga. Con `preload_next_zone = true` vuelve el comportamiento antiguo (la siguiente se construye de antemano).
+
 1. **Los muertos vuelven en el ascensor.** Cuando el grupo sube, los compañeros muertos (espectadores) aparecen dentro de la cabina con los demás, curados, pero **pierden lo que llevaban** (salvo la linterna), igual que los heridos, los derribados y los que se quedaron fuera (`elevator_strip`).
 2. **Viaje:** pantalla negra y la cabina tiembla al salir y al frenar.
 3. **GAME OVER.** Si mueren todos los del grupo, sale la pantalla de GAME OVER (estática, letras rojas que tiemblan, en qué planta caísteis y el tiempo) con **«Volver al lobby»** o **«Seguir mirando»**. Los eliminados pasan a mirar a los jugadores vivos de **cualquier partida en curso** (`spectate_scope`: `ALL_RUNS` u `OWN_RUN`); clic para cambiar. Si no queda nadie a quien mirar, vuelves al lobby al acabar la partida.

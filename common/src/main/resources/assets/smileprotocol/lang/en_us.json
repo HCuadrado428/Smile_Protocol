@@ -512,5 +512,6 @@
   "smileprotocol.playtest.started": "A playtest session has started: everything is being logged. If something looks wrong, type /sp nota <what happened>.",
   "smileprotocol.playtest.stopped": "Playtest session over. Log and summary in %s",
   "smileprotocol.playtest.inactive": "No playtest session is running",
-  "smileprotocol.playtest.noted": "Note saved. Thanks!"
+  "smileprotocol.playtest.noted": "Note saved. Thanks!",
+  "smileprotocol.zone_elevator.riding": "▼ Going down to floor %s… %s %%"
 }
