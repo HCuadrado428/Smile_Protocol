@@ -805,6 +805,45 @@ public final class ClientSelfTest {
         }));
         SHOTS.add(() -> wait = 15);
         SHOTS.add(() -> grab(mc, "50_mueble_abierto"));
+        // los cinco muebles que se registran, en fila: cerrados y luego abiertos (cajon, puertas y tapa animados)
+        String[] row = {"desk", "filing_cabinet", "medical_cabinet", "tool_cart", "supply_box"};
+        BlockPos[] rowAt = {null};
+        SHOTS.add(() -> server.execute(() -> {
+            // en un escenario flotante con luz, para que se vean bien
+            BlockPos base = BlockPos.containing(cam).offset(-4, 40, 3);
+            rowAt[0] = base;
+            var floorSt = com.smileprotocol.registry.ModBlocks.building("lab_tile_floor").defaultBlockState();
+            var lightSt = net.minecraft.world.level.block.Blocks.LIGHT.defaultBlockState()
+                    .setValue(net.minecraft.world.level.block.LightBlock.LEVEL, 15);
+            for (int dx = -2; dx <= 12; dx++) {
+                for (int dz = -6; dz <= 3; dz++) level.setBlockAndUpdate(base.offset(dx, -1, dz), floorSt);
+            }
+            for (int dx = 0; dx <= 10; dx += 5) level.setBlockAndUpdate(base.offset(dx, 3, -2), lightSt);
+            for (int i = 0; i < row.length; i++) {
+                BlockPos p = base.offset(i * 2, 0, 0);
+                level.setBlockAndUpdate(p, com.smileprotocol.registry.ModBlocks.furniture(row[i]).defaultBlockState()
+                        .setValue(com.smileprotocol.block.FurnitureBlock.FACING, Direction.NORTH));
+            }
+            boolean be = level.getBlockEntity(base) instanceof com.smileprotocol.blockentity.FurnitureBlockEntity;
+            log((be ? "OK" : "FALLO") + " muebles animados: los que se registran tienen entidad de bloque (GeckoLib)");
+            SPSessionManager.teleport(sp, level, Vec3.atBottomCenterOf(base.offset(4, 0, -3)), 0f, 20f);
+            com.smileprotocol.motion.Flashlights.set(sp, true);
+        }));
+        SHOTS.add(() -> wait = 25);
+        SHOTS.add(() -> grab(mc, "57_muebles_cerrados"));
+        SHOTS.add(() -> server.execute(() -> {
+            for (int i = 0; i < row.length; i++) {
+                BlockPos p = rowAt[0].offset(i * 2, 0, 0);
+                level.setBlockAndUpdate(p, level.getBlockState(p).setValue(com.smileprotocol.block.SearchableFurnitureBlock.OPEN, true));
+            }
+        }));
+        SHOTS.add(() -> wait = 5);
+        SHOTS.add(() -> grab(mc, "58_muebles_abriendose"));
+        SHOTS.add(() -> wait = 20);
+        SHOTS.add(() -> grab(mc, "59_muebles_abiertos"));
+        SHOTS.add(() -> server.execute(() -> {
+            for (int i = 0; i < row.length; i++) level.removeBlock(rowAt[0].offset(i * 2, 0, 0), false);
+        }));
         // 8m. Fase 22: accesibilidad (minijuego asistido validado en el servidor, colores de daltonismo)
         SHOTS.add(() -> server.execute(() -> {
             com.smileprotocol.qte.QTEManager.setAssist(sp, true);

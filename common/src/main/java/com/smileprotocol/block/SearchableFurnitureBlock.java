@@ -32,7 +32,7 @@ import javax.annotation.Nullable;
  * ({@link SearchLoot}); despues queda abierto y vacio. Cada partida coloca la planta de nuevo, asi
  * que el registro es por instancia.
  */
-public class SearchableFurnitureBlock extends FurnitureBlock implements SPInteractable {
+public class SearchableFurnitureBlock extends FurnitureBlock implements SPInteractable, net.minecraft.world.level.block.EntityBlock {
 
     public static final BooleanProperty OPEN = BlockStateProperties.OPEN;
     private final String kind;
@@ -81,5 +81,27 @@ public class SearchableFurnitureBlock extends FurnitureBlock implements SPIntera
             player.displayClientMessage(Component.translatable("smileprotocol.search.empty"), true);
         }
         LabEvents.fire(level, pos, player, "furniture_searched", kind);
+    }
+
+    @Override
+    protected net.minecraft.world.level.block.RenderShape getRenderShape(BlockState state) {
+        return net.minecraft.world.level.block.RenderShape.ENTITYBLOCK_ANIMATED;
+    }
+
+    @Override
+    public net.minecraft.world.level.block.entity.BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
+        return new com.smileprotocol.blockentity.FurnitureBlockEntity(pos, state);
+    }
+
+    @Nullable
+    @Override
+    public <T extends net.minecraft.world.level.block.entity.BlockEntity> net.minecraft.world.level.block.entity.BlockEntityTicker<T> getTicker(
+            Level level, BlockState state, net.minecraft.world.level.block.entity.BlockEntityType<T> type) {
+        if (!level.isClientSide) return null;
+        return (lvl, pos, st, be) -> {
+            if (be instanceof com.smileprotocol.blockentity.AnimatedBlockEntity a) {
+                com.smileprotocol.blockentity.AnimatedBlockEntity.clientTick(lvl, pos, st, a);
+            }
+        };
     }
 }

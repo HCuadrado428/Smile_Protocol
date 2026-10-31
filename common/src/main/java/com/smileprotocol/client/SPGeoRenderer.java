@@ -150,6 +150,22 @@ public class SPGeoRenderer<T extends AnimatedBlockEntity> extends GeoBlockRender
                     pose.translate(0, -0.5f, 0);
                 }
             }
+            // Muebles que se registran
+            case "slide" -> bone.setPosZ(open * 5f);
+            case "swing_l" -> bone.setRotY(open * 1.75f);
+            case "swing_r" -> bone.setRotY(-open * 1.75f);
+            case "flip" -> bone.setRotX(open * 1.9f);
+            case "full" -> {
+                if (st.hasProperty(com.smileprotocol.block.SearchableFurnitureBlock.OPEN)
+                        && st.getValue(com.smileprotocol.block.SearchableFurnitureBlock.OPEN)) return;
+            }
+            case "empty" -> {
+                if (st.hasProperty(com.smileprotocol.block.SearchableFurnitureBlock.OPEN)
+                        && !st.getValue(com.smileprotocol.block.SearchableFurnitureBlock.OPEN)) return;
+            }
+            case "json_open" -> {
+                return;
+            }
             case "lamp_on", "lamp_off" -> {
                 if (be instanceof FuseBoxBlockEntity && st.hasProperty(FuseBoxBlock.POWERED)) {
                     boolean on = st.getValue(FuseBoxBlock.POWERED);

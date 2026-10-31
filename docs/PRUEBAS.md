@@ -266,6 +266,11 @@ Hace falta Simple Voice Chat en el servidor y en los clientes (es opcional: sin 
 2. **Registrar.** Escritorios, archivadores, botiquines, carros de herramientas y cajas de suministros se registran: mírales y mantén el clic derecho (sale el texto, p. ej. «Registrar los cajones»). Hace algo de ruido. Al acabar se abren (cajón fuera, puertas abiertas, tapa quitada) y a veces sueltan algo delante: latas, botellas, pilas, botiquines, bengalas, adrenalina o un fusible fundido; muchas veces nada («No hay nada útil.»). Un mueble abierto ya no se puede registrar.
 3. **Botín por planta.** Cada planta tiene su tabla (`data/smileprotocol/search_loot/<planta>.json`): en la morgue salen más botiquines, en energía más pilas... y en los botiquines siempre es más fácil encontrar curas. Cada partida coloca la planta de nuevo, así que vuelven a estar cerrados.
 
+## Muebles animados
+
+- Registra un escritorio, un archivador o un carro: el cajón sale despacio (medio segundo) en vez de aparecer fuera de golpe. El botiquín abre sus dos puertas de cristal y la caja de suministros levanta la tapa. Lo de dentro cambia al quedar registrado (faltan frascos, quedan huecos en la gomaespuma).
+- Al volver a cargar la planta o reconectar, los ya registrados siguen abiertos (sin repetir la animación).
+
 ## Música de cada planta
 
 - Al llegar a cada planta suena muy bajo su ambiente (recepción: piano apagado; almacén: chapa lejana; oficinas: la nana desafinada; morgue: coro frío; energía: zumbido eléctrico; jardín: gotas; criogenia: cristales; Laboratorio Cero: pulso y la nana muy lejos; tutorial: colchón tranquilo). Al cambiar de planta se funde con la siguiente.

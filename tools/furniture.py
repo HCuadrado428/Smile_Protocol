@@ -47,12 +47,19 @@ MAT.update({
 DEFS = []      # (nombre, se registra, caja)
 
 
-def export(g, name, variants, searchable):
-    """Pinta la textura con Geo y escribe un modelo JSON por variante ({sufijo: bones que se quitan})."""
+def export(g, name, variants, searchable, moves=None):
+    """Pinta la textura con Geo y escribe un modelo JSON por variante ({sufijo: bones que se quitan}).
+    moves: {sufijo: {bone: (dx, dy, dz)}} desplaza las piezas de ese bone en esa variante (cajon fuera).
+
+    Los que se registran ademas guardan el modelo GeckoLib (se dibujan animados: SPGeoRenderer mueve
+    «slide», «swing_l», «swing_r» y «flip» segun lo abierto; «full» solo se ve cerrado, «empty» solo abierto
+    y «json_open» solo existe para el modelo JSON abierto)."""
     g.save()
-    for p in (ROOT / f"geo/block/{name}.geo.json", ROOT / f"animations/block/{name}.animation.json"):
-        if p.exists():
-            p.unlink()
+    if not searchable:
+        for p in (ROOT / f"geo/block/{name}.geo.json", ROOT / f"animations/block/{name}.animation.json"):
+            if p.exists():
+                p.unlink()
+    moves = moves or {}
     tex = Image.open(ROOT / f"textures/block/{name}.png")
     TW, TH = tex.size
     lo = [99, 99, 99]
@@ -62,8 +69,10 @@ def export(g, name, variants, searchable):
         for b in g.bones:
             if b["name"] in drop:
                 continue
+            off = moves.get(suffix, {}).get(b["name"], (0, 0, 0))
             for c in b["cubes"]:
                 ox, oy, oz = c["origin"]
+                ox, oy, oz = ox + off[0], oy + off[1], oz + off[2]
                 sx, sy, sz = c["size"]
                 fr = [ox + 8, oy, oz + 8]
                 to = [ox + sx + 8, oy + sy, oz + sz + 8]
@@ -105,125 +114,131 @@ def export(g, name, variants, searchable):
 
 def desk():
     """Escritorio de despacho: tablero de madera, faldon, cajonera a la derecha con tres cajones;
-    abierto, el de arriba sale con papeles revueltos."""
+    al registrarlo, el de arriba sale con papeles revueltos."""
     g = Geo("desk", 31)
     g.bone("root")
-    g.bone("closed", "root")
-    g.bone("open", "root")
+    g.bone("slide", "root")
     g.cube("root", (-8, 11, -8), (16, 1.5, 16), "wood")                     # tablero
     g.cube("root", (-7.5, 3, -7.5), (0.8, 8, 15), "wood_dark")              # lateral izquierdo
     g.cube("root", (-7.5, 4, -7.5), (8, 7, 0.8), "wood_dark")               # faldon trasero
-    g.cube("root", (0.5, 0, -7.5), (7, 11, 15), "wood_dark")               # cajonera
-    for i, y in enumerate((7.6, 4.2, 0.8)):
-        bone = "closed" if i == 0 else "root"
-        g.cube(bone, (0.8, y, 7.4), (6.4, 3.0, 0.6), "wood")
-        g.cube(bone, (3.2, y + 1.2, 8), (1.6, 0.6, 0.6), "chrome")
-    g.cube("open", (0.8, 7.6, 12.4), (6.4, 3.0, 0.6), "wood")
-    g.cube("open", (0.8, 7.6, 7.4), (6.4, 3.0, 5.0), "wood_dark", skip=("up",))
-    g.cube("open", (1.3, 9.0, 8), (5.4, 0.6, 4), "paper")
-    g.cube("open", (3.2, 8.8, 13), (1.6, 0.6, 0.6), "chrome")
-    g.cube("open", (0.8, 7.6, 7.3), (6.4, 3.0, 0.2), "black")
+    g.cube("root", (0.5, 0, -7.5), (7, 7.5, 15), "wood_dark")               # cajonera (sin el hueco de arriba)
+    g.cube("root", (0.5, 7.5, -7.5), (7, 3.5, 10), "wood_dark")
+    g.cube("root", (0.5, 7.5, 2.5), (0.3, 3.5, 5), "wood_dark")
+    g.cube("root", (7.2, 7.5, 2.5), (0.3, 3.5, 5), "wood_dark")
+    for y in (4.2, 0.8):
+        g.cube("root", (0.8, y, 7.4), (6.4, 3.0, 0.6), "wood")
+        g.cube("root", (3.2, y + 1.2, 8), (1.6, 0.6, 0.6), "chrome")
+    g.cube("slide", (0.8, 7.6, 7.4), (6.4, 3.0, 0.6), "wood")               # cajon de arriba
+    g.cube("slide", (0.8, 7.6, 2.4), (6.4, 2.8, 5.0), "wood_dark", skip=("up",))
+    g.cube("slide", (1.3, 9.0, 3), (5.4, 0.6, 4), "paper")
+    g.cube("slide", (3.2, 8.8, 8), (1.6, 0.6, 0.6), "chrome")
     g.cube("root", (-6, 12.5, -4), (6, 0.3, 4.5), "paper")                  # papeles encima
     g.cube("root", (-5.5, 12.8, -3.5), (5, 0.3, 4), "paper")
     g.cube("root", (2, 12.5, -6), (1.2, 3, 1.2), "steel_dark")             # flexo
     g.cube("root", (2, 15.2, -6), (4, 0.8, 1.2), "steel_dark")
     g.blood("splat", (-3, 12.6, 2), 1.6)
-    export(g, "desk", {"": {"open"}, "_open": {"closed"}}, True)
+    export(g, "desk", {"": set(), "_open": set()}, True, moves={"_open": {"slide": (0, 0, 5)}})
 
 
 def filing_cabinet():
-    """Archivador metalico de cuatro cajones con etiquetas; abierto, uno sale con carpetas."""
+    """Archivador metalico de cuatro cajones con etiquetas; al registrarlo, el segundo sale con carpetas."""
     g = Geo("filing_cabinet", 32)
     g.bone("root")
-    g.bone("closed", "root")
-    g.bone("open", "root")
-    g.cube("root", (-6, 0, -7), (12, 16, 14), "paint_olive")
+    g.bone("slide", "root")
+    g.cube("root", (-6, 0, -7), (12, 8.2, 14), "paint_olive")
+    g.cube("root", (-6, 11.6, -7), (12, 4.4, 14), "paint_olive")
+    g.cube("root", (-6, 8.2, -7), (12, 3.4, 8), "paint_olive")
+    g.cube("root", (-6, 8.2, 1), (0.4, 3.4, 6), "paint_olive")
+    g.cube("root", (5.6, 8.2, 1), (0.4, 3.4, 6), "paint_olive")
     for i, y in enumerate((12, 8.2, 4.4, 0.6)):
-        bone = "closed" if i == 1 else "root"
+        bone = "slide" if i == 1 else "root"
         g.cube(bone, (-5.6, y, 7), (11.2, 3.4, 0.6), "paint_olive")
         g.cube(bone, (-1.5, y + 2.3, 7.6), (3, 0.6, 0.5), "chrome")
         g.cube(bone, (-1.2, y + 0.6, 7.6), (2.4, 1.2, 0.2), "label_file")
-    g.cube("open", (-5.6, 8.2, 13), (11.2, 3.4, 0.6), "paint_olive")
-    g.cube("open", (-5.6, 8.2, 7), (11.2, 3.4, 6), "steel_dark", skip=("up",))
+    g.cube("slide", (-5.6, 8.2, 1), (11.2, 3.2, 6), "steel_dark", skip=("up",))
     for k in range(5):
-        g.cube("open", (-5 + k * 2.2, 9, 8), (1.8, 3.4, 4.6), "paper")
-    g.cube("open", (-1.5, 10.5, 13.6), (3, 0.6, 0.5), "chrome")
+        g.cube("slide", (-5 + k * 2.2, 8.6, 2), (1.8, 3.0, 4.6), "paper")
     g.blood("drip", 4, 7.6, 16, 9)
-    export(g, "filing_cabinet", {"": {"open"}, "_open": {"closed"}}, True)
+    export(g, "filing_cabinet", {"": set(), "_open": set()}, True, moves={"_open": {"slide": (0, 0, 6)}})
 
 
 def medical_cabinet():
     """Armario de botiquin: blanco con dos puertas de cristal, baldas con frascos y bolsas de suero
-    y una cruz roja; abierto, las puertas quedan de lado y falta la mitad de lo de dentro."""
+    y una cruz roja; al registrarlo, las puertas se abren y falta la mitad de lo de dentro."""
     g = Geo("medical_cabinet", 33)
     g.bone("root")
-    g.bone("closed", "root")
-    g.bone("open", "root")
+    g.bone("full", "root")
+    g.bone("empty", "root")
+    g.bone("swing_l", "root", pivot=(-7, 0, 6.3))
+    g.bone("swing_r", "root", pivot=(7, 0, 6.3))
+    g.bone("json_open", "root")
     g.cube("root", (-7, 0, -6), (14, 16, 12), "paint_white", skip=("south",))
     g.cube("root", (-6.5, 0.5, -5.5), (13, 15, 0.3), "locker_inner")
     for y in (5, 10):
         g.cube("root", (-6.5, y, -5.5), (13, 0.5, 11), "paint_white_dark")
     for x in (-5.5, -3.5, 2, 4):
-        g.cube("closed", (x, 5.5, -3), (1.4, 2.6, 1.4), "amber")
-    g.cube("closed", (-1, 10.5, -3), (2.4, 3.2, 1.2), "blood_bag")
+        g.cube("full", (x, 5.5, -3), (1.4, 2.6, 1.4), "amber")
+    g.cube("full", (-1, 10.5, -3), (2.4, 3.2, 1.2), "blood_bag")
     g.cube("root", (-5, 10.5, -2), (1.4, 2.0, 1.4), "jar")
     g.cube("root", (3.5, 0.6, -4), (2.6, 3.5, 3), "steel_dark")
-    for x in (-7, 0):
-        g.cube("closed", (x, 0.5, 6), (7, 15, 0.6), "glass")
-        g.cube("closed", (x + 5.5 if x < 0 else x + 0.5, 7, 6.6), (1, 2, 0.5), "chrome")
-    g.cube("open", (-7.6, 0.5, 6), (0.6, 15, 7), "glass")
-    g.cube("open", (7, 0.5, 6), (0.6, 15, 7), "glass")
-    g.cube("open", (-4, 5.5, -3), (1.4, 2.6, 1.4), "amber_dead")
+    g.cube("swing_l", (-7, 0.5, 6), (7, 15, 0.6), "glass")
+    g.cube("swing_l", (-1.5, 7, 6.6), (1, 2, 0.5), "chrome")
+    g.cube("swing_r", (0, 0.5, 6), (7, 15, 0.6), "glass")
+    g.cube("swing_r", (0.5, 7, 6.6), (1, 2, 0.5), "chrome")
+    g.cube("json_open", (-7.6, 0.5, 6), (0.6, 15, 7), "glass")
+    g.cube("json_open", (7, 0.5, 6), (0.6, 15, 7), "glass")
+    g.cube("empty", (-4, 5.5, -3), (1.4, 2.6, 1.4), "amber_dead")
     g.cube("root", (-1.5, 13.6, 6.1), (3, 2, 0.4), "label_med")
     g.blood("smear", (2, 9, 6.6), 1.0, 5)
-    export(g, "medical_cabinet", {"": {"open"}, "_open": {"closed"}}, True)
+    export(g, "medical_cabinet", {"": {"empty", "json_open"}, "_open": {"full", "swing_l", "swing_r"}}, True)
 
 
 def tool_cart():
-    """Carro de herramientas rojo con ruedas y cajones; abierto, el de arriba fuera con llaves."""
+    """Carro de herramientas rojo con ruedas y cajones; al registrarlo, el de arriba sale con llaves."""
     g = Geo("tool_cart", 34)
     g.bone("root")
-    g.bone("closed", "root")
-    g.bone("open", "root")
-    g.cube("root", (-7, 2, -6), (14, 11, 12), "paint_red")
+    g.bone("slide", "root")
+    g.cube("root", (-7, 2, -6), (14, 8, 12), "paint_red")
+    g.cube("root", (-7, 10, -6), (14, 3, 7), "paint_red")
+    g.cube("root", (-7, 10, 1), (0.4, 3, 5), "paint_red")
+    g.cube("root", (6.6, 10, 1), (0.4, 3, 5), "paint_red")
     g.cube("root", (-7.3, 13, -6.3), (14.6, 0.8, 12.6), "steel_dark")
     for x in (-6.5, 5.5):
         for z in (-5.5, 4.5):
             g.cube("root", (x - 0.2, 0, z - 0.2), (1.4, 2, 1.4), "rubber")
     for i, y in enumerate((10, 6.5, 3)):
-        bone = "closed" if i == 0 else "root"
+        bone = "slide" if i == 0 else "root"
         g.cube(bone, (-6.6, y, 6), (13.2, 3, 0.5), "paint_red")
         g.cube(bone, (-3, y + 1.8, 6.5), (6, 0.5, 0.5), "chrome")
-    g.cube("open", (-6.6, 10, 11), (13.2, 3, 0.5), "paint_red")
-    g.cube("open", (-6.6, 10, 6), (13.2, 3, 5), "steel_dark", skip=("up",))
-    g.cube("open", (-5, 11.2, 7), (4, 0.6, 1), "chrome")
-    g.cube("open", (0, 11.2, 8.5), (5, 0.6, 1), "steel")
-    g.cube("open", (-3, 12.8 - 1.5, 11.5), (6, 0.5, 0.5), "chrome")
+    g.cube("slide", (-6.6, 10, 1), (13.2, 2.8, 5), "steel_dark", skip=("up",))
+    g.cube("slide", (-5, 11.2, 2), (4, 0.6, 1), "chrome")
+    g.cube("slide", (0, 11.2, 3.5), (5, 0.6, 1), "steel")
     g.cube("root", (8, 6, -4), (0.6, 7, 0.6), "chrome")                     # asa
     g.cube("root", (8, 12.4, -4), (0.6, 0.6, 8), "chrome")
     g.cube("root", (8, 6, 3.4), (0.6, 7, 0.6), "chrome")
     g.cube("root", (-5, 13.8, -4), (5, 1, 2), "steel")                      # caja de llaves encima
-    export(g, "tool_cart", {"": {"open"}, "_open": {"closed"}}, True)
+    export(g, "tool_cart", {"": set(), "_open": set()}, True, moves={"_open": {"slide": (0, 0, 5)}})
 
 
 def supply_box():
-    """Caja de suministros con la tapa atornillada y estarcido; abierta, la tapa apoyada al lado y
-    gomaespuma con huecos dentro."""
+    """Caja de suministros con la tapa atornillada y estarcido; al registrarla, la tapa se levanta y
+    dentro queda gomaespuma con huecos."""
     g = Geo("supply_box", 35)
     g.bone("root")
-    g.bone("closed", "root")
-    g.bone("open", "root")
+    g.bone("flip", "root", pivot=(0, 8, -6.2))
+    g.bone("empty", "root")
+    g.bone("json_open", "root")
     g.cube("root", (-7, 0, -6), (14, 8, 12), "paint_olive", skip=("up",))
     g.cube("root", (-6.5, 0.5, -5.5), (13, 6.5, 11), "foam")
     g.cube("root", (-7.4, 1, -6.4), (14.8, 1, 12.8), "steel_dark")
     g.cube("root", (-3, 3, 6), (6, 3, 0.3), "crate_stencil")
     for x in (-7.6, 7):
         g.cube("root", (x, 4, -2), (0.6, 1.2, 4), "steel")                # asas
-    g.cube("closed", (-7.2, 8, -6.2), (14.4, 1.4, 12.4), "paint_olive")
-    g.cube("open", (-8, 0, -6.5), (1.2, 12, 13), "paint_olive")
-    g.cube("open", (-3, 6.8, -3), (2, 1, 6), "black")
-    g.cube("open", (1, 6.8, -3), (3, 1, 2), "black")
-    export(g, "supply_box", {"": {"open"}, "_open": {"closed"}}, True)
+    g.cube("flip", (-7.2, 8, -6.2), (14.4, 1.4, 12.4), "paint_olive")
+    g.cube("json_open", (-8, 0, -6.5), (1.2, 12, 13), "paint_olive")
+    g.cube("empty", (-3, 6.8, -3), (2, 1, 6), "black")
+    g.cube("empty", (1, 6.8, -3), (3, 1, 2), "black")
+    export(g, "supply_box", {"": {"empty", "json_open"}, "_open": {"flip"}}, True)
 
 
 # Decoracion --------------------------------------------------------------------------------------------

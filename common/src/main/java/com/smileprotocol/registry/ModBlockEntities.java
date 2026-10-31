@@ -52,6 +52,15 @@ public final class ModBlockEntities {
             () -> Services.PLATFORM.blockEntityType(HideBlockEntity::new, ModBlocks.LOCKER.get(), ModBlocks.WARDROBE.get(),
                     ModBlocks.WASTE_CONTAINER.get(), ModBlocks.GURNEY.get(), ModBlocks.CURTAIN.get()));
 
+    /** Muebles que se registran (fase 24): se dibujan con GeckoLib para animar cajones, puertas y tapas. */
+    public static final Supplier<BlockEntityType<com.smileprotocol.blockentity.FurnitureBlockEntity>> FURNITURE = Services.PLATFORM.register(
+            BuiltInRegistries.BLOCK_ENTITY_TYPE, "furniture",
+            () -> Services.PLATFORM.blockEntityType(com.smileprotocol.blockentity.FurnitureBlockEntity::new,
+                    java.util.Arrays.stream(com.smileprotocol.block.FurnitureDefs.ALL)
+                            .filter(com.smileprotocol.block.FurnitureDefs.Def::searchable)
+                            .map(d -> ModBlocks.furniture(d.name()))
+                            .toArray(net.minecraft.world.level.block.Block[]::new)));
+
     private ModBlockEntities() {}
 
     public static void init() {}
