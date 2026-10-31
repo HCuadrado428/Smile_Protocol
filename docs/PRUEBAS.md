@@ -42,6 +42,8 @@ La configuración está en `config/smileprotocol.json`.
   - Con todos listos empieza la cuenta atrás. Al llegar a cero se cierran las puertas, la pantalla se funde a negro y bajáis a la sala de pruebas.
   - Si un séptimo jugador entra, sale expulsado. Si uno no pulsa en 30 s mientras el resto está listo, también.
 - **Modo evento.** Con `/smileprotocol mode event` los pequeños se cierran y el mega se abre. Con 4 jugadores en el lobby, cuando entran los 4 en el mega, baja solo.
+- **Modo cerrado.** Con `/smileprotocol mode closed` se cierran los cuatro pequeños y el mega; la pantalla del TUTORIAL sigue en verde.
+- **Ascensor TUTORIAL** (pared oeste del lobby, junto a la entrada de los ascensores). Entra uno solo y pulsa el botón: baja a la planta de entrenamiento. Comprueba que no aparece ningún monstruo ni susto, que los carteles de las siete estaciones se leen (linterna, registrar, esconderse, llaves, válvulas, conductos y fusibles) y que el objetivo del HUD avanza paso a paso: pasadizo agachado → llave roja → puerta roja → volante → válvula → conducto → fusibles → ascensor. Al subir no cuenta como partida jugada para el mega.
 - **Forzar la bajada.** `/smileprotocol start mini1 force` hace bajar a quien esté dentro.
 
 ## Sesión y partida (fases 2 y 3)

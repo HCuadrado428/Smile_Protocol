@@ -126,7 +126,7 @@ public final class LobbyManager {
                     rt.afkTicks = 0;
                     return;
                 }
-                if (def.type() == ElevatorType.MINI) updateMini(def, rt, occupants);
+                if (def.type() != ElevatorType.MEGA) updateMini(def, rt, occupants);
                 else updateMega(server, data, def, rt, occupants);
             }
             case DESCENDING -> {
@@ -156,7 +156,7 @@ public final class LobbyManager {
 
     private static void updateMini(ElevatorDef def, Runtime rt, List<ServerPlayer> occupants) {
         int max = SPConfig.get().mini_max_players;
-        int min = SPConfig.get().mini_min_players;
+        int min = minPlayers(def);
 
         // Cabina llena: no entra nadie mas
         if (occupants.size() > max) {
@@ -276,7 +276,11 @@ public final class LobbyManager {
             ServerPlayer p = server.getPlayerList().getPlayer(id);
             if (p != null && !SPPlayerData.inSP(p)) group.add(p);
         }
-        RunType type = def.type() == ElevatorType.MEGA ? RunType.MEGA : RunType.MINI;
+        RunType type = switch (def.type()) {
+            case MEGA -> RunType.MEGA;
+            case TUTORIAL -> RunType.TUTORIAL;
+            default -> RunType.MINI;
+        };
         RunManager.StartResult result = RunManager.start(server, type, def.id(), group, rt.forced);
         rt.forced = false;
         if (!result.ok()) {
@@ -376,8 +380,30 @@ public final class LobbyManager {
         return Component.translatable("smileprotocol.elevator.cannot_play");
     }
 
+    /** Si el ascensor {@code id} admite jugadores ahora mismo (lo usan las pruebas y los comandos). */
+    public static boolean isOpen(MinecraftServer server, String id) {
+        LobbyData data = LobbyData.get(server);
+        ElevatorDef def = data.getElevator(id);
+        return def != null && !isClosed(data, def, runtime(id));
+    }
+
+    /** Minimo de jugadores para bajar: el tutorial se puede hacer solo. */
+    private static int minPlayers(ElevatorDef def) {
+        return switch (def.type()) {
+            case TUTORIAL -> 1;
+            case MINI -> SPConfig.get().mini_min_players;
+            default -> SPConfig.get().min_group_size;
+        };
+    }
+
     private static boolean isClosed(LobbyData data, ElevatorDef def, Runtime rt) {
         MinecraftServer server = com.smileprotocol.ServerRef.get();
+        if (def.type() == ElevatorType.TUTORIAL) {
+            // Abierto en todos los modos (tambien en «closed»); solo hace falta hueco para el grupo
+            if (server == null || rt.state != State.IDLE || !rt.inside.isEmpty()) return false;
+            return RunManager.freeGroupSlots(server) < 1;
+        }
+        if (data.getMode() == LobbyMode.CLOSED) return true;
         if (def.type() == ElevatorType.MEGA) {
             if (data.getMode() == LobbyMode.FREE) return true;
             return server != null && RunManager.megaStatus(server) != RunManager.MegaStatus.OPEN;
@@ -432,13 +458,13 @@ public final class LobbyManager {
     // HUD y pantallas --------------------------------------------------------------
 
     private static Payloads.SyncReady readyPacket(ElevatorDef def, Runtime rt) {
-        int min = def.type() == ElevatorType.MINI ? SPConfig.get().mini_min_players : SPConfig.get().min_group_size;
+        int min = minPlayers(def);
         Component status;
         int countdown = -1;
         if (rt.state == State.COUNTDOWN) {
             countdown = Math.max(0, (rt.countdown + 19) / 20);
             status = Component.translatable("smileprotocol.elevator.countdown", countdown);
-        } else if (def.type() == ElevatorType.MINI && rt.shownTotal < min) {
+        } else if (def.type() != ElevatorType.MEGA && rt.shownTotal < min) {
             status = Component.translatable("smileprotocol.elevator.need_players", min);
         } else if (def.type() == ElevatorType.MEGA && rt.waitingSpace) {
             status = Component.translatable("smileprotocol.elevator.waiting_space");

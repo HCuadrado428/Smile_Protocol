@@ -1,0 +1,13 @@
+{
+  "zone": "smileprotocol:tutorial",
+  "steps": [
+    {"type": "REACH", "marker": "tut_crouch", "text": "smileprotocol.mission.tutorial.crouch"},
+    {"type": "FIND_ITEM", "item": "smileprotocol:key", "text": "smileprotocol.mission.tutorial.key"},
+    {"type": "OPEN_DOOR", "door": "red", "text": "smileprotocol.mission.tutorial.door"},
+    {"type": "FIND_ITEM", "item": "smileprotocol:valve_wheel", "text": "smileprotocol.mission.tutorial.wheel"},
+    {"type": "TURN_VALVES", "group": "tut", "text": "smileprotocol.mission.tutorial.valve"},
+    {"type": "REACH", "marker": "tut_vent", "text": "smileprotocol.mission.tutorial.vent"},
+    {"type": "INSERT_FUSES", "circuit": "exit"},
+    {"type": "ESCAPE", "on_complete": [{"type": "message", "text": "smileprotocol.mission.tutorial.done"}]}
+  ]
+}

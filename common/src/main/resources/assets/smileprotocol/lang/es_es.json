@@ -433,5 +433,16 @@
   "smileprotocol.warning.body": "Smile Protocol tiene sustos, imágenes perturbadoras, sangre, destellos y sonidos fuertes. Puedes suavizarlos en el menú de accesibilidad (F7) en cualquier momento.",
   "smileprotocol.warning.continue": "Continuar",
   "smileprotocol.warning.options": "Accesibilidad",
-  "smileprotocol.warning.never": "No volver a avisar"
+  "smileprotocol.warning.never": "No volver a avisar",
+  "smileprotocol.mode.closed": "cerrado",
+  "smileprotocol.mode.announce.closed": "Los ascensores están cerrados. Solo funciona el ascensor TUTORIAL.",
+  "smileprotocol.run.type.tutorial": "tutorial",
+  "smileprotocol.mission.tutorial.crouch": "Pasa agachado por el pasadizo bajo",
+  "smileprotocol.mission.tutorial.key": "Encuentra la llave roja",
+  "smileprotocol.mission.tutorial.door": "Abre la puerta roja con la llave",
+  "smileprotocol.mission.tutorial.wheel": "Coge el volante de la válvula",
+  "smileprotocol.mission.tutorial.valve": "Pon el volante en la válvula y gíralo",
+  "smileprotocol.mission.tutorial.vent": "Cruza el muro por el conducto del suelo",
+  "smileprotocol.mission.tutorial.done": "¡Entrenamiento completado! Ya sabes lo básico. Allí abajo no estarás solo.",
+  "smileprotocol.zone.tutorial": "Planta de entrenamiento"
 }

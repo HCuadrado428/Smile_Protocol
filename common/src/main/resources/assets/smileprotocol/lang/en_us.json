@@ -433,5 +433,16 @@
   "smileprotocol.warning.body": "Smile Protocol contains jumpscares, disturbing images, blood, flashes and loud sounds. You can soften them in the accessibility menu (F7) at any time.",
   "smileprotocol.warning.continue": "Continue",
   "smileprotocol.warning.options": "Accessibility",
-  "smileprotocol.warning.never": "Don't warn again"
+  "smileprotocol.warning.never": "Don't warn again",
+  "smileprotocol.mode.closed": "closed",
+  "smileprotocol.mode.announce.closed": "The elevators are closed. Only the TUTORIAL elevator is running.",
+  "smileprotocol.run.type.tutorial": "tutorial",
+  "smileprotocol.mission.tutorial.crouch": "Crouch through the low passage",
+  "smileprotocol.mission.tutorial.key": "Find the red key",
+  "smileprotocol.mission.tutorial.door": "Open the red door with the key",
+  "smileprotocol.mission.tutorial.wheel": "Pick up the valve wheel",
+  "smileprotocol.mission.tutorial.valve": "Fit the wheel on the valve and turn it",
+  "smileprotocol.mission.tutorial.vent": "Get past the wall through the floor vent",
+  "smileprotocol.mission.tutorial.done": "Training complete! You know the basics. Down there you won't be alone.",
+  "smileprotocol.zone.tutorial": "Training floor"
 }

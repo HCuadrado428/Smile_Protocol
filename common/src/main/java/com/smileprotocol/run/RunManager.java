@@ -116,6 +116,13 @@ public final class RunManager {
         return Math.max(0, SPConfig.get().max_groups - activeGroups(server));
     }
 
+    /** El grupo esta en el tutorial (sin monstruos, sin sustos, no cuenta para records). */
+    public static boolean isTutorial(MinecraftServer server, @Nullable Group g) {
+        if (g == null) return false;
+        Run r = runOf(server, g);
+        return r != null && r.type() == RunType.TUTORIAL;
+    }
+
     public static boolean megaRunning(MinecraftServer server) {
         for (Run r : openRuns(server)) if (r.type() == RunType.MEGA) return true;
         return false;
@@ -170,7 +177,7 @@ public final class RunManager {
         if (valid.isEmpty()) return new StartResult(null, Component.translatable("smileprotocol.run.nobody"));
 
         List<List<ServerPlayer>> groups;
-        if (type == RunType.MINI) {
+        if (type == RunType.MINI || type == RunType.TUTORIAL) {
             groups = GroupManager.mini(valid);
         } else {
             groups = GroupManager.mega(valid, data.fixedGroups, RANDOM);
@@ -194,7 +201,13 @@ public final class RunManager {
             seed = RANDOM.nextLong();
         }
         List<ResourceLocation> last = data.lastSequence.getOrDefault(elevatorId, List.of());
-        List<ResourceLocation> sequence = ZoneSequence.generate(server, seed, last);
+        List<ResourceLocation> sequence;
+        if (type == RunType.TUTORIAL) {
+            ResourceLocation tut = ResourceLocation.tryParse(cfg.tutorial_zone);
+            sequence = tut == null ? List.of() : List.of(tut);
+        } else {
+            sequence = ZoneSequence.generate(server, seed, last);
+        }
         if (sequence.isEmpty()) return new StartResult(null, Component.translatable("smileprotocol.run.no_zones"));
 
         data.counter++;
@@ -220,7 +233,7 @@ public final class RunManager {
 
         // Se guarda antes de colocar para que el hueco quede reservado aunque algo falle
         data.runs.put(runId, run);
-        data.lastSequence.put(elevatorId, sequence);
+        if (type != RunType.TUTORIAL) data.lastSequence.put(elevatorId, sequence);
         data.changed();
 
         // Primero se colocan todas las zonas de entrada; si alguna falla no baja nadie
@@ -245,7 +258,7 @@ public final class RunManager {
                 // Equipo inicial (README 6.4): la linterna, siempre equipada, cargada y encendida
                 com.smileprotocol.motion.Flashlights.recharge(p, 1f);
                 com.smileprotocol.motion.Flashlights.set(p, true);
-                data.plays.merge(id, 1, Integer::sum);
+                if (type != RunType.TUTORIAL) data.plays.merge(id, 1, Integer::sum);
                 p.sendSystemMessage(Component.translatable("smileprotocol.run.joined", g.label(), g.members().size(),
                         Component.translatable("smileprotocol.run.type." + type.name().toLowerCase())).withStyle(ChatFormatting.DARK_AQUA));
             }

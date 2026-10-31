@@ -1,0 +1,7 @@
+{
+  "template": "smileprotocol:zones/tutorial",
+  "kind": "tutorial",
+  "difficulty": 0,
+  "entry_yaw": 0,
+  "name": "Planta de entrenamiento"
+}

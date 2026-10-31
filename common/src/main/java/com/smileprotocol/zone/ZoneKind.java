@@ -7,5 +7,7 @@ public enum ZoneKind {
     /** Zona intermedia: cambia entre partidas. */
     INTERMEDIATE,
     /** Sala final de criogenizacion y experimentos (fija). */
-    FINAL
+    FINAL,
+    /** Planta de entrenamiento: solo la usa el ascensor TUTORIAL. */
+    TUTORIAL
 }

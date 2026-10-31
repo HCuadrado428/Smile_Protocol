@@ -74,6 +74,8 @@ public final class SPConfig {
         public boolean per_group_zones = false;
         public String start_zone = "smileprotocol:start_corridor";
         public String final_zone = "smileprotocol:smiley_lab";
+        /** Planta del ascensor TUTORIAL. */
+        public String tutorial_zone = "smileprotocol:tutorial";
         public int zone_clear_blocks_per_tick = 32768;
         public int mini_return_delay = 10;
         public int disconnect_grace = 120;
@@ -275,6 +277,7 @@ public final class SPConfig {
             intermediate_zones = Math.max(0, intermediate_zones);
             if (start_zone == null) start_zone = "";
             if (final_zone == null) final_zone = "";
+            if (tutorial_zone == null || tutorial_zone.isBlank()) tutorial_zone = "smileprotocol:tutorial";
             camera_shake = Math.max(0f, Math.min(1f, camera_shake));
             hud_scale = Math.max(0.75f, Math.min(1.5f, hud_scale));
             if (colorblind == null) colorblind = "OFF";

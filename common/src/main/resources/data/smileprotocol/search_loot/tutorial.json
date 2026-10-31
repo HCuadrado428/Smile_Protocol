@@ -1,0 +1,10 @@
+{
+  "_comment": "Planta de entrenamiento: siempre sale algo para que se vea como funciona.",
+  "entries": [
+    {"item": "can", "weight": 30},
+    {"item": "bottle", "weight": 25},
+    {"item": "battery", "weight": 20},
+    {"item": "medkit", "weight": 10},
+    {"item": "flare", "weight": 5}
+  ]
+}

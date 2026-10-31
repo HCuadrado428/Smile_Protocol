@@ -131,6 +131,8 @@ public final class LabEventManager {
         Group g = ctx.group(level.getServer());
         ZonePlacement z = g == null ? null : g.current();
         if (z == null) return;
+        // El tutorial no tiene sustos
+        if (com.smileprotocol.run.RunManager.isTutorial(level.getServer(), g)) return;
         Map<String, Long> fired = ctx.state("lab_events", HashMap::new);
         long now = level.getGameTime();
         List<ServerPlayer> group = groupPlayers(level.getServer(), g);

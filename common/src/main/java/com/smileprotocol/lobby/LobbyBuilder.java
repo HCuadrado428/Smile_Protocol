@@ -32,7 +32,7 @@ import net.minecraft.world.level.levelgen.structure.BoundingBox;
  * avisos que hablan de los smilers sin nombrarlos, taquillas, la sala de observacion con camillas
  * y cortinas, el acceso a urgencias precintado y, al fondo, los ascensores: cuatro mini y el mega
  * en el centro. Un rastro de sangre muy discreto entra en el ascensor 3. Registra la region
- * protegida, el punto de aparicion y los cinco ascensores.
+ * protegida, el punto de aparicion y los seis ascensores (los cinco del fondo y el TUTORIAL de la pared oeste).
  * <p>
  * Orientacion fija: la entrada mira al sur (+Z) y los ascensores estan al norte (-Z).
  * Coordenadas locales: X 0..40, Z 0..46 la sala, Z -7..-1 las cabinas, Y 0 el suelo.
@@ -73,7 +73,7 @@ public final class LobbyBuilder {
 
     /** Caja que ocupara el lobby (region protegida). */
     public static BoundingBox regionFor(BlockPos origin) {
-        return new BoundingBox(origin.getX() - 1, origin.getY() - 1, origin.getZ() - 8,
+        return new BoundingBox(origin.getX() - 7, origin.getY() - 1, origin.getZ() - 8,
                 origin.getX() + WIDTH, origin.getY() + 10, origin.getZ() + DEPTH);
     }
 
@@ -86,6 +86,7 @@ public final class LobbyBuilder {
         b.floorAndCeiling();
         b.frontWall();
         b.elevatorBank();
+        b.tutorialElevator();
         b.reception();
         b.waitingArea();
         b.westWall();
@@ -165,9 +166,9 @@ public final class LobbyBuilder {
     // Partes --------------------------------------------------------------------
 
     private void clear() {
-        fill(-1, 0, -8, WIDTH, 10, DEPTH, Blocks.AIR);
+        fill(-7, 0, -8, WIDTH, 10, DEPTH, Blocks.AIR);
         // Cimientos para que no quede flotando
-        fill(-1, -1, -8, WIDTH, -1, DEPTH, Blocks.STONE);
+        fill(-7, -1, -8, WIDTH, -1, DEPTH, Blocks.STONE);
     }
 
     private void shell() {
@@ -260,6 +261,42 @@ public final class LobbyBuilder {
         hangingSign(SPAWN_X, 7, 6, 0, "ASCENSORES", "Acceso a", "laboratorios", "Planta -1");
     }
 
+    /** Interior de la cabina del tutorial: x -4..-1, z 8..11 (en la pared oeste, puerta en x 0). */
+    private static final int TUT_X1 = -4, TUT_X2 = -1, TUT_Z1 = 8, TUT_Z2 = 11;
+
+    /**
+     * El ascensor TUTORIAL, aparte de los demas: en la pared oeste, con la puerta mirando al este.
+     * Baja a la planta de entrenamiento (sin monstruos) y esta abierto en todos los modos.
+     */
+    private void tutorialElevator() {
+        BlockState wallPanel = ModBlocks.ELEVATOR_WALL_PANEL.get().defaultBlockState();
+        BlockState frame = ModBlocks.ELEVATOR_FRAME.get().defaultBlockState();
+        // Bloque de obra por fuera y la cabina dentro
+        fill(TUT_X1 - 2, 0, TUT_Z1 - 2, -1, 6, TUT_Z2 + 2, ModBlocks.building("lab_concrete_wall"));
+        fill(TUT_X1, 1, TUT_Z1, TUT_X2, 4, TUT_Z2, Blocks.AIR);
+        fill(TUT_X1, 0, TUT_Z1, TUT_X2, 0, TUT_Z2, ModBlocks.ELEVATOR_FLOOR.get().defaultBlockState());
+        fill(TUT_X1 - 1, 1, TUT_Z1, TUT_X1 - 1, 4, TUT_Z2, wallPanel);
+        fill(TUT_X1, 1, TUT_Z1 - 1, TUT_X2, 4, TUT_Z1 - 1, wallPanel);
+        fill(TUT_X1, 1, TUT_Z2 + 1, TUT_X2, 4, TUT_Z2 + 1, wallPanel);
+        fill(TUT_X1 - 1, 5, TUT_Z1 - 1, TUT_X2, 5, TUT_Z2 + 1, frame);
+        set(-2, 5, 9, ModBlocks.FLUORESCENT_LIGHT.get().defaultBlockState());
+        // Puerta en la pared oeste del lobby, con marco
+        BlockState door = ModBlocks.ELEVATOR_DOOR.get().defaultBlockState()
+                .setValue(ElevatorDoorBlock.FACING, Direction.EAST).setValue(ElevatorDoorBlock.OPEN, true);
+        fill(0, 1, TUT_Z1, 0, 3, TUT_Z2, frame);
+        for (int z = TUT_Z1 + 1; z <= TUT_Z2 - 1; z++) {
+            set(0, 1, z, door.setValue(ElevatorDoorBlock.HALF, DoubleBlockHalf.LOWER));
+            set(0, 2, z, door.setValue(ElevatorDoorBlock.HALF, DoubleBlockHalf.UPPER));
+        }
+        // Pantalla encima, boton dentro y carteles
+        set(1, 4, TUT_Z1 + 1, ModBlocks.ELEVATOR_BOARD.get().defaultBlockState().setValue(ElevatorBoardBlock.FACING, Direction.EAST));
+        set(TUT_X1, 2, TUT_Z1 + 2, ModBlocks.ELEVATOR_BUTTON.get().defaultBlockState().setValue(ElevatorButtonBlock.FACING, Direction.EAST));
+        wallSign(1, 5, TUT_Z1 + 2, Direction.EAST, "TUTORIAL", "Aprende lo", "básico. Sin", "monstruos");
+        hangingSign(3, 7, TUT_Z1 + 1, 4, "ENTRENAMIENTO", "Planta de", "prácticas", "1 a 6 personas");
+        // Franja de espera delante de la puerta
+        fill(1, 0, TUT_Z1, 1, 0, TUT_Z2, ModBlocks.building("lab_hazard"));
+    }
+
     private void reception() {
         // Mostrador curvo delante del logotipo de la pared oeste (x 0, z 30..38)
         BlockState counter = Blocks.POLISHED_DIORITE.defaultBlockState();
@@ -327,7 +364,8 @@ public final class LobbyBuilder {
 
     private void westWall() {
         // Taquillas
-        for (int z = 6; z <= 12; z++) {
+        for (int z = 2; z <= 14; z++) {
+            if (z >= TUT_Z1 - 1 && z <= TUT_Z2 + 1) continue;     // ahi esta la puerta del tutorial
             fill(1, 1, z, 1, 2, z, ModBlocks.building("lab_metal_wall"));
             BlockState door = Blocks.IRON_TRAPDOOR.defaultBlockState()
                     .setValue(TrapDoorBlock.FACING, Direction.EAST).setValue(TrapDoorBlock.OPEN, true);
@@ -506,7 +544,9 @@ public final class LobbyBuilder {
                     o.getX() + c.x2(), o.getY() + c.height(), o.getZ() - 1);
             LobbyManager.registerElevator(level, c.type(), c.id(), c.name(), cabin);
         }
+        LobbyManager.registerElevator(level, ElevatorType.TUTORIAL, "tutorial", "TUTORIAL", new BoundingBox(
+                o.getX() + TUT_X1, o.getY() + 1, o.getZ() + TUT_Z1, o.getX() + TUT_X2, o.getY() + 4, o.getZ() + TUT_Z2));
         SPDebug.log("lobby construido en " + o.toShortString());
-        return Component.translatable("smileprotocol.lobby.built", spawn.toShortString(), CABINS.length);
+        return Component.translatable("smileprotocol.lobby.built", spawn.toShortString(), CABINS.length + 1);
     }
 }

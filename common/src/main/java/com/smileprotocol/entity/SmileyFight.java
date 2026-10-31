@@ -100,6 +100,7 @@ public final class SmileyFight {
         if (level == null) return;
         long now = server.getTickCount();
         for (Run run : RunManager.openRuns(server)) {
+            if (run.type() == com.smileprotocol.run.RunType.TUTORIAL) continue;
             for (Group g : run.groups()) {
                 if (g.state().isDone() || g.current() == null) continue;
                 ZonePlacement z = g.current();

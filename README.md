@@ -158,7 +158,7 @@ El lobby está definido por una **región** (`BoundingBox`, configurable con `/s
 |---|---|
 | `/smileprotocol lobby [jugadores]` | Lleva a otros jugadores al lobby |
 | `/smileprotocol leave [jugadores]` | Saca a los jugadores de la partida, restaura su estado y los lleva al lobby |
-| `/smileprotocol mode <free\|event>` | **Interruptor de administrador** entre **modo libre** (mini ascensores activos, mega cerrado) y **modo evento** (solo el mega; los mini se bloquean). Ver 6.2 |
+| `/smileprotocol mode <free\|event\|closed>` | **Interruptor de administrador** entre **modo libre** (mini ascensores activos, mega cerrado), **modo evento** (solo el mega; los mini se bloquean) y **cerrado** (todo cerrado menos el ascensor TUTORIAL). El TUTORIAL está abierto en los tres modos. Ver 6.2 |
 | `/smileprotocol start <ascensor> [force]` | Fuerza el descenso de un ascensor (`mega` o `mini1`, `mini2`...) con los jugadores que estén dentro |
 | `/smileprotocol runs [list\|end <run>]` | Lista las partidas en curso o termina una |
 | `/smileprotocol newrun [semilla]` | Prepara una **partida nueva del mega ascensor** con otra secuencia de zonas (con la semilla indicada o aleatoria) y lo reabre. Normalmente ocurre sola al acabar el evento (ver 6.8). Los mini ascensores generan su secuencia solos en cada bajada |

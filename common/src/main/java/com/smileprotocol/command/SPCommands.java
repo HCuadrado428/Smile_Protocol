@@ -130,7 +130,8 @@ public final class SPCommands {
         root.then(Commands.literal("mode")
                 .executes(SPCommands::showMode)
                 .then(Commands.literal("free").executes(c -> setMode(c, LobbyMode.FREE)))
-                .then(Commands.literal("event").executes(c -> setMode(c, LobbyMode.EVENT))));
+                .then(Commands.literal("event").executes(c -> setMode(c, LobbyMode.EVENT)))
+                .then(Commands.literal("closed").executes(c -> setMode(c, LobbyMode.CLOSED))));
 
         root.then(Commands.literal("start")
                 .then(Commands.argument("elevator", StringArgumentType.word()).suggests(ELEVATORS)
@@ -369,6 +370,7 @@ public final class SPCommands {
                 .then(Commands.literal("elevator")
                         .then(elevatorType("mega", ElevatorType.MEGA))
                         .then(elevatorType("mini", ElevatorType.MINI))
+                        .then(elevatorType("tutorial", ElevatorType.TUTORIAL))
                         .then(Commands.literal("remove")
                                 .then(Commands.argument("id", StringArgumentType.word()).suggests(ELEVATORS)
                                         .executes(SPCommands::removeElevator))))

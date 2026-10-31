@@ -109,10 +109,38 @@ public final class ClientSelfTest {
             }
             case 3 -> {
                 Screenshot.grab(mc.gameDirectory, "00_lobby_ascensores.png", mc.getMainRenderTarget(), c -> log("captura 00_lobby_ascensores"));
-                wait = 10;
+                server.execute(() -> {
+                    ServerPlayer sp = server.getPlayerList().getPlayers().get(0);
+                    var lv = com.smileprotocol.lobby.LobbyData.get(server);
+                    var tut = lv.getElevator("tutorial");
+                    boolean ok = tut != null && tut.type() == com.smileprotocol.lobby.ElevatorType.TUTORIAL
+                            && tut.doors().size() == 2 && tut.button() != null && tut.board() != null;
+                    log((ok ? "OK" : "FALLO") + " lobby: ascensor TUTORIAL registrado"
+                            + (tut == null ? "" : " (puertas=" + tut.doors().size() + " boton=" + (tut.button() != null)
+                            + " pantalla=" + (tut.board() != null) + ")"));
+                    // Modo «closed»: todo cerrado menos el tutorial
+                    var before = lv.getMode();
+                    lv.setMode(com.smileprotocol.lobby.LobbyMode.CLOSED);
+                    boolean closedOk = com.smileprotocol.lobby.LobbyManager.isOpen(server, "tutorial")
+                            && !com.smileprotocol.lobby.LobbyManager.isOpen(server, "mini1")
+                            && !com.smileprotocol.lobby.LobbyManager.isOpen(server, "mega");
+                    lv.setMode(com.smileprotocol.lobby.LobbyMode.FREE);
+                    boolean freeOk = com.smileprotocol.lobby.LobbyManager.isOpen(server, "tutorial")
+                            && com.smileprotocol.lobby.LobbyManager.isOpen(server, "mini1");
+                    lv.setMode(before);
+                    log((closedOk && freeOk ? "OK" : "FALLO") + " modo closed: solo queda abierto el tutorial");
+                    // la puerta del tutorial, en la pared oeste
+                    SPSessionManager.teleport(sp, server.overworld(), Vec3.atBottomCenterOf(LOBBY).add(-13, 0, -33), 90f, 0f);
+                });
+                wait = 30;
                 step++;
             }
             case 4 -> {
+                Screenshot.grab(mc.gameDirectory, "00_lobby_tutorial.png", mc.getMainRenderTarget(), c -> log("captura 00_lobby_tutorial"));
+                wait = 10;
+                step++;
+            }
+            case 5 -> {
                 log("en el mundo, bajando a una partida");
                 server.execute(() -> {
                     ServerPlayer sp = server.getPlayerList().getPlayers().get(0);
@@ -122,12 +150,12 @@ public final class ClientSelfTest {
                 wait = 200;
                 step++;
             }
-            case 5 -> {
+            case 6 -> {
                 plan(mc, server);
                 step++;
             }
             default -> {
-                int i = step - 6;
+                int i = step - 7;
                 if (i >= SHOTS.size()) {
                     log("fin");
                     mc.stop();
@@ -760,6 +788,41 @@ public final class ClientSelfTest {
             cfg.colorblind = "OFF";
             log((c1 != c0 && ClientMarkers.display(c0) == c0 ? "OK" : "FALLO") + " accesibilidad: paleta para daltonismo");
         });
+        // 8n. Planta de entrenamiento (ascensor TUTORIAL): sin monstruos, con sus estaciones
+        ZonePlacement[] tut = {null};
+        Group[] tutGroup = {null};
+        SHOTS.add(() -> server.execute(() -> {
+            var id = net.minecraft.resources.ResourceLocation.tryParse(com.smileprotocol.config.SPConfig.get().tutorial_zone);
+            tutGroup[0] = new Group(java.util.UUID.randomUUID(), "TUT", 980, List.of(id),
+                    com.smileprotocol.difficulty.DifficultyScaler.forGroup(server, 1), 980);
+            tut[0] = com.smileprotocol.instance.InstanceManager.place(level, tutGroup[0], 0, 0);
+            if (tut[0] == null) {
+                log("FALLO tutorial: no se coloco la planta");
+                return;
+            }
+            int mobs = level.getEntitiesOfClass(com.smileprotocol.entity.SPMonster.class, net.minecraft.world.phys.AABB.of(tut[0].box())).size();
+            boolean marks = !tut[0].marker("tut_crouch").isEmpty() && !tut[0].marker("tut_vent").isEmpty()
+                    && tut[0].marker("mob_spawn").isEmpty();
+            log((mobs == 0 && marks ? "OK" : "FALLO") + " tutorial: sin monstruos (" + mobs + ") y con sus marcadores "
+                    + tut[0].markers().keySet());
+            com.smileprotocol.motion.Flashlights.set(sp, true);
+            SPSessionManager.teleport(sp, level, tut[0].entry().add(0, 0, 9), 0f, 5f);
+        }));
+        SHOTS.add(() -> wait = 40);
+        SHOTS.add(() -> grab(mc, "51_tutorial_entrada"));
+        SHOTS.add(() -> server.execute(() -> {
+            if (tut[0] != null) SPSessionManager.teleport(sp, level, tut[0].entry().add(1, 0, 33), 0f, 5f);
+        }));
+        SHOTS.add(() -> wait = 25);
+        SHOTS.add(() -> grab(mc, "52_tutorial_escondites"));
+        SHOTS.add(() -> server.execute(() -> {
+            if (tut[0] != null) SPSessionManager.teleport(sp, level, tut[0].entry().add(-1, 0, 64), 0f, 20f);
+        }));
+        SHOTS.add(() -> wait = 25);
+        SHOTS.add(() -> grab(mc, "53_tutorial_conducto"));
+        SHOTS.add(() -> server.execute(() -> {
+            if (tutGroup[0] != null) com.smileprotocol.instance.InstanceManager.release(server, tutGroup[0]);
+        }));
         // 9. Fase 12: levantarse tras la reanimacion, muerte instantanea en primera persona y muerte final
         SHOTS.add(() -> server.execute(() -> {
             com.smileprotocol.qte.QTEManager.clear(sp);
