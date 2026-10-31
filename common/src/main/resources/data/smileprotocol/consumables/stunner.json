@@ -1,0 +1,1 @@
+{ "item": "smileprotocol:stunner", "use_time": 6, "effect": { "type": "STUN", "amount": 70 }, "noise": 8, "anim": "flare", "sound": "minecraft:entity.bee.sting", "usable_downed": true }

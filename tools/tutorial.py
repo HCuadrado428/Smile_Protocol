@@ -103,6 +103,10 @@ def build():
     t.marker(-2, 1, 18, "sp:item can")
     t.marker(2, 1, 15, "sp:item bottle")
     t.marker(1, 1, 20, "sp:item battery")
+    t.marker(-1, 1, 16, "sp:item decoy")
+    t.marker(-3, 1, 20, "sp:item stunner")
+    sign(X, 2, 16, "Despertador:", "dejalo en el", "suelo y sonara.", "Los atrae.", facing="west")
+    sign(X, 2, 18, "Aturdidor: deja", "quieto a un", "smiler unos", "segundos.", facing="west")
     partition(22, lab("lab_door"))
     sign(-1, 2, 21, "Las puertas", "se abren con", "clic derecho", facing="north")
 

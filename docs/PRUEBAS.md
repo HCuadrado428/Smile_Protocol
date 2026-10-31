@@ -266,6 +266,12 @@ Hace falta Simple Voice Chat en el servidor y en los clientes (es opcional: sin 
 2. **Registrar.** Escritorios, archivadores, botiquines, carros de herramientas y cajas de suministros se registran: mírales y mantén el clic derecho (sale el texto, p. ej. «Registrar los cajones»). Hace algo de ruido. Al acabar se abren (cajón fuera, puertas abiertas, tapa quitada) y a veces sueltan algo delante: latas, botellas, pilas, botiquines, bengalas, adrenalina o un fusible fundido; muchas veces nada («No hay nada útil.»). Un mueble abierto ya no se puede registrar.
 3. **Botín por planta.** Cada planta tiene su tabla (`data/smileprotocol/search_loot/<planta>.json`): en la morgue salen más botiquines, en energía más pilas... y en los botiquines siempre es más fácil encontrar curas. Cada partida coloca la planta de nuevo, así que vuelven a estar cerrados.
 
+## Señuelo y aturdidor
+
+- **Despertador (señuelo).** `/spadmin give decoy`. Mantén clic derecho: se deja en el suelo, un poco por delante. Suena dos campanadas cada 1,5 s durante 20 s y luego se rompe. Un berserker que patrulla cerca va a mirar al despertador en vez de a ti.
+- **Aturdidor.** `/spadmin give stunner`. Sin nada delante, al usarlo sale «No hay ningún smiler al alcance» y no se gasta. Con un smiler a menos de 4,5 bloques delante y a la vista: chispas azules, se queda quieto 3,5 s (no persigue ni ataca) y el aturdidor se gasta. A Smiley no le hace nada.
+- **Dónde salen.** Los dos aparecen al registrar muebles (el aturdidor muy rara vez) y el despertador también suelto por el suelo. En el tutorial hay uno de cada en la estación 2.
+
 ## Dificultad y modificadores
 
 - **Elegir reglas.** Entrad dos en el Ascensor 1 y pulsad F7: sale «Reglas de la partida» en vez del menú de accesibilidad (que sigue a un botón). Cambia a Pesadilla y activa «Sin reanimación». A los dos os llega el aviso en el chat, se os quita el «listo» y la nota de la cabina muestra «Reglas: Pesadilla + Sin reanimación».

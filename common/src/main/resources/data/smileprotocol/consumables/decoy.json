@@ -1,0 +1,1 @@
+{ "item": "smileprotocol:decoy", "use_time": 20, "effect": { "type": "DECOY", "amount": 400 }, "noise": 1, "anim": "battery", "sound": "minecraft:block.chain.place", "usable_downed": false }

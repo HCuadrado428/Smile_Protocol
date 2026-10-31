@@ -838,6 +838,41 @@ public final class ClientSelfTest {
         SHOTS.add(() -> wait = 10);
         SHOTS.add(() -> grab(mc, "54_reglas"));
         SHOTS.add(() -> mc.setScreen(null));
+        // 8p. Senuelo (despertador) y aturdidor
+        com.smileprotocol.entity.SPMonster[] stunMob = {null};
+        SHOTS.add(() -> server.execute(() -> {
+            for (var m : level.getEntitiesOfClass(com.smileprotocol.entity.SPMonster.class,
+                    new net.minecraft.world.phys.AABB(cam, cam).inflate(40))) m.discard();
+            SPSessionManager.teleport(sp, level, cam, 0f, 25f);
+            var d = com.smileprotocol.item.Decoys.place(level, cam.add(0, 0, 2.2), 200, 30f);
+            log((d != null && com.smileprotocol.item.Decoys.active() > 0 ? "OK" : "FALLO") + " senuelo colocado y sonando");
+        }));
+        SHOTS.add(() -> wait = 35);
+        SHOTS.add(() -> grab(mc, "55_senuelo"));
+        SHOTS.add(() -> server.execute(() -> {
+            SPSessionManager.teleport(sp, level, cam, 0f, 0f);
+            stunMob[0] = com.smileprotocol.entity.MobManager.spawn(level, com.smileprotocol.registry.ModEntities.BERSERKER.get(),
+                    BlockPos.containing(cam.add(0, 0, 3)), level.random);
+        }));
+        SHOTS.add(() -> wait = 5);
+        SHOTS.add(() -> server.execute(() -> {
+            var m = stunMob[0];
+            if (m == null) {
+                log("FALLO aturdidor: no aparecio el berserker");
+                return;
+            }
+            m.lookAt(net.minecraft.commands.arguments.EntityAnchorArgument.Anchor.EYES, sp.getEyePosition());
+            var target = com.smileprotocol.item.UseManager.stunTarget(sp);
+            boolean ok = target == m && m.stun(60) && m.isStunned();
+            log((ok ? "OK" : "FALLO") + " aturdidor: apunta al smiler de delante y lo deja quieto");
+        }));
+        SHOTS.add(() -> wait = 20);
+        SHOTS.add(() -> grab(mc, "56_aturdido"));
+        SHOTS.add(() -> server.execute(() -> {
+            if (stunMob[0] != null) stunMob[0].discard();
+            for (var e2 : level.getEntitiesOfClass(net.minecraft.world.entity.Display.ItemDisplay.class,
+                    new net.minecraft.world.phys.AABB(cam, cam).inflate(10))) e2.discard();
+        }));
         // 9. Fase 12: levantarse tras la reanimacion, muerte instantanea en primera persona y muerte final
         SHOTS.add(() -> server.execute(() -> {
             com.smileprotocol.qte.QTEManager.clear(sp);

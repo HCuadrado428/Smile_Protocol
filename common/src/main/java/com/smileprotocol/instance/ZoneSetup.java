@@ -112,7 +112,7 @@ public final class ZoneSetup {
 
         // Objetos sueltos en los sitios que sobran (README 10.1, 12.7): consumibles y lanzables al azar,
         // mas lanzables que curas. Hasta que lleguen los muebles registrables (fase 24).
-        String[] loot = {"can", "bottle", "can", "bottle", "battery", "medkit", "flare", "can", "adrenaline"};
+        String[] loot = {"can", "bottle", "can", "bottle", "battery", "medkit", "flare", "can", "adrenaline", "decoy"};
         int extra = scarce ? 0 : Math.min(spots.size() - used.size(), 2 + rnd.nextInt(3));
         for (int i = 0; i < extra; i++) {
             BlockPos p = spots.get(used.size());
@@ -152,6 +152,8 @@ public final class ZoneSetup {
             case "adrenaline", "syringe" -> new ItemStack(ModItems.ADRENALINE.get());
             case "can" -> new ItemStack(ModItems.CAN.get());
             case "bottle" -> new ItemStack(ModItems.BOTTLE.get());
+            case "decoy" -> new ItemStack(ModItems.DECOY.get());
+            case "stunner" -> new ItemStack(ModItems.STUNNER.get());
             default -> ItemStack.EMPTY;
         };
     }

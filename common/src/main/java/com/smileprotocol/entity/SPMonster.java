@@ -32,6 +32,9 @@ public abstract class SPMonster extends PathfinderMob implements GeoEntity {
     /** Cliente: tick en que empezo la secuencia que se esta animando. */
     private int sequenceStartTick;
 
+    /** Ticks que le quedan aturdido (aturdidor electrico). */
+    private int stunTicks;
+
     protected SPMonster(EntityType<? extends PathfinderMob> type, Level level) {
         super(type, level);
         setPersistenceRequired();
@@ -49,6 +52,43 @@ public abstract class SPMonster extends PathfinderMob implements GeoEntity {
         getNavigation().stop();
         entityData.set(SEQUENCE_VICTIM, victim.getId());
         entityData.set(SEQUENCE, (byte) (kind.ordinal() + 1));
+    }
+
+    /** Si el aturdidor le hace algo (Smiley, no). */
+    public boolean canBeStunned() {
+        return true;
+    }
+
+    public boolean isStunned() {
+        return stunTicks > 0;
+    }
+
+    /** Aturdido: no piensa ni se mueve durante {@code ticks}. No interrumpe un remate ya empezado. */
+    public boolean stun(int ticks) {
+        if (!canBeStunned() || sequence() != null) return false;
+        stunTicks = Math.max(stunTicks, ticks);
+        getNavigation().stop();
+        setTarget(null);
+        return true;
+    }
+
+    @Override
+    protected boolean isImmobile() {
+        return super.isImmobile() || stunTicks > 0;
+    }
+
+    @Override
+    public void aiStep() {
+        if (stunTicks > 0 && !level().isClientSide) {
+            stunTicks--;
+            getNavigation().stop();
+            setDeltaMovement(0, getDeltaMovement().y, 0);
+            if (stunTicks % 4 == 0 && level() instanceof net.minecraft.server.level.ServerLevel sl) {
+                sl.sendParticles(net.minecraft.core.particles.ParticleTypes.ELECTRIC_SPARK, getX(), getY() + getBbHeight() * 0.7, getZ(),
+                        6, getBbWidth() * 0.6, getBbHeight() * 0.3, getBbWidth() * 0.6, 0.2);
+            }
+        }
+        super.aiStep();
     }
 
     public int sequenceVictim() {

@@ -405,6 +405,68 @@ def walkie():
     return cv
 
 
+def alarm_clock():
+    """Senuelo: despertador de cuerda con dos campanas, esfera blanca y agujas."""
+    r = R(44)
+    cv = Canvas(S, S, (0, 0, 0), 0.0)
+    yy, xx = np.mgrid[0:S, 0:S]
+    cx, cy = 16, 18
+    d = np.hypot(xx - cx, yy - cy)
+    body = d <= 10.5
+    bells = (np.hypot(xx - 8, yy - 7) <= 4.2) | (np.hypot(xx - 24, yy - 7) <= 4.2)
+    legs = ((np.abs(xx - 9) <= 1) | (np.abs(xx - 23) <= 1)) & (yy >= 27) & (yy <= 30)
+    hammer = (np.abs(xx - 16) <= 0.8) & (yy >= 4) & (yy <= 8)
+    cv.a = (body | bells | legs | hammer).astype(float)
+    cv.c[:] = (176, 34, 30)
+    cv.c[bells] = (196, 170, 90)
+    cv.c[legs | hammer] = (60, 56, 52)
+    face = d <= 7.8
+    cv.c[face] = (232, 226, 206)
+    ang = np.arctan2(yy - cy, xx - cx)
+    for k in range(12):                                                    # marcas de las horas
+        a = k * math.pi / 6
+        m = (np.abs(d - 6.6) < 0.8) & (np.abs(np.angle(np.exp(1j * (ang - a)))) < 0.12)
+        cv.c[m] = (40, 36, 32)
+    hand1 = (d <= 5.5) & (np.abs(np.angle(np.exp(1j * (ang + math.pi / 2)))) < 0.16)
+    hand2 = (d <= 4.0) & (np.abs(np.angle(np.exp(1j * (ang - 0.5)))) < 0.22)
+    cv.c[hand1 | hand2] = (24, 22, 20)
+    cv.c[d <= 1.0] = (150, 30, 26)
+    rim = body & (d > 7.8)
+    cv.c[rim] *= (1.25 - 0.06 * (xx[rim] - cx)).clip(0.6, 1.5)[..., None]
+    cv.mix((255, 255, 240), (np.hypot(xx - 12, yy - 13) <= 2) * face * 0.5)   # reflejo del cristal
+    grime(cv, r, 0.45)
+    outline(cv)
+    return cv
+
+
+def stunner():
+    """Aturdidor electrico: mango negro con franjas amarillas, dos puntas y una chispa azul."""
+    r = R(45)
+    cv = Canvas(S, S, (0, 0, 0), 0.0)
+    ang = -math.pi / 4
+    yy, xx = np.mgrid[0:S, 0:S]
+    t = (xx - 16) * math.cos(ang) + (yy - 16) * math.sin(ang)
+    s = -(xx - 16) * math.sin(ang) + (yy - 16) * math.cos(ang)
+    grip = (t >= -13) & (t <= 3) & (np.abs(s) <= 3.4)
+    head = (t > 3) & (t <= 8) & (np.abs(s) <= 4.4)
+    prongs = (t > 8) & (t <= 12) & ((np.abs(s - 2.4) <= 0.6) | (np.abs(s + 2.4) <= 0.6))
+    cv.a = (grip | head | prongs).astype(float)
+    cv.c[grip] = (34, 34, 36)
+    cv.c[head] = (58, 58, 62)
+    cv.c[prongs] = (200, 200, 196)
+    for k in (-9, -5):                                                     # franjas de aviso
+        cv.c[grip & (np.abs(t - k) < 1.1)] = (220, 180, 30)
+    cv.c[grip & (np.abs(t + 1) < 1.2) & (np.abs(s) < 1.2)] = (190, 40, 30)   # boton
+    cv.c *= (1.3 - 0.12 * s).clip(0.5, 1.6)[..., None]
+    spark = (t > 11) & (t <= 15) & (np.abs(s - 1.6 * np.sin(t * 2.3)) <= 0.9)
+    cv.c[spark] = (150, 210, 255)
+    cv.a[spark] = 1.0
+    cv.mix((230, 245, 255), spark * 0.5)
+    grime(cv, r, 0.3)
+    outline(cv)
+    return cv
+
+
 def main():
     out = {}
     out["walkie"] = walkie()
@@ -421,6 +483,8 @@ def main():
     out["adrenaline"] = syringe()
     out["can"] = can()
     out["bottle"] = bottle()
+    out["decoy"] = alarm_clock()
+    out["stunner"] = stunner()
     for name, kw in (("lab_door", {}), ("security_door", {}), ("locker", {"yaw": -145}),
                      ("wardrobe", {"yaw": -145}), ("waste_container", {"yaw": -145}), ("gurney", {"yaw": 145}),
                      ("curtain", {"yaw": -150}), ("valve", {"yaw": -145}), ("fuse_box", {"yaw": -150, "skip": ("lamp_on",)})):

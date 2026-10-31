@@ -104,6 +104,10 @@ public final class UseManager {
             p.displayClientMessage(Component.translatable("smileprotocol.use.full_battery").withStyle(ChatFormatting.GRAY), true);
             return;
         }
+        if ("STUN".equals(def.effect()) && stunTarget(p) == null) {
+            p.displayClientMessage(Component.translatable("smileprotocol.use.no_target").withStyle(ChatFormatting.GRAY), true);
+            return;
+        }
         USES.put(p.getUUID(), new Use(slot, def, stack, downed));
         p.setSprinting(false);
         if (downed) MotionManager.setAction(p, Action.DOWNED, 1, true);    // derribado: se pincha la jeringa
@@ -186,6 +190,17 @@ public final class UseManager {
                 }
             }
             case "WALKIE" -> com.smileprotocol.voice.WalkieManager.toggle(p);
+            case "DECOY" -> Decoys.place(p, (int) u.def.amount());
+            case "STUN" -> {
+                com.smileprotocol.entity.SPMonster m = stunTarget(p);
+                if (m != null && m.stun((int) u.def.amount())) {
+                    p.serverLevel().playSound(null, m.blockPosition(), SoundEvents.TRIDENT_RIPTIDE_1.value(), SoundSource.HOSTILE, 0.9f, 1.8f);
+                    p.displayClientMessage(Component.translatable("smileprotocol.use.stunned").withStyle(ChatFormatting.AQUA), true);
+                    SPDebug.log(p.getGameProfile().getName() + " aturde a " + m.defId());
+                } else {
+                    p.displayClientMessage(Component.translatable("smileprotocol.use.stun_failed").withStyle(ChatFormatting.GRAY), true);
+                }
+            }
             case "ADRENALINE" -> {
                 if (DownedManager.isDowned(p)) DownedManager.selfRevive(p, u.def.amount());
             }
@@ -194,6 +209,32 @@ public final class UseManager {
         if (!u.downed) MotionManager.clearAction(p, Action.USE);
         NoiseSystem.emit(p.serverLevel(), p.position(), u.def.noise(), NoiseType.ITEM, p);
         SPDebug.log(p.getGameProfile().getName() + " usa " + u.stack.getHoverName().getString());
+    }
+
+    /**
+     * El smiler al que le llega el aturdidor: el mas cercano a 4,5 bloques, delante (cono de ~55 grados)
+     * y a la vista. Smiley no cuenta.
+     */
+    @javax.annotation.Nullable
+    public static com.smileprotocol.entity.SPMonster stunTarget(ServerPlayer p) {
+        Vec3 eye = p.getEyePosition();
+        Vec3 look = p.getLookAngle();
+        com.smileprotocol.entity.SPMonster best = null;
+        double bestD = Double.MAX_VALUE;
+        for (com.smileprotocol.entity.SPMonster m : p.serverLevel().getEntitiesOfClass(com.smileprotocol.entity.SPMonster.class,
+                p.getBoundingBox().inflate(5))) {
+            if (!m.isAlive() || !m.canBeStunned()) continue;
+            Vec3 to = m.getBoundingBox().getCenter().subtract(eye);
+            double d = to.length();
+            if (d > 4.5 || d < 1e-3) continue;
+            if (look.dot(to.scale(1 / d)) < 0.55 && d > 1.5) continue;
+            if (!p.hasLineOfSight(m)) continue;
+            if (d < bestD) {
+                bestD = d;
+                best = m;
+            }
+        }
+        return best;
     }
 
     // Lanzables --------------------------------------------------------------------------------

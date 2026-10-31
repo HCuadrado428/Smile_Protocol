@@ -125,6 +125,7 @@ public final class SPEvents {
         com.smileprotocol.qte.QTEManager.tick(server);
         com.smileprotocol.sequence.SequenceManager.tick(server);
         com.smileprotocol.item.UseManager.tick(server);
+        com.smileprotocol.item.Decoys.tick(server);
         com.smileprotocol.downed.DeathManager.tick(server);
         com.smileprotocol.voice.VoiceManager.tick(server);
         com.smileprotocol.marker.MarkerManager.tick(server);

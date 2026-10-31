@@ -117,6 +117,11 @@ public class Smiley extends SmilerBase implements QTEManager.Grabber {
     }
 
     @Override
+    public boolean canBeStunned() {
+        return false;
+    }
+
+    @Override
     public String defId() {
         return "smiley";
     }

@@ -466,5 +466,10 @@
   "smileprotocol.rules.mod.scarce_loot.tip": "Furniture is almost always empty and there are no loose items.",
   "smileprotocol.rules.score": "Score: ×%s %%",
   "smileprotocol.rules.hud": "Rules: %s · F7 to change",
-  "smileprotocol.rules.changed": "%s changed the rules: %s. Press “ready” again."
+  "smileprotocol.rules.changed": "%s changed the rules: %s. Press “ready” again.",
+  "item.smileprotocol.decoy": "Alarm clock (decoy)",
+  "item.smileprotocol.stunner": "Stun gun",
+  "smileprotocol.use.no_target": "No smiler within reach",
+  "smileprotocol.use.stunned": "Stunned! Run",
+  "smileprotocol.use.stun_failed": "The stun gun did nothing"
 }

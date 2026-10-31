@@ -26,6 +26,14 @@
       "weight": 2
     },
     {
+      "item": "decoy",
+      "weight": 6
+    },
+    {
+      "item": "stunner",
+      "weight": 1
+    },
+    {
       "item": "fuse_blown",
       "weight": 4
     },

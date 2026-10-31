@@ -54,6 +54,10 @@ public final class ModItems {
     public static final Supplier<Item> ADRENALINE = item("adrenaline", () -> new com.smileprotocol.item.ConsumableItem(one()));
     /** Walkie (README 17.3): se usa como consumible que no se gasta (encender y apagar). */
     public static final Supplier<Item> WALKIE = item("walkie", () -> new com.smileprotocol.item.ConsumableItem(one()));
+    /** Senuelo: un despertador que se deja en el suelo y suena un rato. */
+    public static final Supplier<Item> DECOY = item("decoy", () -> new com.smileprotocol.item.ConsumableItem(one()));
+    /** Aturdidor electrico: deja quieto unos segundos al smiler que tengas delante. Raro, un solo uso. */
+    public static final Supplier<Item> STUNNER = item("stunner", () -> new com.smileprotocol.item.ConsumableItem(one()));
     public static final Supplier<Item> CAN = item("can", () -> new com.smileprotocol.item.ThrowableItem(one()));
     public static final Supplier<Item> BOTTLE = item("bottle", () -> new com.smileprotocol.item.ThrowableItem(one()));
 

@@ -466,5 +466,10 @@
   "smileprotocol.rules.mod.scarce_loot.tip": "Los muebles casi nunca tienen nada y no hay objetos sueltos.",
   "smileprotocol.rules.score": "Puntuación: ×%s %%",
   "smileprotocol.rules.hud": "Reglas: %s · F7 para cambiarlas",
-  "smileprotocol.rules.changed": "%s ha cambiado las reglas: %s. Pulsad «listo» otra vez."
+  "smileprotocol.rules.changed": "%s ha cambiado las reglas: %s. Pulsad «listo» otra vez.",
+  "item.smileprotocol.decoy": "Despertador (señuelo)",
+  "item.smileprotocol.stunner": "Aturdidor eléctrico",
+  "smileprotocol.use.no_target": "No hay ningún smiler al alcance",
+  "smileprotocol.use.stunned": "¡Aturdido! Corre",
+  "smileprotocol.use.stun_failed": "El aturdidor no le ha hecho nada"
 }
