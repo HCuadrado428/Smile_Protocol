@@ -1,0 +1,180 @@
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.4.0/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+
+> Configure project :common
+Creating Minecraft artifacts without recompilation.
+
+> Configure project :fabric
+Fabric Loom: 1.16.3
+
+> Configure project :neoforge
+Creating Minecraft artifacts without recompilation.
+
+> Task :common:createMinecraftArtifacts UP-TO-DATE
+> Task :common:compileJava UP-TO-DATE
+
+> Task :fabric:compileJava
+Note: Some input files use or override a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+
+> Task :fabric:processResources UP-TO-DATE
+> Task :fabric:classes
+> Task :fabric:generateLog4jConfig
+> Task :fabric:generateRemapClasspath
+> Task :fabric:generateDLIConfig
+> Task :fabric:configureLaunch
+
+> Task :fabric:runServer
+[15:26:39] [main/INFO] (FabricLoader/GameProvider) Loading Minecraft 1.21.1 with Fabric Loader 0.18.4
+[15:26:39] [main/INFO] (FabricLoader) Loading 47 mods:
+	- fabric-api 0.116.4+1.21.1
+	- fabric-api-base 0.4.42+6573ed8c19
+	- fabric-api-lookup-api-v1 1.6.71+b559734419
+	- fabric-biome-api-v1 13.0.31+d527f9fd19
+	- fabric-block-api-v1 1.1.0+0bc3503219
+	- fabric-block-view-api-v2 1.0.11+ebb2264e19
+	- fabric-command-api-v1 1.2.49+f71b366f19
+	- fabric-command-api-v2 2.2.28+6ced4dd919
+	- fabric-commands-v0 0.2.66+df3654b319
+	- fabric-content-registries-v0 8.0.19+b559734419
+	- fabric-convention-tags-v1 2.1.5+7f945d5b19
+	- fabric-convention-tags-v2 2.11.1+a406e79519
+	- fabric-crash-report-info-v1 0.2.29+0af3f5a719
+	- fabric-data-attachment-api-v1 1.4.5+6116a37819
+	- fabric-data-generation-api-v1 20.2.32+5b9dea2e19
+	- fabric-dimensions-v1 4.0.0+6fc22b9919
+	- fabric-entity-events-v1 1.8.0+2b27e0a419
+	- fabric-events-interaction-v0 0.7.13+ba9dae0619
+	- fabric-game-rule-api-v1 1.0.53+6ced4dd919
+	- fabric-gametest-api-v1 2.0.5+6fc22b9919
+	- fabric-item-api-v1 11.1.1+d5debaed19
+	- fabric-item-group-api-v1 4.1.7+def88e3a19
+	- fabric-lifecycle-events-v1 2.6.0+0865547519
+	- fabric-loot-api-v2 3.0.15+3f89f5a519
+	- fabric-loot-api-v3 1.0.3+3f89f5a519
+	- fabric-message-api-v1 6.0.14+8aaf3aca19
+	- fabric-networking-api-v1 4.3.0+c7469b2119
+	- fabric-object-builder-api-v1 15.2.1+40875a9319
+	- fabric-particles-v1 4.0.2+6573ed8c19
+	- fabric-recipe-api-v1 5.0.14+248df81c19
+	- fabric-registry-sync-v0 5.3.1+e3eddc2119
+	- fabric-rendering-data-attachment-v1 0.3.49+73761d2e19
+	- fabric-rendering-fluids-v1 3.1.6+1daea21519
+	- fabric-resource-conditions-api-v1 4.3.0+8dc279b119
+	- fabric-resource-loader-v0 1.3.1+5b5275af19
+	- fabric-screen-handler-api-v1 1.3.90+b559734419
+	- fabric-transfer-api-v1 5.4.3+c24bd99419
+	- fabric-transitive-access-wideners-v1 6.2.0+45b9699719
+	- fabricloader 0.18.4
+	- geckolib 4.7.2
+	- java 21
+	- minecraft 1.21.1
+	- mixinextras 0.4.1
+	- playeranimator 2.0.4+1.21.1
+	- smileprotocol 0.2.0
+	- veil 4.3.0
+	- voicechat 1.21.1-2.5.36
+[15:26:39] [main/INFO] (FabricLoader/Mixin) SpongePowered MIXIN Subsystem Version=0.8.7 Source=file:/home/runner/.gradle/caches/modules-2/files-2.1/net.fabricmc/sponge-mixin/0.15.5+mixin.0.8.7/22f9eb729e216a091673a574a5906dc1b9027fb3/sponge-mixin-0.15.5+mixin.0.8.7.jar Service=Knot/Fabric Env=SERVER
+[15:26:39] [main/INFO] (FabricLoader/Mixin) Loaded Fabric development mappings for mixin remapper!
+[15:26:39] [main/INFO] (FabricLoader/Mixin) Compatibility level set to JAVA_17
+[15:26:39] [main/INFO] (FabricLoader/Mixin) Compatibility level set to JAVA_21
+[15:26:40] [main/INFO] (FabricLoader/MixinExtras|Service) Initializing MixinExtras via com.llamalad7.mixinextras.service.MixinExtrasServiceImpl(version=0.4.1).
+[15:26:44] [main/ERROR] (Minecraft) No data fixer registered for berserker
+[15:26:44] [main/ERROR] (Minecraft) No data fixer registered for smiler_test
+[15:26:44] [main/ERROR] (Minecraft) No data fixer registered for smiler_kill
+[15:26:44] [main/ERROR] (Minecraft) No data fixer registered for paciente
+[15:26:44] [main/ERROR] (Minecraft) No data fixer registered for rastreador
+[15:26:44] [main/ERROR] (Minecraft) No data fixer registered for ahorcado
+[15:26:44] [main/ERROR] (Minecraft) No data fixer registered for apagon
+[15:26:44] [main/ERROR] (Minecraft) No data fixer registered for smiley
+[15:26:44] [main/ERROR] (Minecraft) No data fixer registered for imitador
+[15:26:44] [main/ERROR] (Minecraft) No data fixer registered for flare
+[15:26:44] [main/ERROR] (Minecraft) No data fixer registered for thrown_item
+[15:26:44] [main/INFO] (Smile Protocol) Smile Protocol: iniciado
+[15:26:44] [main/WARN] (voicechat) [voicechat/Voicechat] Running in debug mode - Don't leave this enabled in production!
+[15:26:44] [main/INFO] (voicechat) [voicechat/Voicechat] Compatibility version 18
+[15:26:44] [main/INFO] (voicechat) [voicechat/PluginManager] Loading plugins
+[15:26:44] [main/INFO] (voicechat) [voicechat/PluginManager] Loaded 1 plugin(s)
+[15:26:44] [main/INFO] (voicechat) [voicechat/PluginManager] Initializing plugins
+[15:26:44] [main/INFO] (Smile Protocol) Plugin de Simple Voice Chat cargado
+[15:26:44] [main/INFO] (voicechat) [voicechat/PluginManager] Initialized 1 plugin(s)
+[15:26:44] [main/INFO] (voicechat) [voicechat/PluginManager] Registering events for 'smileprotocol'
+[15:26:45] [main/INFO] (Veil) Veil is initializing.
+[15:26:45] [main/INFO] (Minecraft) Environment: Environment[sessionHost=https://sessionserver.mojang.com, servicesHost=https://api.minecraftservices.com, name=PROD]
+[15:26:45] [main/INFO] (Minecraft) No existing world data, creating new world
+[15:26:45] [main/ERROR] (Minecraft) No key layers in MapLike[{}]
+[15:26:46] [main/INFO] (Minecraft) Loaded 1290 recipes
+[15:26:46] [main/INFO] (Minecraft) Loaded 1399 advancements
+[15:26:46] [main/INFO] (BiomeModificationImpl) Applied 0 biome modifications to 0 of 64 new biomes in 944.3 μs
+[15:26:46] [Server thread/INFO] (Minecraft) Starting minecraft server version 1.21.1
+[15:26:46] [Server thread/INFO] (Minecraft) Loading properties
+[15:26:46] [Server thread/INFO] (Minecraft) Default game type: SURVIVAL
+[15:26:46] [Server thread/INFO] (Minecraft) Generating keypair
+[15:26:46] [Server thread/INFO] (Minecraft) Starting Minecraft server on *:25565
+[15:26:46] [Server thread/INFO] (Minecraft) Using epoll channel type
+[15:26:46] [Server thread/WARN] (Minecraft) **** SERVER IS RUNNING IN OFFLINE/INSECURE MODE!
+[15:26:46] [Server thread/WARN] (Minecraft) The server will make no attempt to authenticate usernames. Beware.
+[15:26:46] [Server thread/WARN] (Minecraft) While this makes the game possible to play without internet access, it also opens up the ability for hackers to connect with any username they choose.
+[15:26:46] [Server thread/WARN] (Minecraft) To change this, set "online-mode" to "true" in the server.properties file.
+[15:26:46] [Server thread/INFO] (Minecraft) Preparing level "world"
+[15:26:47] [Server thread/INFO] (Minecraft) Preparing start region for dimension minecraft:overworld
+[15:26:47] [Worker-Main-3/INFO] (Minecraft) Preparing spawn area: 2%
+[15:26:47] [Server thread/INFO] (Minecraft) Time elapsed: 180 ms
+[15:26:47] [Server thread/INFO] (Minecraft) Done (0.839s)! For help, type "help"
+[15:26:47] [Server thread/WARN] (voicechat) [voicechat/ServerVoiceEvents] Running in offline mode - Voice chat encryption is not secure!
+[15:26:47] [Server thread/DEBUG] (voicechat) [voicechat/PluginManager] Using default voicechat socket implementation
+[15:26:47] [VoiceChatServerThread/INFO] (voicechat) [voicechat/Server] Voice chat server started at port 24454
+[15:26:47] [Server thread/INFO] (Smile Protocol) SELFTEST inicio
+[15:26:47] [Server thread/INFO] (Smile Protocol) SELFTEST grupos 4 -> [4]
+[15:26:47] [Server thread/INFO] (Smile Protocol) SELFTEST grupos 7 -> [7]
+[15:26:47] [Server thread/INFO] (Smile Protocol) SELFTEST grupos 9 -> [5, 4]
+[15:26:47] [Server thread/INFO] (Smile Protocol) SELFTEST grupos 11 -> [6, 5]
+[15:26:47] [Server thread/INFO] (Smile Protocol) SELFTEST grupos 19 -> [5, 5, 5, 4]
+[15:26:47] [Server thread/INFO] (Smile Protocol) SELFTEST grupos 23 -> [5, 5, 5, 4, 4]
+[15:26:47] [Server thread/INFO] (Smile Protocol) SELFTEST dificultad 2j fus×0.5 mobs×0.6 qte×1.4
+[15:26:47] [Server thread/INFO] (Smile Protocol) SELFTEST dificultad 3j fus×0.75 mobs×0.8 qte×1.2
+[15:26:47] [Server thread/INFO] (Smile Protocol) SELFTEST dificultad 4j fus×1.0 mobs×1.0 qte×1.0
+[15:26:47] [Server thread/INFO] (Smile Protocol) SELFTEST dificultad 5j fus×1.0 mobs×1.15 qte×1.0
+[15:26:47] [Server thread/INFO] (Smile Protocol) SELFTEST dificultad 6j fus×1.25 mobs×1.3 qte×1.0
+[15:26:47] [Server thread/INFO] (Smile Protocol) SELFTEST escondite HideType[id=locker, capacity=1, enterTime=16, exitTime=14, noiseOnEnter=6.0, viewCone=70.0, breathDrain=0.12, searchPriority=1.5, canBeLocked=false, partial=false, low=false, overlay=slits]
+[15:26:47] [Server thread/INFO] (Smile Protocol) SELFTEST escondite HideType[id=wardrobe, capacity=2, enterTime=20, exitTime=16, noiseOnEnter=8.0, viewCone=80.0, breathDrain=0.12, searchPriority=1.2, canBeLocked=false, partial=false, low=false, overlay=crack]
+[15:26:47] [Server thread/INFO] (Smile Protocol) SELFTEST escondite HideType[id=gurney, capacity=1, enterTime=14, exitTime=16, noiseOnEnter=3.0, viewCone=120.0, breathDrain=0.14, searchPriority=0.8, canBeLocked=false, partial=false, low=true, overlay=low]
+[15:26:47] [Server thread/INFO] (Smile Protocol) SELFTEST escondite HideType[id=curtain, capacity=1, enterTime=8, exitTime=8, noiseOnEnter=2.0, viewCone=140.0, breathDrain=0.0, searchPriority=0.6, canBeLocked=false, partial=true, low=false, overlay=cloth]
+[15:26:47] [Server thread/INFO] (Smile Protocol) SELFTEST escondite HideType[id=container, capacity=1, enterTime=18, exitTime=16, noiseOnEnter=3.0, viewCone=60.0, breathDrain=0.1, searchPriority=1.0, canBeLocked=false, partial=false, low=false, overlay=crack]
+[15:26:47] [Server thread/INFO] (Smile Protocol) SELFTEST reglas: NIGHTMARE|fast_mobs,no_revive 4j fus×1.0 mobs×1.4 qte×0.8 / facil 4j fus×0.8 mobs×0.7 qte×1.3
+[15:26:47] [Server thread/INFO] (Smile Protocol) SELFTEST puntuacion: escapar=11100 rapido=12300 eliminados=3000 pesadilla=18038 puesto=7
+[15:26:47] [Server thread/INFO] (Smile Protocol) Smile Protocol: 9 zonas, 6 en el catalogo de intermedias
+[15:26:47] [Server thread/INFO] (Smile Protocol) SELFTEST secuencia [smileprotocol:start_corridor, smileprotocol:lab_offices, smileprotocol:lab_storage, smileprotocol:final_room, smileprotocol:smiley_lab]
+[15:26:47] [Server thread/INFO] (Smile Protocol) SELFTEST voz: radios silencio=0.0 susurro=3.0 hablar=10.3 gritar=22.0 (Simple Voice Chat si)
+[15:26:48] [Server thread/INFO] (Smile Protocol) SELFTEST zona smileprotocol:final_room caja=128x154 marcadores=[fuse, mob_spawn, item:keycard:3, exit_cabin, entry, exit_door, entry_door] cajas=4 fusibles necesarios=4 fusibles en el suelo=9 objetos=9 puertas=81 valvulas=0 rejillas=2 salida=true puertas salida=3 circuitos={exit=false}
+[15:26:48] [Server thread/INFO] (Smile Protocol) SELFTEST zona smileprotocol:lab_generators caja=117x146 marcadores=[fuse, mob_spawn, item:wheel, entry, exit_cabin, exit_door, entry_door] cajas=3 fusibles necesarios=4 fusibles en el suelo=9 objetos=10 puertas=66 valvulas=2 rejillas=2 salida=true puertas salida=3 circuitos={exit=false, aux=false}
+[15:26:48] [Server thread/INFO] (Smile Protocol) SELFTEST zona smileprotocol:lab_greenhouse caja=116x153 marcadores=[fuse, mob_spawn, entry, exit_cabin, item:keycard:2, exit_door, entry_door] cajas=2 fusibles necesarios=2 fusibles en el suelo=6 objetos=7 puertas=70 valvulas=2 rejillas=4 salida=true puertas salida=3 circuitos={exit=false}
+[15:26:49] [Server thread/INFO] (Smile Protocol) SELFTEST zona smileprotocol:lab_morgue caja=138x167 marcadores=[fuse, entry, mob_spawn, item:key:blue, exit_cabin, exit_door, entry_door] cajas=3 fusibles necesarios=3 fusibles en el suelo=7 objetos=8 puertas=95 valvulas=0 rejillas=2 salida=true puertas salida=3 circuitos={exit=false, vent=false}
+[15:26:49] [Server thread/INFO] (Smile Protocol) SELFTEST zona smileprotocol:lab_offices caja=148x144 marcadores=[fuse, exit_cabin, mob_spawn, entry, item:keycard:1, exit_door, entry_door] cajas=2 fusibles necesarios=2 fusibles en el suelo=6 objetos=6 puertas=90 valvulas=0 rejillas=4 salida=true puertas salida=3 circuitos={exit=false}
+[15:26:49] [Server thread/INFO] (Smile Protocol) SELFTEST zona smileprotocol:lab_storage caja=120x149 marcadores=[fuse, mob_spawn, exit_cabin, entry, item:key:red, exit_door, entry_door] cajas=2 fusibles necesarios=2 fusibles en el suelo=7 objetos=5 puertas=68 valvulas=0 rejillas=2 salida=true puertas salida=3 circuitos={exit=false}
+[15:26:49] [Server thread/INFO] (Smile Protocol) SELFTEST zona smileprotocol:smiley_lab caja=39x55 marcadores=[fuse, summon, exit_cabin, entry, arena, smiley, cell, exit_door, entry_door] cajas=3 fusibles necesarios=3 fusibles en el suelo=6 objetos=4 puertas=0 valvulas=0 rejillas=2 salida=true puertas salida=3 circuitos={gen1=false, gen2=false, gen3=false}
+[15:26:50] [Server thread/INFO] (Smile Protocol) SELFTEST zona smileprotocol:start_corridor caja=140x169 marcadores=[fuse, mob_spawn, exit_cabin, entry, exit_door, entry_door] cajas=2 fusibles necesarios=2 fusibles en el suelo=6 objetos=3 puertas=102 valvulas=0 rejillas=2 salida=true puertas salida=3 circuitos={exit=false}
+[15:26:50] [Server thread/INFO] (Smile Protocol) SELFTEST zona smileprotocol:tutorial caja=11x97 marcadores=[item:stunner, item:key:red, tut_vent, fuse, item:can, item:wheel, exit_cabin, tut_crouch, item:decoy, entry, item:battery, item:bottle, exit_door, entry_door] cajas=1 fusibles necesarios=1 fusibles en el suelo=4 objetos=11 puertas=4 valvulas=1 rejillas=2 salida=true puertas salida=3 circuitos={exit=false}
+[15:26:51] [Server thread/INFO] (Smile Protocol) SELFTEST carga: 6 instancias a la vez en 1148 ms (191 ms cada una), mobs=4 luces=1824
+[15:26:51] [Server thread/INFO] (Smile Protocol) SELFTEST construccion por partes: 16 ticks (0.8 s de viaje) con 2 rebanadas por tick, peor tick 123 ms
+[15:26:51] [Server thread/INFO] (Smile Protocol) SELFTEST combate guardado: el estado del combate contra Smiley se guarda y se recupera
+[15:26:51] [Server thread/INFO] (Smile Protocol) SELFTEST OK
+[15:26:51] [Server thread/INFO] (Minecraft) Stopping server
+[15:26:51] [Server thread/INFO] (Minecraft) Saving players
+[15:26:51] [Server thread/INFO] (Minecraft) Saving worlds
+[15:26:54] [Server thread/INFO] (Minecraft) Saving chunks for level 'ServerLevel[world]'/minecraft:overworld
+[15:26:54] [Server thread/INFO] (Minecraft) Saving chunks for level 'ServerLevel[world]'/minecraft:the_nether
+[15:26:54] [Server thread/INFO] (Minecraft) Saving chunks for level 'ServerLevel[world]'/smileprotocol:smile_protocol
+[15:27:02] [Server thread/INFO] (Minecraft) Saving chunks for level 'ServerLevel[world]'/minecraft:the_end
+[15:27:02] [Server thread/INFO] (Minecraft) ThreadedAnvilChunkStorage (world): All chunks are saved
+[15:27:02] [Server thread/INFO] (Minecraft) ThreadedAnvilChunkStorage (DIM-1): All chunks are saved
+[15:27:02] [Server thread/INFO] (Minecraft) ThreadedAnvilChunkStorage (smile_protocol): All chunks are saved
+[15:27:02] [Server thread/INFO] (Minecraft) ThreadedAnvilChunkStorage (DIM1): All chunks are saved
+[15:27:02] [Server thread/INFO] (Minecraft) ThreadedAnvilChunkStorage: All dimensions are saved
+gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/__run_4-1793460391864.json
+
+[Incubating] Problems report is available at: file:///home/runner/work/Smile_Protocol/Smile_Protocol/build/reports/problems/problems-report.html
+
+BUILD SUCCESSFUL in 33s
+8 actionable tasks: 5 executed, 3 up-to-date
+Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.4.0/userguide/configuration_cache_enabling.html
