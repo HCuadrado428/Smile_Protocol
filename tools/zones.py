@@ -576,7 +576,49 @@ class Floor:
         """n muebles contra la pared de la sala, eligiendo al azar de la lista."""
         return self.take(self.wall_spots(room), n, lambda x, z, f: self.furn(self.rnd.choice(names), x, z, f))
 
+    SCATTER = {
+        "storage": (["metal_shelf", "metal_shelf", "supply_box", "tool_cart"], 11),
+        "morgue": (["trolley", "iv_stand", "sink", "medical_cabinet", "trolley"], 13),
+        "ward": (["iv_stand", "trolley", "wheelchair", "medical_cabinet", "iv_stand"], 13),
+        "lab": (["workstation", "specimen_shelf", "trolley", "sink", "office_chair"], 15),
+        "machine": (["tool_cart", "supply_box", "metal_shelf"], 15),
+        "server": (["workstation", "office_chair"], 20),
+        "lockers": (["supply_box", "office_chair"], 24),
+        "break": (["office_chair", "sink", "workstation"], 16),
+    }
+
+    def scatter(self, room, names, n):
+        """Muebles por el centro de la sala sin cerrar el paso: cada uno se quita si deja alguna
+        celda de la sala sin acceso desde las puertas."""
+        cells = [(x, z) for x in range(room["x0"] + 1, room["x1"]) for z in range(room["z0"] + 1, room["z1"])]
+        self.rnd.shuffle(cells)
+        base = len(self.reach(room))
+        placed = 0
+        for (x, z) in cells:
+            if placed >= n:
+                break
+            if not self.free(x, z) or self.near_door(x, z):
+                continue
+            if not self.furn(self.rnd.choice(names), x, z, self.rnd.choice(["north", "south", "east", "west"])):
+                continue
+            now = len(self.reach(room))
+            if now < base - 1:
+                self.t.set(x, 1, z, "air")
+                self.used.discard((x, z))
+                continue
+            base = now
+            placed += 1
+        return placed
+
     def furnish(self, room):
+        kind, r = room["kind"], self.rnd
+        self._furnish(room)
+        if kind in self.SCATTER:
+            names, per = self.SCATTER[kind]
+            area = (room["x1"] - room["x0"] + 1) * (room["z1"] - room["z0"] + 1)
+            self.scatter(room, names, max(1, area // per))
+
+    def _furnish(self, room):
         kind, r = room["kind"], self.rnd
         if kind in LABELS_SPECIAL:
             getattr(self, "sp_" + kind)(room)
