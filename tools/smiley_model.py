@@ -33,13 +33,11 @@ SMILE = [
 ]
 # Ojo: rojo encendido con la pupila rasgada en vertical
 EYE = [
-    "...RRR...",
-    ".RRYYYRR.",
-    "RYYWKWYYR",
-    "RYWWKWWYR",
-    "RYYWKWYYR",
-    ".RRYYYRR.",
-    "...RRR...",
+    "..RRR..",
+    ".RYWYR.",
+    "RYWKWYR",
+    ".RYWYR.",
+    "..RRR..",
 ]
 COLORS = {"R": (196, 12, 18), "T": (236, 210, 200), "V": (200, 170, 150), "K": (3, 0, 1), "Y": (226, 14, 16),
           "W": (255, 34, 26)}             # el ojo, todo rojo (mas vivo en el centro) salvo la pupila negra
@@ -229,8 +227,8 @@ def smiley():
     for x, ln in ((-4.6, 2.6), (-3.1, 1.4), (4.2, 3.4), (1.5, 1.0)):
         g.cube("smile", (x, 53.6 - ln, -4.24), (0.35, ln, 0.15), "smiley_drip")   # gotas de las comisuras
     g.bone("eye", "head", (2.35, 59.55, -4.1))
-    g.cube("eye", (0.2, 57.8, -4.2), (4.5, 3.5, 0.2), "smiley_eye")               # ojo derecho
-    g.cube("eye", (1.9, 55.6, -4.19), (0.3, 2.4, 0.15), "smiley_drip")            # lagrima roja
+    g.cube("eye", (0.6, 58.3, -4.2), (3.5, 2.5, 0.2), "smiley_eye")               # ojo derecho
+    g.cube("eye", (2.0, 56.0, -4.19), (0.3, 2.3, 0.15), "smiley_drip")            # lagrima roja
     g.cube("head", (-2.6, 59.2, -4.12), (0.35, 0.35, 0.1), "smiley_pin")         # chispa en la cuenca vacia
     # melena lacia por los hombros, en mechones desiguales que se afinan en la punta; el flequillo
     # cae sobre el lado izquierdo (el del ojo que no tiene) y deja ver el ojo
