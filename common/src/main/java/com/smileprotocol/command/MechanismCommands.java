@@ -195,6 +195,7 @@ final class MechanismCommands {
             case "apagon" -> com.smileprotocol.entity.MobManager.spawn(level, com.smileprotocol.registry.ModEntities.APAGON.get(), pos, level.random);
             case "rastreador" -> com.smileprotocol.entity.MobManager.spawn(level, com.smileprotocol.registry.ModEntities.RASTREADOR.get(), pos, level.random);
             case "paciente" -> com.smileprotocol.entity.MobManager.spawn(level, com.smileprotocol.registry.ModEntities.PACIENTE.get(), pos, level.random);
+            case "gemelo" -> com.smileprotocol.entity.MobManager.spawn(level, com.smileprotocol.registry.ModEntities.GEMELO.get(), pos, level.random);
             case "smiley" -> {
                 var m = com.smileprotocol.entity.MobManager.spawn(level, com.smileprotocol.registry.ModEntities.SMILEY.get(), pos, level.random);
                 if (m != null) m.startIntro();

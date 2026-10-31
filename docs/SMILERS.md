@@ -51,6 +51,14 @@ Inspirado en los ángeles llorones de Doctor Who. *Implementado (fase 21):* mode
 - **Cómo se le gana:** luces encendidas, baterías, bengalas y no separarse.
 - **Dónde:** plantas con apagones, generadores y la final.
 
+## El Gemelo (copia a un jugador)
+*Implementado:* IA en `entity/Gemelo.java`, dibujo en `client/GemeloRenderer.java` (modelo y piel de jugador), aparece en `gemelo_zones` (oficinas, jardín y criogenia), uno por planta.
+- **Aspecto:** igual que uno de los jugadores del grupo: su piel (ancha o fina) y su nombre encima. Lo que lo delata: **no lleva linterna**, no habla por la voz y, si el de verdad está cerca, hay dos iguales. Al delatarse, la cabeza tiembla, los brazos se van hacia delante y aparece su cara: cuencas negras con un punto rojo y una sonrisa rasgada.
+- **Movimiento:** anda como un jugador. Se acerca hasta unos 9 bloques y se queda mirando; si te acercas, se aparta despacio. Delatado, corre bastante más que tú.
+- **Actitud:** paciente. Se delata si alguien se le pone a menos de 3,5 bloques (`gemelo_reveal_distance`), si le enfocan con la linterna unos 2 segundos o tras 90 s cerca del grupo (`gemelo_patience`).
+- **Mecánica:** al delatarse chilla (susto suave a quien lo vea) y persigue al más cercano. Si lo alcanza, lo **derriba** y se desvanece en humo. Si no alcanza a nadie en 15 s (`gemelo_chase_seconds`), también desaparece. Respeta los escondites. Se le puede aturdir.
+- **Cómo se le gana:** fijarse en quién no lleva linterna, enfocar a quien se acerque callado y esconderse cuando chilla.
+
 ## Smiley (jefe final)
 *Implementado (fase 21):* modelo `tools/smiley_model.py` (silueta negra de 4 bloques; ojo y sonrisa en placas propias que la intro enciende y abre), IA en `entity/Smiley.java`, combate y apariciones en `entity/SmileyFight.java`, sala `tools/arena.py` (zona final `smiley_lab`, «Laboratorio Cero»: suelo, anillo de pasarelas con puente y pasarelas altas, escaleras que él puede subir y escaleras de mano que no; tres generadores `gen1`-`gen3`, uno por nivel, que encienden las luces de su nivel), misión `missions/smiley_lab.json`, remate `SMILEY_KILL` y arrastre del último `SMILEY_DRAG`, sonidos de grito, susurro, risa y mancha. La música (`tools/music.py`, tres bucles: nana de caja de música, coro, tensión que sube por fase y latidos) suena mientras pelea, con fundido entre fases (`boss_music_volume`); se calla al encerrarlo. Ajustes `smiley_*` en la configuración. `final_room` pasa a ser una planta intermedia más.
 

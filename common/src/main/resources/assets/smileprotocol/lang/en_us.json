@@ -507,5 +507,6 @@
   "smileprotocol.achievement.clockmaker": "Clockmaker",
   "smileprotocol.achievement.clockmaker.desc": "Use 10 alarm clocks",
   "smileprotocol.soundphysics.disabled": "Sound Physics Remastered is disabled: echoes and sounds muffled behind walls are part of the game. Turn it on in its config.",
-  "smileprotocol.soundphysics.voice": "Sound Physics Remastered isn't processing voice (simple_voice_chat_integration=false): your teammates will sound without echo or occlusion."
+  "smileprotocol.soundphysics.voice": "Sound Physics Remastered isn't processing voice (simple_voice_chat_integration=false): your teammates will sound without echo or occlusion.",
+  "entity.smileprotocol.gemelo": "Twin"
 }
