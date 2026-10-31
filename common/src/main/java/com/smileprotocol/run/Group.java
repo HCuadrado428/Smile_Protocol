@@ -158,13 +158,13 @@ public final class Group {
         t.put("Difficulty", difficulty.save());
         t.putString("Rules", rules.encode());
         if (missionZone >= 0) {
-            CompoundTag m = new CompoundTag();
-            m.putInt("Zone", missionZone);
-            m.putInt("Step", missionStep);
-            ListTag f = new ListTag();
-            for (String s : missionFacts) f.add(StringTag.valueOf(s));
-            m.put("Facts", f);
-            t.put("Mission", m);
+            CompoundTag mission = new CompoundTag();
+            mission.putInt("Zone", missionZone);
+            mission.putInt("Step", missionStep);
+            ListTag facts = new ListTag();
+            for (String fact : missionFacts) facts.add(StringTag.valueOf(fact));
+            mission.put("Facts", facts);
+            t.put("Mission", mission);
         }
         t.putInt("Slot", slot);
         t.putString("State", state.name());
@@ -206,11 +206,11 @@ public final class Group {
         g.zoneIndex = t.getInt("ZoneIndex");
         g.rules = com.smileprotocol.difficulty.RunRules.decode(t.getString("Rules"));
         if (t.contains("Mission")) {
-            CompoundTag m = t.getCompound("Mission");
-            g.missionZone = m.getInt("Zone");
-            g.missionStep = m.getInt("Step");
-            ListTag f = m.getList("Facts", Tag.TAG_STRING);
-            for (int i = 0; i < f.size(); i++) g.missionFacts.add(f.getString(i));
+            CompoundTag mission = t.getCompound("Mission");
+            g.missionZone = mission.getInt("Zone");
+            g.missionStep = mission.getInt("Step");
+            ListTag facts = mission.getList("Facts", Tag.TAG_STRING);
+            for (int k = 0; k < facts.size(); k++) g.missionFacts.add(facts.getString(k));
         }
         if (t.contains("Current")) g.current = ZonePlacement.load(t.getCompound("Current"));
         if (t.contains("Next")) g.next = ZonePlacement.load(t.getCompound("Next"));
