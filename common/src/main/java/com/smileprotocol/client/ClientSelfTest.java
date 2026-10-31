@@ -937,6 +937,30 @@ public final class ClientSelfTest {
         SHOTS.add(() -> server.execute(() -> {
             if (twin[0] != null) twin[0].discard();
         }));
+        // 8r. El Imitador: modelo, imita (con voz si la hay; si no, susurro) y su animacion de imitar
+        com.smileprotocol.entity.Imitador[] imi = {null};
+        SHOTS.add(() -> server.execute(() -> {
+            SPSessionManager.teleport(sp, level, cam, 0f, 5f);
+            imi[0] = com.smileprotocol.entity.MobManager.spawn(level, com.smileprotocol.registry.ModEntities.IMITADOR.get(),
+                    BlockPos.containing(cam.add(0, 0, 5)), level.random);
+            if (imi[0] != null) {
+                imi[0].lookAt(net.minecraft.commands.arguments.EntityAnchorArgument.Anchor.EYES, sp.getEyePosition());
+                // una frase falsa (silencio codificado no hace falta: sin voz cae al susurro)
+                imi[0].forceMimic();
+                imi[0].setNoAi(true);
+            }
+        }));
+        SHOTS.add(() -> wait = 20);
+        SHOTS.add(() -> server.execute(() -> {
+            var m = imi[0];
+            boolean ok = m != null && m.mimics() == 1 && m.state() == com.smileprotocol.entity.Imitador.State.MIMIC;
+            log((ok ? "OK" : "FALLO") + " imitador: imita (voz " + (com.smileprotocol.voice.VoiceManager.available() ? "disponible" : "no disponible")
+                    + ", frases de " + sp.getGameProfile().getName() + ": " + com.smileprotocol.voice.VoiceManager.clipCount(sp.getUUID()) + ")");
+        }));
+        SHOTS.add(() -> grab(mc, "62_imitador"));
+        SHOTS.add(() -> server.execute(() -> {
+            if (imi[0] != null) imi[0].discard();
+        }));
         // 8p. Senuelo (despertador) y aturdidor
         com.smileprotocol.entity.SPMonster[] stunMob = {null};
         SHOTS.add(() -> server.execute(() -> {

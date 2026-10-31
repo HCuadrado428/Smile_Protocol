@@ -88,6 +88,7 @@ public class SPVoicePlugin implements VoicechatPlugin, VoiceBridge {
         OpusDecoder decoder = decoders.computeIfAbsent(id, k -> api.createDecoder());
         short[] pcm = decoder.decode(data);
         if (pcm == null || pcm.length == 0) return;
+        VoiceManager.recordClip(id, data, decibels(pcm));
         int muffle = com.smileprotocol.hide.HideManager.muffle(id);
         VoiceManager.onVoice(id, decibels(pcm) - (muffle == 2 ? 10 : muffle == 1 ? 4 : 0), e.getPacket().isWhispering());
         // Escondido: los de fuera le oyen ahogado (filtro de paso bajo y menos volumen) desde el escondite
@@ -121,6 +122,87 @@ public class SPVoicePlugin implements VoicechatPlugin, VoiceBridge {
         ch.setFilter(player -> !player.getUuid().equals(id));
         ch.send(muffledEncoders.computeIfAbsent(id, k -> api.createEncoder()).encode(muffle(pcm, muffle)));
         return true;
+    }
+
+    private static final java.util.concurrent.ScheduledExecutorService MIMIC_EXEC =
+            java.util.concurrent.Executors.newSingleThreadScheduledExecutor(r -> {
+                Thread t = new Thread(r, "SmileProtocol-Imitador");
+                t.setDaemon(true);
+                return t;
+            });
+
+    @Override
+    public boolean playMimic(net.minecraft.server.level.ServerLevel level, net.minecraft.world.phys.Vec3 pos, java.util.List<byte[]> clip,
+                             float distance) {
+        if (api == null || clip.isEmpty()) return false;
+        OpusDecoder dec = api.createDecoder();
+        OpusEncoder enc = api.createEncoder();
+        try {
+            // decodificar todo, deformar y volver a partir en paquetes de 20 ms (960 muestras a 48 kHz)
+            java.util.List<short[]> parts = new java.util.ArrayList<>();
+            int total = 0;
+            for (byte[] b : clip) {
+                short[] s = dec.decode(b);
+                if (s == null) continue;
+                parts.add(s);
+                total += s.length;
+            }
+            short[] all = new short[total];
+            int k = 0;
+            for (short[] s : parts) {
+                System.arraycopy(s, 0, all, k, s.length);
+                k += s.length;
+            }
+            short[] warped = warp(all);
+            java.util.List<byte[]> frames = new java.util.ArrayList<>();
+            for (int i = 0; i + 960 <= warped.length; i += 960) {
+                frames.add(enc.encode(java.util.Arrays.copyOfRange(warped, i, i + 960)));
+            }
+            var ch = api.createLocationalAudioChannel(UUID.randomUUID(), api.fromServerLevel(level), api.createPosition(pos.x, pos.y, pos.z));
+            if (ch == null || frames.isEmpty()) return false;
+            ch.setDistance(distance);
+            int[] i = {0};
+            java.util.concurrent.ScheduledFuture<?>[] task = {null};
+            task[0] = MIMIC_EXEC.scheduleAtFixedRate(() -> {
+                if (i[0] >= frames.size()) {
+                    ch.flush();
+                    task[0].cancel(false);
+                    return;
+                }
+                ch.send(frames.get(i[0]++));
+            }, 0, 20, java.util.concurrent.TimeUnit.MILLISECONDS);
+            return true;
+        } catch (Exception e) {
+            SmileProtocol.LOGGER.warn("Imitador: no se pudo reproducir la voz: {}", e.toString());
+            return false;
+        } finally {
+            dec.close();
+            enc.close();
+        }
+    }
+
+    /** Voz «casi» igual: un 7 % mas grave, con un tartamudeo en medio y un poco de aspereza. */
+    static short[] warp(short[] in) {
+        double rate = 0.93;
+        int n = (int) (in.length / rate);
+        short[] slow = new short[n];
+        for (int i = 0; i < n; i++) {
+            double src = i * rate;
+            int a = (int) src;
+            double f = src - a;
+            double v = a + 1 < in.length ? in[a] * (1 - f) + in[a + 1] * f : in[Math.min(a, in.length - 1)];
+            double x = v / 32768.0;
+            x = Math.tanh(x * 1.6) * 0.8;
+            slow[i] = (short) Math.max(Short.MIN_VALUE, Math.min(Short.MAX_VALUE, x * 32767));
+        }
+        // tartamudeo: repite un trozo de 120 ms hacia la mitad
+        int cut = n / 2, len = Math.min(5760, n / 4);
+        if (len < 960) return slow;
+        short[] out = new short[n + len];
+        System.arraycopy(slow, 0, out, 0, cut);
+        System.arraycopy(slow, cut - len, out, cut, len);
+        System.arraycopy(slow, cut, out, cut + len, n - cut);
+        return out;
     }
 
     /** Paso bajo (dos polos) y menos volumen: suena «a traves de la puerta». */

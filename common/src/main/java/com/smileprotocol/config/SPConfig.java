@@ -203,6 +203,10 @@ public final class SPConfig {
         /** Berserkers por planta segun la dificultad de la zona (0, 1, 2, 3, 4...), antes de escalar por el grupo. */
         // El Paciente (docs/SMILERS.md)
         /** Plantas donde aparece (uno por planta, en los pasillos). */
+        /** Plantas con Imitador (repite la voz de los jugadores para atraerlos). */
+        public java.util.List<String> imitador_zones = new java.util.ArrayList<>(java.util.List.of("lab_storage", "lab_morgue", "lab_generators"));
+        /** El Imitador puede grabar frases de la voz de proximidad (solo en memoria, durante la partida). */
+        public boolean imitador_voices = true;
         /** Plantas con Gemelo (copia a un jugador del grupo). */
         public java.util.List<String> gemelo_zones = new java.util.ArrayList<>(java.util.List.of("lab_offices", "lab_greenhouse", "final_room"));
         /** A cuantos bloques se delata si alguien se le acerca. */

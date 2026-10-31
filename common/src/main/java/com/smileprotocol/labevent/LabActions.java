@@ -218,6 +218,7 @@ public final class LabActions {
             case "rastreador" -> com.smileprotocol.registry.ModEntities.RASTREADOR.get();
             case "paciente" -> com.smileprotocol.registry.ModEntities.PACIENTE.get();
             case "gemelo" -> com.smileprotocol.registry.ModEntities.GEMELO.get();
+            case "imitador" -> com.smileprotocol.registry.ModEntities.IMITADOR.get();
             case "smiley" -> com.smileprotocol.registry.ModEntities.SMILEY.get();
             default -> com.smileprotocol.registry.ModEntities.BERSERKER.get();
         };

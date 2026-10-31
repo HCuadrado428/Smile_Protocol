@@ -51,6 +51,14 @@ Inspirado en los ángeles llorones de Doctor Who. *Implementado (fase 21):* mode
 - **Cómo se le gana:** luces encendidas, baterías, bengalas y no separarse.
 - **Dónde:** plantas con apagones, generadores y la final.
 
+## El Imitador (habla con tu voz)
+*Implementado:* modelo `imitador` (`tools/imitador_model.py`), IA en `entity/Imitador.java`, aparece en `imitador_zones` (almacén, morgue y energía).
+- **Aspecto:** 2,4 bloques, pálido y descarnado, encorvado como si escuchara. Sin ojos: la cabeza es un huevo liso con una sonrisa enorme de dientes de personas distintas y dos orejas grandes que se mueven. Para imitar se ahueca las manos junto a la boca y la mandíbula imita el habla.
+- **Movimiento:** lento y de puntillas mientras acecha; a zancadas cuando ataca o huye.
+- **Actitud:** no se deja ver. Se queda a unos 14 bloques, detrás de una pared, y cada 12-20 s habla con la voz de **otro del grupo**: frases que ha oído por la voz de proximidad (solo se guardan en memoria las 6 últimas de cada uno durante la partida y se borran al salir; se puede desactivar con `imitador_voices`). Suenan algo más graves, con un tartamudeo en medio. Sin Simple Voice Chat, susurra y da golpes.
+- **Mecánica:** si quien va a mirar llega **solo** a menos de 5 bloques, se ríe y se le echa encima: lo **derriba** y se escabulle. Si llega acompañado, o si alguien le mira, huye corriendo. Respeta los escondites. Se le puede aturdir.
+- **Cómo se le gana:** no ir solo hacia una voz; preguntar por el walkie si de verdad era él.
+
 ## El Gemelo (copia a un jugador)
 *Implementado:* IA en `entity/Gemelo.java`, dibujo en `client/GemeloRenderer.java` (modelo y piel de jugador), aparece en `gemelo_zones` (oficinas, jardín y criogenia), uno por planta.
 - **Aspecto:** igual que uno de los jugadores del grupo: su piel (ancha o fina) y su nombre encima. Lo que lo delata: **no lleva linterna**, no habla por la voz y, si el de verdad está cerca, hay dos iguales. Al delatarse, la cabeza tiembla, los brazos se van hacia delante y aparece su cara: cuencas negras con un punto rojo y una sonrisa rasgada.

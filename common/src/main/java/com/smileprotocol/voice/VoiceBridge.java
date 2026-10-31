@@ -22,4 +22,11 @@ public interface VoiceBridge {
 
     /** Tiene el mod de voz instalado y conectado. */
     boolean connected(ServerPlayer player);
+
+    /**
+     * El Imitador: reproduce en {@code pos} una frase grabada (paquetes opus de 20 ms), deformada (algo mas
+     * grave y entrecortada), audible a {@code distance} bloques. Devuelve false si no se pudo.
+     */
+    boolean playMimic(net.minecraft.server.level.ServerLevel level, net.minecraft.world.phys.Vec3 pos, java.util.List<byte[]> clip,
+                      float distance);
 }

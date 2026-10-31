@@ -59,6 +59,12 @@ public final class ModEntities {
                     MobCategory.MONSTER).sized(0.9f, 3.4f).eyeHeight(3.2f).clientTrackingRange(16).fireImmune()
                     .build("smiley"));
 
+    /** El Imitador: 2,4 bloques encorvado; la caja de 2 pasa por las puertas. */
+    public static final Supplier<EntityType<com.smileprotocol.entity.Imitador>> IMITADOR = Services.PLATFORM.register(
+            BuiltInRegistries.ENTITY_TYPE, "imitador", () -> EntityType.Builder.of(com.smileprotocol.entity.Imitador::new,
+                    MobCategory.MONSTER).sized(0.7f, 1.95f).eyeHeight(1.8f).clientTrackingRange(12).fireImmune()
+                    .build("imitador"));
+
     /** El Gemelo: copia a un jugador (modelo y piel de jugador). */
     public static final Supplier<EntityType<com.smileprotocol.entity.Gemelo>> GEMELO = Services.PLATFORM.register(
             BuiltInRegistries.ENTITY_TYPE, "gemelo", () -> EntityType.Builder.of(com.smileprotocol.entity.Gemelo::new,
@@ -89,5 +95,6 @@ public final class ModEntities {
         Services.PLATFORM.registerAttributes(APAGON, com.smileprotocol.entity.Apagon::attributes);
         Services.PLATFORM.registerAttributes(SMILEY, com.smileprotocol.entity.Smiley::attributes);
         Services.PLATFORM.registerAttributes(GEMELO, com.smileprotocol.entity.Gemelo::attributes);
+        Services.PLATFORM.registerAttributes(IMITADOR, com.smileprotocol.entity.Imitador::attributes);
     }
 }

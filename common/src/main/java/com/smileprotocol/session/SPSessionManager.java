@@ -92,6 +92,7 @@ public final class SPSessionManager {
         boolean wasDead = wasIn && com.smileprotocol.downed.DeathManager.isDead(player);
         if (wasIn) RunManager.onPlayerLeft(player, data.getGroupId());
         com.smileprotocol.sequence.SequenceManager.clear(player);
+        com.smileprotocol.voice.VoiceManager.forgetClips(player.getUUID());
         com.smileprotocol.hide.HideManager.forceExit(player, false);
         com.smileprotocol.downed.DownedManager.clear(player);
         com.smileprotocol.qte.QTEManager.clear(player);

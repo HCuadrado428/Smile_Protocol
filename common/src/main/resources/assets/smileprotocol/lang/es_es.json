@@ -508,5 +508,6 @@
   "smileprotocol.achievement.clockmaker.desc": "Usa 10 despertadores",
   "smileprotocol.soundphysics.disabled": "Sound Physics Remastered está desactivado: el eco y los sonidos ahogados tras las paredes son parte del juego. Actívalo en su configuración.",
   "smileprotocol.soundphysics.voice": "Sound Physics Remastered no procesa la voz (simple_voice_chat_integration=false): tus compañeros sonarán sin eco ni oclusión.",
-  "entity.smileprotocol.gemelo": "Gemelo"
+  "entity.smileprotocol.gemelo": "Gemelo",
+  "entity.smileprotocol.imitador": "Imitador"
 }

@@ -131,7 +131,68 @@ public final class VoiceManager {
         return bridge != null ? bridge.spectatorRun(p) : null;
     }
 
+    // El Imitador: frases cortas de cada jugador en partida, para repetirlas --------------------------
+
+    private static final int CLIP_MAX = 150, CLIP_MIN = 15, CLIPS_KEPT = 6;
+    private static final Map<UUID, java.util.Deque<java.util.List<byte[]>>> CLIPS = new ConcurrentHashMap<>();
+    private static final Map<UUID, java.util.List<byte[]>> RECORDING = new ConcurrentHashMap<>();
+
+    /** Desde el hilo de la voz: un paquete del microfono. Junta las frases (con voz) y guarda las ultimas. */
+    public static void recordClip(UUID player, byte[] opus, double db) {
+        if (!com.smileprotocol.config.SPConfig.get().imitador_voices) return;
+        MinecraftServer server = ServerRef.get();
+        ServerPlayer p = server == null ? null : server.getPlayerList().getPlayer(player);
+        boolean playing = p != null && SPPlayerData.inSP(p) && !p.isSpectator();
+        java.util.List<byte[]> cur = RECORDING.get(player);
+        boolean voiced = playing && db > com.smileprotocol.config.SPConfig.get().voice_talk_db - 6;
+        if (voiced) {
+            if (cur == null) RECORDING.put(player, cur = new java.util.ArrayList<>());
+            cur.add(opus.clone());
+            if (cur.size() < CLIP_MAX) return;
+        }
+        if (cur == null) return;
+        RECORDING.remove(player);
+        if (cur.size() < CLIP_MIN) return;
+        java.util.Deque<java.util.List<byte[]>> q = CLIPS.computeIfAbsent(player, k -> new java.util.concurrent.ConcurrentLinkedDeque<>());
+        q.addLast(cur);
+        while (q.size() > CLIPS_KEPT) q.pollFirst();
+    }
+
+    /** Frases guardadas de un jugador (para las pruebas). */
+    public static int clipCount(UUID player) {
+        var q = CLIPS.get(player);
+        return q == null ? 0 : q.size();
+    }
+
+    /** Pruebas: guardar una frase como si la hubiera dicho. */
+    public static void addClipForTest(UUID player, java.util.List<byte[]> clip) {
+        CLIPS.computeIfAbsent(player, k -> new java.util.concurrent.ConcurrentLinkedDeque<>()).addLast(clip);
+    }
+
+    /**
+     * El Imitador habla con la voz de uno de {@code sources} (al azar, de sus ultimas frases). False si no
+     * hay voz o nadie ha dicho nada aun.
+     */
+    public static boolean mimic(net.minecraft.server.level.ServerLevel level, net.minecraft.world.phys.Vec3 pos,
+                                java.util.List<UUID> sources, float distance) {
+        if (bridge == null) return false;
+        java.util.List<java.util.List<byte[]>> pool = new java.util.ArrayList<>();
+        for (UUID id : sources) {
+            var q = CLIPS.get(id);
+            if (q != null) pool.addAll(q);
+        }
+        if (pool.isEmpty()) return false;
+        return bridge.playMimic(level, pos, pool.get(level.random.nextInt(pool.size())), distance);
+    }
+
+    /** Al salir de la partida se olvida lo que dijo. */
+    public static void forgetClips(UUID player) {
+        CLIPS.remove(player);
+        RECORDING.remove(player);
+    }
+
     public static void onLogout(ServerPlayer p) {
+        forgetClips(p.getUUID());
         LAST_NOISE.remove(p.getUUID());
         LAST_DB.remove(p.getUUID());
         WalkieManager.onLogout(p);

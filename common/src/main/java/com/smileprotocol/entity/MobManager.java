@@ -70,6 +70,17 @@ public final class MobManager {
      * El Paciente (docs/SMILERS.md): uno en las plantas de {@code paciente_zones}, en un punto lejos
      * de la llegada desde el que pueda andar hasta ella (en los pasillos: no cabe por las puertas).
      */
+    /** El Imitador: en las plantas de {@code imitador_zones}, lejos de la llegada. */
+    public static void spawnImitador(ServerLevel level, net.minecraft.resources.ResourceLocation zoneId, List<BlockPos> points,
+                                     Vec3 entry, RandomSource rnd) {
+        if (!SPConfig.get().imitador_zones.contains(zoneId.getPath())) return;
+        List<BlockPos> far = new ArrayList<>();
+        for (BlockPos p : points) if (Vec3.atBottomCenterOf(p).distanceTo(entry) > 30) far.add(p);
+        if (far.isEmpty()) return;
+        BlockPos p = far.get(rnd.nextInt(far.size()));
+        if (spawn(level, ModEntities.IMITADOR.get(), p, rnd) != null) SPDebug.log("mobs: imitador en " + p.toShortString());
+    }
+
     /** El Gemelo: en las plantas de {@code gemelo_zones}, lejos de la llegada. */
     public static void spawnGemelo(ServerLevel level, net.minecraft.resources.ResourceLocation zoneId, List<BlockPos> points,
                                    Vec3 entry, RandomSource rnd) {
