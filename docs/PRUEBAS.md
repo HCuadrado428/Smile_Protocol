@@ -280,7 +280,7 @@ Hace falta Simple Voice Chat en el servidor y en los clientes (es opcional: sin 
 
 ## Música de cada planta
 
-- Al llegar a cada planta suena muy bajo su ambiente (recepción: piano apagado; almacén: chapa lejana; oficinas: la nana desafinada; morgue: coro frío; energía: zumbido eléctrico; jardín: gotas; criogenia: cristales; Laboratorio Cero: pulso y la nana muy lejos; tutorial: colchón tranquilo). Al cambiar de planta se funde con la siguiente.
+- Al llegar a cada planta suena muy bajo su ambiente, sin melodías: zumbidos de los tubos, aire de la ventilación, crujidos, gotas, compresores o una respiración enorme en el Laboratorio Cero, según la planta. Al cambiar de planta se funde con la siguiente.
 - Baja cuando sube la tensión y casi desaparece mientras suena la música de Smiley.
 - `floor_music_volume` en la configuración (0 = sin música). Se oye con el deslizador «Música» de Minecraft.
 
