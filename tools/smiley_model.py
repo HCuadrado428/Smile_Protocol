@@ -8,6 +8,7 @@ sonrisa se abra escalandola.
     python3 tools/smiley_model.py [preview.png]
 """
 import json
+import math
 import sys
 from pathlib import Path
 
@@ -200,27 +201,40 @@ MAT.update({
 
 
 def smiley():
+    """Esqueleto: cadera > cintura > pecho > (hombros > brazo > antebrazo > mano > dedos/pulgar)
+    y (cuello > cuello2 > cabeza > mandibula/sonrisa/ojo/pelo); piernas: muslo > espinilla > pie > dedos."""
     g = Geo("smiley", 99, folder="entity", glow=("smiley_smile", "smiley_eye", "void_crack", "smiley_drip", "smiley_pin"),
             ao=False)
     g.bone("root")
     g.bone("hips", "root", (0, 28, 0))
     g.cube("hips", (-2.6, 26, -1.5), (5.2, 4, 3), "void")
+    # columna en tres tramos que se doblan por separado
     g.bone("torso", "hips", (0, 30, 0))
     g.cube("torso", (-1.7, 30, -1.2), (3.4, 8.5, 2.4), "void")                      # cintura imposible
-    g.cube("torso", (-3.2, 38, -1.8), (6.4, 8, 3.6), "void_crack")                  # pecho estrecho, agrietado
-    for i in range(5):
-        g.cube("torso", (-3.5 + i * 0.1, 38.6 + i * 1.5, -2.15), (7.0 - i * 0.2, 0.75, 0.5), "void_hi")   # costillas marcadas
     g.cube("torso", (-2.4, 33.5, -1.45), (4.8, 1.2, 0.3), "void_hi")               # vientre hundido, con un pliegue
-    g.cube("torso", (-4.6, 45, -1.5), (9.2, 2.3, 3), "void_crack")                  # hombros como perchas
-    g.cube("torso", (-5.1, 46.4, -0.6), (1.6, 0.6, 0.6), "nail")                    # clavicula rota que asoma
-    for k, (x, ln) in enumerate(((-2.2, 7), (-0.6, 9.5), (1.2, 6), (2.6, 8.5))):
-        g.cube("torso", (x, 44 - ln, 1.6), (0.35, ln, 0.3), "void")                 # jirones que cuelgan de la espalda
-    for i in range(6):
-        g.cube("torso", (-0.6, 31 + i * 2.5, 1.2), (1.2, 1.2, 0.8), "void_hi")         # espinazo
-    g.bone("neck", "torso", (0, 47, -0.2))
-    g.cube("neck", (-0.9, 46.5, -1.1), (1.8, 6, 1.8), "void")                       # cuello largo
-    g.bone("head", "neck", (0, 52.3, -0.4))
-    g.cube("head", (-3.4, 53, -4), (6.8, 9.5, 7), "void_face")                           # cabeza alargada
+    for i in range(3):
+        g.cube("torso", (-0.6, 31 + i * 2.5, 1.2), (1.2, 1.2, 0.8), "void_hi")      # espinazo
+    g.bone("chest", "torso", (0, 38, 0))
+    g.cube("chest", (-3.2, 38, -1.8), (6.4, 8, 3.6), "void_crack")                  # pecho estrecho, agrietado
+    for i in range(5):
+        g.cube("chest", (-3.5 + i * 0.1, 38.6 + i * 1.5, -2.15), (7.0 - i * 0.2, 0.75, 0.5), "void_hi")   # costillas
+    for i in range(3, 6):
+        g.cube("chest", (-0.6, 31 + i * 2.5, 1.2), (1.2, 1.2, 0.8), "void_hi")
+    for x, ln in ((-2.2, 7), (-0.6, 9.5), (1.2, 6), (2.6, 8.5)):
+        g.cube("chest", (x, 44 - ln, 1.6), (0.35, ln, 0.3), "void")                 # jirones de la espalda
+    g.cube("chest", (-1.6, 45, -1.5), (3.2, 2.3, 3), "void_crack")                  # centro de la percha
+    # hombros: huesos propios para encogerlos, dejarlos caer o tirar hacia atras
+    for side, sx in (("r", 1), ("l", -1)):
+        g.bone(f"shoulder_{side}", "chest", (sx * 1.6, 45.8, 0))
+        g.cube(f"shoulder_{side}", (1.4 if sx > 0 else -4.6, 45, -1.5), (3.2, 2.3, 3), "void_crack")  # hombros como perchas
+    g.cube("shoulder_l", (-5.1, 46.4, -0.6), (1.6, 0.6, 0.6), "nail")                 # clavicula rota que asoma
+    # cuello en dos tramos: se curva en S y la cabeza puede quedarse quieta mientras el cuerpo se mueve
+    g.bone("neck", "chest", (0, 46.5, -0.2))
+    g.cube("neck", (-0.9, 46.5, -1.1), (1.8, 3.2, 1.8), "void")
+    g.bone("neck2", "neck", (0, 49.5, -0.3))
+    g.cube("neck2", (-0.85, 49.4, -1.15), (1.7, 3.4, 1.7), "void")
+    g.bone("head", "neck2", (0, 52.3, -0.4))
+    g.cube("head", (-3.4, 53, -4), (6.8, 9.5, 7), "void_face")                      # cabeza alargada
     g.cube("head", (-3, 51.5, -3.7), (6, 1.8, 6), "void")                           # mandibula
     g.bone("smile", "head", (0, 55.6, -4.1))
     g.cube("smile", (-5.5, 53.5, -4.25), (11, 4.5, 0.2), "smiley_smile")          # mas ancha que la cara
@@ -252,12 +266,12 @@ def smiley():
         g.cube("hair", (x + 0.3, 62.5 - ln - 1.2, -4.7), (0.6, 1.3, 0.3), "void_hair")
 
     for side, sx in (("r", 1), ("l", -1)):
-        g.bone(f"arm_{side}", "torso", (sx * 4.6, 46, 0))
+        g.bone(f"arm_{side}", f"shoulder_{side}", (sx * 4.6, 46, 0))
         g.cube(f"arm_{side}", (sx * 4.6 - 0.9, 28, -0.9), (1.8, 18.5, 1.8), "void")
         g.bone(f"forearm_{side}", f"arm_{side}", (sx * 4.6, 28.5, 0))
         g.cube(f"forearm_{side}", (sx * 4.6 - 0.75, 11.5, -0.75), (1.5, 17.5, 1.5), "void")
         g.cube(f"forearm_{side}", (sx * 4.6 - 1, 27, -1), (2, 2, 2), "void_hi")          # codo
-        for k, (dz, ln) in enumerate(((-0.6, 4.5), (0.4, 6.5))):
+        for dz, ln in ((-0.6, 4.5), (0.4, 6.5)):
             g.cube(f"forearm_{side}", (sx * 4.6 + sx * 0.75 - (0.3 if sx > 0 else 0), 24 - ln, dz), (0.3, ln, 0.3), "void")  # jirones
         g.bone(f"hand_{side}", f"forearm_{side}", (sx * 4.6, 12, 0))
         g.cube(f"hand_{side}", (sx * 4.6 - 1.1, 8.5, -1.9), (2.2, 3.5, 3.6), "void")
@@ -267,7 +281,8 @@ def smiley():
             g.bone(f"finger{i}_{side}", f"hand_{side}", (sx * 4.6, 8.8, z + 0.25))
             g.cube(f"finger{i}_{side}", (sx * 4.6 - 0.3, 8.8 - ln * 0.55, z), (0.6, ln * 0.55, 0.55), "void")
             g.cube(f"finger{i}_{side}", (sx * 4.6 - 0.22, 8.8 - ln, z + 0.04), (0.44, ln * 0.45 + 0.1, 0.47), "nail")
-        g.cube(f"hand_{side}", (sx * 4.6 - sx * 1.5 - 0.3, 6, -2.2), (0.6, 4, 0.6), "nail")  # pulgar
+        g.bone(f"thumb_{side}", f"hand_{side}", (sx * 3.1, 10, -2.0))
+        g.cube(f"thumb_{side}", (sx * 3.1 - 0.3, 6, -2.2), (0.6, 4, 0.6), "nail")           # pulgar
     for side, sx in (("r", 1), ("l", -1)):
         g.bone(f"thigh_{side}", "hips", (sx * 1.8, 27, 0))
         g.cube(f"thigh_{side}", (sx * 1.8 - 1, 14, -1), (2, 13.5, 2), "void")
@@ -275,10 +290,10 @@ def smiley():
         g.cube(f"shin_{side}", (sx * 1.8 - 0.85, 1.2, -0.85), (1.7, 13.5, 1.7), "void")
         g.cube(f"shin_{side}", (sx * 1.8 - 1.1, 13.4, -1.1), (2.2, 2, 2.2), "void_hi")  # rodilla
         g.bone(f"foot_{side}", f"shin_{side}", (sx * 1.8, 1.2, 0))
-        g.cube(f"foot_{side}", (sx * 1.8 - 0.9, 0, -4.4), (1.8, 1.3, 5.4), "void")
-    split(g, "torso", "chest", (0, 38, 0), lambda c: c["origin"][1] >= 38)
-    for b in ("neck", "arm_r", "arm_l"):
-        mm.reparent(g, b, "chest")
+        g.cube(f"foot_{side}", (sx * 1.8 - 0.9, 0, -1.8), (1.8, 1.3, 2.8), "void")     # talon
+        g.bone(f"toe_{side}", f"foot_{side}", (sx * 1.8, 0.6, -1.8))
+        g.cube(f"toe_{side}", (sx * 1.8 - 0.85, 0, -4.6), (1.7, 1.0, 2.85), "void")     # dedos largos
+        g.cube(f"toe_{side}", (sx * 1.8 - 0.5, 0, -5.05), (1.0, 0.55, 0.5), "nail")
     split(g, "head", "jaw", (0, 53, 0.5), lambda c: abs(c["origin"][1] - 51.5) < 0.01)
     split(g, "hair", "hair_back", (0, 62.5, 2.8), lambda c: c["origin"][2] > 2.7)
     split(g, "hair", "hair_l", (-3.8, 62.5, -1), lambda c: c["origin"][0] < -3.85 and c["origin"][1] < 62)
@@ -290,41 +305,115 @@ def smiley():
 
 # Animaciones ---------------------------------------------------------------------------------------------
 #
-# idle     de pie, enorme, ladea la cabeza despacio; los dedos tamborilean
-# walk     fase 1: pasos largos y teatrales, los brazos colgando casi al suelo
-# run      fase 3: encorvado y a zancadas, brazos por delante con las garras abiertas
-# intro    (5 s) oscuridad: aparece de pie con la cabeza gacha, se enciende el ojo, la sonrisa se abre
-# scream   (2 s) cabeza atras, mandibula abierta y brazos abiertos: aturde
-# summon   (2 s) levanta los brazos y los dedos se retuercen
-# retreat  bucle: dos linternas o mas le dan: se cubre la cara y se encoge
+# idle     de pie, respira, carga el peso de una pierna a otra; ladea la cabeza despacio y la endereza de golpe,
+#          parpadea y tamborilea con los dedos
+# walk     fase 1: pasos largos y teatrales; cadera y pecho giran al reves, los brazos se balancean con retraso
+#          en antebrazo, mano y dedos, el pie apoya el talon y empuja con los dedos; la cabeza no se mueve del sitio
+# run      fase 3: encorvado y a zancadas, brazos por delante con las garras abiertas; la cabeza fija en ti
+# intro    (5 s) aparece encorvado; se enciende el ojo, se endereza vertebra a vertebra, la sonrisa se abre
+#          y abre los brazos haciendo crujir los dedos uno a uno
+# scream   (2 s) coge aire agachandose, se echa atras con la mandibula abierta y los brazos abiertos: aturde
+# summon   (2 s) levanta los brazos (el antebrazo llega despues) y los dedos se retuercen
+# retreat  bucle: dos linternas o mas le dan: se cubre la cara, se encoge y tiembla
 # smear_in (1 s) se aplasta contra la pared y se deshace (teletransporte)
 # smear_out(1 s) sale de una mancha en la pared, desplegandose
-# grab     bucle: agarra a la victima a la altura de la cara (QTE)
-# execute_smiley (3,5 s) la levanta, abre la sonrisa enorme y la parte
-# sealed   (3 s) derrota: se le apaga el ojo, se queda colgando y la sonrisa sigue
-# drag     bucle: arrastra al ultimo jugador cogido del tobillo
+# grab     bucle: agarra a la victima a la altura de la cara (QTE), aprieta y la examina
+# execute_smiley (3,5 s) la levanta (de puntillas), abre la sonrisa enorme, coge impulso y la parte (2,25 s)
+# sealed   (3 s) derrota: el ojo parpadea y se apaga, se le doblan las rodillas y se queda colgando
+# drag     bucle: arrastra al ultimo jugador cogido del tobillo, inclinado contra el peso
 
 ARM = 4
+TAU = math.tau
 
 
-def base(extra=None):
-    b = {
-        "arm_r": {"rotation": kf([(0, [ARM, 0, -4])])}, "arm_l": {"rotation": kf([(0, [ARM, 0, 4])])},
-        "forearm_r": {"rotation": kf([(0, [-6, 0, 0])])}, "forearm_l": {"rotation": kf([(0, [-6, 0, 0])])},
-    }
-    for k, v in (extra or {}).items():
-        b.setdefault(k, {}).update(v)
-    return b
+def smooth(keys, loop=False, fps=16):
+    """Poses clave -> fotogramas densos con curva cubica monotona (sin pasarse de la pose, y las poses
+    repetidas se quedan quietas). GeckoLib interpola en linea recta entre fotogramas: asi el movimiento
+    acelera y frena como un cuerpo en vez de ir a tirones."""
+    keys = sorted(((float(t), [float(x) for x in v]) for t, v in keys), key=lambda k: k[0])
+    if len(keys) == 1:
+        return kf(keys)
+    T = np.array([k[0] for k in keys])
+    V = np.array([k[1] for k in keys])
+    H = np.diff(T)
+    D = np.diff(V, axis=0) / H[:, None]
+    M = np.zeros_like(V)
+
+    def tangent(a, b):
+        with np.errstate(divide="ignore", invalid="ignore"):
+            return np.where(a * b > 0, 2 * a * b / (a + b), 0.0)
+
+    for i in range(1, len(T) - 1):
+        M[i] = tangent(D[i - 1], D[i])
+    if loop and len(T) > 2:
+        M[0] = M[-1] = tangent(D[-1], D[0])
+    out = []
+    for i in range(len(T) - 1):
+        n = max(1, math.ceil(H[i] * fps))
+        for s in range(n):
+            u = s / n
+            h00, h10, h01, h11 = 2 * u ** 3 - 3 * u ** 2 + 1, u ** 3 - 2 * u ** 2 + u, -2 * u ** 3 + 3 * u ** 2, u ** 3 - u ** 2
+            out.append((T[i] + u * H[i], list(h00 * V[i] + h10 * H[i] * M[i] + h01 * V[i + 1] + h11 * H[i] * M[i + 1])))
+    out.append((T[-1], list(V[-1])))
+    return kf(out)
+
+
+def R(*keys, loop=False):
+    return {"rotation": smooth(keys, loop)}
+
+
+def mirror(keys):
+    return [(t, [v[0], -v[1], -v[2]]) for t, v in keys]
+
+
+def both(name, *keys, loop=False):
+    """El mismo gesto en los dos lados (el izquierdo en espejo)."""
+    return {f"{name}_r": R(*keys, loop=loop), f"{name}_l": R(*mirror(keys), loop=loop)}
+
+
+def fingers(fn, sides="rl"):
+    """fn(i, lado) -> canal de rotacion de cada dedo."""
+    return {f"finger{i}_{s}": fn(i, s) for i in range(4) for s in sides}
+
+
+def cyc(L, f, steps=24):
+    """Bucle procedural: f(fase en radianes) -> [x, y, z]."""
+    return kf([(L * i / steps, f(TAU * i / steps)) for i in range(steps + 1)])
+
+
+def pos(f):
+    return lambda p: list(f(p))
+
+
+def gait(L, stride, knee, lift=0.0, lean=0.0, sides="rl"):
+    """Piernas de un ciclo de paso. Fase 0 = la pierna derecha pasa por debajo hacia delante; en
+    pi/2 apoya el talon delante; en 3pi/2 empuja con los dedos detras."""
+    out = {}
+    for s, off in (("r", 0.0), ("l", math.pi)):
+        if s not in sides:
+            continue
+        out[f"thigh_{s}"] = {"rotation": cyc(L, lambda p, o=off: [lean - stride * math.sin(p + o), 0, 0])}
+        out[f"shin_{s}"] = {"rotation": cyc(L, lambda p, o=off: [lift + knee * max(0.0, math.cos(p + o - 0.35)) ** 1.5 +
+                                                                 0.15 * knee * max(0.0, math.sin(p + o - 1.6)), 0, 0])}
+        out[f"foot_{s}"] = {"rotation": cyc(L, lambda p, o=off: [-0.5 * stride * max(0.0, math.sin(p + o)) ** 2 +
+                                                                 0.9 * stride * max(0.0, -math.sin(p + o + 0.5)) ** 3 -
+                                                                 lean * 0.5 - lift * 0.6, 0, 0])}
+        out[f"toe_{s}"] = {"rotation": cyc(L, lambda p, o=off: [-1.3 * stride * max(0.0, -math.sin(p + o + 0.3)) ** 2 +
+                                                                0.4 * stride * max(0.0, math.cos(p + o)), 0, 0])}
+    return out
 
 
 def hang_hair(A):
     """El pelo cuelga: cuando la cabeza se inclina, los mechones giran al reves para seguir hacia abajo."""
     for an in A.values():
         bb = an["bones"]
-        chans = [bb[b]["rotation"] for b in ("chest", "neck", "head") if "rotation" in bb.get(b, {})]
+        chans = [bb[b]["rotation"] for b in ("hips", "torso", "chest", "neck", "neck2", "head") if "rotation" in bb.get(b, {})]
         if not chans:
             continue
         times = sorted({float(t) for c in chans for t in c})
+        if len(times) > 60:
+            step = max(1, len(times) // 60)
+            times = sorted(set(times[::step]) | {times[-1]})
         for hb, k in (("hair_back", 0.9), ("hair_l", 0.8), ("hair_r", 0.8)):
             if hb in bb:
                 continue
@@ -338,158 +427,327 @@ def hang_hair(A):
 
 def animations():
     A = {}
-    L = 4.0
-    A["idle"] = loop_anim(L, base({
-        "chest": {"rotation": kf(wave(L, [4, 0, 0], 1.5))},
-        "neck": {"rotation": kf(wave(L, [8, 0, 0], 2, 1))},
-        "head": {"rotation": kf([(0, [0, 0, 0]), (1.2, [0, 0, 0]), (2.0, [4, 10, 24]), (3.2, [4, 10, 24]), (L, [0, 0, 0])])},
-        "arm_r": {"rotation": kf(wave(L, [ARM, 0, -4], 3, 0, 8, 2))}, "arm_l": {"rotation": kf(wave(L, [ARM, 0, 4], 3, 2, 8, 2))},
-        **{f"finger{i}_{s}": {"rotation": kf(wave(L / 2, [8, 0, 0], 18, i * 1.2 + (0 if s == "r" else 3)))}
-           for i in range(4) for s in "rl"},
-    }))
+    s, c = math.sin, math.cos
+
+    # idle: respira (pecho y hombros), carga el peso de un lado a otro con la cadera y el pecho
+    # compensando; ladea la cabeza despacio, la mantiene y la endereza de un tiron; parpadea
+    L = 4.8
+    A["idle"] = loop_anim(L, {
+        "root": {"position": cyc(L, lambda p: [0.35 * s(p), 0.12 * c(2 * p), 0])},
+        "hips": {"rotation": cyc(L, lambda p: [0, 2 * s(p), 2.2 * s(p)])},
+        "torso": {"rotation": cyc(L, lambda p: [1 + 1.2 * s(2 * p), 0, -1.2 * s(p)])},
+        "chest": {"rotation": cyc(L, lambda p: [2 + 2.2 * s(2 * p), -1.5 * s(p), -1.6 * s(p)])},
+        **{f"shoulder_{sd}": {"rotation": cyc(L, lambda p, k=k: [0, 0, k * (1.5 + 2.0 * s(2 * p - 0.3))])}
+           for sd, k in (("r", -1), ("l", 1))},
+        "neck": {"rotation": cyc(L, lambda p: [-2 - 1.5 * s(2 * p + 0.4), 0, 0])},
+        "neck2": R((0, [2, 0, 0]), (1.3, [2, 0, 0]), (2.2, [-2, 4, 8]), (3.25, [-2, 4, 8]), (3.4, [4, -2, -3]), (3.9, [2, 0, 0]),
+                   (L, [2, 0, 0]), loop=True),
+        "head": R((0, [0, 0, 0]), (1.3, [0, 0, 0]), (2.3, [5, 9, 20]), (3.25, [5, 10, 22]), (3.38, [-3, -5, -8]),
+                  (3.7, [1, 1, 2]), (L, [0, 0, 0]), loop=True),
+        "jaw": {"rotation": cyc(L, lambda p: [2 + 1.5 * s(2 * p), 0, 0])},
+        "eye": {"scale": kf([(0, [1, 1, 1]), (1.0, [1, 1, 1]), (1.05, [1, 0.1, 1]), (1.12, [1, 1, 1]), (4.0, [1, 1, 1]),
+                             (4.04, [1, 0.15, 1]), (4.1, [1, 1, 1]), (L, [1, 1, 1])])},
+        "arm_r": {"rotation": cyc(L, lambda p: [ARM + 1.5 * s(p + 0.6), 0, -4 - 1.2 * s(p)])},
+        "arm_l": {"rotation": cyc(L, lambda p: [ARM - 1.5 * s(p + 0.6), 0, 4 - 1.2 * s(p)])},
+        "forearm_r": {"rotation": cyc(L, lambda p: [-6 + 2 * s(p - 0.4), 0, 0])},
+        "forearm_l": {"rotation": cyc(L, lambda p: [-6 - 2 * s(p - 0.4), 0, 0])},
+        "hand_r": {"rotation": cyc(L, lambda p: [3 + 2 * s(p - 1.0), 0, 0])},
+        "hand_l": {"rotation": cyc(L, lambda p: [3 - 2 * s(p - 1.0), 0, 0])},
+        # tamborileo: cada dedo se encoge y golpea, uno tras otro, dos veces por ciclo
+        **fingers(lambda i, sd: {"rotation": cyc(L, lambda p, i=i, sd=sd: [
+            6 + 26 * max(0.0, s(4 * p - i * 0.9 - (0 if sd == "r" else 2.2))) ** 6, 0, 0], 48)}),
+        **both("thumb", (0, [0, 0, 0])),
+        **gait(L, 0, 0),
+        "thigh_r": {"rotation": cyc(L, lambda p: [0, 0, -2.2 * s(p)])}, "thigh_l": {"rotation": cyc(L, lambda p: [0, 0, -2.2 * s(p)])},
+        "shin_r": {"rotation": cyc(L, lambda p: [1.5 + 1.5 * s(p), 0, 0])}, "shin_l": {"rotation": cyc(L, lambda p: [1.5 - 1.5 * s(p), 0, 0])},
+        "foot_r": {"rotation": cyc(L, lambda p: [-1.5 - 1.5 * s(p), 0, 0])}, "foot_l": {"rotation": cyc(L, lambda p: [-1.5 + 1.5 * s(p), 0, 0])},
+    })
+
+    # walk: fase 1, teatral; todo el cuerpo responde al paso
     L = 2.4
-    A["walk"] = loop_anim(L, base({
-        "root": {"position": kf(wave(L, [0, 0, 0], 0.8, 0, 8, 1))},
-        "chest": {"rotation": kf(wave(L, [8, 0, 0], 2))},
-        "head": {"rotation": kf(multi(L, [6, 0, 0], [2, 6, 8], [0, 1, 2]))},
-        "thigh_r": {"rotation": kf(wave(L, [0, 0, 0], 26))}, "thigh_l": {"rotation": kf(wave(L, [0, 0, 0], 26, 3.14))},
-        "shin_r": {"rotation": kf(wave(L, [16, 0, 0], 16, 1.6))}, "shin_l": {"rotation": kf(wave(L, [16, 0, 0], 16, 4.7))},
-        "arm_r": {"rotation": kf(wave(L, [ARM, 0, -4], 12, 3.14))}, "arm_l": {"rotation": kf(wave(L, [ARM, 0, 4], 12))},
-        "forearm_r": {"rotation": kf(wave(L, [-10, 0, 0], 6, 2.5))}, "forearm_l": {"rotation": kf(wave(L, [-10, 0, 0], 6, 5.6))},
-    }))
+    A["walk"] = loop_anim(L, {
+        "root": {"position": cyc(L, lambda p: [0.45 * s(p), 0.7 * c(2 * p) - 0.3, 0])},
+        "hips": {"rotation": cyc(L, lambda p: [2, 8 * s(p), 3.5 * c(p)])},
+        "torso": {"rotation": cyc(L, lambda p: [4 + c(2 * p), -3 * s(p), -1.5 * c(p)])},
+        "chest": {"rotation": cyc(L, lambda p: [6 + 1.5 * c(2 * p + 0.5), -10 * s(p), -2 * c(p)])},
+        "neck": {"rotation": cyc(L, lambda p: [-3 - 1.5 * c(2 * p + 1.0), 0, 0])},
+        "neck2": {"rotation": cyc(L, lambda p: [-1, 2 * s(p), 0])},
+        "head": {"rotation": cyc(L, lambda p: [3 + 2 * c(2 * p + 1.4), 4 * s(p), 7 + 3 * c(p)])},
+        "jaw": {"rotation": cyc(L, lambda p: [3 + 2 * s(2 * p), 0, 0])},
+        **{f"shoulder_{sd}": {"rotation": cyc(L, lambda p: [0, 0, 2.5 * s(p)])} for sd in "rl"},
+        "arm_r": {"rotation": cyc(L, lambda p: [ARM + 18 * s(p), 0, -5])},
+        "arm_l": {"rotation": cyc(L, lambda p: [ARM - 18 * s(p), 0, 5])},
+        "forearm_r": {"rotation": cyc(L, lambda p: [-11 + 9 * s(p - 0.9), 0, 0])},
+        "forearm_l": {"rotation": cyc(L, lambda p: [-11 - 9 * s(p - 0.9), 0, 0])},
+        "hand_r": {"rotation": cyc(L, lambda p: [4 + 8 * s(p - 1.7), 0, 0])},
+        "hand_l": {"rotation": cyc(L, lambda p: [4 - 8 * s(p - 1.7), 0, 0])},
+        **fingers(lambda i, sd: {"rotation": cyc(L, lambda p, i=i, k=(1 if sd == "r" else -1): [
+            8 + 9 * k * s(p - 2.3 - i * 0.25), 0, 0])}),
+        **gait(L, 22, 46, 4),
+    })
+
+    # run: fase 3, encorvado, zancadas largas, brazos por delante; la cabeza no se aparta de ti
     L = 0.9
-    A["run"] = loop_anim(L, base({
-        "root": {"position": kf(wave(L, [0, -6, 0], 1.4, 0, 8, 1))},
-        "hips": {"rotation": kf([(0, [8, 0, 0])])},
-        "torso": {"rotation": kf(wave(L, [26, 0, 0], 4))},
-        "chest": {"rotation": kf(wave(L, [16, 0, 0], 3, 1))},
-        "neck": {"rotation": kf([(0, [-30, 0, 0])])},
-        "head": {"rotation": kf(multi(L, [-12, 0, 0], [5, 8, 10], [0, 1, 2]))},
-        "thigh_r": {"rotation": kf(wave(L, [-30, 0, 0], 40))}, "thigh_l": {"rotation": kf(wave(L, [-30, 0, 0], 40, 3.14))},
-        "shin_r": {"rotation": kf(wave(L, [45, 0, 0], 30, 1.6))}, "shin_l": {"rotation": kf(wave(L, [45, 0, 0], 30, 4.7))},
-        "arm_r": {"rotation": kf(wave(L, [-70, -10, -10], 30, 3.14))}, "arm_l": {"rotation": kf(wave(L, [-70, 10, 10], 30))},
-        "forearm_r": {"rotation": kf([(0, [-20, 0, 0])])}, "forearm_l": {"rotation": kf([(0, [-20, 0, 0])])},
-        **{f"finger{i}_{s}": {"rotation": kf([(0, [-25, 0, (i - 1.5) * 8 * (1 if s == "r" else -1)])])} for i in range(4) for s in "rl"},
-    }))
+    A["run"] = loop_anim(L, {
+        "root": {"position": cyc(L, lambda p: [0.6 * s(p), -5 + 1.8 * c(2 * p), 0])},
+        "hips": {"rotation": cyc(L, lambda p: [10, 10 * s(p), 4 * c(p)])},
+        "torso": {"rotation": cyc(L, lambda p: [22 + 3 * c(2 * p), -4 * s(p), 0])},
+        "chest": {"rotation": cyc(L, lambda p: [14 + 4 * c(2 * p - 0.6), -13 * s(p), -3 * c(p)])},
+        "neck": {"rotation": kf([(0, [-26, 0, 0])])},
+        "neck2": {"rotation": cyc(L, lambda p: [-14 - 3 * c(2 * p - 1.2), 0, 0])},
+        "head": {"rotation": cyc(L, lambda p: [-12 - 2 * c(2 * p - 1.6), 7 * s(p), 4 * c(p)])},
+        "jaw": {"rotation": cyc(L, lambda p: [18 + 7 * s(2 * p), 0, 0])},
+        **{f"shoulder_{sd}": {"rotation": cyc(L, lambda p, k=k: [0, 0, k * (4 + 3 * s(p) * k)])}
+           for sd, k in (("r", -1), ("l", 1))},
+        "arm_r": {"rotation": cyc(L, lambda p: [-92 + 24 * s(p), -10, -12])},
+        "arm_l": {"rotation": cyc(L, lambda p: [-92 - 24 * s(p), 10, 12])},
+        "forearm_r": {"rotation": cyc(L, lambda p: [-22 + 14 * s(p - 1.0), 0, 0])},
+        "forearm_l": {"rotation": cyc(L, lambda p: [-22 - 14 * s(p - 1.0), 0, 0])},
+        "hand_r": {"rotation": cyc(L, lambda p: [-12 + 10 * s(p - 1.8), 0, 0])},
+        "hand_l": {"rotation": cyc(L, lambda p: [-12 - 10 * s(p - 1.8), 0, 0])},
+        **fingers(lambda i, sd: {"rotation": cyc(L, lambda p, i=i, k=(1 if sd == "r" else -1): [
+            -26 + 12 * s(p * 2 - 2.2 - i * 0.4), 0, (i - 1.5) * 9 * k])}),
+        **both("thumb", (0, [-20, 0, -15])),
+        **gait(L, 40, 75, 18, -22),
+    })
+
+    # intro (5 s): encorvado y a oscuras; se enciende el ojo (cabeceo), se endereza de abajo arriba
+    # (cintura, pecho, cuello, cabeza: cada tramo despues del anterior), la sonrisa se abre y abre los
+    # brazos; los dedos crujen uno a uno
     L = 5.0
-    A["intro"] = loop_anim(L, base({
-        "neck": {"rotation": kf([(0, [40, 0, 0]), (2.6, [40, 0, 0]), (3.4, [0, 0, 0]), (L, [0, 0, 0])])},
-        "head": {"rotation": kf([(0, [30, 0, 0]), (2.6, [30, 0, 0]), (3.4, [0, 0, 28]), (4.2, [0, 0, 18]), (L, [0, 0, 0])])},
+    A["intro"] = loop_anim(L, {
+        "torso": R((0, [14, 0, 0]), (2.6, [14, 0, 0]), (3.1, [-2, 0, 0]), (3.6, [0, 0, 0]), (L, [0, 0, 0])),
+        "chest": R((0, [22, 0, 4]), (2.7, [22, 0, 4]), (3.25, [-5, 0, 0]), (3.8, [1, 0, 0]), (L, [0, 0, 0])),
+        "neck": R((0, [30, 0, 0]), (2.8, [30, 0, 0]), (3.35, [-6, 0, 0]), (3.9, [0, 0, 0]), (L, [0, 0, 0])),
+        "neck2": R((0, [24, 0, 0]), (2.9, [24, 0, 0]), (3.45, [-8, 0, 6]), (4.0, [0, 0, 4]), (L, [0, 0, 0])),
+        "head": R((0, [20, 0, 6]), (1.9, [20, 0, 6]), (2.05, [14, 0, 2]), (2.3, [20, 0, 6]), (3.0, [20, 0, 6]),
+                  (3.55, [-4, 6, 30]), (4.3, [0, 4, 20]), (L, [0, 0, 4])),
         "eye": {"scale": kf([(0, [0, 0, 1]), (1.6, [0, 0, 1]), (1.7, [1, 0.2, 1]), (1.9, [1, 1, 1]), (2.1, [1, 0.1, 1]),
                              (2.2, [1, 1, 1]), (L, [1, 1, 1])])},
-        "smile": {"scale": kf([(0, [0.2, 0, 1]), (2.6, [0.2, 0, 1]), (3.0, [0.5, 0.15, 1]), (3.6, [1, 1, 1]),
-                               (4.2, [1.15, 1.2, 1]), (L, [1, 1, 1])])},
-        "jaw": {"rotation": kf([(0, [0, 0, 0]), (3.0, [0, 0, 0]), (3.6, [18, 0, 0]), (4.4, [26, 0, 0]), (L, [4, 0, 0])])},
-        "arm_r": {"rotation": kf([(0, [ARM, 0, -2]), (3.4, [ARM, 0, -2]), (4.2, [ARM, 0, -20]), (L, [ARM, 0, -4])])},
-        "arm_l": {"rotation": kf([(0, [ARM, 0, 2]), (3.4, [ARM, 0, 2]), (4.2, [ARM, 0, 20]), (L, [ARM, 0, 4])])},
-        **{f"finger{i}_{s}": {"rotation": kf([(0, [40, 0, 0]), (3.6, [40, 0, 0]), (4.2, [-30, 0, (i - 1.5) * 10 * (1 if s == "r" else -1)]),
-                                               (L, [6, 0, 0])])} for i in range(4) for s in "rl"},
-    }), loop="hold_on_last_frame")
+        "smile": {"scale": smooth([(0, [0.2, 0, 1]), (2.6, [0.2, 0, 1]), (3.0, [0.5, 0.15, 1]), (3.6, [1, 1, 1]),
+                                   (4.2, [1.15, 1.2, 1]), (L, [1, 1, 1])])},
+        "jaw": R((0, [0, 0, 0]), (3.0, [0, 0, 0]), (3.6, [18, 0, 0]), (4.4, [26, 0, 0]), (L, [4, 0, 0])),
+        **both("shoulder", (0, [0, 0, 6]), (2.8, [0, 0, 6]), (3.3, [0, 0, -5]), (3.9, [0, 0, 0]), (L, [0, 0, 0])),
+        **both("arm", (0, [-32, 0, -1]), (2.6, [-32, 0, -1]), (3.3, [ARM, 0, -1]), (3.4, [ARM, 0, -1]), (4.2, [ARM - 6, 0, -24]), (4.6, [ARM - 4, 0, -20]),
+               (L, [ARM, 0, -5])),
+        **both("forearm", (0, [-4, 0, 0]), (3.4, [-4, 0, 0]), (4.25, [-18, 0, 0]), (L, [-6, 0, 0])),
+        **both("hand", (0, [0, 0, 0]), (3.5, [0, 0, 0]), (4.2, [-22, 0, 0]), (L, [2, 0, 0])),
+        **fingers(lambda i, sd: R(*[(t, [v[0], 0, v[2] * (1 if sd == "r" else -1)]) for t, v in (
+            (0, [40, 0, 0]), (3.7 + i * 0.12, [40, 0, 0]), (3.82 + i * 0.12, [-38, 0, (i - 1.5) * 10]),
+            (4.6, [-25, 0, (i - 1.5) * 8]), (L, [6, 0, 0]))])),
+        **both("thumb", (0, [30, 0, 0]), (3.65, [30, 0, 0]), (3.8, [-20, 0, -20]), (L, [0, 0, 0])),
+        **both("thigh", (0, [-4, 0, 0]), (2.6, [-4, 0, 0]), (3.2, [0, 0, 0])),
+        **both("shin", (0, [8, 0, 0]), (2.6, [8, 0, 0]), (3.2, [0, 0, 0])),
+        **both("foot", (0, [-4, 0, 0]), (2.6, [-4, 0, 0]), (3.2, [0, 0, 0])),
+        "root": {"position": smooth([(0, [0, -0.6, 0]), (2.6, [0, -0.6, 0]), (3.2, [0, 0.3, 0]), (3.7, [0, 0, 0])])},
+    }, loop="hold_on_last_frame")
+
+    # scream (2 s): coge aire (se agacha y se cierra), estalla hacia atras; la cabeza tiembla
     L = 2.0
-    A["scream"] = loop_anim(L, base({
-        "chest": {"rotation": kf([(0, [0, 0, 0]), (0.3, [-10, 0, 0]), (1.6, [-12, 0, 0]), (L, [0, 0, 0])])},
-        "neck": {"rotation": kf([(0, [0, 0, 0]), (0.3, [-12, 0, 0]), (1.6, [-14, 0, 0]), (L, [0, 0, 0])])},
-        "head": {"rotation": kf([(0, [0, 0, 0]), (0.3, [-14, 0, 0]), (0.4, [-14, 6, 4]), (0.5, [-14, -6, -4]), (0.6, [-14, 6, 4]),
-                                 (0.7, [-14, -6, -4]), (1.6, [-14, 0, 0]), (L, [0, 0, 0])])},
-        "jaw": {"rotation": kf([(0, [0, 0, 0]), (0.3, [45, 0, 0]), (1.6, [45, 0, 0]), (L, [0, 0, 0])])},
-        "smile": {"scale": kf([(0, [1, 1, 1]), (0.3, [1.2, 1.8, 1]), (1.6, [1.2, 1.8, 1]), (L, [1, 1, 1])])},
-        "arm_r": {"rotation": kf([(0, [ARM, 0, -4]), (0.3, [-20, 0, -80]), (1.6, [-20, 0, -85]), (L, [ARM, 0, -4])])},
-        "arm_l": {"rotation": kf([(0, [ARM, 0, 4]), (0.3, [-20, 0, 80]), (1.6, [-20, 0, 85]), (L, [ARM, 0, 4])])},
-        **{f"finger{i}_{s}": {"rotation": kf([(0, [6, 0, 0]), (0.3, [-35, 0, 0]), (1.6, [-35, 0, 0]), (L, [6, 0, 0])])}
-           for i in range(4) for s in "rl"},
-    }), loop=False)
-    A["summon"] = loop_anim(L, base({
-        "chest": {"rotation": kf([(0, [0, 0, 0]), (0.4, [-8, 0, 0]), (1.6, [-8, 0, 0]), (L, [0, 0, 0])])},
-        "head": {"rotation": kf([(0, [0, 0, 0]), (0.4, [-24, 0, 0]), (1.6, [-24, 0, 0]), (L, [0, 0, 0])])},
-        "arm_r": {"rotation": kf([(0, [ARM, 0, -4]), (0.5, [-160, 0, -25]), (1.6, [-165, 0, -30]), (L, [ARM, 0, -4])])},
-        "arm_l": {"rotation": kf([(0, [ARM, 0, 4]), (0.5, [-160, 0, 25]), (1.6, [-165, 0, 30]), (L, [ARM, 0, 4])])},
-        **{f"finger{i}_{s}": {"rotation": kf(wave(L, [10, 0, 0], 40, i * 1.5 + (0 if s == "r" else 0.8), 16))}
-           for i in range(4) for s in "rl"},
-    }), loop=False)
+    shake = [(0.5 + k * 0.1, [-14, 7 * (-1) ** k, 5 * (-1) ** k]) for k in range(9)]
+    A["scream"] = loop_anim(L, {
+        "root": {"position": smooth([(0, [0, 0, 0]), (0.22, [0, -1.2, 0]), (0.4, [0, 0.4, 0]), (1.6, [0, 0.2, 0]), (L, [0, 0, 0])])},
+        "torso": R((0, [0, 0, 0]), (0.22, [8, 0, 0]), (0.4, [-6, 0, 0]), (1.6, [-5, 0, 0]), (L, [0, 0, 0])),
+        "chest": R((0, [0, 0, 0]), (0.22, [14, 0, 0]), (0.4, [-14, 0, 0]), (1.6, [-12, 0, 0]), (L, [0, 0, 0])),
+        "neck": R((0, [0, 0, 0]), (0.22, [10, 0, 0]), (0.4, [-12, 0, 0]), (1.6, [-10, 0, 0]), (L, [0, 0, 0])),
+        "neck2": R((0, [0, 0, 0]), (0.22, [8, 0, 0]), (0.4, [-10, 0, 0]), (1.6, [-8, 0, 0]), (L, [0, 0, 0])),
+        "head": R((0, [0, 0, 0]), (0.22, [14, 0, 0]), (0.4, [-14, 0, 0]), *shake, (1.6, [-12, 0, 0]), (L, [0, 0, 0])),
+        "jaw": R((0, [0, 0, 0]), (0.22, [0, 0, 0]), (0.35, [50, 0, 0]), (1.0, [44, 0, 0]), (1.6, [48, 0, 0]), (L, [0, 0, 0])),
+        "smile": {"scale": smooth([(0, [1, 1, 1]), (0.22, [0.9, 0.7, 1]), (0.35, [1.25, 1.9, 1]), (1.6, [1.2, 1.8, 1]),
+                                   (L, [1, 1, 1])])},
+        "eye": {"scale": smooth([(0, [1, 1, 1]), (0.22, [1, 0.5, 1]), (0.35, [1.25, 1.25, 1]), (1.6, [1.2, 1.2, 1]),
+                                 (L, [1, 1, 1])])},
+        **both("shoulder", (0, [0, 0, 0]), (0.22, [0, 0, 3]), (0.4, [0, 0, -8]), (1.6, [0, 0, -7]), (L, [0, 0, 0])),
+        **both("arm", (0, [ARM, 0, -4]), (0.22, [10, 0, -2]), (0.42, [-24, 0, -88]), (1.6, [-20, 0, -84]), (L, [ARM, 0, -4])),
+        **both("forearm", (0, [-6, 0, 0]), (0.22, [-30, 0, 0]), (0.48, [-4, 0, 0]), (1.6, [-8, 0, 0]), (L, [-6, 0, 0])),
+        **both("hand", (0, [0, 0, 0]), (0.22, [20, 0, 0]), (0.5, [-30, 0, 0]), (1.6, [-25, 0, 0]), (L, [0, 0, 0])),
+        **fingers(lambda i, sd: R(*[(t, [v, 0, sp * (i - 1.5) * (1 if sd == "r" else -1)]) for t, v, sp in (
+            (0, 6, 0), (0.22, 50, 0), (0.45, -40, 10), (1.6, -38, 10), (L, 6, 0))])),
+        **both("thumb", (0, [0, 0, 0]), (0.22, [30, 0, 0]), (0.45, [-30, 0, -25]), (1.6, [-30, 0, -25]), (L, [0, 0, 0])),
+        **both("thigh", (0, [0, 0, 0]), (0.22, [-8, 0, 0]), (0.4, [0, 0, -3]), (1.6, [0, 0, -3]), (L, [0, 0, 0])),
+        **both("shin", (0, [0, 0, 0]), (0.22, [14, 0, 0]), (0.4, [0, 0, 0])),
+        **both("foot", (0, [0, 0, 0]), (0.22, [-6, 0, 0]), (0.4, [0, 0, 3]), (1.6, [0, 0, 3]), (L, [0, 0, 0])),
+    }, loop=False)
+
+    # summon (2 s): se agacha un instante y alza los brazos; el antebrazo y la mano llegan despues
+    A["summon"] = loop_anim(L, {
+        "root": {"position": smooth([(0, [0, 0, 0]), (0.3, [0, -0.8, 0]), (0.6, [0, 0.3, 0]), (1.6, [0, 0.3, 0]), (L, [0, 0, 0])])},
+        "chest": R((0, [0, 0, 0]), (0.3, [6, 0, 0]), (0.6, [-12, 0, 0]), (1.6, [-10, 0, 0]), (L, [0, 0, 0])),
+        "neck2": R((0, [0, 0, 0]), (0.3, [6, 0, 0]), (0.65, [-8, 0, 0]), (1.6, [-8, 0, 4]), (L, [0, 0, 0])),
+        "head": R((0, [0, 0, 0]), (0.3, [10, 0, 0]), (0.7, [-22, 0, 0]), (1.6, [-20, 0, 10]), (L, [0, 0, 0])),
+        "jaw": R((0, [2, 0, 0]), (0.6, [20, 0, 0]), (1.6, [26, 0, 0]), (L, [2, 0, 0])),
+        "eye": {"scale": smooth([(0, [1, 1, 1]), (0.6, [1.3, 1.3, 1]), (1.6, [1.2, 1.2, 1]), (L, [1, 1, 1])])},
+        **both("shoulder", (0, [0, 0, 0]), (0.6, [0, 0, -9]), (1.6, [0, 0, -9]), (L, [0, 0, 0])),
+        **both("arm", (0, [ARM, 0, -4]), (0.3, [14, 0, -8]), (0.7, [-160, 0, -24]), (1.6, [-166, 0, -30]), (L, [ARM, 0, -4])),
+        **both("forearm", (0, [-6, 0, 0]), (0.3, [-6, 0, 0]), (0.55, [-50, 0, 0]), (0.85, [-8, 0, 0]), (1.6, [-6, 0, 0]),
+               (L, [-6, 0, 0])),
+        **both("hand", (0, [0, 0, 0]), (0.55, [30, 0, 0]), (0.9, [-20, 0, 0]), (1.6, [-15, 0, 0]), (L, [0, 0, 0])),
+        **fingers(lambda i, sd: {"rotation": kf(wave(L, [10, 0, 0], 40, i * 1.5 + (0 if sd == "r" else 0.8), 16))}),
+        **both("thumb", (0, [0, 0, 0]), (0.7, [-25, 0, -20]), (1.6, [-25, 0, -20]), (L, [0, 0, 0])),
+        **both("thigh", (0, [0, 0, 0]), (0.3, [-6, 0, 0]), (0.6, [0, 0, 0])),
+        **both("shin", (0, [0, 0, 0]), (0.3, [10, 0, 0]), (0.6, [0, 0, 0])),
+        **both("foot", (0, [0, 0, 0]), (0.3, [-4, 0, 0]), (0.6, [0, 0, 0])),
+    }, loop=False)
+
+    # retreat: se tapa la cara, encogido y temblando
     L = 0.8
-    A["retreat"] = loop_anim(L, base({
-        "torso": {"rotation": kf(wave(L, [-12, 0, 0], 3))},
-        "chest": {"rotation": kf(wave(L, [20, 0, 0], 3, 1))},
-        "head": {"rotation": kf(multi(L, [25, 0, 0], [5, 12, 8], [0, 1, 2]))},
-        "arm_r": {"rotation": kf([(0, [-140, -35, 10])])}, "arm_l": {"rotation": kf([(0, [-140, 35, -10])])},
-        "forearm_r": {"rotation": kf(wave(L, [-95, 0, 0], 8))}, "forearm_l": {"rotation": kf(wave(L, [-95, 0, 0], 8, 1))},
+    A["retreat"] = loop_anim(L, {
+        "root": {"position": cyc(L, lambda p: [0.15 * s(5 * p), -2.2 + 0.15 * s(3 * p), 0])},
+        "hips": {"rotation": kf([(0, [6, 0, 0])])},
+        "torso": {"rotation": cyc(L, lambda p: [-12 + 3 * s(p), 0, 1.2 * s(4 * p)])},
+        "chest": {"rotation": cyc(L, lambda p: [22 + 3 * s(p + 1), 1.5 * s(5 * p), 1.5 * s(3 * p)])},
+        "neck": {"rotation": kf([(0, [10, 0, 0])])},
+        "neck2": {"rotation": kf([(0, [8, 0, 0])])},
+        "head": {"rotation": cyc(L, lambda p: [22 + 4 * s(p), 8 * s(3 * p), 6 * s(5 * p + 1)])},
         "eye": {"scale": kf([(0, [1, 0.25, 1])])},
-        "thigh_r": {"rotation": kf([(0, [-14, 0, 0])])}, "thigh_l": {"rotation": kf([(0, [-14, 0, 0])])},
-        "shin_r": {"rotation": kf([(0, [26, 0, 0])])}, "shin_l": {"rotation": kf([(0, [26, 0, 0])])},
-        "root": {"position": kf([(0, [0, -2, 0])])},
-    }))
+        **{f"shoulder_{sd}": {"rotation": cyc(L, lambda p, k=k: [0, 0, k * (8 + 1.5 * s(4 * p))])} for sd, k in (("r", -1), ("l", 1))},
+        "arm_r": {"rotation": cyc(L, lambda p: [-72 + 3 * s(3 * p), -14, 6])},
+        "arm_l": {"rotation": cyc(L, lambda p: [-72 + 3 * s(3 * p + 1), 14, -6])},
+        "forearm_r": {"rotation": cyc(L, lambda p: [-146 + 5 * s(p), 0, 0])},
+        "forearm_l": {"rotation": cyc(L, lambda p: [-146 + 5 * s(p + 1), 0, 0])},
+        **both("hand", (0, [-18, 0, 0])),
+        **fingers(lambda i, sd: {"rotation": cyc(L, lambda p, i=i: [38 + 10 * s(4 * p + i), 0, 0])}),
+        **both("thigh", (0, [-16, 0, 0])), **both("shin", (0, [30, 0, 0])), **both("foot", (0, [-14, 0, 0])),
+    })
+
+    # smear_in (1 s): se aplasta contra la pared; la cabeza se tumba y los brazos se abren pegados
     L = 1.0
-    A["smear_in"] = loop_anim(L, base({
-        "root": {"scale": kf([(0, [1, 1, 1]), (0.4, [1.3, 1.05, 0.5]), (0.8, [1.8, 0.7, 0.05]), (L, [0.1, 0.1, 0.02])]),
-                 "position": kf([(0, [0, 0, 0]), (L, [0, 0, 6])])},
-        "arm_r": {"rotation": kf([(0, [ARM, 0, -4]), (0.6, [0, 0, -70]), (L, [0, 0, -90])])},
-        "arm_l": {"rotation": kf([(0, [ARM, 0, 4]), (0.6, [0, 0, 70]), (L, [0, 0, 90])])},
-    }), loop="hold_on_last_frame")
-    A["smear_out"] = loop_anim(L, base({
-        "root": {"scale": kf([(0, [1.8, 0.7, 0.05]), (0.5, [1.3, 1.05, 0.5]), (L, [1, 1, 1])]),
-                 "position": kf([(0, [0, 0, 6]), (L, [0, 0, 0])])},
-        "arm_r": {"rotation": kf([(0, [0, 0, -90]), (0.6, [-20, 0, -40]), (L, [ARM, 0, -4])])},
-        "arm_l": {"rotation": kf([(0, [0, 0, 90]), (0.6, [-20, 0, 40]), (L, [ARM, 0, 4])])},
-        "neck": {"rotation": kf([(0, [30, 0, 0]), (0.7, [10, 0, 0]), (L, [0, 0, 0])])},
-        "head": {"rotation": kf([(0, [0, 0, 60]), (0.7, [0, 0, 30]), (L, [0, 0, 0])])},
-    }), loop="hold_on_last_frame")
-    L = 1.0
-    A["grab"] = loop_anim(L, base({
-        "chest": {"rotation": kf(wave(L, [22, 0, 0], 3))},
-        "neck": {"rotation": kf([(0, [20, 0, 0])])},
-        "head": {"rotation": kf(multi(L, [10, 0, 0], [4, 10, 14], [0, 1, 2]))},
-        "jaw": {"rotation": kf(wave(L, [14, 0, 0], 8, 0, 8))},
-        "arm_r": {"rotation": kf(wave(L, [-62, -20, -6], 5))}, "arm_l": {"rotation": kf(wave(L, [-62, 20, 6], 5, 1))},
-        "forearm_r": {"rotation": kf([(0, [-50, 0, 0])])}, "forearm_l": {"rotation": kf([(0, [-50, 0, 0])])},
-        **{f"finger{i}_{s}": {"rotation": kf([(0, [65, 0, 0])])} for i in range(4) for s in "rl"},
-    }))
-    # remate: la levanta del cuello hasta su cara (0-1,2), abre la sonrisa enorme (1,2-2,0) y la parte (2,2)
+    A["smear_in"] = loop_anim(L, {
+        "root": {"scale": smooth([(0, [1, 1, 1]), (0.4, [1.3, 1.05, 0.5]), (0.8, [1.8, 0.7, 0.05]), (L, [0.1, 0.1, 0.02])]),
+                 "position": smooth([(0, [0, 0, 0]), (L, [0, 0, 6])])},
+        "chest": R((0, [0, 0, 0]), (0.5, [-10, 0, 0]), (L, [-14, 0, 0])),
+        "neck2": R((0, [0, 0, 0]), (0.6, [-10, 0, 30]), (L, [-10, 0, 40])),
+        "head": R((0, [0, 0, 0]), (0.6, [-6, 0, 30]), (L, [-10, 0, 40])),
+        "jaw": R((0, [4, 0, 0]), (0.5, [30, 0, 0]), (L, [40, 0, 0])),
+        **both("shoulder", (0, [0, 0, 0]), (0.6, [0, 0, -10])),
+        **both("arm", (0, [ARM, 0, -4]), (0.6, [0, 0, -70]), (L, [0, 0, -90])),
+        **both("forearm", (0, [-6, 0, 0]), (0.6, [0, 0, 0])),
+        **fingers(lambda i, sd: R((0, [6, 0, 0]), (0.6, [-30, 0, (i - 1.5) * 12 * (1 if sd == "r" else -1)]))),
+        **both("thigh", (0, [0, 0, 0]), (0.6, [0, 0, -14])),
+        **both("foot", (0, [0, 0, 0]), (0.6, [0, 0, 14])),
+    }, loop="hold_on_last_frame")
+    A["smear_out"] = loop_anim(L, {
+        "root": {"scale": smooth([(0, [1.8, 0.7, 0.05]), (0.5, [1.3, 1.05, 0.5]), (L, [1, 1, 1])]),
+                 "position": smooth([(0, [0, 0, 6]), (L, [0, 0, 0])])},
+        "chest": R((0, [-14, 0, 0]), (0.5, [6, 0, 0]), (L, [0, 0, 0])),
+        "neck": R((0, [30, 0, 0]), (0.7, [10, 0, 0]), (L, [0, 0, 0])),
+        "neck2": R((0, [10, 0, 30]), (0.75, [6, 0, 10]), (L, [0, 0, 0])),
+        "head": R((0, [0, 0, 60]), (0.7, [0, 0, 30]), (0.85, [0, 0, -6]), (L, [0, 0, 0])),
+        **both("shoulder", (0, [0, 0, -10]), (0.6, [0, 0, 4]), (L, [0, 0, 0])),
+        **both("arm", (0, [0, 0, -90]), (0.6, [-20, 0, -40]), (L, [ARM, 0, -4])),
+        **both("forearm", (0, [0, 0, 0]), (0.5, [-40, 0, 0]), (L, [-6, 0, 0])),
+        **both("hand", (0, [0, 0, 0]), (0.6, [30, 0, 0]), (L, [0, 0, 0])),
+        **fingers(lambda i, sd: R((0, [-30, 0, 0]), (0.55 + i * 0.06, [50, 0, 0]), (L, [6, 0, 0]))),
+        **both("thigh", (0, [0, 0, -14]), (0.7, [0, 0, 0])),
+        **both("foot", (0, [0, 0, 14]), (0.7, [0, 0, 0])),
+    }, loop="hold_on_last_frame")
+
+    # grab: la tiene cogida a la altura de la cara; la aprieta a pulsos, la examina ladeando la cabeza
+    L = 1.6
+    A["grab"] = loop_anim(L, {
+        "root": {"position": cyc(L, lambda p: [0, -0.6 + 0.2 * s(p), 0])},
+        "hips": {"rotation": kf([(0, [4, 0, 0])])},
+        "torso": {"rotation": cyc(L, lambda p: [6 + 1.5 * s(p), 0, 0])},
+        "chest": {"rotation": cyc(L, lambda p: [14 + 2 * s(p + 0.5), 2 * s(p), 0])},
+        "neck": {"rotation": kf([(0, [16, 0, 0])])},
+        "neck2": {"rotation": cyc(L, lambda p: [-4, 4 * s(p + 1), 6 * s(p)])},
+        "head": {"rotation": cyc(L, lambda p: [8 + 3 * s(2 * p), 8 * s(p + 1), 16 * s(p)])},
+        "jaw": {"rotation": cyc(L, lambda p: [14 + 9 * s(4 * p), 0, 0], 32)},
+        "smile": {"scale": cyc(L, lambda p: [1.05 + 0.05 * s(2 * p), 1.1 + 0.1 * s(2 * p), 1])},
+        **both("shoulder", (0, [0, 0, -4])),
+        "arm_r": {"rotation": cyc(L, lambda p: [-70 + 2 * s(p), -20, -6])},
+        "arm_l": {"rotation": cyc(L, lambda p: [-70 + 2 * s(p + 0.6), 20, 6])},
+        "forearm_r": {"rotation": cyc(L, lambda p: [-50 + 4 * s(p - 0.8), 0, 0])},
+        "forearm_l": {"rotation": cyc(L, lambda p: [-50 + 4 * s(p - 0.2), 0, 0])},
+        "hand_r": {"rotation": cyc(L, lambda p: [8 + 3 * s(p - 1.4), 0, 0])},
+        "hand_l": {"rotation": cyc(L, lambda p: [8 + 3 * s(p - 0.8), 0, 0])},
+        **fingers(lambda i, sd: {"rotation": cyc(L, lambda p, i=i: [66 + 8 * max(0.0, s(2 * p - i * 0.4)) ** 2, 0, 0])}),
+        **both("thumb", (0, [40, 0, 10])),
+        **both("thigh", (0, [-4, 0, -5])), **both("shin", (0, [8, 0, 0])), **both("foot", (0, [-4, 0, 5])),
+    })
+
+    # remate: la levanta del cuello hasta su cara, de puntillas (0-1,2); abre la sonrisa enorme
+    # (1,2-1,9), echa la cabeza atras para coger impulso (1,9-2,1) y la parte (2,25)
     L = 3.5
-    A["execute_smiley"] = loop_anim(L, base({
-        "chest": {"rotation": kf([(0, [22, 0, 0]), (1.2, [6, 0, 0]), (2.1, [10, 0, 0]), (2.25, [26, 0, 0]), (L, [20, 0, 0])])},
-        "neck": {"rotation": kf([(0, [20, 0, 0]), (1.2, [0, 0, 0]), (2.0, [-6, 0, 0]), (2.25, [24, 0, 0]), (L, [18, 0, 0])])},
-        "head": {"rotation": kf([(0, [10, 0, 0]), (1.2, [0, 0, 20]), (1.9, [-6, 0, 30]), (2.25, [16, 0, 4]), (L, [12, 0, 10])])},
-        "jaw": {"rotation": kf([(0, [10, 0, 0]), (1.2, [6, 0, 0]), (1.9, [50, 0, 0]), (2.2, [55, 0, 0]), (2.3, [6, 0, 0]),
-                                (L, [12, 0, 0])])},
-        "smile": {"scale": kf([(0, [1, 1, 1]), (1.2, [1, 1, 1]), (1.9, [1.4, 2.4, 1]), (2.2, [1.4, 2.4, 1]), (2.3, [1.05, 1, 1]),
-                               (L, [1.1, 1.1, 1])])},
-        "arm_r": {"rotation": kf([(0, [-62, -20, -6]), (1.2, [-110, -18, -4]), (2.1, [-112, -18, -4]), (2.25, [-60, -40, -30]),
-                                  (L, [-40, -30, -30])])},
-        "arm_l": {"rotation": kf([(0, [-62, 20, 6]), (1.2, [-110, 18, 4]), (2.1, [-112, 18, 4]), (2.25, [-60, 40, 30]),
-                                  (L, [-40, 30, 30])])},
-        "forearm_r": {"rotation": kf([(0, [-50, 0, 0]), (1.2, [-20, 0, 0]), (2.25, [-10, 0, 0]), (L, [-10, 0, 0])])},
-        "forearm_l": {"rotation": kf([(0, [-50, 0, 0]), (1.2, [-20, 0, 0]), (2.25, [-10, 0, 0]), (L, [-10, 0, 0])])},
-        **{f"finger{i}_{s}": {"rotation": kf([(0, [65, 0, 0]), (2.1, [70, 0, 0]), (2.25, [-20, 0, 0]), (L, [10, 0, 0])])}
-           for i in range(4) for s in "rl"},
-    }), loop="hold_on_last_frame")
+    A["execute_smiley"] = loop_anim(L, {
+        "root": {"position": smooth([(0, [0, -0.6, 0]), (1.2, [0, 1.0, 0]), (2.1, [0, 1.0, 0]), (2.25, [0, -0.8, 0]),
+                                     (L, [0, -0.5, 0])])},
+        "hips": R((0, [4, 0, 0]), (1.2, [0, 0, 0]), (2.1, [0, 0, 0]), (2.25, [4, 0, 0])),
+        "torso": R((0, [7, 0, 0]), (1.2, [0, 0, 0]), (2.1, [-4, 0, 0]), (2.25, [10, 0, 0]), (L, [8, 0, 0])),
+        "chest": R((0, [15, 0, 0]), (1.2, [6, 0, 0]), (2.1, [6, 0, 0]), (2.25, [24, 0, 0]), (L, [18, 0, 0])),
+        "neck": R((0, [16, 0, 0]), (1.2, [0, 0, 0]), (2.0, [-6, 0, 0]), (2.25, [22, 0, 0]), (L, [16, 0, 0])),
+        "neck2": R((0, [-4, 0, 0]), (1.2, [-6, 0, 0]), (1.9, [-10, 0, 6]), (2.25, [14, 0, 0]), (L, [10, 0, 0])),
+        "head": R((0, [8, 0, 0]), (1.2, [0, 0, 20]), (1.9, [-6, 0, 30]), (2.08, [-12, 0, 26]), (2.25, [16, 0, 4]),
+                  (L, [12, 0, 10])),
+        "jaw": R((0, [10, 0, 0]), (1.2, [6, 0, 0]), (1.9, [50, 0, 0]), (2.15, [58, 0, 0]), (2.27, [6, 0, 0]), (L, [12, 0, 0])),
+        "smile": {"scale": smooth([(0, [1, 1, 1]), (1.2, [1, 1, 1]), (1.9, [1.4, 2.4, 1]), (2.2, [1.45, 2.5, 1]),
+                                   (2.3, [1.05, 1, 1]), (L, [1.1, 1.1, 1])])},
+        "eye": {"scale": smooth([(0, [1, 1, 1]), (1.9, [1.2, 1.2, 1]), (2.25, [1.35, 0.6, 1]), (2.5, [1.1, 1.1, 1]),
+                                 (L, [1, 1, 1])])},
+        **both("shoulder", (0, [0, 0, -4]), (1.2, [0, 0, -7]), (2.1, [0, 0, -8]), (2.25, [0, 0, 4]), (L, [0, 0, 2])),
+        **both("arm", (0, [-70, -20, -6]), (1.2, [-110, -18, -4]), (2.1, [-104, -18, -4]), (2.25, [-60, -40, -30]),
+               (L, [-40, -30, -30])),
+        **both("forearm", (0, [-50, 0, 0]), (1.2, [-20, 0, 0]), (2.1, [-22, 0, 0]), (2.25, [-10, 0, 0]), (L, [-10, 0, 0])),
+        **both("hand", (0, [8, 0, 0]), (1.2, [20, 0, 0]), (2.1, [24, 0, 0]), (2.25, [-30, 0, 0]), (L, [0, 0, 0])),
+        **fingers(lambda i, sd: R((0, [65, 0, 0]), (2.1, [72, 0, 0]), (2.25 + i * 0.02, [-24, 0, 0]), (L, [10, 0, 0]))),
+        **both("thumb", (0, [40, 0, 10]), (2.1, [45, 0, 10]), (2.25, [-20, 0, -20]), (L, [0, 0, 0])),
+        **both("thigh", (0, [-4, 0, -5]), (1.2, [0, 0, -4]), (2.1, [0, 0, -4]), (2.25, [-10, 0, -6]), (L, [-6, 0, -5])),
+        **both("shin", (0, [8, 0, 0]), (1.2, [0, 0, 0]), (2.1, [0, 0, 0]), (2.25, [16, 0, 0]), (L, [10, 0, 0])),
+        **both("foot", (0, [-4, 0, 5]), (1.2, [16, 0, 4]), (2.1, [16, 0, 4]), (2.25, [-6, 0, 6]), (L, [-4, 0, 5])),
+        **both("toe", (0, [0, 0, 0]), (1.2, [-16, 0, 0]), (2.1, [-16, 0, 0]), (2.25, [0, 0, 0])),
+    }, loop="hold_on_last_frame")
+
+    # sealed (3 s): el ojo parpadea y se apaga; se le doblan las rodillas, se queda colgando de si mismo
     L = 3.0
-    A["sealed"] = loop_anim(L, base({
-        "eye": {"scale": kf([(0, [1, 1, 1]), (0.4, [1, 0.3, 1]), (0.5, [1, 1, 1]), (1.0, [1, 0.6, 1]), (1.4, [1, 0, 1]), (L, [0, 0, 1])])},
-        "chest": {"rotation": kf([(0, [4, 0, 0]), (1.4, [4, 0, 0]), (2.4, [30, 0, 0]), (L, [32, 0, 0])])},
-        "neck": {"rotation": kf([(0, [0, 0, 0]), (1.4, [0, 0, 0]), (2.4, [45, 0, 0]), (L, [48, 0, 0])])},
-        "head": {"rotation": kf([(0, [0, 0, 0]), (1.4, [0, 0, 0]), (2.4, [20, 0, 26]), (L, [22, 0, 30])])},
-        "arm_r": {"rotation": kf([(0, [ARM, 0, -4]), (2.4, [10, 0, -1]), (L, [12, 0, 0])])},
-        "arm_l": {"rotation": kf([(0, [ARM, 0, 4]), (2.4, [10, 0, 1]), (L, [12, 0, 0])])},
-        "thigh_r": {"rotation": kf([(0, [0, 0, 0]), (2.4, [-20, 0, 0])])}, "thigh_l": {"rotation": kf([(0, [0, 0, 0]), (2.4, [-20, 0, 0])])},
-        "shin_r": {"rotation": kf([(0, [0, 0, 0]), (2.4, [36, 0, 0])])}, "shin_l": {"rotation": kf([(0, [0, 0, 0]), (2.4, [36, 0, 0])])},
-        "root": {"position": kf([(0, [0, 0, 0]), (2.4, [0, -3, 0])])},
-        **{f"finger{i}_{s}": {"rotation": kf([(0, [6, 0, 0]), (2.4, [30, 0, 0])])} for i in range(4) for s in "rl"},
-    }), loop="hold_on_last_frame")
+    A["sealed"] = loop_anim(L, {
+        "eye": {"scale": kf([(0, [1, 1, 1]), (0.4, [1, 0.3, 1]), (0.5, [1, 1, 1]), (0.8, [1, 0.2, 1]), (0.85, [1, 0.9, 1]),
+                             (1.0, [1, 0.6, 1]), (1.4, [1, 0, 1]), (L, [0, 0, 1])])},
+        "root": {"position": smooth([(0, [0, 0, 0]), (1.4, [0, 0, 0]), (2.4, [0, -4, 0]), (2.6, [0, -3.6, 0]), (L, [0, -4.2, 0])])},
+        "torso": R((0, [0, 0, 0]), (1.4, [0, 0, 0]), (2.4, [12, 0, 2]), (L, [13, 0, 3])),
+        "chest": R((0, [4, 0, 0]), (1.4, [4, 0, 0]), (2.45, [24, 0, 0]), (2.65, [20, 0, 0]), (L, [26, 0, 0])),
+        "neck": R((0, [0, 0, 0]), (1.4, [0, 0, 0]), (2.5, [40, 0, 0]), (L, [42, 0, 0])),
+        "neck2": R((0, [0, 0, 0]), (1.45, [0, 0, 0]), (2.55, [20, 0, 10]), (L, [22, 0, 12])),
+        "head": R((0, [0, 0, 0]), (1.5, [0, 0, 0]), (2.6, [16, 0, 24]), (2.75, [12, 0, 20]), (L, [18, 0, 28])),
+        "jaw": R((0, [4, 0, 0]), (1.4, [4, 0, 0]), (2.5, [24, 0, 0]), (L, [26, 0, 0])),
+        **both("shoulder", (0, [0, 0, 0]), (1.4, [0, 0, 0]), (2.4, [0, 0, 8]), (L, [0, 0, 9])),
+        **both("arm", (0, [ARM, 0, -4]), (1.4, [ARM, 0, -4]), (2.5, [-30, 0, -1]), (2.7, [-38, 0, -1]), (L, [-34, 0, 0])),
+        **both("forearm", (0, [-6, 0, 0]), (1.5, [-6, 0, 0]), (2.6, [-1, 0, 0]), (L, [-2, 0, 0])),
+        **both("hand", (0, [0, 0, 0]), (1.5, [0, 0, 0]), (2.7, [12, 0, 0]), (L, [10, 0, 0])),
+        **fingers(lambda i, sd: R((0, [6, 0, 0]), (1.5, [6, 0, 0]), (2.6 + i * 0.05, [32, 0, 0]), (L, [30, 0, 0]))),
+        **both("thigh", (0, [0, 0, 0]), (1.4, [0, 0, 0]), (2.4, [-20, 0, -2]), (L, [-21, 0, -2])),
+        **both("shin", (0, [0, 0, 0]), (1.4, [0, 0, 0]), (2.4, [38, 0, 0]), (L, [40, 0, 0])),
+        **both("foot", (0, [0, 0, 0]), (1.4, [0, 0, 0]), (2.4, [-18, 0, 2]), (L, [-19, 0, 2])),
+    }, loop="hold_on_last_frame")
+
+    # drag: arrastra al ultimo del tobillo con la derecha, inclinado contra el peso; a mitad de paso
+    # gira la cabeza del todo para mirarte
     L = 2.4
-    A["drag"] = loop_anim(L, base({
-        "root": {"position": kf(wave(L, [0, 0, 0], 0.6, 0, 8, 1))},
-        "chest": {"rotation": kf(wave(L, [10, 0, 0], 2))},
-        "head": {"rotation": kf([(0, [4, 0, 0]), (1.2, [4, 150, 0]), (1.6, [4, 150, 0]), (L, [4, 0, 0])])},  # mira atras, a ti
-        "thigh_r": {"rotation": kf(wave(L, [0, 0, 0], 20))}, "thigh_l": {"rotation": kf(wave(L, [0, 0, 0], 20, 3.14))},
-        "shin_r": {"rotation": kf(wave(L, [14, 0, 0], 12, 1.6))}, "shin_l": {"rotation": kf(wave(L, [14, 0, 0], 12, 4.7))},
-        "arm_r": {"rotation": kf([(0, [30, 0, -8])])},       # brazo hacia atras: arrastra al jugador del tobillo
+    A["drag"] = loop_anim(L, {
+        "root": {"position": cyc(L, lambda p: [0.3 * s(p), 0.5 * c(2 * p) - 1.0, 0])},
+        "hips": {"rotation": cyc(L, lambda p: [6, 5 * s(p), 3 * c(p)])},
+        "torso": {"rotation": cyc(L, lambda p: [6, -6, 0])},
+        "chest": {"rotation": cyc(L, lambda p: [12 + 2 * c(2 * p), -12 - 5 * s(p), -3])},
+        "neck2": R((0, [0, 0, 0]), (1.0, [0, 0, 0]), (1.2, [0, 40, 0]), (1.6, [0, 40, 0]), (1.85, [0, 0, 0]), (L, [0, 0, 0]),
+                   loop=True),
+        "head": R((0, [4, 0, 6]), (1.0, [4, 0, 6]), (1.2, [4, 110, 10]), (1.6, [4, 110, 14]), (1.85, [4, 0, 6]), (L, [4, 0, 6]),
+                  loop=True),
+        "shoulder_r": {"rotation": kf([(0, [0, 10, 6])])},            # tirado hacia atras por el peso
+        "shoulder_l": {"rotation": cyc(L, lambda p: [0, 0, 2 * s(p)])},
+        "arm_r": {"rotation": cyc(L, lambda p: [22 + 2 * s(2 * p), 0, -8])},
         "forearm_r": {"rotation": kf([(0, [10, 0, 0])])},
-        **{f"finger{i}_r": {"rotation": kf([(0, [70, 0, 0])])} for i in range(4)},
-    }))
+        "hand_r": {"rotation": kf([(0, [20, 0, 0])])},
+        **fingers(lambda i, sd: {"rotation": kf([(0, [72, 0, 0])])}, "r"),
+        **both("thumb", (0, [40, 0, 10])),
+        "arm_l": {"rotation": cyc(L, lambda p: [-18 - 14 * s(p), 0, 5])},
+        "forearm_l": {"rotation": cyc(L, lambda p: [-10 - 8 * s(p - 0.9), 0, 0])},
+        "hand_l": {"rotation": cyc(L, lambda p: [4 - 6 * s(p - 1.7), 0, 0])},
+        **fingers(lambda i, sd: {"rotation": cyc(L, lambda p, i=i: [8 - 8 * s(p - 2.3 - i * 0.25), 0, 0])}, "l"),
+        **gait(L, 18, 38, 6, -4),
+    })
     hang_hair(A)
     enrich(A, mm.bones_of("smiley"))
     out = {"format_version": "1.8.0", "animations": A}
-    (ROOT / "animations/entity/smiley.animation.json").write_text(json.dumps(out, indent=1) + "\n", encoding="utf-8")
+    (ROOT / "animations/entity/smiley.animation.json").write_text(json.dumps(out, separators=(",", ":")) + "\n", encoding="utf-8")
     return A
 
 
