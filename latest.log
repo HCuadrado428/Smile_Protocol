@@ -24,14 +24,14 @@ Creating Minecraft artifacts without recompilation.
 Loaded 93 artifacts from /home/runner/work/Smile_Protocol/Smile_Protocol/common/build/tmp/createMinecraftArtifacts/nfrt_artifact_manifest.properties
 [1m*** Started working on [4mdownloadJson[23;0m[23;0m
  [1m[92m✓[23;0m Completed [4mdownloadJson[23;0m in 0.02s
-[1m*** Started working on [4mdownloadClient[23;0m[23;0m
 [1m*** Started working on [4mdownloadClientMappings[23;0m[23;0m
+[1m*** Started working on [4mdownloadClient[23;0m[23;0m
 [1m*** Started working on [4mdownloadServer[23;0m[23;0m
- [1m[92m✓[23;0m Completed [4mdownloadClient[23;0m in 0.03s
  [1m[92m✓[23;0m Completed [4mdownloadClientMappings[23;0m in 0.03s
  [1m[92m✓[23;0m Completed [4mdownloadServer[23;0m in 0.03s
+ [1m[92m✓[23;0m Completed [4mdownloadClient[23;0m in 0.03s
 [1m*** Started working on [4mmergeMappings[23;0m[23;0m
- [1m[92m♻[23;0m Used cache of [4mmergeMappings[23;0m in 0.01s
+ [1m[92m♻[23;0m Used cache of [4mmergeMappings[23;0m in 0.00s
 [1m*** Started working on [4mstripClient[23;0m[23;0m
  [1m[92m♻[23;0m Used cache of [4mstripClient[23;0m in 0.00s
 [1m*** Started working on [4mextractServer[23;0m[23;0m
@@ -42,11 +42,11 @@ Loaded 93 artifacts from /home/runner/work/Smile_Protocol/Smile_Protocol/common/
  [1m[92m♻[23;0m Used cache of [4mmerge[23;0m in 0.00s
 [1m*** Started working on [4mrename[23;0m[23;0m
  [1m[92m♻[23;0m Used cache of [4mrename[23;0m in 0.00s
-Total runtime: 0.83s
+Total runtime: 0.57s
 
 
 > Task :common:compileJava
-Note: /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/client/light/Flashlight.java uses or overrides a deprecated API.
+Note: Some input files use or override a deprecated API.
 Note: Recompile with -Xlint:deprecation for details.
 
 > Task :common:processResources
@@ -81,15 +81,15 @@ Note: Recompile with -Xlint:deprecation for details.
 > Task :neoforge:createMinecraftArtifacts
 Loaded 131 artifacts from /home/runner/work/Smile_Protocol/Smile_Protocol/neoforge/build/tmp/createMinecraftArtifacts/nfrt_artifact_manifest.properties
 [1m*** Started working on [4mdownloadJson[23;0m[23;0m
- [1m[92m✓[23;0m Completed [4mdownloadJson[23;0m in 0.03s
+ [1m[92m✓[23;0m Completed [4mdownloadJson[23;0m in 0.06s
 [1m*** Started working on [4mdownloadServer[23;0m[23;0m
 [1m*** Started working on [4mdownloadClientMappings[23;0m[23;0m
 [1m*** Started working on [4mdownloadClient[23;0m[23;0m
- [1m[92m✓[23;0m Completed [4mdownloadClient[23;0m in 0.03s
- [1m[92m✓[23;0m Completed [4mdownloadClientMappings[23;0m in 0.04s
- [1m[92m✓[23;0m Completed [4mdownloadServer[23;0m in 0.05s
+ [1m[92m✓[23;0m Completed [4mdownloadClient[23;0m in 0.07s
+ [1m[92m✓[23;0m Completed [4mdownloadClientMappings[23;0m in 0.07s
+ [1m[92m✓[23;0m Completed [4mdownloadServer[23;0m in 0.09s
 [1m*** Started working on [4mstripClient[23;0m[23;0m
- [1m[92m♻[23;0m Used cache of [4mstripClient[23;0m in 0.00s
+ [1m[92m♻[23;0m Used cache of [4mstripClient[23;0m in 0.01s
 [1m*** Started working on [4mmergeMappings[23;0m[23;0m
  [1m[92m♻[23;0m Used cache of [4mmergeMappings[23;0m in 0.00s
 [1m*** Started working on [4mextractServer[23;0m[23;0m
@@ -108,7 +108,7 @@ Loaded 131 artifacts from /home/runner/work/Smile_Protocol/Smile_Protocol/neofor
  [1m[92m♻[23;0m Used cache of [4mapplyDevTransforms[23;0m in 0.00s
 [1m*** Started working on [4mbinaryWithNeoForge[23;0m[23;0m
  [1m[92m♻[23;0m Used cache of [4mbinaryWithNeoForge[23;0m in 0.00s
-Total runtime: 1.73s
+Total runtime: 1.78s
 
 
 > Task :fabric:remapJar
@@ -132,10 +132,10 @@ Note: Recompile with -Xlint:deprecation for details.
 > Task :fabric:remapSourcesJar
 > Task :fabric:assemble
 > Task :fabric:build
-gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/__run-1793461031191.json
+gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/__run-1793463052739.json
 
 [Incubating] Problems report is available at: file:///home/runner/work/Smile_Protocol/Smile_Protocol/build/reports/problems/problems-report.html
 
-BUILD SUCCESSFUL in 45s
+BUILD SUCCESSFUL in 44s
 17 actionable tasks: 17 executed
 Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.4.0/userguide/configuration_cache_enabling.html
