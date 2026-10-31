@@ -34,6 +34,9 @@ public final class Flashlight {
     private static final Map<Integer, LightRenderHandle<PointLightData>> FILL = new HashMap<>();
     private static boolean failed;
 
+    /** Direccion del haz local con retraso (la mano sigue a la mirada con algo de inercia). */
+    private static float lagYaw = Float.NaN, lagPitch;
+
     private Flashlight() {}
 
     public static void set(int entityId, boolean on) {
@@ -98,7 +101,22 @@ public final class Flashlight {
                 d.setBrightness(2.2f * k);
                 fill.getLightData().setBrightness(0.35f * k);
                 if (p == mc.player && camera.getEntity() == p) {
-                    d.setTo(camera);
+                    // en la mano: el haz va un poco por detras de la mirada y se balancea al andar
+                    float yaw = camera.getYRot(), pitch = camera.getXRot();
+                    if (Float.isNaN(lagYaw)) {
+                        lagYaw = yaw;
+                        lagPitch = pitch;
+                    }
+                    lagYaw += Mth.wrapDegrees(yaw - lagYaw) * 0.35f;
+                    lagPitch += (pitch - lagPitch) * 0.35f;
+                    float walk = p.walkDist * 6.2f;
+                    float amp = Math.min(1f, (float) p.getDeltaMovement().horizontalDistance() * 9f);
+                    float sy = lagYaw + Mth.sin(walk) * 0.9f * amp, sp = lagPitch + Math.abs(Mth.cos(walk)) * 0.8f * amp;
+                    d.getOrientationMutable().set(new Quaternionf().rotationYXZ(Mth.PI - sy * Mth.DEG_TO_RAD, -sp * Mth.DEG_TO_RAD, 0f));
+                    var cp = camera.getPosition();
+                    var right = net.minecraft.world.phys.Vec3.directionFromRotation(0, yaw + 90);
+                    d.getPositionMutable().set(cp.x + right.x * 0.18, cp.y - 0.12, cp.z + right.z * 0.18);
+                    d.markDirty();
                 } else {
                     float yaw = p.getViewYRot(pt), pitch = p.getViewXRot(pt);
                     d.getOrientationMutable().set(new Quaternionf().rotationYXZ(Mth.PI - yaw * Mth.DEG_TO_RAD, -pitch * Mth.DEG_TO_RAD, 0f));

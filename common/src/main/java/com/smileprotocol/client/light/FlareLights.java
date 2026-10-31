@@ -47,9 +47,14 @@ public final class FlareLights {
                 }
                 continue;
             }
-            h.getLightData().setPosition(f.getX(), f.getY() + 0.3, f.getZ());
-            h.getLightData().setBrightness(1.6f * k);
-            h.getLightData().setRadius(7f + 4f * k);
+            // llama: parpadeo irregular y el centro de la luz que baila un poco
+            double t = (mc.level.getGameTime() + f.getId() * 17) * 0.7;
+            float flick = 0.82f + 0.12f * (float) Math.sin(t * 2.3) + 0.08f * (float) Math.sin(t * 5.1 + 1.3)
+                    + (mc.level.random.nextFloat() < 0.06f ? -0.25f : 0f);
+            h.getLightData().setPosition(f.getX() + Math.sin(t * 1.7) * 0.06, f.getY() + 0.3 + Math.sin(t * 2.9) * 0.05,
+                    f.getZ() + Math.cos(t * 1.3) * 0.06);
+            h.getLightData().setBrightness(1.6f * k * flick);
+            h.getLightData().setRadius((7f + 4f * k) * (0.95f + 0.05f * flick));
         }
         LIGHTS.entrySet().removeIf(en -> {
             if (seen.contains(en.getKey())) return false;

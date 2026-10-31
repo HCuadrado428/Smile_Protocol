@@ -266,6 +266,13 @@ Hace falta Simple Voice Chat en el servidor y en los clientes (es opcional: sin 
 2. **Registrar.** Escritorios, archivadores, botiquines, carros de herramientas y cajas de suministros se registran: mírales y mantén el clic derecho (sale el texto, p. ej. «Registrar los cajones»). Hace algo de ruido. Al acabar se abren (cajón fuera, puertas abiertas, tapa quitada) y a veces sueltan algo delante: latas, botellas, pilas, botiquines, bengalas, adrenalina o un fusible fundido; muchas veces nada («No hay nada útil.»). Un mueble abierto ya no se puede registrar.
 3. **Botín por planta.** Cada planta tiene su tabla (`data/smileprotocol/search_loot/<planta>.json`): en la morgue salen más botiquines, en energía más pilas... y en los botiquines siempre es más fácil encontrar curas. Cada partida coloca la planta de nuevo, así que vuelven a estar cerrados.
 
+## Luces
+
+- **Fluorescentes.** Al dar corriente a un circuito, cada tubo arranca a golpes (unos destellos) antes de quedarse fijo; no todos a la vez ni igual. Encendidos tienen un rizado muy leve, cada uno su intensidad y su tono (unos más verdes, otros más azulados). Al quitar la corriente se apagan casi de golpe.
+- **Linterna.** El haz sale de la mano (algo a la derecha y por debajo de los ojos), sigue a la mirada con un poco de retraso y se balancea al andar. Las de los demás, como antes, desde su cabeza.
+- **Bengalas.** La luz roja tiembla como una llama y su centro baila un poco.
+- **Sombras.** Las luces de Veil no proyectan sombras de los bloques; no se ha podido añadir.
+
 ## Muebles animados
 
 - Registra un escritorio, un archivador o un carro: el cajón sale despacio (medio segundo) en vez de aparecer fuera de golpe. El botiquín abre sus dos puertas de cristal y la caja de suministros levanta la tapa. Lo de dentro cambia al quedar registrado (faltan frascos, quedan huecos en la gomaespuma).
