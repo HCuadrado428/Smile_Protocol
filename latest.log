@@ -24,16 +24,16 @@ Creating Minecraft artifacts without recompilation.
 Loaded 93 artifacts from /home/runner/work/Smile_Protocol/Smile_Protocol/common/build/tmp/createMinecraftArtifacts/nfrt_artifact_manifest.properties
 [1m*** Started working on [4mdownloadJson[23;0m[23;0m
  [1m[92m✓[23;0m Completed [4mdownloadJson[23;0m in 0.02s
-[1m*** Started working on [4mdownloadClient[23;0m[23;0m
 [1m*** Started working on [4mdownloadServer[23;0m[23;0m
 [1m*** Started working on [4mdownloadClientMappings[23;0m[23;0m
- [1m[92m✓[23;0m Completed [4mdownloadClient[23;0m in 0.04s
- [1m[92m✓[23;0m Completed [4mdownloadServer[23;0m in 0.04s
- [1m[92m✓[23;0m Completed [4mdownloadClientMappings[23;0m in 0.04s
-[1m*** Started working on [4mstripClient[23;0m[23;0m
- [1m[92m♻[23;0m Used cache of [4mstripClient[23;0m in 0.00s
+[1m*** Started working on [4mdownloadClient[23;0m[23;0m
+ [1m[92m✓[23;0m Completed [4mdownloadServer[23;0m in 0.03s
+ [1m[92m✓[23;0m Completed [4mdownloadClient[23;0m in 0.03s
+ [1m[92m✓[23;0m Completed [4mdownloadClientMappings[23;0m in 0.03s
 [1m*** Started working on [4mmergeMappings[23;0m[23;0m
  [1m[92m♻[23;0m Used cache of [4mmergeMappings[23;0m in 0.00s
+[1m*** Started working on [4mstripClient[23;0m[23;0m
+ [1m[92m♻[23;0m Used cache of [4mstripClient[23;0m in 0.00s
 [1m*** Started working on [4mextractServer[23;0m[23;0m
  [1m[92m♻[23;0m Used cache of [4mextractServer[23;0m in 0.00s
 [1m*** Started working on [4mstripServer[23;0m[23;0m
@@ -42,22 +42,24 @@ Loaded 93 artifacts from /home/runner/work/Smile_Protocol/Smile_Protocol/common/
  [1m[92m♻[23;0m Used cache of [4mmerge[23;0m in 0.00s
 [1m*** Started working on [4mrename[23;0m[23;0m
  [1m[92m♻[23;0m Used cache of [4mrename[23;0m in 0.00s
-Total runtime: 0.76s
+Total runtime: 0.68s
 
 
 > Task :common:compileJava
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/run/Group.java:161: error: variable m is already defined in method save()
-            CompoundTag m = new CompoundTag();
-                        ^
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/run/Group.java:209: error: variable m is already defined in method load(CompoundTag)
-            CompoundTag m = t.getCompound("Mission");
-                        ^
+/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/client/GemeloRenderer.java:44: error: cannot find symbol
+        if (id == null) return DefaultPlayerSkin.getDefaultSkin();
+                                                ^
+  symbol:   method getDefaultSkin()
+  location: class DefaultPlayerSkin
+/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/client/ClientSelfTest.java:934: error: variable g is already defined in method plan(Minecraft,MinecraftServer)
+            log((t instanceof com.smileprotocol.entity.Gemelo g && g.revealed() ? "OK" : "FALLO") + " gemelo: se delata (cara y sin nombre)");
+                                                              ^
 Note: /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/client/light/Flashlight.java uses or overrides a deprecated API.
 Note: Recompile with -Xlint:deprecation for details.
 2 errors
 
 > Task :common:compileJava FAILED
-gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/__run-1793451547726.json
+gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/__run-1793451727090.json
 
 [Incubating] Problems report is available at: file:///home/runner/work/Smile_Protocol/Smile_Protocol/build/reports/problems/problems-report.html
 
@@ -68,12 +70,14 @@ Execution failed for task ':common:compileJava'.
 > Compilation failed; see the compiler output below.
   Note: /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/client/light/Flashlight.java uses or overrides a deprecated API.
   Note: Recompile with -Xlint:deprecation for details.
-  /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/run/Group.java:161: error: variable m is already defined in method save()
-              CompoundTag m = new CompoundTag();
-                          ^
-  /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/run/Group.java:209: error: variable m is already defined in method load(CompoundTag)
-              CompoundTag m = t.getCompound("Mission");
-                          ^
+  /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/client/ClientSelfTest.java:934: error: variable g is already defined in method plan(Minecraft,MinecraftServer)
+              log((t instanceof com.smileprotocol.entity.Gemelo g && g.revealed() ? "OK" : "FALLO") + " gemelo: se delata (cara y sin nombre)");
+                                                                ^
+  /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/client/GemeloRenderer.java:44: error: cannot find symbol
+          if (id == null) return DefaultPlayerSkin.getDefaultSkin();
+                                                  ^
+    symbol:   method getDefaultSkin()
+    location: class DefaultPlayerSkin
   2 errors
 
 * Try:
@@ -116,12 +120,14 @@ org.gradle.api.tasks.TaskExecutionException: Execution failed for task ':common:
 	at org.gradle.internal.concurrent.ExecutorPolicy$CatchAndRecordFailures.onExecute(ExecutorPolicy.java:64)
 	at org.gradle.internal.concurrent.AbstractManagedExecutor$1.run(AbstractManagedExecutor.java:47)
 Caused by: org.gradle.api.internal.tasks.compile.CompilationFailedException: Compilation failed; see the compiler output below.
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/run/Group.java:161: error: variable m is already defined in method save()
-            CompoundTag m = new CompoundTag();
-                        ^
-/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/run/Group.java:209: error: variable m is already defined in method load(CompoundTag)
-            CompoundTag m = t.getCompound("Mission");
-                        ^
+/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/client/GemeloRenderer.java:44: error: cannot find symbol
+        if (id == null) return DefaultPlayerSkin.getDefaultSkin();
+                                                ^
+  symbol:   method getDefaultSkin()
+  location: class DefaultPlayerSkin
+/home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/client/ClientSelfTest.java:934: error: variable g is already defined in method plan(Minecraft,MinecraftServer)
+            log((t instanceof com.smileprotocol.entity.Gemelo g && g.revealed() ? "OK" : "FALLO") + " gemelo: se delata (cara y sin nombre)");
+                                                              ^
 Note: /home/runner/work/Smile_Protocol/Smile_Protocol/common/src/main/java/com/smileprotocol/client/light/Flashlight.java uses or overrides a deprecated API.
 Note: Recompile with -Xlint:deprecation for details.
 2 errors
@@ -259,5 +265,5 @@ Note: Recompile with -Xlint:deprecation for details.
 	... 30 more
 
 
-BUILD FAILED in 28s
+BUILD FAILED in 29s
 2 actionable tasks: 2 executed
