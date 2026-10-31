@@ -41,8 +41,8 @@ EYE = [
     ".RRYYYRR.",
     "...RRR...",
 ]
-COLORS = {"R": (196, 12, 18), "T": (236, 210, 200), "V": (200, 170, 150), "K": (3, 0, 1), "Y": (255, 58, 40),
-          "W": (255, 214, 200)}
+COLORS = {"R": (196, 12, 18), "T": (236, 210, 200), "V": (200, 170, 150), "K": (3, 0, 1), "Y": (226, 14, 16),
+          "W": (255, 34, 26)}             # el ojo, todo rojo (mas vivo en el centro) salvo la pupila negra
 
 
 def art(rows, glowing):
