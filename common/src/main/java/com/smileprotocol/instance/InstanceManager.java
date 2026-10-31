@@ -144,6 +144,9 @@ public final class InstanceManager {
         @Nullable BoundingBox box;
         int nextZ;
         boolean blocksDone;
+        /** Bloques de la plantilla ordenados por Z (se coloca de delante a atras) y por donde va. */
+        @Nullable List<StructureTemplate.StructureBlockInfo> blocks;
+        int cursor;
 
         PlaceJob(Group group, int index, int sub, ResourceLocation zoneId, @Nullable ZoneDef def, BlockPos origin,
                  @Nullable StructureTemplate template) {
@@ -167,6 +170,7 @@ public final class InstanceManager {
         /** De 0 a 1: cuanto lleva pegado. */
         public float progress() {
             if (blocksDone || box == null) return 1f;
+            if (blocks != null) return Mth.clamp(cursor / (float) Math.max(1, blocks.size()), 0f, 1f);
             return Mth.clamp((nextZ - box.minZ()) / (float) Math.max(1, box.getZSpan()), 0f, 1f);
         }
     }
@@ -208,17 +212,54 @@ public final class InstanceManager {
             job.box = template.getBoundingBox(settings(), origin);
             job.nextZ = job.box.minZ();
             addTicket(level, job.box);
+            // los bloques de la plantilla, una sola vez y ordenados por Z
+            var palettes = ((com.smileprotocol.mixin.StructureTemplateAccessor) template).smileprotocol$palettes();
+            if (palettes.size() == 1) {
+                List<StructureTemplate.StructureBlockInfo> list = new ArrayList<>();
+                for (StructureTemplate.StructureBlockInfo info : palettes.get(0).blocks()) {
+                    if (!info.state().is(Blocks.STRUCTURE_BLOCK)) list.add(info);
+                }
+                list.sort(Comparator.comparingInt((StructureTemplate.StructureBlockInfo i) -> i.pos().getZ())
+                        .thenComparingInt(i -> i.pos().getY()));
+                job.blocks = list;
+            }
         } else {
             job.blocksDone = true;
         }
         return job;
     }
 
+    /** Bloques que se colocan por cada «rebanada» de {@code zone_build_slices_per_tick}. */
+    private static final int BLOCKS_PER_SLICE = 1500;
+
     /** Pega hasta {@code slices} rebanadas. Devuelve true cuando ya estan todos los bloques. */
     public static boolean stepPlace(ServerLevel level, PlaceJob job, int slices) {
         if (job.blocksDone || job.template == null || job.box == null) {
             job.blocksDone = true;
             return true;
+        }
+        if (job.blocks != null) {
+            // directo: cada bloque con su estado y, si tiene, los datos de su entidad de bloque
+            long budget = slices >= Integer.MAX_VALUE / BLOCKS_PER_SLICE ? Long.MAX_VALUE : (long) slices * BLOCKS_PER_SLICE;
+            int n = job.blocks.size();
+            while (job.cursor < n && budget-- > 0) {
+                StructureTemplate.StructureBlockInfo info = job.blocks.get(job.cursor++);
+                BlockPos pos = job.origin.offset(info.pos());
+                level.setBlock(pos, info.state(), Block.UPDATE_CLIENTS);
+                if (info.nbt() != null) {
+                    var be = level.getBlockEntity(pos);
+                    if (be != null) {
+                        CompoundTag t = info.nbt().copy();
+                        t.putInt("x", pos.getX());
+                        t.putInt("y", pos.getY());
+                        t.putInt("z", pos.getZ());
+                        be.loadWithComponents(t, level.registryAccess());
+                        be.setChanged();
+                    }
+                }
+            }
+            if (job.cursor >= n) job.blocksDone = true;
+            return job.blocksDone;
         }
         BoundingBox b = job.box;
         for (int i = 0; i < slices && job.nextZ <= b.maxZ(); i++) {

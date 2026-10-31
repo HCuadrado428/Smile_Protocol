@@ -10,7 +10,8 @@
     "PlayerMixin",
     "ServerLevelMixin",
     "ServerPlayerGameModeMixin",
-    "ServerPlayerMixin"
+    "ServerPlayerMixin",
+    "StructureTemplateAccessor"
   ],
   "client": [
     "client.CameraMixin",

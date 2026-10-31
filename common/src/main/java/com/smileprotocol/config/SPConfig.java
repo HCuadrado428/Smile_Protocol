@@ -254,8 +254,8 @@ public final class SPConfig {
         // Ascensores de zona (README 6.5)
         public int elevator_grace = 15;
         public int elevator_ride_time = 8;
-        /** Rebanadas de 4 filas de la planta siguiente que se construyen por tick mientras baja el ascensor. */
-        public int zone_build_slices_per_tick = 3;
+        /** Tandas de 1500 bloques de la planta siguiente que se construyen por tick mientras baja el ascensor. */
+        public int zone_build_slices_per_tick = 2;
         /** Construir la planta siguiente de antemano (de golpe) en vez de durante el viaje en ascensor. */
         public boolean preload_next_zone = false;
         public String elevator_strip = "HURT_OR_REVIVED";
