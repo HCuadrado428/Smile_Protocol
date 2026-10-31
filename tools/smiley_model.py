@@ -18,24 +18,31 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import mob_models as mm  # noqa: E402  (pone gm.SCALE = 4 y registra los materiales de los smilers)
 from mob_models import Geo, MAT, ART, kf, wave, multi, loop_anim, split, finger_tips, enrich, render_pose, ROOT  # noqa: E402
 
+# Sonrisa: muy ancha, torcida (la comisura derecha sube mas), dos filas de dientes desiguales con
+# colmillos largos, encias rojas y huecos negros
 SMILE = [
-    "R..................R",
-    "RR................RR",
-    ".RR..............RR.",
-    "..RRRRRRRRRRRRRRRR..",
-    "..RTKTKTKTKTKTKTKR..",
-    "...RKKKKKKKKKKKKR...",
-    "....RKTKTKTKTKTR....",
-    ".....RRRRRRRRRR.....",
+    "RR..................RR",
+    ".RR................RR.",
+    "..RRR............RRR..",
+    "...RRRRRRRRRRRRRRRR...",
+    "...RTTKTVTTKTTVTKTTR..",
+    "...RKVKKKTKKKKTKVKKR..",
+    "....RKTKKKKKKKKKTKR...",
+    ".....RTKTVTKTTKVTR....",
+    "......RRRRRRRRRRR.....",
 ]
+# Ojo: rojo encendido con la pupila rasgada en vertical
 EYE = [
-    "..RRR..",
-    ".RYYYR.",
-    "RYWWWYR",
-    ".RYYYR.",
-    "..RRR..",
+    "...RRR...",
+    ".RRYYYRR.",
+    "RYYWKWYYR",
+    "RYWWKWWYR",
+    "RYYWKWYYR",
+    ".RRYYYRR.",
+    "...RRR...",
 ]
-COLORS = {"R": (196, 12, 18), "T": (236, 210, 200), "K": (3, 0, 1), "Y": (255, 58, 40), "W": (255, 214, 200)}
+COLORS = {"R": (196, 12, 18), "T": (236, 210, 200), "V": (200, 170, 150), "K": (3, 0, 1), "Y": (255, 58, 40),
+          "W": (255, 214, 200)}
 
 
 def art(rows, glowing):
@@ -145,6 +152,28 @@ def void_hair():
     return m
 
 
+def void_crack():
+    """Piel con grietas finas que brillan como brasas por dentro (solo en el pecho y los hombros):
+    asi se le adivina el cuerpo en la oscuridad."""
+    sk = void()
+    from mob_models import noise3 as n3
+
+    def cracks(f):
+        cr = np.abs(n3(f.X * 0.55, f.Y * 0.35, f.Z * 0.55, 1.0, 701) - 0.5)
+        thin = cr < 0.018
+        branch = (np.abs(n3(f.X * 1.3, f.Y * 0.9, f.Z * 1.3, 1.0, 702) - 0.5) < 0.012) & (f.n(0.4, 2, 703) > 0.55)
+        return (thin | branch).astype(float)
+
+    def m(f):
+        c, a = sk(f)
+        k = cracks(f)
+        c = c * (1 - k[..., None]) + np.array([150, 18, 12]) * k[..., None]
+        return c, a
+
+    m.glowmask = lambda f: cracks(f) * 0.75
+    return m
+
+
 def nail():
     """Unas largas: negras y brillantes, el filo algo mas claro."""
     from mob_models import sstep as ss
@@ -164,22 +193,30 @@ MAT.update({
     "void_face": void_face(),
     "nail": nail(),
     "void_hair": void_hair(),
-    "smiley_smile": art(SMILE, "RTW"),
+    "smiley_smile": art(SMILE, "RTVW"),
     "smiley_eye": art(EYE, "RYW"),
+    "smiley_drip": art(["R"], "R"),
+    "smiley_pin": art(["Y"], "Y"),
+    "void_crack": void_crack(),
 })
 
 
 def smiley():
-    g = Geo("smiley", 99, folder="entity", glow=("smiley_smile", "smiley_eye"), ao=False)
+    g = Geo("smiley", 99, folder="entity", glow=("smiley_smile", "smiley_eye", "void_crack", "smiley_drip", "smiley_pin"),
+            ao=False)
     g.bone("root")
     g.bone("hips", "root", (0, 28, 0))
     g.cube("hips", (-2.6, 26, -1.5), (5.2, 4, 3), "void")
     g.bone("torso", "hips", (0, 30, 0))
     g.cube("torso", (-1.7, 30, -1.2), (3.4, 8.5, 2.4), "void")                      # cintura imposible
-    g.cube("torso", (-3.2, 38, -1.8), (6.4, 8, 3.6), "void")                        # pecho estrecho
-    for i in range(4):
-        g.cube("torso", (-3.4, 39 + i * 1.8, -2.0), (6.8, 0.7, 0.4), "void_hi")        # costillas apenas
-    g.cube("torso", (-4.6, 45, -1.5), (9.2, 2.3, 3), "void")                        # hombros como perchas
+    g.cube("torso", (-3.2, 38, -1.8), (6.4, 8, 3.6), "void_crack")                  # pecho estrecho, agrietado
+    for i in range(5):
+        g.cube("torso", (-3.5 + i * 0.1, 38.6 + i * 1.5, -2.15), (7.0 - i * 0.2, 0.75, 0.5), "void_hi")   # costillas marcadas
+    g.cube("torso", (-2.4, 33.5, -1.45), (4.8, 1.2, 0.3), "void_hi")               # vientre hundido, con un pliegue
+    g.cube("torso", (-4.6, 45, -1.5), (9.2, 2.3, 3), "void_crack")                  # hombros como perchas
+    g.cube("torso", (-5.1, 46.4, -0.6), (1.6, 0.6, 0.6), "nail")                    # clavicula rota que asoma
+    for k, (x, ln) in enumerate(((-2.2, 7), (-0.6, 9.5), (1.2, 6), (2.6, 8.5))):
+        g.cube("torso", (x, 44 - ln, 1.6), (0.35, ln, 0.3), "void")                 # jirones que cuelgan de la espalda
     for i in range(6):
         g.cube("torso", (-0.6, 31 + i * 2.5, 1.2), (1.2, 1.2, 0.8), "void_hi")         # espinazo
     g.bone("neck", "torso", (0, 47, -0.2))
@@ -188,9 +225,13 @@ def smiley():
     g.cube("head", (-3.4, 53, -4), (6.8, 9.5, 7), "void_face")                           # cabeza alargada
     g.cube("head", (-3, 51.5, -3.7), (6, 1.8, 6), "void")                           # mandibula
     g.bone("smile", "head", (0, 55.6, -4.1))
-    g.cube("smile", (-5, 53.8, -4.25), (10, 4, 0.2), "smiley_smile")              # mas ancha que la cara
+    g.cube("smile", (-5.5, 53.5, -4.25), (11, 4.5, 0.2), "smiley_smile")          # mas ancha que la cara
+    for x, ln in ((-4.6, 2.6), (-3.1, 1.4), (4.2, 3.4), (1.5, 1.0)):
+        g.cube("smile", (x, 53.6 - ln, -4.24), (0.35, ln, 0.15), "smiley_drip")   # gotas de las comisuras
     g.bone("eye", "head", (2.35, 59.55, -4.1))
-    g.cube("eye", (0.6, 58.3, -4.2), (3.5, 2.5, 0.2), "smiley_eye")               # ojo derecho
+    g.cube("eye", (0.2, 57.8, -4.2), (4.5, 3.5, 0.2), "smiley_eye")               # ojo derecho
+    g.cube("eye", (1.9, 55.6, -4.19), (0.3, 2.4, 0.15), "smiley_drip")            # lagrima roja
+    g.cube("head", (-2.6, 59.2, -4.12), (0.35, 0.35, 0.1), "smiley_pin")         # chispa en la cuenca vacia
     # melena lacia por los hombros, en mechones desiguales que se afinan en la punta; el flequillo
     # cae sobre el lado izquierdo (el del ojo que no tiene) y deja ver el ojo
     g.bone("hair", "head", (0, 62.5, -0.5))
@@ -218,8 +259,11 @@ def smiley():
         g.bone(f"forearm_{side}", f"arm_{side}", (sx * 4.6, 28.5, 0))
         g.cube(f"forearm_{side}", (sx * 4.6 - 0.75, 11.5, -0.75), (1.5, 17.5, 1.5), "void")
         g.cube(f"forearm_{side}", (sx * 4.6 - 1, 27, -1), (2, 2, 2), "void_hi")          # codo
+        for k, (dz, ln) in enumerate(((-0.6, 4.5), (0.4, 6.5))):
+            g.cube(f"forearm_{side}", (sx * 4.6 + sx * 0.75 - (0.3 if sx > 0 else 0), 24 - ln, dz), (0.3, ln, 0.3), "void")  # jirones
         g.bone(f"hand_{side}", f"forearm_{side}", (sx * 4.6, 12, 0))
         g.cube(f"hand_{side}", (sx * 4.6 - 1.1, 8.5, -1.9), (2.2, 3.5, 3.6), "void")
+        g.cube(f"hand_{side}", (sx * 4.6 - 1.25, 8.6, -1.8), (2.5, 0.8, 3.4), "void_hi")      # nudillos
         for i, z in enumerate((-1.7, -0.6, 0.5, 1.5)):
             ln = (10, 11.5, 11, 9)[i]
             g.bone(f"finger{i}_{side}", f"hand_{side}", (sx * 4.6, 8.8, z + 0.25))
