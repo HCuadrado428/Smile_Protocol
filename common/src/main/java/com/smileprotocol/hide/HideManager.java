@@ -61,6 +61,13 @@ public final class HideManager {
     }
 
     private static final Map<UUID, Hidden> HIDDEN = new HashMap<>();
+    /** Cuanto se ahoga la voz de cada escondido: 1 poco (camilla, cortina), 2 mucho (taquilla, armario). Lo lee el hilo de la voz. */
+    private static final Map<UUID, Integer> MUFFLE = new java.util.concurrent.ConcurrentHashMap<>();
+
+    /** 0 si no esta escondido; 1 voz algo ahogada; 2 muy ahogada (dentro de algo cerrado). Seguro desde otros hilos. */
+    public static int muffle(UUID player) {
+        return MUFFLE.getOrDefault(player, 0);
+    }
     private static final Map<BlockPos, Set<UUID>> OCCUPANTS = new HashMap<>();
     /** Escondites que un mob ha visto usar (README 15.3). */
     private static final Set<BlockPos> COMPROMISED = new HashSet<>();
@@ -134,6 +141,7 @@ public final class HideManager {
 
         Hidden h = new Hidden(spot.immutable(), type, anchor, yaw, facing);
         HIDDEN.put(p.getUUID(), h);
+        MUFFLE.put(p.getUUID(), block.kind() == HideBlock.Kind.ENCLOSED ? 2 : 1);
         OCCUPANTS.computeIfAbsent(h.spot, k -> new HashSet<>()).add(p.getUUID());
 
         SPSessionManager.teleport(p, level, anchor, yaw, 0f);
@@ -163,6 +171,7 @@ public final class HideManager {
     /** Sale ya (al terminar EXITING, al salir de la partida, al desconectarse...). */
     public static void forceExit(ServerPlayer p, boolean teleportOut) {
         Hidden h = HIDDEN.remove(p.getUUID());
+        MUFFLE.remove(p.getUUID());
         if (h == null) return;
         Set<UUID> occ = OCCUPANTS.get(h.spot);
         if (occ != null) {
@@ -218,6 +227,7 @@ public final class HideManager {
             Hidden h = e.getValue();
             if (p == null) {
                 HIDDEN.remove(e.getKey());
+                MUFFLE.remove(e.getKey());
                 Set<UUID> occ = OCCUPANTS.get(h.spot);
                 if (occ != null) occ.remove(e.getKey());
                 continue;

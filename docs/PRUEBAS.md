@@ -266,6 +266,12 @@ Hace falta Simple Voice Chat en el servidor y en los clientes (es opcional: sin 
 2. **Registrar.** Escritorios, archivadores, botiquines, carros de herramientas y cajas de suministros se registran: mírales y mantén el clic derecho (sale el texto, p. ej. «Registrar los cajones»). Hace algo de ruido. Al acabar se abren (cajón fuera, puertas abiertas, tapa quitada) y a veces sueltan algo delante: latas, botellas, pilas, botiquines, bengalas, adrenalina o un fusible fundido; muchas veces nada («No hay nada útil.»). Un mueble abierto ya no se puede registrar.
 3. **Botín por planta.** Cada planta tiene su tabla (`data/smileprotocol/search_loot/<planta>.json`): en la morgue salen más botiquines, en energía más pilas... y en los botiquines siempre es más fácil encontrar curas. Cada partida coloca la planta de nuevo, así que vuelven a estar cerrados.
 
+## Reinicios, voz ahogada y Sound Physics
+
+- **Reinicio a mitad de planta.** Abre la puerta roja de la planta de almacenes (objetivo en «Pon los fusibles…») y reinicia el servidor. Al volver, el objetivo del HUD sigue en el mismo paso; puertas, válvulas y fusibles siguen como estaban. Las reglas de la partida también se mantienen.
+- **Voz ahogada.** Con Simple Voice Chat: uno se mete en una taquilla y habla; el de fuera lo oye bajo y apagado, como a través de la puerta, y solo de cerca. En la camilla o tras la cortina se oye un poco apagado. Al salir, la voz vuelve a ser normal. Los smilers también le oyen menos (unos 10 dB menos dentro de algo cerrado).
+- **Sound Physics Remastered.** En `docs/sound_physics/soundphysics.properties` están los ajustes recomendados. Con `enabled=false` en el cliente, al entrar sale un aviso en el chat; con `simple_voice_chat_integration=false`, otro aviso de que la voz no tendrá eco ni oclusión.
+
 ## Puntuación, récords y logros
 
 - **Tablón del lobby.** A la izquierda de la sala, una pared de madera con diez carteles: «1. ---» … «10. ---» mientras no hay partidas.

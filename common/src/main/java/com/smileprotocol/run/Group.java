@@ -59,6 +59,25 @@ public final class Group {
     public DifficultyProfile difficulty() { return difficulty; }
     public int slot() { return slot; }
     public com.smileprotocol.difficulty.RunRules rules() { return rules; }
+
+    // Mision de la planta en curso (se guarda para sobrevivir a un reinicio del servidor)
+    private int missionZone = -1;
+    private int missionStep;
+    private final java.util.Set<String> missionFacts = new java.util.LinkedHashSet<>();
+
+    public int missionZone() { return missionZone; }
+    public int missionStep() { return missionStep; }
+    public java.util.Set<String> missionFacts() { return missionFacts; }
+
+    /** Guarda el progreso de la mision. Devuelve true si ha cambiado. */
+    public boolean setMission(int zone, int step, java.util.Set<String> facts) {
+        if (zone == missionZone && step == missionStep && facts.equals(missionFacts)) return false;
+        missionZone = zone;
+        missionStep = step;
+        missionFacts.clear();
+        missionFacts.addAll(facts);
+        return true;
+    }
     public void setRules(com.smileprotocol.difficulty.RunRules rules) { this.rules = rules; }
 
     public void addMember(UUID player, String name) {
@@ -138,6 +157,15 @@ public final class Group {
         t.put("Sequence", seq);
         t.put("Difficulty", difficulty.save());
         t.putString("Rules", rules.encode());
+        if (missionZone >= 0) {
+            CompoundTag m = new CompoundTag();
+            m.putInt("Zone", missionZone);
+            m.putInt("Step", missionStep);
+            ListTag f = new ListTag();
+            for (String s : missionFacts) f.add(StringTag.valueOf(s));
+            m.put("Facts", f);
+            t.put("Mission", m);
+        }
         t.putInt("Slot", slot);
         t.putString("State", state.name());
         t.putInt("ZoneIndex", zoneIndex);
@@ -177,6 +205,13 @@ public final class Group {
         }
         g.zoneIndex = t.getInt("ZoneIndex");
         g.rules = com.smileprotocol.difficulty.RunRules.decode(t.getString("Rules"));
+        if (t.contains("Mission")) {
+            CompoundTag m = t.getCompound("Mission");
+            g.missionZone = m.getInt("Zone");
+            g.missionStep = m.getInt("Step");
+            ListTag f = m.getList("Facts", Tag.TAG_STRING);
+            for (int i = 0; i < f.size(); i++) g.missionFacts.add(f.getString(i));
+        }
         if (t.contains("Current")) g.current = ZonePlacement.load(t.getCompound("Current"));
         if (t.contains("Next")) g.next = ZonePlacement.load(t.getCompound("Next"));
         g.offlineSince = t.getLong("OfflineSince");

@@ -102,6 +102,11 @@ public final class MissionManager {
             s.timer = 0;
             s.facts.clear();
             s.synced = null;
+            // Tras un reinicio del servidor: se sigue donde se quedo
+            if (g.missionZone() == g.zoneIndex()) {
+                s.step = Math.min(g.missionStep(), s.def.steps().size());
+                s.facts.addAll(g.missionFacts());
+            }
         }
         return s;
     }
@@ -139,6 +144,12 @@ public final class MissionManager {
         if (g == null) return;
         State s = state(level.getServer(), g);
         if (s != null) s.facts.add(fact);
+    }
+
+    /** Paso de la mision en el que va el grupo (pruebas y depuracion). */
+    public static int currentStep(MinecraftServer server, Group g) {
+        State s = state(server, g);
+        return s == null ? -1 : s.step;
     }
 
     /** El ascensor de salida solo arranca cuando el unico paso que queda es escapar. */
@@ -180,6 +191,7 @@ public final class MissionManager {
                     s.timer = 0;
                 }
                 sync(level, g, s, players);
+                if (g.setMission(s.zoneIndex, s.step, s.facts)) com.smileprotocol.run.RunData.get(server).changed();
             }
         }
     }

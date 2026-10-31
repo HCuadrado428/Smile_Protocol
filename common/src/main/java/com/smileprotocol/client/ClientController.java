@@ -62,6 +62,7 @@ public final class ClientController {
     }
 
     public static void onLeave() {
+        SoundPhysicsCheck.reset();
         ClientState.reset();
         ClientMotion.reset();
         ClientInteraction.reset();
@@ -91,6 +92,7 @@ public final class ClientController {
         }
         prevAccessKey = accessKey;
         ScareWarningScreen.maybeShow(mc);
+        SoundPhysicsCheck.tick(mc);
         ClientState.tickFade();
         ClientMotion.tick(mc);
         ClientHide.tick(mc);

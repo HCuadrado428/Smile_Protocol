@@ -505,5 +505,7 @@
   "smileprotocol.achievement.tamer": "Domador",
   "smileprotocol.achievement.tamer.desc": "Aturde a 5 smilers",
   "smileprotocol.achievement.clockmaker": "Relojero",
-  "smileprotocol.achievement.clockmaker.desc": "Usa 10 despertadores"
+  "smileprotocol.achievement.clockmaker.desc": "Usa 10 despertadores",
+  "smileprotocol.soundphysics.disabled": "Sound Physics Remastered está desactivado: el eco y los sonidos ahogados tras las paredes son parte del juego. Actívalo en su configuración.",
+  "smileprotocol.soundphysics.voice": "Sound Physics Remastered no procesa la voz (simple_voice_chat_integration=false): tus compañeros sonarán sin eco ni oclusión."
 }

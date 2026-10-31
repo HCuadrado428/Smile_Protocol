@@ -211,6 +211,20 @@ public final class ClientSelfTest {
             if (com.smileprotocol.voice.WalkieManager.enabled()) log((slot >= 0 ? "OK" : "FALLO") + " walkie en el equipo inicial");
             if (slot >= 0) com.smileprotocol.interact.SPInventoryOps.take(sp, slot);
         }));
+        // Persistencia: la mision sigue donde estaba tras perder la memoria (reinicio) y se guarda en el grupo
+        SHOTS.add(() -> server.execute(() -> {
+            int before = com.smileprotocol.mission.MissionManager.currentStep(server, g);
+            java.util.Set<String> facts = new java.util.HashSet<>(g.missionFacts());
+            g.setMission(g.zoneIndex(), 1, java.util.Set.of("door:prueba"));
+            com.smileprotocol.instance.InstanceContext.discard(g.id());
+            int after = com.smileprotocol.mission.MissionManager.currentStep(server, g);
+            Group copy = Group.load(g.save());
+            boolean ok = after == 1 && copy.missionStep() == 1 && copy.missionFacts().contains("door:prueba")
+                    && copy.rules().equals(g.rules());
+            log((ok ? "OK" : "FALLO") + " persistencia: la mision sigue en el paso guardado tras un reinicio (" + after + ")");
+            g.setMission(g.zoneIndex(), Math.max(0, before), facts);
+            com.smileprotocol.instance.InstanceContext.discard(g.id());
+        }));
         // 2. Pasillo principal
         shot(mc, server, "02_pasillo", e.add(0, 0, 30), 0f, 5f, 40);
         shot(mc, server, "03_pasillo_transversal", e.add(0, 0, 33), -90f, 5f, 40);

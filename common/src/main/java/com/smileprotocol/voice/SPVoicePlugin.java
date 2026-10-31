@@ -88,10 +88,54 @@ public class SPVoicePlugin implements VoicechatPlugin, VoiceBridge {
         OpusDecoder decoder = decoders.computeIfAbsent(id, k -> api.createDecoder());
         short[] pcm = decoder.decode(data);
         if (pcm == null || pcm.length == 0) return;
-        VoiceManager.onVoice(id, decibels(pcm), e.getPacket().isWhispering());
+        int muffle = com.smileprotocol.hide.HideManager.muffle(id);
+        VoiceManager.onVoice(id, decibels(pcm) - (muffle == 2 ? 10 : muffle == 1 ? 4 : 0), e.getPacket().isWhispering());
+        // Escondido: los de fuera le oyen ahogado (filtro de paso bajo y menos volumen) desde el escondite
+        if (muffle > 0 && sendMuffled(e, id, pcm, muffle)) e.cancel();
         // Walkie (README 17.3): la voz, con filtro de radio, a los receptores del grupo
         java.util.List<WalkieManager.Rx> rx = WalkieManager.routes(id);
         if (rx != null && !rx.isEmpty()) sendRadio(id, pcm, rx);
+    }
+
+    private final Map<UUID, de.maxhenkel.voicechat.api.audiochannel.LocationalAudioChannel> muffledChannels = new ConcurrentHashMap<>();
+    private final Map<UUID, OpusEncoder> muffledEncoders = new ConcurrentHashMap<>();
+
+    /** Reenvia la voz ahogada como audio posicional en el sitio del jugador. False si no se puede (se deja la normal). */
+    private boolean sendMuffled(MicrophonePacketEvent e, UUID id, short[] pcm, int muffle) {
+        if (api == null) return false;
+        net.minecraft.server.MinecraftServer server = com.smileprotocol.ServerRef.get();
+        ServerPlayer p = server == null ? null : server.getPlayerList().getPlayer(id);
+        if (p == null) return false;
+        de.maxhenkel.voicechat.api.Position pos = api.createPosition(p.getX(), p.getEyeY(), p.getZ());
+        var ch = muffledChannels.get(id);
+        if (ch == null || ch.isClosed()) {
+            ch = api.createLocationalAudioChannel(UUID.nameUUIDFromBytes(("muffle" + id).getBytes(java.nio.charset.StandardCharsets.UTF_8)),
+                    api.fromServerLevel(p.serverLevel()), pos);
+            if (ch == null) return false;
+            muffledChannels.put(id, ch);
+        }
+        ch.updateLocation(pos);
+        float range = (float) api.getVoiceChatDistance();
+        ch.setDistance(range * (muffle == 2 ? 0.5f : 0.75f));
+        // el que habla no debe oirse a si mismo
+        ch.setFilter(player -> !player.getUuid().equals(id));
+        ch.send(muffledEncoders.computeIfAbsent(id, k -> api.createEncoder()).encode(muffle(pcm, muffle)));
+        return true;
+    }
+
+    /** Paso bajo (dos polos) y menos volumen: suena «a traves de la puerta». */
+    static short[] muffle(short[] pcm, int level) {
+        double a = level == 2 ? 0.08 : 0.2;          // ~650 Hz o ~1,8 kHz a 48 kHz
+        double gain = level == 2 ? 0.55 : 0.8;
+        short[] out = new short[pcm.length];
+        double y1 = 0, y2 = 0;
+        for (int i = 0; i < pcm.length; i++) {
+            double x = pcm[i] / 32768.0;
+            y1 += a * (x - y1);
+            y2 += a * (y1 - y2);
+            out[i] = (short) Math.max(Short.MIN_VALUE, Math.min(Short.MAX_VALUE, y2 * gain * 1.4 * 32767));
+        }
+        return out;
     }
 
     /** Nivel RMS en dBFS (0 = maximo, -127 = silencio). */
