@@ -84,7 +84,18 @@ public final class SPCommands {
         d.register(Commands.literal("sp")
                 .then(Commands.literal("lobby")
                         .requires(s -> s.hasPermission(SPConfig.get().sp_lobby_permission))
-                        .executes(SPCommands::spLobby)));
+                        .executes(SPCommands::spLobby))
+                .then(Commands.literal("records").executes(c -> {
+                    for (Component l : com.smileprotocol.score.ScoreManager.recordLines(c.getSource().getServer())) {
+                        c.getSource().sendSuccess(() -> l, false);
+                    }
+                    return 1;
+                }))
+                .then(Commands.literal("logros").executes(c -> {
+                    ServerPlayer p = c.getSource().getPlayerOrException();
+                    for (Component l : com.smileprotocol.score.ScoreManager.achievementLines(p)) c.getSource().sendSuccess(() -> l, false);
+                    return 1;
+                })));
     }
 
     private static int spLobby(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
@@ -147,6 +158,12 @@ public final class SPCommands {
                         .then(Commands.argument("run", StringArgumentType.word()).suggests(RUNS)
                                 .executes(SPCommands::endRun))));
 
+        root.then(Commands.literal("records").then(Commands.literal("clear").executes(c -> {
+            com.smileprotocol.score.ScoreData.get(c.getSource().getServer()).clearTop();
+            com.smileprotocol.score.ScoreManager.refreshBoard(c.getSource().getServer());
+            c.getSource().sendSuccess(() -> Component.translatable("smileprotocol.score.cleared"), true);
+            return 1;
+        })));
         root.then(Commands.literal("newrun")
                 .executes(c -> newRun(c, null))
                 .then(Commands.argument("seed", LongArgumentType.longArg())

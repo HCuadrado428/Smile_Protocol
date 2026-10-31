@@ -133,6 +133,7 @@ public class FuseBoxBlock extends HorizontalDirectionalBlock implements EntityBl
             level.playSound(null, pos, SoundEvents.IRON_TRAPDOOR_CLOSE, SoundSource.BLOCKS, 0.7f, 1.6f);
             if (blown) level.playSound(null, pos, SoundEvents.FIRE_EXTINGUISH, SoundSource.BLOCKS, 0.6f, 1.4f);
             com.smileprotocol.mechanism.LabEvents.fire(level, pos, player, "fuse_inserted", box.circuit());
+            com.smileprotocol.score.ScoreManager.onFuseInserted(player);
         } else if (!box.fuses().isEmpty()) {
             String type = box.removeLast();
             ItemStack out = type.equals(FuseBoxBlockEntity.BLOWN) ? new ItemStack(ModItems.FUSE_BLOWN.get())

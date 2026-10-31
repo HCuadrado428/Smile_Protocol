@@ -129,6 +129,10 @@ public final class ClientSelfTest {
                             && com.smileprotocol.lobby.LobbyManager.isOpen(server, "mini1");
                     lv.setMode(before);
                     log((closedOk && freeOk ? "OK" : "FALLO") + " modo closed: solo queda abierto el tutorial");
+                    var board = com.smileprotocol.score.ScoreData.get(server).board();
+                    boolean signs = board.size() == 10 && board.stream().allMatch(b ->
+                            server.overworld().getBlockEntity(b) instanceof net.minecraft.world.level.block.entity.SignBlockEntity);
+                    log((signs ? "OK" : "FALLO") + " lobby: tablon de records con " + board.size() + " carteles");
                     // Reglas: dentro de la cabina del ascensor 1 se eligen con F7 (aqui, el paquete directamente)
                     var mini = lv.getElevator("mini1");
                     if (mini != null) {
@@ -939,6 +943,23 @@ public final class ClientSelfTest {
             log((run != null ? "OK" : "FALLO") + " voz: el muerto pasa al grupo de espectadores (" + run + ")");
         }));
         SHOTS.add(() -> grab(mc, "27_game_over"));
+        SHOTS.add(() -> server.execute(() -> {
+            var data = com.smileprotocol.score.ScoreData.get(server);
+            boolean rec = !data.top().isEmpty() && data.stats(sp.getUUID()).runs > 0;
+            log((rec ? "OK" : "FALLO") + " puntuacion: la partida queda en la tabla (" + data.top().size() + ") y en las estadisticas");
+            boolean first = com.smileprotocol.score.ScoreManager.unlock(sp, "graduate");
+            boolean again = com.smileprotocol.score.ScoreManager.unlock(sp, "graduate");
+            log((first && !again ? "OK" : "FALLO") + " logros: se desbloquean una sola vez");
+            // el tablon del lobby ya muestra la partida
+            var b = data.board();
+            if (!b.isEmpty()) {
+                server.overworld().getChunkAt(b.get(0));
+                com.smileprotocol.score.ScoreManager.refreshBoard(server);
+            }
+            String l0 = b.isEmpty() || !(server.overworld().getBlockEntity(b.get(0)) instanceof net.minecraft.world.level.block.entity.SignBlockEntity s)
+                    ? "" : s.getFrontText().getMessage(0, false).getString();
+            log((l0.contains("pts") ? "OK" : "FALLO") + " tablon de records actualizado: «" + l0 + "»");
+        }));
     }
 
     // Grabacion de animaciones -------------------------------------------------------------------

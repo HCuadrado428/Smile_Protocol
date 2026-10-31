@@ -357,7 +357,8 @@ public final class RunManager {
         long secs = run == null ? 0 : Math.max(0, (now - run.startTime()) / 20);
         ZonePlacement cur = g.current();
         Component zoneName = cur == null ? Component.empty() : com.smileprotocol.instance.FloorTitle.zoneName(server, cur.zoneId());
-        Payloads.GroupEnd end = new Payloads.GroupEnd(state == GroupState.ELIMINATED, zoneName, g.zoneIndex(), g.lastIndex(), (int) secs);
+        int score = run == null ? 0 : com.smileprotocol.score.ScoreManager.onGroupFinished(server, run, g, state, (int) secs);
+        Payloads.GroupEnd end = new Payloads.GroupEnd(state == GroupState.ELIMINATED, zoneName, g.zoneIndex(), g.lastIndex(), (int) secs, score);
         for (UUID id : g.members().keySet()) {
             ServerPlayer p = server.getPlayerList().getPlayer(id);
             if (p != null) {

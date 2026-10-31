@@ -95,6 +95,7 @@ public final class LobbyBuilder {
         b.cafeteria();
         b.security();
         b.details();
+        b.recordBoard();
         return b.register(spawn);
     }
 
@@ -532,6 +533,27 @@ public final class LobbyBuilder {
         }
     }
 
+    /** Carteles del tablon de records, en orden (1 a 10). */
+    private final java.util.List<BlockPos> recordSigns = new java.util.ArrayList<>();
+
+    /** Tablon de records: una pared de madera en la sala con diez carteles (los rellena ScoreManager). */
+    private void recordBoard() {
+        int z = 20;
+        fill(7, 1, z, 13, 4, z, Blocks.DARK_OAK_PLANKS);
+        fill(7, 5, z, 13, 5, z, Blocks.DARK_OAK_SLAB);
+        wallSign(10, 4, z + 1, Direction.SOUTH, "TABLÓN DE", "RÉCORDS", "/sp records", "/sp logros");
+        for (int row = 0; row < 2; row++) {
+            for (int i = 0; i < 5; i++) {
+                int x = 8 + i, y = 3 - row;
+                set(x, y, z + 1, Blocks.SPRUCE_WALL_SIGN.defaultBlockState().setValue(WallSignBlock.FACING, Direction.SOUTH));
+                writeSign(at(x, y, z + 1), (row * 5 + i + 1) + ".", "---");
+                recordSigns.add(at(x, y, z + 1));
+            }
+        }
+        set(7, 1, z + 1, Blocks.LANTERN);
+        set(13, 1, z + 1, Blocks.LANTERN);
+    }
+
     private Component register(BlockPos spawn) {
         LobbyData data = LobbyData.get(level.getServer());
         data.setRegion(regionFor(o));
@@ -546,6 +568,8 @@ public final class LobbyBuilder {
         }
         LobbyManager.registerElevator(level, ElevatorType.TUTORIAL, "tutorial", "TUTORIAL", new BoundingBox(
                 o.getX() + TUT_X1, o.getY() + 1, o.getZ() + TUT_Z1, o.getX() + TUT_X2, o.getY() + 4, o.getZ() + TUT_Z2));
+        com.smileprotocol.score.ScoreData.get(level.getServer()).setBoard(recordSigns);
+        com.smileprotocol.score.ScoreManager.refreshBoard(level.getServer());
         SPDebug.log("lobby construido en " + o.toShortString());
         return Component.translatable("smileprotocol.lobby.built", spawn.toShortString(), CABINS.length + 1);
     }

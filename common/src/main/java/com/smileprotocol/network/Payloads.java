@@ -370,7 +370,7 @@ public final class Payloads {
      * S -> C: final del grupo (README 6.6, 6.7): GAME OVER (todos muertos) o escapados, con la planta
      * en que acabo. C -> S no; para volver al lobby desde la pantalla se usa {@link ReturnLobby}.
      */
-    public record GroupEnd(boolean eliminated, Component zone, int zoneIndex, int zones, int seconds) implements CustomPacketPayload {
+    public record GroupEnd(boolean eliminated, Component zone, int zoneIndex, int zones, int seconds, int score) implements CustomPacketPayload {
         public static final Type<GroupEnd> TYPE = typeOf("group_end");
         public static final StreamCodec<RegistryFriendlyByteBuf, GroupEnd> CODEC = StreamCodec.composite(
                 ByteBufCodecs.BOOL, GroupEnd::eliminated,
@@ -378,6 +378,7 @@ public final class Payloads {
                 ByteBufCodecs.VAR_INT, GroupEnd::zoneIndex,
                 ByteBufCodecs.VAR_INT, GroupEnd::zones,
                 ByteBufCodecs.VAR_INT, GroupEnd::seconds,
+                ByteBufCodecs.VAR_INT, GroupEnd::score,
                 GroupEnd::new);
 
         @Override public Type<GroupEnd> type() { return TYPE; }

@@ -115,6 +115,7 @@ public final class HideManager {
 
     public static void enter(ServerPlayer p, BlockPos spot, HideType type, HideBlock block) {
         if (HIDDEN.containsKey(p.getUUID()) || occupants(spot) >= type.capacity()) return;
+        com.smileprotocol.score.ScoreManager.onHide(p);
         ServerLevel level = p.serverLevel();
         BlockState st = level.getBlockState(spot);
         Direction facing = st.hasProperty(HideBlock.FACING) ? st.getValue(HideBlock.FACING) : Direction.NORTH;

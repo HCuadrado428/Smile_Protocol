@@ -59,6 +59,21 @@ public final class SelfTest {
                     && com.smileprotocol.difficulty.RunRules.decode("").isDefault();
             log((rulesOk ? "reglas" : "FALLO reglas") + ": " + rules.encode() + " " + hard.describe() + " / facil " + easy.describe());
             if (!rulesOk) failures++;
+            // Puntuacion y tabla de records
+            var normal = com.smileprotocol.difficulty.RunRules.DEFAULT;
+            int sEsc = com.smileprotocol.score.ScoreManager.score(6, true, 1200, 3, normal);
+            int sFast = com.smileprotocol.score.ScoreManager.score(6, true, 600, 3, normal);
+            int sDead = com.smileprotocol.score.ScoreManager.score(3, false, 600, 0, normal);
+            int sHard = com.smileprotocol.score.ScoreManager.score(6, true, 1200, 3, rules);
+            var table = new com.smileprotocol.score.ScoreData();
+            for (int k = 0; k < 12; k++) table.add(new com.smileprotocol.score.ScoreData.Entry(k * 100, List.of("p" + k), 1, 6, 60, "NORMAL", false, 0));
+            int place = table.add(new com.smileprotocol.score.ScoreData.Entry(550, List.of("x"), 1, 6, 60, "NORMAL", false, 0));
+            boolean scoreOk = sFast > sEsc && sEsc > sDead && sHard > sEsc && table.top().size() == 10
+                    && table.top().get(0).score() == 1100 && place == 7
+                    && table.add(new com.smileprotocol.score.ScoreData.Entry(1, List.of("y"), 1, 6, 60, "NORMAL", false, 0)) == 0;
+            log((scoreOk ? "puntuacion" : "FALLO puntuacion") + ": escapar=" + sEsc + " rapido=" + sFast + " eliminados=" + sDead
+                    + " pesadilla=" + sHard + " puesto=" + place);
+            if (!scoreOk) failures++;
             List<ResourceLocation> seq = ZoneSequence.generate(server, 1234L, List.of());
             log("secuencia " + seq);
             if (seq.size() < 2) failures++;

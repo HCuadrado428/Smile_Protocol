@@ -190,13 +190,16 @@ public final class UseManager {
                 }
             }
             case "WALKIE" -> com.smileprotocol.voice.WalkieManager.toggle(p);
-            case "DECOY" -> Decoys.place(p, (int) u.def.amount());
+            case "DECOY" -> {
+                if (Decoys.place(p, (int) u.def.amount())) com.smileprotocol.score.ScoreManager.onDecoy(p);
+            }
             case "STUN" -> {
                 com.smileprotocol.entity.SPMonster m = stunTarget(p);
                 if (m != null && m.stun((int) u.def.amount())) {
                     p.serverLevel().playSound(null, m.blockPosition(), SoundEvents.TRIDENT_RIPTIDE_1.value(), SoundSource.HOSTILE, 0.9f, 1.8f);
                     p.displayClientMessage(Component.translatable("smileprotocol.use.stunned").withStyle(ChatFormatting.AQUA), true);
                     SPDebug.log(p.getGameProfile().getName() + " aturde a " + m.defId());
+                    com.smileprotocol.score.ScoreManager.onStun(p);
                 } else {
                     p.displayClientMessage(Component.translatable("smileprotocol.use.stun_failed").withStyle(ChatFormatting.GRAY), true);
                 }

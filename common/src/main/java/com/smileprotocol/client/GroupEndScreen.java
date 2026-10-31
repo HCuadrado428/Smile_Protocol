@@ -81,6 +81,10 @@ public class GroupEndScreen extends Screen {
         Component time = HudOverlay.hud(Component.translatable("smileprotocol.end.time", end.seconds() / 60, String.format("%02d", end.seconds() % 60)));
         g.drawString(font, where, width / 2 - font.width(where) / 2, height / 2 + 4, 0xFFC9BFA6, true);
         g.drawString(font, time, width / 2 - font.width(time) / 2, height / 2 + 18, 0xFF8C8270, true);
+        if (end.score() > 0) {
+            Component sc = HudOverlay.hud(Component.translatable("smileprotocol.end.score", end.score()));
+            g.drawString(font, sc, width / 2 - font.width(sc) / 2, height / 2 + 46, 0xFFD8B860, true);
+        }
         if (end.eliminated()) {
             Component hint = HudOverlay.hud(Component.translatable("smileprotocol.end.no_retry"));
             g.drawString(font, hint, width / 2 - font.width(hint) / 2, height / 2 + 32, 0xFF6A6050, false);

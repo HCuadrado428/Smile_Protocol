@@ -266,6 +266,14 @@ Hace falta Simple Voice Chat en el servidor y en los clientes (es opcional: sin 
 2. **Registrar.** Escritorios, archivadores, botiquines, carros de herramientas y cajas de suministros se registran: mírales y mantén el clic derecho (sale el texto, p. ej. «Registrar los cajones»). Hace algo de ruido. Al acabar se abren (cajón fuera, puertas abiertas, tapa quitada) y a veces sueltan algo delante: latas, botellas, pilas, botiquines, bengalas, adrenalina o un fusible fundido; muchas veces nada («No hay nada útil.»). Un mueble abierto ya no se puede registrar.
 3. **Botín por planta.** Cada planta tiene su tabla (`data/smileprotocol/search_loot/<planta>.json`): en la morgue salen más botiquines, en energía más pilas... y en los botiquines siempre es más fácil encontrar curas. Cada partida coloca la planta de nuevo, así que vuelven a estar cerrados.
 
+## Puntuación, récords y logros
+
+- **Tablón del lobby.** A la izquierda de la sala, una pared de madera con diez carteles: «1. ---» … «10. ---» mientras no hay partidas.
+- **Al terminar.** Cada grupo recibe en el chat y en la pantalla final «Puntuación: N». Cuenta: 1000 por planta superada; si escapan, 3000 más, hasta 3000 por rapidez (menos de 25 min) y 500 por superviviente; todo por el multiplicador de las reglas (Pesadilla ×1,25, Fácil ×0,8, +15 % por modificador). Si entra en la tabla sale «¡Nuevo récord!» para todos y el tablón se actualiza.
+- **Comandos.** `/sp records` lista la tabla; `/sp logros` tus logros (✔/✘) y tus estadísticas. `/smileprotocol records clear` borra la tabla.
+- **Logros.** Doce: Graduado (tutorial), Primera huida, Sin un rasguño, Superviviente de pesadilla, Temerario (3 modificadores), Veterano (10 huidas), Contrarreloj (menos de 15 min), El último en pie, Electricista (25 fusibles), Rey del escondite (50 escondites), Domador (5 aturdidos) y Relojero (10 despertadores). Al conseguir uno: aviso, sonido de desafío y mensaje en el chat (pasando el ratón se ve qué pedía). No se repiten.
+- **Tutorial.** No puntúa ni sale en la tabla, pero da «Graduado».
+
 ## Señuelo y aturdidor
 
 - **Despertador (señuelo).** `/spadmin give decoy`. Mantén clic derecho: se deja en el suelo, un poco por delante. Suena dos campanadas cada 1,5 s durante 20 s y luego se rompe. Un berserker que patrulla cerca va a mirar al despertador en vez de a ti.

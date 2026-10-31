@@ -72,6 +72,7 @@ public final class DownedManager {
             DeathManager.die(p, cause);
             return;
         }
+        com.smileprotocol.score.ScoreManager.onDowned(p);
         HideManager.forceExit(p, true);
         com.smileprotocol.qte.QTEManager.clear(p);
         com.smileprotocol.interact.InteractionManager.stop(p, true);
