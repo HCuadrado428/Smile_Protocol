@@ -41,7 +41,7 @@ public class GemeloRenderer extends LivingEntityRenderer<Gemelo, PlayerModel<Gem
 
     private static PlayerSkin skin(Gemelo g) {
         UUID id = g.copied();
-        if (id == null) return DefaultPlayerSkin.getDefaultSkin();
+        if (id == null) return DefaultPlayerSkin.get(g.getUUID());
         var conn = Minecraft.getInstance().getConnection();
         PlayerInfo info = conn == null ? null : conn.getPlayerInfo(id);
         return info != null ? info.getSkin() : DefaultPlayerSkin.get(id);

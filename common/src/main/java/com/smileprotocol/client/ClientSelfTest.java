@@ -931,7 +931,7 @@ public final class ClientSelfTest {
         SHOTS.add(() -> wait = 12);
         SHOTS.add(() -> {
             var t = twin[0] == null ? null : mc.level.getEntity(twin[0].getId());
-            log((t instanceof com.smileprotocol.entity.Gemelo g && g.revealed() ? "OK" : "FALLO") + " gemelo: se delata (cara y sin nombre)");
+            log((t instanceof com.smileprotocol.entity.Gemelo tw && tw.revealed() ? "OK" : "FALLO") + " gemelo: se delata (cara y sin nombre)");
             grab(mc, "61_gemelo_delatado");
         });
         SHOTS.add(() -> server.execute(() -> {
