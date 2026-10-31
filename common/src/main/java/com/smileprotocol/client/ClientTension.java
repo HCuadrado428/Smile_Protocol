@@ -66,8 +66,11 @@ public final class ClientTension {
     /** Despues del mundo y antes de la HUD. */
     public static void render(float pt) {
         float k = level(pt);
-        if (k <= 0.004f || failed) return;
         Minecraft mc = Minecraft.getInstance();
+        // la capa base (grado de color, grano, vineta) va siempre dentro de la partida
+        float base = mc.player != null && ClientState.inSmileProtocol() && SPConfig.get().tension_shader && !ClientState.dead
+                ? SPConfig.get().film_strength : 0f;
+        if ((k <= 0.004f && base <= 0.001f) || failed || mc.level == null) return;
         try {
             if (chain == null) {
                 chain = new PostChain(mc.getTextureManager(), mc.getResourceManager(), mc.getMainRenderTarget(), CHAIN);
@@ -83,6 +86,8 @@ public final class ClientTension {
             for (PostPass pass : ((PostChainAccessor) chain).smileprotocol$passes()) {
                 pass.getEffect().safeGetUniform("Intensity").set(k);
                 pass.getEffect().safeGetUniform("Pulse").set(pulse);
+                pass.getEffect().safeGetUniform("Base").set(base);
+                pass.getEffect().safeGetUniform("Calm").set(SPConfig.get().reduce_flashes ? 1f : 0f);
             }
             chain.process(pt);
             rendered = true;

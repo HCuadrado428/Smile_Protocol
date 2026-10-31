@@ -266,6 +266,12 @@ Hace falta Simple Voice Chat en el servidor y en los clientes (es opcional: sin 
 2. **Registrar.** Escritorios, archivadores, botiquines, carros de herramientas y cajas de suministros se registran: mírales y mantén el clic derecho (sale el texto, p. ej. «Registrar los cajones»). Hace algo de ruido. Al acabar se abren (cajón fuera, puertas abiertas, tapa quitada) y a veces sueltan algo delante: latas, botellas, pilas, botiquines, bengalas, adrenalina o un fusible fundido; muchas veces nada («No hay nada útil.»). Un mueble abierto ya no se puede registrar.
 3. **Botín por planta.** Cada planta tiene su tabla (`data/smileprotocol/search_loot/<planta>.json`): en la morgue salen más botiquines, en energía más pilas... y en los botiquines siempre es más fácil encontrar curas. Cada partida coloca la planta de nuevo, así que vuelven a estar cerrados.
 
+## Imagen (shaders)
+
+- **Siempre, dentro de la partida:** colores algo apagados con sombras frías y luces amarillentas, negros más profundos, grano de película fino, viñeta suave, un poco de aberración cromática en los bordes y, de vez en cuando, una mota de polvo o una raya. En el lobby no.
+- **Con tensión** (un smiler cerca, minijuego, derribado o poca vida): visión de túnel con el borde borroso, imagen doble que tiembla con el latido, colores hacia el rojo enfermizo, grano más grueso, alguna franja de interferencia y viñeta roja que late.
+- **Accesibilidad:** con «Reducir destellos» desaparecen las franjas, el polvo y las rayas; con el shader de tensión apagado no hay ninguna capa. `film_strength` en la configuración regula la capa de siempre (0 = nada).
+
 ## Luces
 
 - **Fluorescentes.** Al dar corriente a un circuito, cada tubo arranca a golpes (unos destellos) antes de quedarse fijo; no todos a la vez ni igual. Encendidos tienen un rizado muy leve, cada uno su intensidad y su tono (unos más verdes, otros más azulados). Al quitar la corriente se apagan casi de golpe.

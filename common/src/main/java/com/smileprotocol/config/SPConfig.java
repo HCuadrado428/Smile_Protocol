@@ -177,6 +177,8 @@ public final class SPConfig {
         public float boss_music_volume = 0.8f;
         /** Musica de ambiente de cada planta (0 = sin musica). */
         public float floor_music_volume = 0.5f;
+        /** Capa base de la imagen dentro de la partida (grado de color, grano, vineta, polvo): 0 = nada. */
+        public float film_strength = 1.0f;
 
         // Walkies (README 17.3) y marcadores (8.4)
         public boolean walkie_enabled = true;
