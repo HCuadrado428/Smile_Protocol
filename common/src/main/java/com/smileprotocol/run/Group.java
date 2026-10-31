@@ -38,6 +38,8 @@ public final class Group {
     /** Tiempo de juego desde el que no queda ningun miembro activo conectado (-1 = alguno lo esta). */
     private long offlineSince = -1;
     private long endTime = -1;
+    /** Dificultad y modificadores elegidos en el ascensor. */
+    private com.smileprotocol.difficulty.RunRules rules = com.smileprotocol.difficulty.RunRules.DEFAULT;
 
     public Group(UUID id, String runId, int number, List<ResourceLocation> sequence, DifficultyProfile difficulty, int slot) {
         this.id = id;
@@ -56,6 +58,8 @@ public final class Group {
     public List<ResourceLocation> sequence() { return sequence; }
     public DifficultyProfile difficulty() { return difficulty; }
     public int slot() { return slot; }
+    public com.smileprotocol.difficulty.RunRules rules() { return rules; }
+    public void setRules(com.smileprotocol.difficulty.RunRules rules) { this.rules = rules; }
 
     public void addMember(UUID player, String name) {
         members.put(player, MemberStatus.ACTIVE);
@@ -133,6 +137,7 @@ public final class Group {
         for (ResourceLocation r : sequence) seq.add(StringTag.valueOf(r.toString()));
         t.put("Sequence", seq);
         t.put("Difficulty", difficulty.save());
+        t.putString("Rules", rules.encode());
         t.putInt("Slot", slot);
         t.putString("State", state.name());
         t.putInt("ZoneIndex", zoneIndex);
@@ -171,6 +176,7 @@ public final class Group {
             g.state = GroupState.INTRO;
         }
         g.zoneIndex = t.getInt("ZoneIndex");
+        g.rules = com.smileprotocol.difficulty.RunRules.decode(t.getString("Rules"));
         if (t.contains("Current")) g.current = ZonePlacement.load(t.getCompound("Current"));
         if (t.contains("Next")) g.next = ZonePlacement.load(t.getCompound("Next"));
         g.offlineSince = t.getLong("OfflineSince");

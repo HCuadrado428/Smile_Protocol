@@ -129,6 +129,16 @@ public final class ClientSelfTest {
                             && com.smileprotocol.lobby.LobbyManager.isOpen(server, "mini1");
                     lv.setMode(before);
                     log((closedOk && freeOk ? "OK" : "FALLO") + " modo closed: solo queda abierto el tutorial");
+                    // Reglas: dentro de la cabina del ascensor 1 se eligen con F7 (aqui, el paquete directamente)
+                    var mini = lv.getElevator("mini1");
+                    if (mini != null) {
+                        SPSessionManager.teleport(sp, server.overworld(), mini.cabinAABB().getCenter().with(net.minecraft.core.Direction.Axis.Y,
+                                mini.cabin().minY()), 0f, 0f);
+                        com.smileprotocol.lobby.LobbyManager.onSetRules(new com.smileprotocol.network.Payloads.SetRules("NIGHTMARE|weak_battery"), sp);
+                        var got = com.smileprotocol.lobby.LobbyManager.rulesOf("mini1");
+                        log((got.encode().equals("NIGHTMARE|weak_battery") ? "OK" : "FALLO") + " reglas elegidas en la cabina: " + got.encode());
+                        com.smileprotocol.lobby.LobbyManager.onSetRules(new com.smileprotocol.network.Payloads.SetRules("NORMAL"), sp);
+                    }
                     // la puerta del tutorial, en la pared oeste
                     SPSessionManager.teleport(sp, server.overworld(), Vec3.atBottomCenterOf(LOBBY).add(-13, 0, -33), 90f, 0f);
                 });
@@ -823,6 +833,11 @@ public final class ClientSelfTest {
         SHOTS.add(() -> server.execute(() -> {
             if (tutGroup[0] != null) com.smileprotocol.instance.InstanceManager.release(server, tutGroup[0]);
         }));
+        // 8o. Pantalla de reglas (F7 dentro de un ascensor pequeno)
+        SHOTS.add(() -> mc.setScreen(new RulesScreen(com.smileprotocol.difficulty.RunRules.decode("NIGHTMARE|fast_mobs,no_revive"))));
+        SHOTS.add(() -> wait = 10);
+        SHOTS.add(() -> grab(mc, "54_reglas"));
+        SHOTS.add(() -> mc.setScreen(null));
         // 9. Fase 12: levantarse tras la reanimacion, muerte instantanea en primera persona y muerte final
         SHOTS.add(() -> server.execute(() -> {
             com.smileprotocol.qte.QTEManager.clear(sp);

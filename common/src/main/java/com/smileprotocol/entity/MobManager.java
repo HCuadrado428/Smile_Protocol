@@ -131,11 +131,27 @@ public final class MobManager {
         if (spawn(level, ModEntities.APAGON.get(), p, rnd) != null) SPDebug.log("mobs: apagon en " + p.toShortString());
     }
 
+    private static final net.minecraft.resources.ResourceLocation RULES_SPEED =
+            net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("smileprotocol", "rules_speed");
+
+    /** Reglas de la partida (Pesadilla, «monstruos rapidos»): mas velocidad. */
+    private static void applyRules(ServerLevel level, SPMonster mob, BlockPos pos) {
+        var ctx = com.smileprotocol.instance.InstanceContext.at(level, pos);
+        var g = ctx == null ? null : ctx.group(level.getServer());
+        if (g == null) return;
+        double f = g.rules().speedFactor();
+        var speed = mob.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MOVEMENT_SPEED);
+        if (speed == null || Math.abs(f - 1) < 1e-3) return;
+        speed.addOrReplacePermanentModifier(new net.minecraft.world.entity.ai.attributes.AttributeModifier(RULES_SPEED, f - 1,
+                net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
+    }
+
     public static <T extends SPMonster> T spawn(ServerLevel level, EntityType<T> type, BlockPos pos, RandomSource rnd) {
         T mob = type.create(level);
         if (mob == null) return null;
         mob.moveTo(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5, rnd.nextFloat() * 360f, 0f);
         mob.finalizeSpawn(level, level.getCurrentDifficultyAt(pos), MobSpawnType.EVENT, null);
+        applyRules(level, mob, pos);
         level.addFreshEntity(mob);
         return mob;
     }

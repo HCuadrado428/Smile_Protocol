@@ -45,7 +45,7 @@ public final class ZoneSetup {
 
     /** Devuelve las posiciones donde se han dejado fusibles. Anade los marcadores de puertas. */
     public static List<BlockPos> setup(ServerLevel level, BoundingBox box, Map<String, List<BlockPos>> markers,
-                                       DifficultyProfile difficulty, RandomSource rnd) {
+                                       DifficultyProfile difficulty, RandomSource rnd, boolean scarce) {
         Map<String, Integer> required = new LinkedHashMap<>();
         Set<String> circuits = new HashSet<>();
         List<BlockPos> doors = new ArrayList<>();
@@ -113,7 +113,7 @@ public final class ZoneSetup {
         // Objetos sueltos en los sitios que sobran (README 10.1, 12.7): consumibles y lanzables al azar,
         // mas lanzables que curas. Hasta que lleguen los muebles registrables (fase 24).
         String[] loot = {"can", "bottle", "can", "bottle", "battery", "medkit", "flare", "can", "adrenaline"};
-        int extra = Math.min(spots.size() - used.size(), 2 + rnd.nextInt(3));
+        int extra = scarce ? 0 : Math.min(spots.size() - used.size(), 2 + rnd.nextInt(3));
         for (int i = 0; i < extra; i++) {
             BlockPos p = spots.get(used.size());
             spawn(level, p, itemFor(loot[rnd.nextInt(loot.length)]));

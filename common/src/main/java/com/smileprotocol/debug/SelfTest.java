@@ -47,6 +47,18 @@ public final class SelfTest {
             for (String h : new String[]{"locker", "wardrobe", "gurney", "curtain", "container"}) {
                 log("escondite " + HideTypes.get(server, h));
             }
+            // Reglas de la partida: texto de ida y vuelta y efecto sobre el perfil del grupo
+            var rules = com.smileprotocol.difficulty.RunRules.decode("NIGHTMARE|no_revive,fast_mobs,inventado");
+            var base = DifficultyScaler.forGroup(server, 4);
+            var hard = rules.apply(base);
+            var easy = com.smileprotocol.difficulty.RunRules.decode("EASY").apply(base);
+            boolean rulesOk = rules.encode().equals("NIGHTMARE|fast_mobs,no_revive")
+                    && com.smileprotocol.difficulty.RunRules.decode(rules.encode()).equals(rules)
+                    && hard.mobs() > base.mobs() && hard.qteTime() < base.qteTime() && easy.mobs() < base.mobs()
+                    && Math.abs(rules.speedFactor() - 1.15 * 1.2) < 1e-6 && rules.scoreFactor() > 1.5
+                    && com.smileprotocol.difficulty.RunRules.decode("").isDefault();
+            log((rulesOk ? "reglas" : "FALLO reglas") + ": " + rules.encode() + " " + hard.describe() + " / facil " + easy.describe());
+            if (!rulesOk) failures++;
             List<ResourceLocation> seq = ZoneSequence.generate(server, 1234L, List.of());
             log("secuencia " + seq);
             if (seq.size() < 2) failures++;

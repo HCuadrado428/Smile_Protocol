@@ -84,7 +84,11 @@ public final class ClientController {
         ClientCaptions.register(mc);
         // Menu de accesibilidad (README 24.2)
         boolean accessKey = mc.screen == null && ClientMotion.isDown(SPConfig.get().key_accessibility);
-        if (accessKey && !prevAccessKey) mc.setScreen(new AccessibilityScreen(null));
+        if (accessKey && !prevAccessKey) {
+            // Dentro de la cabina de un ascensor pequeno, F7 abre las reglas de la partida
+            var rules = RulesScreen.cabinRules();
+            mc.setScreen(rules != null ? new RulesScreen(rules) : new AccessibilityScreen(null));
+        }
         prevAccessKey = accessKey;
         ScareWarningScreen.maybeShow(mc);
         ClientState.tickFade();

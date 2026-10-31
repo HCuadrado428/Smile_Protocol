@@ -167,6 +167,11 @@ public final class RunManager {
      */
     public static StartResult start(MinecraftServer server, RunType type, String elevatorId,
                                     List<ServerPlayer> players, boolean force) {
+        return start(server, type, elevatorId, players, force, com.smileprotocol.difficulty.RunRules.DEFAULT);
+    }
+
+    public static StartResult start(MinecraftServer server, RunType type, String elevatorId,
+                                    List<ServerPlayer> players, boolean force, com.smileprotocol.difficulty.RunRules rules) {
         ServerLevel level = server.getLevel(SPDimension.SP_DIM);
         if (level == null) return new StartResult(null, Component.translatable("smileprotocol.run.no_dimension"));
         RunData data = RunData.get(server);
@@ -225,8 +230,9 @@ public final class RunManager {
             }
             int slot = InstanceManager.allocateSlot(data, taken);
             taken.add(slot);
-            DifficultyProfile difficulty = DifficultyScaler.forGroup(server, members.size());
+            DifficultyProfile difficulty = rules.apply(DifficultyScaler.forGroup(server, members.size()));
             Group g = new Group(UUID.randomUUID(), runId, number, seq, difficulty, slot);
+            g.setRules(rules);
             for (ServerPlayer p : members) g.addMember(p.getUUID(), p.getGameProfile().getName());
             run.groups().add(g);
         }
@@ -268,7 +274,7 @@ public final class RunManager {
 
         StringBuilder sizes = new StringBuilder();
         for (Group g : run.groups()) sizes.append(sizes.isEmpty() ? "" : "+").append(g.members().size());
-        SPDebug.log("partida " + runId + " " + type + " desde " + elevatorId + " grupos=" + sizes + " semilla=" + seed
+        SPDebug.log("partida " + runId + " " + type + " desde " + elevatorId + " reglas=" + rules.encode() + " grupos=" + sizes + " semilla=" + seed
                 + " zonas=" + sequence);
         return new StartResult(run, Component.translatable("smileprotocol.run.started", runId, run.groups().size(), sizes.toString()));
     }

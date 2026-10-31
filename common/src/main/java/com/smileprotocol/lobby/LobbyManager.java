@@ -67,6 +67,8 @@ public final class LobbyManager {
         boolean forced;
         int shownReady;
         int shownTotal;
+        /** Dificultad y modificadores elegidos dentro (solo ascensores pequenos). */
+        com.smileprotocol.difficulty.RunRules rules = com.smileprotocol.difficulty.RunRules.DEFAULT;
     }
 
     private static final Map<String, Runtime> RUNTIME = new HashMap<>();
@@ -175,6 +177,7 @@ public final class LobbyManager {
 
         rt.inside = ids(occupants);
         rt.ready.retainAll(rt.inside);
+        if (occupants.isEmpty()) rt.rules = com.smileprotocol.difficulty.RunRules.DEFAULT;
         rt.shownReady = rt.ready.size();
         rt.shownTotal = occupants.size();
 
@@ -281,7 +284,12 @@ public final class LobbyManager {
             case TUTORIAL -> RunType.TUTORIAL;
             default -> RunType.MINI;
         };
-        RunManager.StartResult result = RunManager.start(server, type, def.id(), group, rt.forced);
+        com.smileprotocol.difficulty.RunRules rules = switch (def.type()) {
+            case MINI -> rt.rules;
+            case MEGA -> com.smileprotocol.difficulty.RunRules.decode(SPConfig.get().event_rules);
+            default -> com.smileprotocol.difficulty.RunRules.DEFAULT;
+        };
+        RunManager.StartResult result = RunManager.start(server, type, def.id(), group, rt.forced, rules);
         rt.forced = false;
         if (!result.ok()) {
             SPDebug.log("ascensor " + def.id() + ": no se pudo bajar: " + result.message().getString());
@@ -360,6 +368,45 @@ public final class LobbyManager {
         }
     }
 
+    /**
+     * Reglas elegidas con F7 dentro de la cabina de un ascensor pequeno. Cambiarlas quita el «listo»
+     * de todos (tienen que volver a aceptar) y se avisa a los de dentro.
+     */
+    public static void onSetRules(Payloads.SetRules in, ServerPlayer player) {
+        MinecraftServer server = player.server;
+        if (player.level() != server.overworld()) return;
+        LobbyData data = LobbyData.get(server);
+        for (ElevatorDef def : data.getElevators()) {
+            if (def.type() != ElevatorType.MINI || !def.contains(player.position())) continue;
+            Runtime rt = runtime(def.id());
+            if (rt.state != State.IDLE && rt.state != State.COUNTDOWN) return;
+            com.smileprotocol.difficulty.RunRules rules = com.smileprotocol.difficulty.RunRules.decode(in.rules());
+            if (rules.equals(rt.rules)) return;
+            rt.rules = rules;
+            List<ServerPlayer> occ = occupants(server, def);
+            cancelCountdown(rt, occ);
+            rt.ready.clear();
+            Component summary = rulesSummary(rules);
+            for (ServerPlayer p : occ) {
+                p.displayClientMessage(Component.translatable("smileprotocol.rules.changed", player.getDisplayName(), summary)
+                        .withStyle(ChatFormatting.GOLD), false);
+            }
+            SPDebug.log("ascensor " + def.id() + ": reglas " + rules.encode() + " (" + player.getGameProfile().getName() + ")");
+            return;
+        }
+    }
+
+    /** «Pesadilla + Monstruos rapidos + Sin reanimacion». */
+    public static Component rulesSummary(com.smileprotocol.difficulty.RunRules rules) {
+        net.minecraft.network.chat.MutableComponent c = Component.empty();
+        List<String> keys = rules.summaryKeys();
+        for (int i = 0; i < keys.size(); i++) {
+            if (i > 0) c.append(" + ");
+            c.append(Component.translatable(keys.get(i)));
+        }
+        return c;
+    }
+
     @Nullable
     private static ElevatorDef elevatorForButton(LobbyData data, BlockPos pos) {
         for (ElevatorDef def : data.getElevators()) {
@@ -378,6 +425,11 @@ public final class LobbyManager {
     private static Component cannotPlayReason(ServerPlayer p) {
         if (!ModCheck.isOk(p)) return ModCheck.reason(p);
         return Component.translatable("smileprotocol.elevator.cannot_play");
+    }
+
+    /** Reglas elegidas ahora en la cabina {@code id} (pruebas). */
+    public static com.smileprotocol.difficulty.RunRules rulesOf(String id) {
+        return runtime(id).rules;
     }
 
     /** Si el ascensor {@code id} admite jugadores ahora mismo (lo usan las pruebas y los comandos). */
@@ -475,7 +527,8 @@ public final class LobbyManager {
         } else {
             status = Component.translatable("smileprotocol.elevator.press_ready");
         }
-        return new Payloads.SyncReady(true, Component.literal(def.name()), rt.shownReady, rt.shownTotal, countdown, status);
+        String rules = def.type() == ElevatorType.MINI ? rt.rules.encode() : "";
+        return new Payloads.SyncReady(true, Component.literal(def.name()), rt.shownReady, rt.shownTotal, countdown, status, rules);
     }
 
     private static Payloads.Board board(LobbyData data, ElevatorDef def) {

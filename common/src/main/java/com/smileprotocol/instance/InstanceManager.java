@@ -210,7 +210,8 @@ public final class InstanceManager {
         List<BlockPos> mobs = pickRandom(mobPoints, group.difficulty().scaleMobs(mobPoints.size(), mobPoints.size()), rnd);
         // Cajas, fusibles, objetos, circuitos y puertas de las cabinas (README 14)
         List<BlockPos> fuses = template != null
-                ? ZoneSetup.setup(level, box, markers, group.difficulty(), rnd)
+                ? ZoneSetup.setup(level, box, markers, group.difficulty(), rnd,
+                        group.rules().has(com.smileprotocol.difficulty.RunRules.SCARCE_LOOT))
                 : List.of();
 
         if (template != null && !mobs.isEmpty()) {

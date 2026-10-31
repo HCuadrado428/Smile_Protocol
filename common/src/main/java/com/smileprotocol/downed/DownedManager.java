@@ -66,6 +66,12 @@ public final class DownedManager {
     /** Derriba al jugador (golpe, QTE fallido...). Si ya estaba derribado no pasa nada. */
     public static void down(ServerPlayer p, @Nullable String cause) {
         if (!SPPlayerData.inSP(p) || p.isSpectator() || p.isCreative() || isDowned(p)) return;
+        // Regla «sin reanimacion»: quien cae, muere
+        com.smileprotocol.run.Group rg = com.smileprotocol.run.RunManager.groupOf(p);
+        if (rg != null && rg.rules().has(com.smileprotocol.difficulty.RunRules.NO_REVIVE)) {
+            DeathManager.die(p, cause);
+            return;
+        }
         HideManager.forceExit(p, true);
         com.smileprotocol.qte.QTEManager.clear(p);
         com.smileprotocol.interact.InteractionManager.stop(p, true);

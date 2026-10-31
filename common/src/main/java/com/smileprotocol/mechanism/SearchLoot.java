@@ -63,6 +63,10 @@ public final class SearchLoot {
         tables = m;
     }
 
+    private static int weight(Entry e, int nothingMul) {
+        return "nothing".equals(e.item()) ? e.weight() * nothingMul : e.weight();
+    }
+
     /** Lo que sale de un mueble {@code kind} en la planta donde esta (puede ser vacio). */
     public static ItemStack roll(ServerLevel level, BlockPos pos, String kind, RandomSource rnd) {
         load(level.getServer().getResourceManager());
@@ -71,13 +75,16 @@ public final class SearchLoot {
         ZonePlacement z = ctx == null ? null : ctx.zone(level.getServer());
         if (z != null && tables.containsKey(z.zoneId().getPath())) zone = z.zoneId().getPath();
         List<Entry> list = tables.getOrDefault(zone, tables.getOrDefault("default", List.of()));
+        // «Botin escaso»: el doble de probabilidad de no encontrar nada
+        com.smileprotocol.run.Group g = ctx == null ? null : ctx.group(level.getServer());
+        int nothingMul = g != null && g.rules().has(com.smileprotocol.difficulty.RunRules.SCARCE_LOOT) ? 3 : 1;
         int total = 0;
-        for (Entry e : list) if (e.kinds().isEmpty() || e.kinds().contains(kind)) total += e.weight();
+        for (Entry e : list) if (e.kinds().isEmpty() || e.kinds().contains(kind)) total += weight(e, nothingMul);
         if (total <= 0) return ItemStack.EMPTY;
         int pick = rnd.nextInt(total);
         for (Entry e : list) {
             if (!(e.kinds().isEmpty() || e.kinds().contains(kind))) continue;
-            pick -= e.weight();
+            pick -= weight(e, nothingMul);
             if (pick < 0) return "nothing".equals(e.item()) ? ItemStack.EMPTY : ZoneSetup.itemFor(e.item());
         }
         return ItemStack.EMPTY;

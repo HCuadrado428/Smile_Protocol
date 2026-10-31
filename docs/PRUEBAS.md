@@ -266,6 +266,14 @@ Hace falta Simple Voice Chat en el servidor y en los clientes (es opcional: sin 
 2. **Registrar.** Escritorios, archivadores, botiquines, carros de herramientas y cajas de suministros se registran: mírales y mantén el clic derecho (sale el texto, p. ej. «Registrar los cajones»). Hace algo de ruido. Al acabar se abren (cajón fuera, puertas abiertas, tapa quitada) y a veces sueltan algo delante: latas, botellas, pilas, botiquines, bengalas, adrenalina o un fusible fundido; muchas veces nada («No hay nada útil.»). Un mueble abierto ya no se puede registrar.
 3. **Botín por planta.** Cada planta tiene su tabla (`data/smileprotocol/search_loot/<planta>.json`): en la morgue salen más botiquines, en energía más pilas... y en los botiquines siempre es más fácil encontrar curas. Cada partida coloca la planta de nuevo, así que vuelven a estar cerrados.
 
+## Dificultad y modificadores
+
+- **Elegir reglas.** Entrad dos en el Ascensor 1 y pulsad F7: sale «Reglas de la partida» en vez del menú de accesibilidad (que sigue a un botón). Cambia a Pesadilla y activa «Sin reanimación». A los dos os llega el aviso en el chat, se os quita el «listo» y la nota de la cabina muestra «Reglas: Pesadilla + Sin reanimación».
+- **Se aplican.** Bajad. Con `/spadmin debug on` el registro dice `reglas=NIGHTMARE|no_revive`. Hay más berserkers que en Normal, el minijuego dura menos y, si a uno lo tumban, muere directamente.
+- **Batería débil.** Con la linterna encendida, la barra baja el doble de rápido.
+- **Botín escaso.** No hay objetos sueltos al llegar y los muebles casi siempre están vacíos.
+- **Mega.** El ascensor de servicio usa `event_rules` de la configuración (por defecto `NORMAL`; p. ej. `NIGHTMARE|fast_mobs`). Fuera de la cabina, F7 abre la accesibilidad de siempre.
+
 ## Smiley (fase 21)
 
 1. **De lejos.** En cada planta, entre 1 y 3 minutos después de llegar, aparece una vez al fondo de un pasillo mirándote. Si lo miras un rato o te acercas, se funde en una mancha negra y desaparece. No ataca. Se quita con `smiley_cameos: false`.

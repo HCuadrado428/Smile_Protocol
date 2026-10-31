@@ -139,7 +139,7 @@ public final class ZoneElevators {
         if (!com.smileprotocol.mission.MissionManager.readyToLeave(server, g)) {
             s.countdown = -1;
             Payloads.SyncReady wait = new Payloads.SyncReady(true, Component.translatable("smileprotocol.zone_elevator.title"),
-                    inside.size(), players.size(), 0, Component.translatable("smileprotocol.mission.pending"));
+                    inside.size(), players.size(), 0, Component.translatable("smileprotocol.mission.pending"), "");
             s.showing.clear();
             for (ServerPlayer p : players) {
                 SPNetwork.sendTo(p, wait);
@@ -152,7 +152,7 @@ public final class ZoneElevators {
         Component status = all ? Component.translatable("smileprotocol.zone_elevator.departing")
                 : Component.translatable("smileprotocol.zone_elevator.waiting", secs);
         Payloads.SyncReady hud = new Payloads.SyncReady(true, Component.translatable("smileprotocol.zone_elevator.title"),
-                inside.size(), players.size(), all ? 0 : secs, status);
+                inside.size(), players.size(), all ? 0 : secs, status, "");
         s.showing.clear();
         for (ServerPlayer p : players) {
             SPNetwork.sendTo(p, hud);

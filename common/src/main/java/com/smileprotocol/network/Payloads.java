@@ -63,7 +63,8 @@ public final class Payloads {
     }
 
     /** S -> C: contador «X/Y listos» del ascensor del lobby. {@code show == false} lo oculta. */
-    public record SyncReady(boolean show, Component title, int ready, int total, int countdown, Component status)
+    /** {@code rules}: reglas de la cabina ({@link com.smileprotocol.difficulty.RunRules#encode}); vacio si no se eligen ahi. */
+    public record SyncReady(boolean show, Component title, int ready, int total, int countdown, Component status, String rules)
             implements CustomPacketPayload {
         public static final Type<SyncReady> TYPE = typeOf("sync_ready");
         public static final StreamCodec<RegistryFriendlyByteBuf, SyncReady> CODEC = StreamCodec.composite(
@@ -73,10 +74,11 @@ public final class Payloads {
                 ByteBufCodecs.VAR_INT, SyncReady::total,
                 ByteBufCodecs.INT, SyncReady::countdown,
                 ComponentSerialization.TRUSTED_STREAM_CODEC, SyncReady::status,
+                ByteBufCodecs.STRING_UTF8, SyncReady::rules,
                 SyncReady::new);
 
         public static SyncReady hidden() {
-            return new SyncReady(false, Component.empty(), 0, 0, -1, Component.empty());
+            return new SyncReady(false, Component.empty(), 0, 0, -1, Component.empty(), "");
         }
 
         @Override public Type<SyncReady> type() { return TYPE; }
@@ -238,6 +240,14 @@ public final class Payloads {
     }
 
     /** C -> S: opciones de accesibilidad que valida el servidor (README 24.2): minijuego asistido. */
+    /** Cliente -> servidor: reglas elegidas en la cabina de un ascensor pequeno (F7 dentro). */
+    public record SetRules(String rules) implements CustomPacketPayload {
+        public static final Type<SetRules> TYPE = typeOf("set_rules");
+        public static final StreamCodec<ByteBuf, SetRules> CODEC = ByteBufCodecs.STRING_UTF8.map(SetRules::new, SetRules::rules);
+
+        @Override public Type<SetRules> type() { return TYPE; }
+    }
+
     public record SetAccessibility(boolean qteAssist) implements CustomPacketPayload {
         public static final Type<SetAccessibility> TYPE = typeOf("set_accessibility");
         public static final StreamCodec<ByteBuf, SetAccessibility> CODEC = ByteBufCodecs.BOOL.map(SetAccessibility::new, SetAccessibility::qteAssist);

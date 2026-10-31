@@ -88,7 +88,9 @@ public final class Flashlights {
                 set(p, false);
                 continue;
             }
-            float b = Math.max(0f, battery(p) - drain);
+            com.smileprotocol.run.Group g = com.smileprotocol.run.RunManager.groupOf(p);
+            float d = g == null ? drain : (float) (drain * g.rules().batteryDrain());
+            float b = Math.max(0f, battery(p) - d);
             BATTERY.put(id, b);
             if (b <= 0f) {
                 p.displayClientMessage(Component.translatable("smileprotocol.flashlight.empty").withStyle(ChatFormatting.RED), true);

@@ -712,7 +712,20 @@ public final class HudOverlay {
         Component title = hud(r.title());
         Component status = hud(r.status());
         int bw = Math.max(190, Math.max(font.width(status), font.width(title)) + 40);
-        int bh = pips ? 76 : 64;
+        com.smileprotocol.difficulty.RunRules rules = r.rules() == null || r.rules().isEmpty() ? null
+                : com.smileprotocol.difficulty.RunRules.decode(r.rules());
+        Component rulesLine = null;
+        if (rules != null) {
+            net.minecraft.network.chat.MutableComponent c = Component.empty();
+            java.util.List<String> keys = rules.summaryKeys();
+            for (int i = 0; i < keys.size(); i++) {
+                if (i > 0) c.append(" + ");
+                c.append(Component.translatable(keys.get(i)));
+            }
+            rulesLine = Component.translatable("smileprotocol.rules.hud", c);
+            bw = Math.max(bw, font.width(rulesLine) + 30);
+        }
+        int bh = (pips ? 76 : 64) + (rulesLine != null ? 11 : 0);
         int x = (w - bw) / 2, y = 6;
         boolean counting = r.countdown() >= 0;
         g.blitSprite(NOTE, x, y, bw, bh);
@@ -738,6 +751,10 @@ public final class HudOverlay {
             sy += 11;
         }
         g.drawString(font, status, (w - font.width(status)) / 2, sy, 0xFF3A3026, false);
+        if (rulesLine != null) {
+            g.drawString(font, rulesLine, (w - font.width(rulesLine)) / 2, sy + 11,
+                    rules.isDefault() ? 0xFF6A6052 : 0xFF8A1010, false);
+        }
     }
 
     // Depuracion ------------------------------------------------------------------------------
