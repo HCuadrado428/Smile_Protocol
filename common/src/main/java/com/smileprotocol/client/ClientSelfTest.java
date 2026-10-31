@@ -443,6 +443,30 @@ public final class ClientSelfTest {
             log((ventOk ? "OK" : "FALLO") + " gateando dentro del conducto (pose " + sp.getPose() + ")");
         }));
         SHOTS.add(() -> grab(mc, "32_conducto"));
+        // el Rastreador sigue por los conductos: va a la rejilla, se mete y alcanza al que gatea
+        com.smileprotocol.entity.Rastreador[] rv = {null};
+        boolean[] rvEntered = {false};
+        SHOTS.add(() -> server.execute(() -> {
+            if (grille[0] == null) return;
+            BlockPos at = grille[0].above().relative(ductDir[0].getOpposite(), 3);
+            rv[0] = com.smileprotocol.entity.MobManager.spawn(level, com.smileprotocol.registry.ModEntities.RASTREADOR.get(), at, level.random);
+            if (rv[0] != null) rv[0].debugChase(sp);
+        }));
+        for (int k = 0; k < 8; k++) {
+            SHOTS.add(() -> wait = 10);
+            SHOTS.add(() -> server.execute(() -> {
+                if (rv[0] != null && (rv[0].inDuct() || rv[0].state() == com.smileprotocol.entity.Rastreador.State.VENT
+                        && com.smileprotocol.downed.DownedManager.isDowned(sp))) rvEntered[0] = true;
+            }));
+        }
+        SHOTS.add(() -> server.execute(() -> {
+            boolean downed = com.smileprotocol.downed.DownedManager.isDowned(sp);
+            log((rvEntered[0] || downed ? "OK" : "FALLO") + " rastreador sigue por el conducto (estado "
+                    + (rv[0] == null ? "-" : rv[0].state()) + ", dentro " + rvEntered[0] + ", derriba " + downed + ")");
+            if (rv[0] != null) rv[0].discard();
+            com.smileprotocol.downed.DownedManager.clear(sp);
+            sp.setHealth(sp.getMaxHealth());
+        }));
         // 8e. Fase 18: la voz hace ruido (simulando un paquete del microfono) y Simple Voice Chat
         SHOTS.add(() -> server.execute(() -> {
             SPSessionManager.teleport(sp, level, cam, 0f, 0f);

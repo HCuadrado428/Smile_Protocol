@@ -21,12 +21,12 @@ Inspirado en los ángeles llorones de Doctor Who. *Implementado (fase 21):* mode
 - **Dónde:** pasillos largos y morgue.
 
 ## El Rastreador (acechador de pasillo)
-*Implementado (fase 21):* modelo `rastreador`, IA en `entity/Rastreador.java`, aparece en `rastreador_zones` (oficinas y almacén). Pendiente: seguirte por los conductos.
+*Implementado (fase 21):* modelo `rastreador`, IA en `entity/Rastreador.java`, aparece en `rastreador_zones` (oficinas y almacén).
 - **Aspecto:** 2,2 bloques, delgado y ágil, espalda arqueada y cabeza adelantada. **Ojo en la palma de la mano**, que levanta para buscar. Garras que arañan las paredes y dejan marcas.
 - **Movimiento:** de pie al patrullar, a cuatro patas al perseguir. Más rápido que el jugador corriendo, pero se cansa a los 8 s.
 - **Actitud:** cazador metódico: patrulla, oye, mira, persigue y revisa.
 - **Sentidos:** vista en cono de 20 bloques y oído normal. Revisa escondites y saca a quien esté dentro.
-- **Mecánica:** busca donde te perdió de vista y revisa los escondites cercanos. Agarre con **QTE MASH**; **remata**. Entra en los conductos detrás de ti. Sin interferencias.
+- **Mecánica:** busca donde te perdió de vista y revisa los escondites cercanos. Agarre con **QTE MASH**; **remata**. **Te sigue por los conductos:** si te metes en uno mientras te persigue, va a la rejilla, la arranca y entra. Dentro no se le ve, solo se le oye arañar la chapa cada vez más cerca; va **más lento que tú gateando** (`rastreador_vent_speed`). Si te alcanza dentro te derriba; si sales por otra rejilla, sale detrás; tras 30 s (`rastreador_vent_seconds`) sale y te busca. Sin interferencias.
 - **Sonido:** chasquidos de garras y respiración agitada al correr.
 - **Cómo se le gana:** romper la línea de visión, dive bajo huecos, esconderse cuando no te ve.
 - **Dónde:** oficinas y almacén.

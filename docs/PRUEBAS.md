@@ -223,6 +223,8 @@ La **batalla final contra Smiley** sigue pendiente de diseño (README 27); de mo
 
 ## Conductos de ventilación (fase 17)
 
+- **El Rastreador entra detrás.** Que te persiga y métete en un conducto: va a la rejilla, la arranca (golpe metálico y chillido) y desaparece dentro. Se le oye arañar la chapa acercándose, más despacio que tú. Si sales por otra rejilla, sale por ella detrás de ti; si te alcanza dentro, te derriba.
+
 1. **Rejillas.** En cada planta hay al menos un conducto con dos rejillas en el suelo de dos salas alejadas. Mantén el clic derecho sobre una rejilla 2 s: hace ruido y queda abierta (un agujero de un bloque).
 2. **Entrar.** Baja al agujero y avanza: te tumbas a gatas solo (pose de gateo de vanilla). Dentro no puedes correr, hacer dive, vault, asomarte ni apuntar lanzables; la linterna y los consumibles sí funcionan.
 3. **Ruido.** Gatear sobre la chapa hace más ruido que gatear normal (`noise_vent_mult`, 1,6 por defecto). Al entrar puede sonar algo arañando la chapa (`vent_scratch`).

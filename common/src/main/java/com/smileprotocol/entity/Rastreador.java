@@ -13,6 +13,8 @@ import com.smileprotocol.player.SPPlayerData;
 import com.smileprotocol.qte.QTEManager;
 import com.smileprotocol.qte.QTEType;
 import com.smileprotocol.registry.ModSounds;
+import com.smileprotocol.motion.MotionManager;
+import net.minecraft.sounds.SoundEvents;
 import com.smileprotocol.sequence.SequenceManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -51,7 +53,7 @@ import java.util.List;
  */
 public class Rastreador extends SmilerBase implements QTEManager.Grabber {
 
-    public enum State { PATROL, INVESTIGATE, CHASE, TIRED, SEARCH, CHECK, GRAB, STUNNED }
+    public enum State { PATROL, INVESTIGATE, CHASE, TIRED, SEARCH, CHECK, GRAB, STUNNED, VENT }
 
     private static final EntityDataAccessor<Byte> STATE = SynchedEntityData.defineId(Rastreador.class, EntityDataSerializers.BYTE);
 
@@ -71,6 +73,10 @@ public class Rastreador extends SmilerBase implements QTEManager.Grabber {
     @Nullable private Vec3 goal;
     @Nullable private Vec3 lastSeen;
     @Nullable private BlockPos seenHiding;
+    /** Persiguiendo por los conductos: rejilla por la que entra (o ha entrado) y camino por dentro. */
+    @Nullable private BlockPos ventGrille;
+    private boolean inDuct;
+    private final java.util.ArrayDeque<BlockPos> ductPath = new java.util.ArrayDeque<>();
     private final List<BlockPos> toCheck = new ArrayList<>();
     @Nullable private BlockPos checking;
     private boolean forced;
@@ -105,6 +111,8 @@ public class Rastreador extends SmilerBase implements QTEManager.Grabber {
 
     private void setState(State s) {
         if (s != state()) SPDebug.log("rastreador " + state() + " -> " + s);
+        // si sale del estado de conducto por otro camino (aturdido, remate...), sale del conducto
+        if (s != State.VENT && inDuct && level() instanceof ServerLevel sl) leaveDuct(sl, nearestGrille(sl, blockPosition(), 12));
         entityData.set(STATE, (byte) s.ordinal());
         timer = 0;
     }
@@ -114,6 +122,15 @@ public class Rastreador extends SmilerBase implements QTEManager.Grabber {
         forced = true;
         getNavigation().stop();
         entityData.set(STATE, (byte) s.ordinal());
+    }
+
+    /** Pruebas: persigue ya a ese jugador. */
+    public void debugChase(ServerPlayer p) {
+        forced = false;
+        target = p;
+        chaseTicks = 0;
+        lostTicks = 0;
+        setState(State.CHASE);
     }
 
     /** Pruebas: vuelve a su IA. */
@@ -167,6 +184,7 @@ public class Rastreador extends SmilerBase implements QTEManager.Grabber {
                 }
             }
             case CHASE -> chase(level, def);
+            case VENT -> vent(level, def);
             case TIRED -> {
                 getNavigation().stop();
                 if (timer >= 50) {
@@ -213,6 +231,17 @@ public class Rastreador extends SmilerBase implements QTEManager.Grabber {
             startSearch(level);
             return;
         }
+        // se ha metido en un conducto: a la rejilla mas cercana y detras de el (README: el Rastreador si entra)
+        if (MotionManager.inDuct(target)) {
+            BlockPos g = nearestGrille(level, target.blockPosition(), 8);
+            if (g != null) {
+                ventGrille = g;
+                inDuct = false;
+                ductPath.clear();
+                setState(State.VENT);
+                return;
+            }
+        }
         chaseTicks++;
         boolean visible = canSee(target);
         if (visible) {
@@ -236,6 +265,185 @@ public class Rastreador extends SmilerBase implements QTEManager.Grabber {
             face(target);
             catchTarget(target, def, downed);
         }
+    }
+
+    // Conductos -------------------------------------------------------------------------------------------
+
+    /**
+     * Va a la rejilla, la arranca y se mete. Por dentro no se le ve: se le oye arañar la chapa mientras
+     * avanza (mas despacio que un jugador gateando, {@code rastreador_vent_speed}). Si alcanza a alguien
+     * dentro, lo derriba; si su presa sale por otra rejilla, sale detras; si la pierde, sale y la busca.
+     */
+    private void vent(ServerLevel level, MobDef def) {
+        var cfg = com.smileprotocol.config.SPConfig.get();
+        if (!inDuct) {
+            // camino de la rejilla
+            if (ventGrille == null || target == null || !target.isAlive()) {
+                startSearch(level);
+                return;
+            }
+            if (timer % 5 == 1) getNavigation().moveTo(ventGrille.getX() + 0.5, ventGrille.getY(), ventGrille.getZ() + 0.5, def.runSpeed());
+            if (position().distanceTo(Vec3.atBottomCenterOf(ventGrille)) < 1.8) {
+                getNavigation().stop();
+                var gs = level.getBlockState(ventGrille);
+                if (gs.getBlock() instanceof com.smileprotocol.block.VentGrilleBlock && !gs.getValue(com.smileprotocol.block.VentGrilleBlock.OPEN)) {
+                    level.setBlock(ventGrille, gs.setValue(com.smileprotocol.block.VentGrilleBlock.OPEN, true), 3);
+                }
+                level.playSound(null, ventGrille, SoundEvents.IRON_TRAPDOOR_OPEN, SoundSource.HOSTILE, 1.2f, 0.6f);
+                level.playSound(null, ventGrille, ModSounds.RASTREADOR_SCREECH.get(), SoundSource.HOSTILE, 1f, 0.8f);
+                inDuct = true;
+                setNoGravity(true);
+                noPhysics = true;
+                setInvisible(true);
+                setPos(ventGrille.getX() + 0.5, ventGrille.getY() - 1, ventGrille.getZ() + 0.5);
+                ductPath.clear();
+            } else if (timer > 200) {
+                startSearch(level);
+            }
+            return;
+        }
+        // dentro del conducto
+        getNavigation().stop();
+        setDeltaMovement(Vec3.ZERO);
+        if (timer > cfg.rastreador_vent_seconds * 20 || target == null || !target.isAlive() || DeathManager.isDead(target)
+                || HideManager.isHidden(target)) {
+            leaveDuct(level, null);
+            startSearch(level);
+            return;
+        }
+        if (timer % 12 == 0) {
+            level.playSound(null, blockPosition(), ModSounds.RASTREADOR_SCRATCH.get(), SoundSource.HOSTILE, 1.3f, 0.75f + getRandom().nextFloat() * 0.2f);
+        }
+        if (timer % 37 == 0) level.playSound(null, blockPosition(), SoundEvents.IRON_TRAPDOOR_CLOSE, SoundSource.HOSTILE, 0.6f, 0.5f);
+        boolean targetIn = MotionManager.inDuct(target);
+        if (!targetIn) {
+            // ha salido: va a la rejilla por la que salio y sale detras
+            BlockPos exit = nearestGrille(level, target.blockPosition(), 4);
+            if (exit != null && timer % 10 == 0) ductPath.clear();
+            BlockPos goalCell = exit != null ? exit.below() : null;
+            if (goalCell == null || blockPosition().distManhattan(goalCell) <= 1) {
+                leaveDuct(level, exit);
+                lastSeen = target.position();
+                chaseTicks = 0;
+                lostTicks = 0;
+                level.playSound(null, blockPosition(), ModSounds.RASTREADOR_SCREECH.get(), SoundSource.HOSTILE, 1.4f, 1f);
+                setState(State.CHASE);
+                return;
+            }
+            crawlTo(level, goalCell, cfg.rastreador_vent_speed);
+            return;
+        }
+        if (distanceTo(target) < 1.3) {
+            // le alcanza dentro del conducto: lo derriba y sale por la rejilla mas cercana
+            DownedManager.down(target, "rastreador");
+            level.playSound(null, blockPosition(), ModSounds.RASTREADOR_SCREECH.get(), SoundSource.HOSTILE, 1.5f, 1.2f);
+            leaveDuct(level, nearestGrille(level, blockPosition(), 12));
+            cooldown = 60;
+            startSearch(level);
+            return;
+        }
+        if (timer % 10 == 0) ductPath.clear();
+        crawlTo(level, target.blockPosition(), cfg.rastreador_vent_speed);
+    }
+
+    /** Avanza por las celdas del conducto hacia {@code goal} (camino por anchura, recalculado a menudo). */
+    private void crawlTo(ServerLevel level, BlockPos goal, double speed) {
+        if (ductPath.isEmpty()) {
+            List<BlockPos> path = ductRoute(level, blockPosition(), goal);
+            ductPath.addAll(path);
+        }
+        BlockPos next = ductPath.peekFirst();
+        if (next == null) return;
+        Vec3 to = Vec3.atBottomCenterOf(next);
+        Vec3 d = to.subtract(position());
+        double len = d.length();
+        if (len <= speed) {
+            setPos(to.x, to.y, to.z);
+            ductPath.pollFirst();
+        } else {
+            Vec3 step = d.scale(speed / len);
+            setPos(getX() + step.x, getY() + step.y, getZ() + step.z);
+            float yaw = (float) Math.toDegrees(Math.atan2(-d.x, d.z));
+            setYRot(yaw);
+            setYBodyRot(yaw);
+            setYHeadRot(yaw);
+        }
+    }
+
+    private static boolean ductCell(ServerLevel level, BlockPos c) {
+        return !level.getBlockState(c).isSolid()
+                && net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(level.getBlockState(c.below()).getBlock()).getPath().equals("lab_vent_duct");
+    }
+
+    private static List<BlockPos> ductRoute(ServerLevel level, BlockPos from, BlockPos to) {
+        BlockPos start = from, goal = new BlockPos(to.getX(), from.getY(), to.getZ());
+        java.util.Map<BlockPos, BlockPos> prev = new java.util.HashMap<>();
+        java.util.ArrayDeque<BlockPos> q = new java.util.ArrayDeque<>();
+        q.add(start);
+        prev.put(start, start);
+        BlockPos found = null, best = start;
+        while (!q.isEmpty() && prev.size() < 600) {
+            BlockPos c = q.poll();
+            if (c.distManhattan(goal) < best.distManhattan(goal)) best = c;
+            if (c.equals(goal)) {
+                found = c;
+                break;
+            }
+            for (net.minecraft.core.Direction dir : net.minecraft.core.Direction.Plane.HORIZONTAL) {
+                BlockPos n = c.relative(dir);
+                if (prev.containsKey(n) || !ductCell(level, n)) continue;
+                prev.put(n, c);
+                q.add(n);
+            }
+        }
+        BlockPos end = found != null ? found : best;
+        java.util.LinkedList<BlockPos> path = new java.util.LinkedList<>();
+        for (BlockPos c = end; !c.equals(start); c = prev.get(c)) path.addFirst(c);
+        return path;
+    }
+
+    /** Sale del conducto por esa rejilla (o por donde esta) y vuelve a verse. */
+    private void leaveDuct(ServerLevel level, @Nullable BlockPos grille) {
+        if (!inDuct) return;
+        inDuct = false;
+        ductPath.clear();
+        setNoGravity(false);
+        noPhysics = false;
+        setInvisible(false);
+        BlockPos at = grille != null ? grille : blockPosition().above();
+        // al lado de la rejilla, en el suelo de la sala
+        for (net.minecraft.core.Direction dir : net.minecraft.core.Direction.Plane.HORIZONTAL) {
+            BlockPos s = at.relative(dir).above();
+            if (level.noCollision(this, getDimensions(getPose()).makeBoundingBox(Vec3.atBottomCenterOf(s)))) {
+                at = s;
+                break;
+            }
+        }
+        setPos(at.getX() + 0.5, at.getY(), at.getZ() + 0.5);
+        level.playSound(null, at, SoundEvents.IRON_TRAPDOOR_OPEN, SoundSource.HOSTILE, 1.2f, 0.6f);
+    }
+
+    /** Rejilla de conducto mas cercana a {@code near} (en su planta, a {@code r} bloques). */
+    @Nullable
+    static BlockPos nearestGrille(ServerLevel level, BlockPos near, int r) {
+        BlockPos best = null;
+        double bd = Double.MAX_VALUE;
+        for (BlockPos p : BlockPos.betweenClosed(near.offset(-r, -2, -r), near.offset(r, 2, r))) {
+            if (level.getBlockState(p).getBlock() instanceof com.smileprotocol.block.VentGrilleBlock
+                    && !level.getBlockState(p).getValue(com.smileprotocol.block.VentGrilleBlock.SEALED)) {
+                double d = p.distSqr(near);
+                if (d < bd) {
+                    bd = d;
+                    best = p.immutable();
+                }
+            }
+        }
+        return best;
+    }
+
+    /** En el conducto ahora mismo (pruebas). */
+    public boolean inDuct() {
+        return inDuct;
     }
 
     private void catchTarget(ServerPlayer p, MobDef def, boolean downed) {
@@ -401,7 +609,7 @@ public class Rastreador extends SmilerBase implements QTEManager.Grabber {
             PlayState seq = sequenceAnimation(st);
             if (seq != null) return seq;
             return switch (state()) {
-                case CHASE -> st.isMoving() ? st.setAndContinue(RUN) : st.setAndContinue(IDLE);
+                case CHASE, VENT -> st.isMoving() ? st.setAndContinue(RUN) : st.setAndContinue(IDLE);
                 case TIRED -> st.setAndContinue(TIRED_A);
                 case SEARCH, CHECK -> st.isMoving() ? st.setAndContinue(WALK) : st.setAndContinue(SEARCH_A);
                 case GRAB -> st.setAndContinue(GRAB_A);

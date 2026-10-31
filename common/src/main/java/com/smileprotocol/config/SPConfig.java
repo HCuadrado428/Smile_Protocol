@@ -227,6 +227,10 @@ public final class SPConfig {
         public java.util.List<String> rastreador_zones = new java.util.ArrayList<>(java.util.List.of("lab_offices", "lab_storage"));
         /** Ticks que aguanta corriendo antes de cansarse. */
         public int rastreador_stamina = 160;
+        /** Velocidad del Rastreador dentro de los conductos (bloques por tick; un jugador gateando va a unos 0,065). */
+        public double rastreador_vent_speed = 0.045;
+        /** Segundos que persigue por los conductos antes de salir a buscar. */
+        public int rastreador_vent_seconds = 30;
         // Smiley, el jefe (docs/SMILERS.md)
         /** Se le ve una vez en cada planta, de lejos, entre estos segundos tras llegar. */
         public boolean smiley_cameos = true;
