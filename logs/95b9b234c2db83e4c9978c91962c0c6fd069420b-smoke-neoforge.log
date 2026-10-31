@@ -1,0 +1,133 @@
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.4.0/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+
+> Configure project :common
+Creating Minecraft artifacts without recompilation.
+
+> Configure project :fabric
+Fabric Loom: 1.16.3
+
+> Configure project :neoforge
+Creating Minecraft artifacts without recompilation.
+
+> Task :common:createMinecraftArtifacts UP-TO-DATE
+> Task :common:compileJava UP-TO-DATE
+> Task :neoforge:createMinecraftArtifacts UP-TO-DATE
+> Task :neoforge:compileJava UP-TO-DATE
+> Task :neoforge:processResources UP-TO-DATE
+> Task :neoforge:classes UP-TO-DATE
+
+> Task :neoforge:downloadAssets
+Loaded 131 artifacts from /home/runner/work/Smile_Protocol/Smile_Protocol/neoforge/build/tmp/downloadAssets/nfrt_artifact_manifest.properties
+Downloading asset index 17
+Using Minecraft asset root: /home/runner/.gradle/caches/neoformruntime/assets
+  ↓ https://piston-meta.mojang.com/v1/packages/cd09c6948871a888359b45607a1dfac4e97f2561/17.json
+
+> Task :neoforge:writeServerLegacyClasspath
+> Task :neoforge:prepareServerRun
+
+> Task :neoforge:runServer
+WARN StatusConsoleListener Advanced terminal features are not available in this environment
+[15:10:06] [main/INFO] [cp.mo.mo.Launcher/MODLAUNCHER]: ModLauncher running: args [--launchTarget, forgeserverdev, --gameDir, ., --fml.fmlVersion, 4.0.39, --fml.mcVersion, 1.21.1, --fml.neoForgeVersion, 21.1.172, --fml.neoFormVersion, 20240808.144430]
+[15:10:06] [main/INFO] [cp.mo.mo.Launcher/MODLAUNCHER]: JVM identified as Eclipse Adoptium OpenJDK 64-Bit Server VM 21.0.13+9-LTS
+[15:10:06] [main/INFO] [cp.mo.mo.Launcher/MODLAUNCHER]: ModLauncher 11.0.4+main.d2e20e43 starting: java version 21.0.13 by Eclipse Adoptium; OS Linux arch amd64 version 7.0.0-1017-azure
+[15:10:06] [main/INFO] [ne.ne.fm.lo.ImmediateWindowHandler/]: ImmediateWindowProvider not loading because launch target is forgeserverdev
+[15:10:06] [main/INFO] [mixin/]: SpongePowered MIXIN Subsystem Version=0.8.7 Source=union:/home/runner/.gradle/caches/modules-2/files-2.1/net.fabricmc/sponge-mixin/0.15.2+mixin.0.8.7/2af2f021d8e02a0220dc27a7a72b4666d66d44ca/sponge-mixin-0.15.2+mixin.0.8.7.jar%2394!/ Service=ModLauncher Env=SERVER
+[15:10:06] [main/INFO] [ne.ne.fm.lo.mo.lo.JarInJarDependencyLocator/]: Found 4 dependencies adding them to mods collection
+[15:10:06] [main/INFO] [ne.ne.fm.lo.mo.ModDiscoverer/]: 
+     Mod List:
+		Name Version (Mod Id)
+
+		GeckoLib 4 4.7.2 (geckolib)
+		Minecraft 1.21.1 (minecraft)
+		NeoForge 21.1.172 (neoforge)
+		Player Animator 2.0.4+1.21.1 (playeranimator)
+		Smile Protocol 0.2.0 (smileprotocol)
+		Veil 4.3.0 (veil)
+[15:10:07] [main/INFO] [mixin/]: Compatibility level set to JAVA_21
+[15:10:07] [main/INFO] [cp.mo.mo.LaunchServiceHandler/MODLAUNCHER]: Launching target 'forgeserverdev' with arguments [--gameDir, .]
+[15:10:07] [main/WARN] [mixin/]: Reference map 'geckolib.refmap.json' for geckolib.mixins.json could not be read. If this is a development environment you can ignore this message
+[15:10:09] [main/INFO] [MixinExtras|Service/]: Initializing MixinExtras via com.llamalad7.mixinextras.service.MixinExtrasServiceImpl(version=0.4.1).
+[15:10:13] [main/WARN] [minecraft/Commands]: Ambiguity between arguments [teleport, location] and [teleport, destination] with inputs: [0.1 -0.5 .9, 0 0 0]
+[15:10:13] [main/WARN] [minecraft/Commands]: Ambiguity between arguments [teleport, location] and [teleport, targets] with inputs: [0.1 -0.5 .9, 0 0 0]
+[15:10:13] [main/WARN] [minecraft/Commands]: Ambiguity between arguments [teleport, destination] and [teleport, targets] with inputs: [Player, 0123, @e, dd12be42-52a9-4a91-a8a1-11c01849e498]
+[15:10:13] [main/WARN] [minecraft/Commands]: Ambiguity between arguments [teleport, targets] and [teleport, destination] with inputs: [Player, 0123, dd12be42-52a9-4a91-a8a1-11c01849e498]
+[15:10:13] [main/WARN] [minecraft/Commands]: Ambiguity between arguments [teleport, targets, location] and [teleport, targets, destination] with inputs: [0.1 -0.5 .9, 0 0 0]
+[15:10:13] [modloading-worker-0/INFO] [Veil/]: Veil is initializing.
+[15:10:13] [modloading-worker-0/INFO] [ne.ne.ne.co.NeoForgeMod/NEOFORGE-MOD]: NeoForge mod loading, version 21.1.172, for MC 1.21.1
+[15:10:13] [modloading-worker-0/INFO] [Smile Protocol/]: Smile Protocol: iniciado
+[15:10:14] [main/INFO] [mojang/YggdrasilAuthenticationService]: Environment: Environment[sessionHost=https://sessionserver.mojang.com, servicesHost=https://api.minecraftservices.com, name=PROD]
+[15:10:14] [main/WARN] [minecraft/VanillaPackResourcesBuilder]: Assets URL 'union:/home/runner/work/Smile_Protocol/Smile_Protocol/neoforge/build/moddev/artifacts/neoforge-21.1.172.jar%23125!/assets/.mcassetsroot' uses unexpected schema
+[15:10:14] [main/WARN] [minecraft/VanillaPackResourcesBuilder]: Assets URL 'union:/home/runner/work/Smile_Protocol/Smile_Protocol/neoforge/build/moddev/artifacts/neoforge-21.1.172.jar%23125!/data/.mcassetsroot' uses unexpected schema
+[15:10:14] [main/INFO] [minecraft/Main]: No existing world data, creating new world
+[15:10:14] [main/ERROR] [minecraft/DedicatedServerProperties]: No key layers in MapLike[{}]
+[15:10:15] [main/INFO] [minecraft/RecipeManager]: Loaded 1290 recipes
+[15:10:15] [main/INFO] [minecraft/AdvancementTree]: Loaded 1399 advancements
+[15:10:16] [Server thread/INFO] [minecraft/DedicatedServer]: Starting minecraft server version 1.21.1
+[15:10:16] [Server thread/INFO] [minecraft/DedicatedServer]: Loading properties
+[15:10:16] [Server thread/INFO] [minecraft/DedicatedServer]: Default game type: SURVIVAL
+[15:10:16] [Server thread/INFO] [minecraft/MinecraftServer]: Generating keypair
+[15:10:16] [Server thread/INFO] [minecraft/DedicatedServer]: Starting Minecraft server on *:25565
+[15:10:16] [Server thread/INFO] [minecraft/ServerConnectionListener]: Using epoll channel type
+[15:10:16] [Server thread/WARN] [minecraft/DedicatedServer]: **** SERVER IS RUNNING IN OFFLINE/INSECURE MODE!
+[15:10:16] [Server thread/WARN] [minecraft/DedicatedServer]: The server will make no attempt to authenticate usernames. Beware.
+[15:10:16] [Server thread/WARN] [minecraft/DedicatedServer]: While this makes the game possible to play without internet access, it also opens up the ability for hackers to connect with any username they choose.
+[15:10:16] [Server thread/WARN] [minecraft/DedicatedServer]: To change this, set "online-mode" to "true" in the server.properties file.
+[15:10:16] [Server thread/INFO] [minecraft/DedicatedServer]: Preparing level "world"
+[15:10:17] [Server thread/INFO] [minecraft/MinecraftServer]: Preparing start region for dimension minecraft:overworld
+[15:10:17] [worldgen/INFO] [minecraft/LoggerChunkProgressListener]: Preparing spawn area: 2%
+[15:10:17] [Server thread/INFO] [minecraft/LoggerChunkProgressListener]: Time elapsed: 208 ms
+[15:10:17] [Server thread/INFO] [minecraft/DedicatedServer]: Done (0.981s)! For help, type "help"
+[15:10:17] [Server thread/INFO] [ne.ne.ne.ga.GameTestHooks/]: Enabled Gametest Namespaces: [smileprotocol]
+[15:10:17] [Server thread/INFO] [ne.ne.ne.se.pe.PermissionAPI/]: Successfully initialized permission handler neoforge:default_handler
+[15:10:17] [Server thread/INFO] [Smile Protocol/]: SELFTEST inicio
+[15:10:17] [Server thread/INFO] [Smile Protocol/]: SELFTEST grupos 4 -> [4]
+[15:10:17] [Server thread/INFO] [Smile Protocol/]: SELFTEST grupos 7 -> [7]
+[15:10:17] [Server thread/INFO] [Smile Protocol/]: SELFTEST grupos 9 -> [5, 4]
+[15:10:17] [Server thread/INFO] [Smile Protocol/]: SELFTEST grupos 11 -> [6, 5]
+[15:10:17] [Server thread/INFO] [Smile Protocol/]: SELFTEST grupos 19 -> [5, 5, 5, 4]
+[15:10:17] [Server thread/INFO] [Smile Protocol/]: SELFTEST grupos 23 -> [5, 5, 5, 4, 4]
+[15:10:17] [Server thread/INFO] [Smile Protocol/]: SELFTEST dificultad 2j fus×0.5 mobs×0.6 qte×1.4
+[15:10:17] [Server thread/INFO] [Smile Protocol/]: SELFTEST dificultad 3j fus×0.75 mobs×0.8 qte×1.2
+[15:10:17] [Server thread/INFO] [Smile Protocol/]: SELFTEST dificultad 4j fus×1.0 mobs×1.0 qte×1.0
+[15:10:17] [Server thread/INFO] [Smile Protocol/]: SELFTEST dificultad 5j fus×1.0 mobs×1.15 qte×1.0
+[15:10:17] [Server thread/INFO] [Smile Protocol/]: SELFTEST dificultad 6j fus×1.25 mobs×1.3 qte×1.0
+[15:10:17] [Server thread/INFO] [Smile Protocol/]: SELFTEST escondite HideType[id=locker, capacity=1, enterTime=16, exitTime=14, noiseOnEnter=6.0, viewCone=70.0, breathDrain=0.12, searchPriority=1.5, canBeLocked=false, partial=false, low=false, overlay=slits]
+[15:10:17] [Server thread/INFO] [Smile Protocol/]: SELFTEST escondite HideType[id=wardrobe, capacity=2, enterTime=20, exitTime=16, noiseOnEnter=8.0, viewCone=80.0, breathDrain=0.12, searchPriority=1.2, canBeLocked=false, partial=false, low=false, overlay=crack]
+[15:10:17] [Server thread/INFO] [Smile Protocol/]: SELFTEST escondite HideType[id=gurney, capacity=1, enterTime=14, exitTime=16, noiseOnEnter=3.0, viewCone=120.0, breathDrain=0.14, searchPriority=0.8, canBeLocked=false, partial=false, low=true, overlay=low]
+[15:10:17] [Server thread/INFO] [Smile Protocol/]: SELFTEST escondite HideType[id=curtain, capacity=1, enterTime=8, exitTime=8, noiseOnEnter=2.0, viewCone=140.0, breathDrain=0.0, searchPriority=0.6, canBeLocked=false, partial=true, low=false, overlay=cloth]
+[15:10:17] [Server thread/INFO] [Smile Protocol/]: SELFTEST escondite HideType[id=container, capacity=1, enterTime=18, exitTime=16, noiseOnEnter=3.0, viewCone=60.0, breathDrain=0.1, searchPriority=1.0, canBeLocked=false, partial=false, low=false, overlay=crack]
+[15:10:17] [Server thread/INFO] [Smile Protocol/]: SELFTEST reglas: NIGHTMARE|fast_mobs,no_revive 4j fus×1.0 mobs×1.4 qte×0.8 / facil 4j fus×0.8 mobs×0.7 qte×1.3
+[15:10:17] [Server thread/INFO] [Smile Protocol/]: SELFTEST puntuacion: escapar=11100 rapido=12300 eliminados=3000 pesadilla=18038 puesto=7
+[15:10:17] [Server thread/INFO] [Smile Protocol/]: Smile Protocol: 9 zonas, 6 en el catalogo de intermedias
+[15:10:17] [Server thread/INFO] [Smile Protocol/]: SELFTEST secuencia [smileprotocol:start_corridor, smileprotocol:lab_offices, smileprotocol:lab_storage, smileprotocol:final_room, smileprotocol:smiley_lab]
+[15:10:17] [Server thread/INFO] [Smile Protocol/]: SELFTEST voz: radios silencio=0.0 susurro=3.0 hablar=10.3 gritar=22.0 (Simple Voice Chat no)
+[15:10:18] [Server thread/INFO] [Smile Protocol/]: SELFTEST zona smileprotocol:final_room caja=128x154 marcadores=[fuse, mob_spawn, item:keycard:3, exit_cabin, entry, exit_door, entry_door] cajas=4 fusibles necesarios=4 fusibles en el suelo=8 objetos=9 puertas=81 valvulas=0 rejillas=2 salida=true puertas salida=3 circuitos={exit=false}
+[15:10:18] [Server thread/INFO] [Smile Protocol/]: SELFTEST zona smileprotocol:lab_generators caja=117x146 marcadores=[fuse, mob_spawn, item:wheel, entry, exit_cabin, exit_door, entry_door] cajas=3 fusibles necesarios=4 fusibles en el suelo=8 objetos=9 puertas=66 valvulas=2 rejillas=2 salida=true puertas salida=3 circuitos={exit=false, aux=false}
+[15:10:19] [Server thread/INFO] [Smile Protocol/]: SELFTEST zona smileprotocol:lab_greenhouse caja=116x153 marcadores=[fuse, mob_spawn, entry, exit_cabin, item:keycard:2, exit_door, entry_door] cajas=2 fusibles necesarios=2 fusibles en el suelo=7 objetos=8 puertas=70 valvulas=2 rejillas=4 salida=true puertas salida=3 circuitos={exit=false}
+[15:10:19] [Server thread/INFO] [Smile Protocol/]: SELFTEST zona smileprotocol:lab_morgue caja=138x167 marcadores=[fuse, entry, mob_spawn, item:key:blue, exit_cabin, exit_door, entry_door] cajas=3 fusibles necesarios=3 fusibles en el suelo=8 objetos=8 puertas=95 valvulas=0 rejillas=2 salida=true puertas salida=3 circuitos={exit=false, vent=false}
+[15:10:20] [Server thread/INFO] [Smile Protocol/]: SELFTEST zona smileprotocol:lab_offices caja=148x144 marcadores=[fuse, exit_cabin, mob_spawn, entry, item:keycard:1, exit_door, entry_door] cajas=2 fusibles necesarios=2 fusibles en el suelo=7 objetos=8 puertas=90 valvulas=0 rejillas=4 salida=true puertas salida=3 circuitos={exit=false}
+[15:10:20] [Server thread/INFO] [Smile Protocol/]: SELFTEST zona smileprotocol:lab_storage caja=120x149 marcadores=[fuse, mob_spawn, exit_cabin, entry, item:key:red, exit_door, entry_door] cajas=2 fusibles necesarios=2 fusibles en el suelo=5 objetos=6 puertas=68 valvulas=0 rejillas=2 salida=true puertas salida=3 circuitos={exit=false}
+[15:10:21] [Server thread/INFO] [Smile Protocol/]: SELFTEST zona smileprotocol:smiley_lab caja=39x55 marcadores=[fuse, summon, exit_cabin, entry, arena, smiley, cell, exit_door, entry_door] cajas=3 fusibles necesarios=3 fusibles en el suelo=8 objetos=7 puertas=0 valvulas=0 rejillas=2 salida=true puertas salida=3 circuitos={gen1=false, gen2=false, gen3=false}
+[15:10:21] [Server thread/INFO] [Smile Protocol/]: SELFTEST zona smileprotocol:start_corridor caja=140x169 marcadores=[fuse, mob_spawn, exit_cabin, entry, exit_door, entry_door] cajas=2 fusibles necesarios=2 fusibles en el suelo=7 objetos=2 puertas=102 valvulas=0 rejillas=2 salida=true puertas salida=3 circuitos={exit=false}
+[15:10:21] [Server thread/INFO] [Smile Protocol/]: SELFTEST zona smileprotocol:tutorial caja=11x97 marcadores=[item:stunner, item:key:red, tut_vent, fuse, item:can, item:wheel, exit_cabin, tut_crouch, item:decoy, entry, item:battery, item:bottle, exit_door, entry_door] cajas=1 fusibles necesarios=1 fusibles en el suelo=4 objetos=6 puertas=4 valvulas=1 rejillas=2 salida=true puertas salida=3 circuitos={exit=false}
+[15:10:24] [Server thread/INFO] [Smile Protocol/]: SELFTEST carga: 6 instancias a la vez en 2760 ms (460 ms cada una), mobs=4 luces=1824
+[15:10:24] [Server thread/INFO] [Smile Protocol/]: SELFTEST construccion por partes: 13 ticks (0.65 s de viaje) con 3 rebanadas por tick, peor tick 253 ms
+[15:10:25] [Server thread/INFO] [Smile Protocol/]: SELFTEST OK
+[15:10:25] [Server thread/INFO] [minecraft/MinecraftServer]: Stopping server
+[15:10:25] [Server thread/INFO] [minecraft/MinecraftServer]: Saving players
+[15:10:25] [Server thread/INFO] [minecraft/MinecraftServer]: Saving worlds
+[15:10:45] [Server thread/INFO] [minecraft/MinecraftServer]: Saving chunks for level 'ServerLevel[world]'/minecraft:overworld
+[15:10:45] [Server thread/INFO] [minecraft/MinecraftServer]: Saving chunks for level 'ServerLevel[world]'/minecraft:the_nether
+[15:10:45] [Server thread/INFO] [minecraft/MinecraftServer]: Saving chunks for level 'ServerLevel[world]'/minecraft:the_end
+[15:10:45] [Server thread/INFO] [minecraft/MinecraftServer]: Saving chunks for level 'ServerLevel[world]'/smileprotocol:smile_protocol
+[15:10:49] [Server thread/INFO] [minecraft/MinecraftServer]: ThreadedAnvilChunkStorage (world): All chunks are saved
+[15:10:49] [Server thread/INFO] [minecraft/MinecraftServer]: ThreadedAnvilChunkStorage (DIM-1): All chunks are saved
+[15:10:49] [Server thread/INFO] [minecraft/MinecraftServer]: ThreadedAnvilChunkStorage (DIM1): All chunks are saved
+[15:10:49] [Server thread/INFO] [minecraft/MinecraftServer]: ThreadedAnvilChunkStorage (smile_protocol): All chunks are saved
+[15:10:49] [Server thread/INFO] [minecraft/MinecraftServer]: ThreadedAnvilChunkStorage: All dimensions are saved
+gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/__run_4-1793459400256.json
+
+BUILD SUCCESSFUL in 52s
+9 actionable tasks: 4 executed, 5 up-to-date
+Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.4.0/userguide/configuration_cache_enabling.html
