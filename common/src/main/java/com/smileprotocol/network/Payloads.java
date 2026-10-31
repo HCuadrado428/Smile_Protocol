@@ -67,15 +67,18 @@ public final class Payloads {
     public record SyncReady(boolean show, Component title, int ready, int total, int countdown, Component status, String rules)
             implements CustomPacketPayload {
         public static final Type<SyncReady> TYPE = typeOf("sync_ready");
-        public static final StreamCodec<RegistryFriendlyByteBuf, SyncReady> CODEC = StreamCodec.composite(
-                ByteBufCodecs.BOOL, SyncReady::show,
-                ComponentSerialization.TRUSTED_STREAM_CODEC, SyncReady::title,
-                ByteBufCodecs.VAR_INT, SyncReady::ready,
-                ByteBufCodecs.VAR_INT, SyncReady::total,
-                ByteBufCodecs.INT, SyncReady::countdown,
-                ComponentSerialization.TRUSTED_STREAM_CODEC, SyncReady::status,
-                ByteBufCodecs.STRING_UTF8, SyncReady::rules,
-                SyncReady::new);
+        // composite admite hasta seis campos: este tiene siete
+        public static final StreamCodec<RegistryFriendlyByteBuf, SyncReady> CODEC = StreamCodec.of((buf, v) -> {
+            ByteBufCodecs.BOOL.encode(buf, v.show());
+            ComponentSerialization.TRUSTED_STREAM_CODEC.encode(buf, v.title());
+            ByteBufCodecs.VAR_INT.encode(buf, v.ready());
+            ByteBufCodecs.VAR_INT.encode(buf, v.total());
+            ByteBufCodecs.INT.encode(buf, v.countdown());
+            ComponentSerialization.TRUSTED_STREAM_CODEC.encode(buf, v.status());
+            ByteBufCodecs.STRING_UTF8.encode(buf, v.rules());
+        }, buf -> new SyncReady(ByteBufCodecs.BOOL.decode(buf), ComponentSerialization.TRUSTED_STREAM_CODEC.decode(buf),
+                ByteBufCodecs.VAR_INT.decode(buf), ByteBufCodecs.VAR_INT.decode(buf), ByteBufCodecs.INT.decode(buf),
+                ComponentSerialization.TRUSTED_STREAM_CODEC.decode(buf), ByteBufCodecs.STRING_UTF8.decode(buf)));
 
         public static SyncReady hidden() {
             return new SyncReady(false, Component.empty(), 0, 0, -1, Component.empty(), "");
