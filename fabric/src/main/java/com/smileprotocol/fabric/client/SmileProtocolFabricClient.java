@@ -54,8 +54,6 @@ public final class SmileProtocolFabricClient implements ClientModInitializer {
         net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(
                 com.smileprotocol.registry.ModEntities.PACIENTE.get(), com.smileprotocol.client.PacienteRenderer::new);
         net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(
-                com.smileprotocol.registry.ModEntities.GEMELO.get(), com.smileprotocol.client.GemeloRenderer::new);
-        net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(
                 com.smileprotocol.registry.ModEntities.IMITADOR.get(), com.smileprotocol.client.ImitadorRenderer::new);
         net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(
                 com.smileprotocol.registry.ModEntities.RASTREADOR.get(), ctx -> new com.smileprotocol.client.BerserkerRenderer<>(ctx, "rastreador", "rastreador"));

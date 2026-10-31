@@ -65,12 +65,6 @@ public final class ModEntities {
                     MobCategory.MONSTER).sized(0.7f, 1.95f).eyeHeight(1.8f).clientTrackingRange(12).fireImmune()
                     .build("imitador"));
 
-    /** El Gemelo: copia a un jugador (modelo y piel de jugador). */
-    public static final Supplier<EntityType<com.smileprotocol.entity.Gemelo>> GEMELO = Services.PLATFORM.register(
-            BuiltInRegistries.ENTITY_TYPE, "gemelo", () -> EntityType.Builder.of(com.smileprotocol.entity.Gemelo::new,
-                    MobCategory.MONSTER).sized(0.6f, 1.8f).eyeHeight(1.62f).clientTrackingRange(10).fireImmune()
-                    .build("gemelo"));
-
     /** Bengala encendida (fase 13). */
     public static final Supplier<EntityType<com.smileprotocol.entity.FlareEntity>> FLARE = Services.PLATFORM.register(
             BuiltInRegistries.ENTITY_TYPE, "flare", () -> EntityType.Builder.<com.smileprotocol.entity.FlareEntity>of(
@@ -94,7 +88,6 @@ public final class ModEntities {
         Services.PLATFORM.registerAttributes(AHORCADO, com.smileprotocol.entity.Ahorcado::attributes);
         Services.PLATFORM.registerAttributes(APAGON, com.smileprotocol.entity.Apagon::attributes);
         Services.PLATFORM.registerAttributes(SMILEY, com.smileprotocol.entity.Smiley::attributes);
-        Services.PLATFORM.registerAttributes(GEMELO, com.smileprotocol.entity.Gemelo::attributes);
         Services.PLATFORM.registerAttributes(IMITADOR, com.smileprotocol.entity.Imitador::attributes);
     }
 }

@@ -207,14 +207,6 @@ public final class SPConfig {
         public java.util.List<String> imitador_zones = new java.util.ArrayList<>(java.util.List.of("lab_storage", "lab_morgue", "lab_generators"));
         /** El Imitador puede grabar frases de la voz de proximidad (solo en memoria, durante la partida). */
         public boolean imitador_voices = true;
-        /** Plantas con Gemelo (copia a un jugador del grupo). */
-        public java.util.List<String> gemelo_zones = new java.util.ArrayList<>(java.util.List.of("lab_offices", "lab_greenhouse", "final_room"));
-        /** A cuantos bloques se delata si alguien se le acerca. */
-        public float gemelo_reveal_distance = 3.5f;
-        /** Segundos cerca del grupo antes de delatarse solo. */
-        public int gemelo_patience = 90;
-        /** Segundos que persigue antes de desvanecerse si no alcanza a nadie. */
-        public int gemelo_chase_seconds = 15;
         public java.util.List<String> paciente_zones = new java.util.ArrayList<>(java.util.List.of("lab_morgue", "final_room"));
         /** Bloques de camino por salto y ticks entre saltos mientras nadie lo mira. */
         public int paciente_step = 4;

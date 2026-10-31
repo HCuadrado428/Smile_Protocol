@@ -221,7 +221,6 @@ public final class InstanceManager {
             com.smileprotocol.entity.MobManager.spawnRastreador(level, zoneId, mobPoints, entry, rnd);
             com.smileprotocol.entity.MobManager.spawnAhorcados(level, zoneId, mobPoints, entry, rnd);
             com.smileprotocol.entity.MobManager.spawnApagon(level, zoneId, mobPoints, entry, rnd);
-            com.smileprotocol.entity.MobManager.spawnGemelo(level, zoneId, mobPoints, entry, rnd);
             com.smileprotocol.entity.MobManager.spawnImitador(level, zoneId, mobPoints, entry, rnd);
         }
         ZonePlacement placement = new ZonePlacement(zoneId, index, sub, box, entry, yaw, markers, mobs, fuses);

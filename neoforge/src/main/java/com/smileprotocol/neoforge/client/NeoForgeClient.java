@@ -71,7 +71,6 @@ public final class NeoForgeClient {
             event.registerEntityRenderer(com.smileprotocol.registry.ModEntities.SMILER_KILL.get(),
                     ctx -> new com.smileprotocol.client.BerserkerRenderer<>(ctx, "smiler_kill"));
             event.registerEntityRenderer(com.smileprotocol.registry.ModEntities.PACIENTE.get(), com.smileprotocol.client.PacienteRenderer::new);
-            event.registerEntityRenderer(com.smileprotocol.registry.ModEntities.GEMELO.get(), com.smileprotocol.client.GemeloRenderer::new);
             event.registerEntityRenderer(com.smileprotocol.registry.ModEntities.IMITADOR.get(), com.smileprotocol.client.ImitadorRenderer::new);
             event.registerEntityRenderer(com.smileprotocol.registry.ModEntities.RASTREADOR.get(),
                     ctx -> new com.smileprotocol.client.BerserkerRenderer<>(ctx, "rastreador", "rastreador"));

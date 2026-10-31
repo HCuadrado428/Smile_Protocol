@@ -28,9 +28,8 @@ Guía para una tarde de pruebas en multijugador (4 a 8 personas). Dura unas 2 ho
 - [ ] Si alguien cae: ¿lo reaniman a tiempo? ¿Se entiende el minijuego?
 - [ ] Al acabar, cada grupo mira su puntuación y `/sp records`.
 
-## Bloque 3 — Monstruos nuevos (20 min)
+## Bloque 3 — El Imitador (15 min)
 
-- [ ] **Gemelo** (oficinas, jardín o criogenia): ¿alguien se da cuenta de que no lleva linterna? ¿Cuánto tardan en descubrirlo?
 - [ ] **Imitador** (almacén, morgue o energía): ¿alguien fue hacia una voz conocida? ¿Se dieron cuenta de que no era su compañero?
 - [ ] Apunta si la voz imitada se entiende o suena demasiado rota.
 

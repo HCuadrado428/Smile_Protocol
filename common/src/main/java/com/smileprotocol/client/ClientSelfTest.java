@@ -914,43 +914,6 @@ public final class ClientSelfTest {
         SHOTS.add(() -> wait = 10);
         SHOTS.add(() -> grab(mc, "54_reglas"));
         SHOTS.add(() -> mc.setScreen(null));
-        // 8q. El Gemelo: copia al jugador (piel y nombre) y al delatarse muestra su cara
-        com.smileprotocol.entity.Gemelo[] twin = {null};
-        SHOTS.add(() -> server.execute(() -> {
-            for (var m : level.getEntitiesOfClass(com.smileprotocol.entity.SPMonster.class,
-                    new net.minecraft.world.phys.AABB(cam, cam).inflate(40))) m.discard();
-            SPSessionManager.teleport(sp, level, cam, 0f, 5f);
-            twin[0] = com.smileprotocol.entity.MobManager.spawn(level, com.smileprotocol.registry.ModEntities.GEMELO.get(),
-                    BlockPos.containing(cam.add(0, 0, 5)), level.random);
-            if (twin[0] != null) {
-                twin[0].setNoAi(false);
-                twin[0].copy(sp);
-                twin[0].lookAt(net.minecraft.commands.arguments.EntityAnchorArgument.Anchor.EYES, sp.getEyePosition());
-            }
-        }));
-        SHOTS.add(() -> wait = 30);
-        SHOTS.add(() -> server.execute(() -> {
-            var t = twin[0];
-            boolean ok = t != null && sp.getUUID().equals(t.copied()) && t.hasCustomName()
-                    && t.getCustomName().getString().equals(sp.getGameProfile().getName()) && !t.revealed();
-            log((ok ? "OK" : "FALLO") + " gemelo: copia la piel y el nombre del jugador");
-        }));
-        SHOTS.add(() -> grab(mc, "60_gemelo"));
-        SHOTS.add(() -> server.execute(() -> {
-            if (twin[0] != null) {
-                twin[0].forceReveal();
-                twin[0].setNoAi(true);
-            }
-        }));
-        SHOTS.add(() -> wait = 12);
-        SHOTS.add(() -> {
-            var t = twin[0] == null ? null : mc.level.getEntity(twin[0].getId());
-            log((t instanceof com.smileprotocol.entity.Gemelo tw && tw.revealed() ? "OK" : "FALLO") + " gemelo: se delata (cara y sin nombre)");
-            grab(mc, "61_gemelo_delatado");
-        });
-        SHOTS.add(() -> server.execute(() -> {
-            if (twin[0] != null) twin[0].discard();
-        }));
         // 8r. El Imitador: modelo, imita (con voz si la hay; si no, susurro) y su animacion de imitar
         com.smileprotocol.entity.Imitador[] imi = {null};
         SHOTS.add(() -> server.execute(() -> {
