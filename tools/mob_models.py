@@ -613,9 +613,31 @@ def cable():
     return m
 
 
-def doll_face():
+def burlap():
+    """Saco de arpillera: trama gruesa y abierta (se ve oscuro entre los hilos), manchas de humedad
+    y de sangre que han empapado la tela."""
+    def m(f):
+        c = np.zeros((f.h, f.w, 3)) + (92, 76, 54)
+        c *= (0.75 + 0.35 * f.n(0.7, 3, 1301))[..., None]
+        u, v = f.U * ART * 2, f.V * ART * 2
+        warp = (np.floor(u) % 2 == 0)
+        weft = (np.floor(v) % 2 == 0)
+        gap = ~warp & ~weft
+        c = np.where(gap[..., None], c * 0.7, c)
+        c = np.where((warp & ~weft)[..., None], c * 1.06, c)
+        stain = sstep(0.6, 0.85, f.n(0.4, 3, 1302))
+        c = c * (1 - stain[..., None] * 0.5) + np.array([70, 52, 30]) * stain[..., None] * 0.5
+        blood = sstep(0.74, 0.88, f.n(0.55, 2, 1303))
+        c = c * (1 - blood[..., None] * 0.85) + np.array([86, 14, 12]) * blood[..., None] * 0.85
+        c = grime_bottom(f, c, 0.4, 5)
+        c += (f.white()[..., None] - 0.5) * 10
+        return np.clip(c, 0, 255), np.ones((f.h, f.w))
+    return m
+
+
+def doll_face(cl=None):
     """Cabeza: tela con un boton rojo por ojo (brilla) y la sonrisa cosida con hilo rojo (brilla)."""
-    cl = sheet_cloth()
+    cl = cl or sheet_cloth()
 
     def glow(f):
         if f.face != "north":
@@ -650,33 +672,37 @@ def doll_face():
     return mat
 
 
-MAT.update({"sheet_cloth": sheet_cloth(), "stuffing": stuffing(), "cable": cable(), "doll_face": doll_face()})
+MAT.update({"sheet_cloth": sheet_cloth(), "stuffing": stuffing(), "cable": cable(), "doll_face": doll_face(),
+            "burlap": burlap(), "sack_face": doll_face(burlap())})
 
 
 def ahorcado():
     """El Ahorcado (docs/SMILERS.md): muneco de trapo de 1,2 bloques hecho de sabanas cosidas,
     colgado del techo por cables enredados en el cuello y los brazos. Ojo de boton rojo, sonrisa
     cosida con hilo rojo que se descose (la mandibula se abre) al atacar; relleno que se sale."""
-    g = Geo("ahorcado", 71, folder="entity", glow=("doll_face",), ao=False)
+    g = Geo("ahorcado", 71, folder="entity", glow=("sack_face",), ao=False)
     g.bone("root")
     g.bone("body", "root", (0, 10, 0))
     g.cube("body", (-2.6, 6, -1.6), (5.2, 6, 3.2), "sheet_cloth")
     g.cube("body", (-1.2, 7.5, -1.9), (2.4, 2.2, 0.4), "stuffing")                           # desgarron en la barriga
     g.cube("body", (-2.2, 11.8, -1.4), (4.4, 0.8, 2.8), "sheet_cloth")
     g.bone("head", "body", (0, 12.6, 0))
-    g.cube("head", (-3, 15.2, -2.6), (6, 4.2, 5.2), "doll_face")                              # cabeza grande de muneco
-    g.cube("head", (2.2, 18.6, -2.2), (1.4, 1.6, 1.4), "stuffing")                           # relleno por la costura
+    g.cube("head", (-3.2, 14.9, -2.8), (6.4, 4.9, 5.6), "sack_face")                         # cabeza: un saco de arpillera cosido
+    g.cube("head", (-1.5, 19.8, -1.3), (3.0, 1.0, 2.6), "burlap")                             # el saco, fruncido arriba
+    g.cube("head", (-0.7, 20.8, -0.6), (1.4, 0.9, 1.2), "burlap")                             # la punta atada
+    g.cube("head", (-2.1, 14.3, -1.9), (4.2, 0.6, 3.8), "cable")                              # atado al cuello con cable
+    g.cube("head", (2.4, 18.2, -2.4), (1.2, 1.4, 1.2), "stuffing")                           # relleno por la costura
     g.cube("head", (-0.4, 12.6, -0.4), (0.8, 2.8, 0.8), "cable")                             # cuello de cable
     g.bone("jaw", "head", (0, 15.6, 1.8))
-    g.cube("jaw", (-2.8, 13.6, -2.4), (5.6, 2, 4.8), "sheet_cloth")
+    g.cube("jaw", (-2.8, 13.6, -2.4), (5.6, 2, 4.8), "burlap")
     g.cube("jaw", (-2.4, 15.3, -2.2), (4.8, 0.4, 4.2), "stuffing")                           # dentro: carne
     g.bone("cables", "root", (0, 19.4, 0))
     for x, z, ln in ((-0.6, 0.2, 40), (0.7, -0.5, 44), (0.1, 1.0, 38)):
         g.cube("cables", (x - 0.25, 19.2, z - 0.25), (0.5, ln, 0.5), "cable")                 # cables hasta el techo
     for side, sx in (("r", 1), ("l", -1)):
         g.bone(f"arm_{side}", "body", (sx * 2.6, 11.5, 0))
-        g.cube(f"arm_{side}", (sx * 2.6 - (0 if sx > 0 else 1.6), 5, -0.8), (1.6, 6.5, 1.6), "sheet_cloth")
-        g.cube(f"arm_{side}", (sx * 2.6 - (0 if sx > 0 else 1.6) + 0.3, 4, -0.5), (1, 1.2, 1), "stuffing")
+        g.cube(f"arm_{side}", (sx * 2.6 - (0 if sx > 0 else 1.4), -1.5, -0.7), (1.4, 13, 1.4), "sheet_cloth")   # brazos larguisimos
+        g.cube(f"arm_{side}", (sx * 2.6 - (0 if sx > 0 else 1.4) + 0.2, -2.8, -0.5), (1, 1.4, 1), "stuffing")
         g.bone(f"leg_{side}", "body", (sx * 1.3, 6.3, 0))
         g.cube(f"leg_{side}", (sx * 1.3 - 0.9, 0, -0.9), (1.8, 6.5, 1.8), "sheet_cloth")
     return g.save()

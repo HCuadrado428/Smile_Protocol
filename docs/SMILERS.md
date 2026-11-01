@@ -36,10 +36,11 @@ Inspirado en los ángeles llorones de Doctor Who. *Implementado (fase 21):* mode
 
 ## El Ahorcado (muñeco colgante)
 *Implementado (fase 21):* modelo `ahorcado`, IA en `entity/Ahorcado.java`, colgado en `ahorcado_zones` (`ahorcado_count` por planta).
-- **Aspecto:** pequeño (1,2 bloques), muñeco de trapo flácido colgado de cables. Ojo cosido con un botón rojo brillante; sonrisa cosida que se descose al atacar.
+- **Aspecto:** pequeño (1,2 bloques), muñeco de trapo flácido colgado de cables, con **la cabeza metida en un saco de arpillera** atado al cuello y brazos larguísimos que le cuelgan por debajo de los pies. Ojo de botón rojo brillante; sonrisa cosida con hilo rojo que se descose al atacar.
+- **No está solo:** a su alrededor cuelgan dos o tres muñecos iguales, sin vida. Solo uno es el Ahorcado: **la linterna lo delata porque gira la cabeza hacia la luz**.
 - **Movimiento:** inmóvil colgado; cae, se arrastra muy rápido 2 s y vuelve a subir.
 - **Actitud:** emboscador, no persigue lejos. Nota lo que pasa justo debajo (2 bloques). No revisa escondites.
-- **Mecánica:** cae sobre quien pasa debajo sin mirar arriba; **la linterna hacia arriba lo delata**. Agarre con **QTE SEQUENCE**. No remata. Vive en los conductos y en los techos. Sin interferencias.
+- **Mecánica:** cae sobre quien pasa debajo sin mirar arriba; **la linterna hacia arriba lo delata**. Agarre con **QTE SEQUENCE**: **te cae en la cara** y la tela del saco te tapa la vista mientras lo intentas soltar. No remata. Vive en los conductos y en los techos. Sin interferencias.
 - **Sonido:** cuerda que se tensa y una risa de juguete.
 - **Cómo se le gana:** mirar arriba con la linterna, o lanzar un objeto debajo para que caiga antes.
 - **Dónde:** conductos, invernadero y salas con tuberías en el techo.

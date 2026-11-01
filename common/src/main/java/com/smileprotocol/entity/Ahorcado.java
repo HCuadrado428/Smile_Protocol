@@ -12,6 +12,7 @@ import com.smileprotocol.qte.QTEManager;
 import com.smileprotocol.qte.QTEType;
 import com.smileprotocol.registry.ModSounds;
 import com.smileprotocol.sequence.SequenceManager;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -38,12 +39,18 @@ import java.util.Comparator;
  * debajo y lo agarra (QTE SEQUENCE); si falla, se arrastra muy rapido 2 s y luego los cables lo
  * vuelven a subir. Si alguien le apunta con la linterna se queda quieto (lo han visto) y no cae;
  * un objeto lanzado debajo lo hace caer antes de tiempo. No persigue lejos ni remata.
+ * <p>
+ * Cuelgan otros muñecos iguales a su alrededor ({@link #isDecoy()}: sin vida); solo uno es el
+ * Ahorcado. La linterna lo delata porque gira la cabeza hacia la luz. Cae en la cara: mientras
+ * agarra, la tela del saco tapa la vista.
  */
 public class Ahorcado extends SmilerBase implements QTEManager.Grabber {
 
     public enum State { HANG, DROP, CRAWL, GRAB, STUNNED, CLIMB }
 
     private static final EntityDataAccessor<Byte> STATE = SynchedEntityData.defineId(Ahorcado.class, EntityDataSerializers.BYTE);
+    /** Muñeco de adorno: cuelga igual pero no tiene vida. */
+    private static final EntityDataAccessor<Boolean> DECOY = SynchedEntityData.defineId(Ahorcado.class, EntityDataSerializers.BOOLEAN);
     private static final RawAnimation HANG_A = RawAnimation.begin().thenLoop("hang");
     private static final RawAnimation DROP_A = RawAnimation.begin().thenPlayAndHold("drop");
     private static final RawAnimation CRAWL_A = RawAnimation.begin().thenLoop("crawl");
@@ -56,6 +63,8 @@ public class Ahorcado extends SmilerBase implements QTEManager.Grabber {
     private int lit;
     @Nullable private ServerPlayer target;
     private boolean forced;
+    private boolean decoysPlaced;
+    private final java.util.List<java.util.UUID> decoys = new java.util.ArrayList<>();
 
     public Ahorcado(EntityType<? extends PathfinderMob> type, Level level) {
         super(type, level);
@@ -79,6 +88,75 @@ public class Ahorcado extends SmilerBase implements QTEManager.Grabber {
     protected void defineSynchedData(SynchedEntityData.Builder b) {
         super.defineSynchedData(b);
         b.define(STATE, (byte) 0);
+        b.define(DECOY, false);
+    }
+
+    public boolean isDecoy() {
+        return entityData.get(DECOY);
+    }
+
+    /** Muñecos iguales colgados alrededor (pruebas). */
+    public int decoyCount() {
+        return decoys.size();
+    }
+
+    @Override
+    public void addAdditionalSaveData(net.minecraft.nbt.CompoundTag tag) {
+        super.addAdditionalSaveData(tag);
+        tag.putBoolean("Decoy", isDecoy());
+        tag.putBoolean("DecoysPlaced", decoysPlaced);
+    }
+
+    @Override
+    public void readAdditionalSaveData(net.minecraft.nbt.CompoundTag tag) {
+        super.readAdditionalSaveData(tag);
+        entityData.set(DECOY, tag.getBoolean("Decoy"));
+        decoysPlaced = tag.getBoolean("DecoysPlaced");
+    }
+
+    @Override
+    public void remove(RemovalReason reason) {
+        if (level() instanceof ServerLevel sl && reason.shouldDestroy()) {
+            for (java.util.UUID id : decoys) {
+                net.minecraft.world.entity.Entity d = sl.getEntity(id);
+                if (d != null) d.discard();
+            }
+        }
+        super.remove(reason);
+    }
+
+    /** Cuelga dos o tres muñecos iguales cerca, a la misma altura, donde quepan. */
+    private void placeDecoys(ServerLevel level) {
+        decoysPlaced = true;
+        if (anchor == null) return;
+        int want = 2 + getRandom().nextInt(2);
+        for (int i = 0; i < 24 && decoys.size() < want; i++) {
+            double ang = getRandom().nextDouble() * Math.PI * 2, r = 2.5 + getRandom().nextDouble() * 4.5;
+            Vec3 at = new Vec3(Math.floor(anchor.x + Math.cos(ang) * r) + 0.5, anchor.y, Math.floor(anchor.z + Math.sin(ang) * r) + 0.5);
+            if (!level.noCollision(this, getType().getDimensions().makeBoundingBox(at))) continue;
+            // colgado de algo: techo a pocos bloques por encima
+            boolean roof = false;
+            for (int dy = 1; dy <= 4 && !roof; dy++) {
+                BlockPos up = BlockPos.containing(at.x, anchor.y + 1.5 + dy, at.z);
+                roof = !level.getBlockState(up).getCollisionShape(level, up).isEmpty();
+            }
+            if (!roof) continue;
+            boolean far = true;
+            for (java.util.UUID id : decoys) {
+                net.minecraft.world.entity.Entity d = level.getEntity(id);
+                if (d != null && d.position().distanceTo(at) < 2) far = false;
+            }
+            if (!far) continue;
+            Ahorcado d = (Ahorcado) getType().create(level);
+            if (d == null) return;
+            d.entityData.set(DECOY, true);
+            d.decoysPlaced = true;
+            d.setYRot(getRandom().nextFloat() * 360f);
+            d.hangAt(at);
+            level.addFreshEntity(d);
+            decoys.add(d.getUUID());
+        }
+        SPDebug.log("ahorcado: " + decoys.size() + " munecos iguales a su alrededor");
     }
 
     public State state() {
@@ -113,6 +191,13 @@ public class Ahorcado extends SmilerBase implements QTEManager.Grabber {
         super.customServerAiStep();
         if (!(level() instanceof ServerLevel level) || forced) return;
         if (anchor == null) hangAt(position());
+        if (isDecoy()) {
+            // un muñeco sin vida: cuelga y se balancea, nada mas
+            setDeltaMovement(Vec3.ZERO);
+            if (position().distanceToSqr(anchor) > 0.01) setPos(anchor);
+            return;
+        }
+        if (!decoysPlaced) placeDecoys(level);
         if (sequence() != null) return;
         timer++;
         if (lit > 0) lit--;
@@ -128,6 +213,8 @@ public class Ahorcado extends SmilerBase implements QTEManager.Grabber {
                     if (v.normalize().dot(p.getViewVector(1f)) > Math.cos(Math.toRadians(18)) && p.hasLineOfSight(this)) {
                         if (lit == 0) level.playSound(null, blockPosition(), ModSounds.AHORCADO_CREAK.get(), SoundSource.HOSTILE, 0.8f, 1.3f);
                         lit = 30;
+                        // lo delata: gira la cabeza hacia la luz (los muñecos de verdad no)
+                        getLookControl().setLookAt(p, 20, 20);
                     }
                 }
                 if (lit > 0 || timer < 20) return;
@@ -221,7 +308,7 @@ public class Ahorcado extends SmilerBase implements QTEManager.Grabber {
     /** Un objeto lanzado que cae justo debajo lo hace caer antes de tiempo (docs/SMILERS.md). */
     @Override
     public void hear(ServerLevel level, NoiseEvent e) {
-        if (forced || state() != State.HANG || e.type() != NoiseType.THROW_IMPACT) return;
+        if (forced || isDecoy() || state() != State.HANG || e.type() != NoiseType.THROW_IMPACT) return;
         double dx = e.pos().x - getX(), dz = e.pos().z - getZ();
         if (Math.sqrt(dx * dx + dz * dz) < 2.0 && e.pos().y < getY()) drop(level, null);
     }

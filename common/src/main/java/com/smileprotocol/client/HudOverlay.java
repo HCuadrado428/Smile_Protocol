@@ -121,6 +121,7 @@ public final class HudOverlay {
                 renderSequence(g, w, h, partialTick);
             } else if (inGame) {
                 if (ClientQTE.active()) {
+                    if (grabbedByAhorcado()) renderSack(g, w, h);
                     renderQTE(g, font, w, h);
                 } else if (ClientState.downed) {
                     renderDowned(g, font, w, h);
@@ -283,6 +284,44 @@ public final class HudOverlay {
     }
 
     /** Minijuego de escape (README 18): titulo garabateado, tiempo en sangre y el control de cada tipo. */
+    /** El Ahorcado le ha caido en la cara (esta a menos de 2,5 bloques agarrando). */
+    private static boolean grabbedByAhorcado() {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.player == null || mc.level == null) return false;
+        for (var a : mc.level.getEntitiesOfClass(com.smileprotocol.entity.Ahorcado.class, mc.player.getBoundingBox().inflate(2.5))) {
+            if (a.state() == com.smileprotocol.entity.Ahorcado.State.GRAB) return true;
+        }
+        return false;
+    }
+
+    /**
+     * Con el Ahorcado en la cara: la tela del saco tapa la vista. Trama de arpillera con la luz que
+     * se cuela entre los hilos y, del reves, las puntadas rojas de su sonrisa.
+     */
+    private static void renderSack(GuiGraphics g, int w, int h) {
+        long t = Util.getMillis();
+        int jx = (int) (Math.sin(t / 70.0) * 3), jy = (int) (Math.cos(t / 90.0) * 2);
+        g.fill(0, 0, w, h, 0xF0261C14);
+        // hilos de la trama: luz entre los huecos
+        int cell = 7;
+        for (int y = -cell; y < h + cell; y += cell) {
+            for (int x = -cell; x < w + cell; x += cell) {
+                int hx = x + jx + ((y / cell) % 2 == 0 ? 0 : cell / 2), hy = y + jy;
+                int a = 26 + (int) (((x * 73856093) ^ (y * 19349663)) & 0x1F);
+                g.fill(hx, hy, hx + 2, hy + 2, a << 24 | 0x8A7454);
+            }
+        }
+        // las puntadas de la sonrisa, vistas desde dentro
+        int cx = w / 2 + jx, cy = (int) (h * 0.58) + jy;
+        for (int i = -9; i <= 9; i++) {
+            double a = i / 9.0;
+            int x = cx + (int) (a * w * 0.32);
+            int y = cy + (int) ((1 - a * a) * h * 0.08);
+            g.fill(x - 4, y - 1, x + 4, y + 2, 0xD08A1418);
+            g.fill(x - 1, y - 6, x + 1, y + 7, 0xC07A1014);
+        }
+    }
+
     private static void renderQTE(GuiGraphics g, Font font, int w, int h) {
         com.smileprotocol.qte.QTEType type = ClientQTE.type();
         float t = ClientQTE.time();
