@@ -490,10 +490,10 @@ def animations():
         **{f"shoulder_{sd}": {"rotation": cyc(L, lambda p: [0, 0, 2.5 * s(p)])} for sd in "rl"},
         "arm_r": {"rotation": cyc(L, lambda p: [ARM + 18 * s(p), 0, -5])},
         "arm_l": {"rotation": cyc(L, lambda p: [ARM - 18 * s(p), 0, 5])},
-        "forearm_r": {"rotation": cyc(L, lambda p: [-11 + 9 * s(p - 0.9), 0, 0])},
-        "forearm_l": {"rotation": cyc(L, lambda p: [-11 - 9 * s(p - 0.9), 0, 0])},
-        "hand_r": {"rotation": cyc(L, lambda p: [4 + 8 * s(p - 1.7), 0, 0])},
-        "hand_l": {"rotation": cyc(L, lambda p: [4 - 8 * s(p - 1.7), 0, 0])},
+        "forearm_r": {"rotation": cyc(L, lambda p: [-9 + 5 * s(p - 0.9), 0, 0])},
+        "forearm_l": {"rotation": cyc(L, lambda p: [-9 - 5 * s(p - 0.9), 0, 0])},
+        "hand_r": {"rotation": cyc(L, lambda p: [4 + 5 * s(p - 1.7), 0, 0])},
+        "hand_l": {"rotation": cyc(L, lambda p: [4 - 5 * s(p - 1.7), 0, 0])},
         **fingers(lambda i, sd: {"rotation": cyc(L, lambda p, i=i, k=(1 if sd == "r" else -1): [
             8 + 9 * k * s(p - 2.3 - i * 0.25), 0, 0])}),
         **gait(L, 22, 46, 4),
@@ -510,16 +510,16 @@ def animations():
         "neck2": {"rotation": cyc(L, lambda p: [-14 - 3 * c(2 * p - 1.2), 0, 0])},
         "head": {"rotation": cyc(L, lambda p: [-12 - 2 * c(2 * p - 1.6), 7 * s(p), 4 * c(p)])},
         "jaw": {"rotation": cyc(L, lambda p: [18 + 7 * s(2 * p), 0, 0])},
-        **{f"shoulder_{sd}": {"rotation": cyc(L, lambda p, k=k: [0, 0, k * (4 + 3 * s(p) * k)])}
+        # brazos estirados hacia ti, los dos a la vez (nada de bombear uno arriba y otro abajo): solo
+        # los sacude el impacto de cada zancada, con retraso en antebrazo y mano; las garras se crispan
+        **{f"shoulder_{sd}": {"rotation": cyc(L, lambda p, k=k: [0, 0, k * (5 + 1.5 * c(2 * p - 0.4))])}
            for sd, k in (("r", -1), ("l", 1))},
-        "arm_r": {"rotation": cyc(L, lambda p: [-92 + 24 * s(p), -10, -12])},
-        "arm_l": {"rotation": cyc(L, lambda p: [-92 - 24 * s(p), 10, 12])},
-        "forearm_r": {"rotation": cyc(L, lambda p: [-22 + 14 * s(p - 1.0), 0, 0])},
-        "forearm_l": {"rotation": cyc(L, lambda p: [-22 - 14 * s(p - 1.0), 0, 0])},
-        "hand_r": {"rotation": cyc(L, lambda p: [-12 + 10 * s(p - 1.8), 0, 0])},
-        "hand_l": {"rotation": cyc(L, lambda p: [-12 - 10 * s(p - 1.8), 0, 0])},
+        **{f"arm_{sd}": {"rotation": cyc(L, lambda p, k=k: [-96 + 4 * c(2 * p - 0.8), 5 * s(p) - 15 * k, -6 * k])}
+           for sd, k in (("r", 1), ("l", -1))},
+        **{f"forearm_{sd}": {"rotation": cyc(L, lambda p: [-14 + 5 * c(2 * p - 1.6), 0, 0])} for sd in "rl"},
+        **{f"hand_{sd}": {"rotation": cyc(L, lambda p: [-20 + 7 * c(2 * p - 2.4), 0, 0])} for sd in "rl"},
         **fingers(lambda i, sd: {"rotation": cyc(L, lambda p, i=i, k=(1 if sd == "r" else -1): [
-            -26 + 12 * s(p * 2 - 2.2 - i * 0.4), 0, (i - 1.5) * 9 * k])}),
+            -32 + 22 * max(0.0, s(2 * p - i * 1.7 - (0.9 if k > 0 else 0))) ** 4, 0, (i - 1.5) * 11 * k], 36)}),
         **both("thumb", (0, [-20, 0, -15])),
         **gait(L, 40, 75, 18, -22),
     })
@@ -668,12 +668,10 @@ def animations():
         "jaw": {"rotation": cyc(L, lambda p: [14 + 9 * s(4 * p), 0, 0], 32)},
         "smile": {"scale": cyc(L, lambda p: [1.05 + 0.05 * s(2 * p), 1.1 + 0.1 * s(2 * p), 1])},
         **both("shoulder", (0, [0, 0, -4])),
-        "arm_r": {"rotation": cyc(L, lambda p: [-70 + 2 * s(p), -8, -4])},
-        "arm_l": {"rotation": cyc(L, lambda p: [-70 + 2 * s(p + 0.6), 8, 4])},
-        "forearm_r": {"rotation": cyc(L, lambda p: [-50 + 4 * s(p - 0.8), 0, 0])},
-        "forearm_l": {"rotation": cyc(L, lambda p: [-50 + 4 * s(p - 0.2), 0, 0])},
-        "hand_r": {"rotation": cyc(L, lambda p: [8 + 3 * s(p - 1.4), 0, 0])},
-        "hand_l": {"rotation": cyc(L, lambda p: [8 + 3 * s(p - 0.8), 0, 0])},
+        # las dos manos a la vez: tira de ella hacia su cara y afloja, a pulsos
+        **{f"arm_{sd}": {"rotation": cyc(L, lambda p, k=k: [-70 - 3 * max(0.0, s(p)) ** 2, -8 * k, -4 * k])} for sd, k in (("r", 1), ("l", -1))},
+        **{f"forearm_{sd}": {"rotation": cyc(L, lambda p: [-50 - 6 * max(0.0, s(p - 0.4)) ** 2, 0, 0])} for sd in "rl"},
+        **{f"hand_{sd}": {"rotation": cyc(L, lambda p: [8 + 3 * s(p - 0.9), 0, 0])} for sd in "rl"},
         **fingers(lambda i, sd: {"rotation": cyc(L, lambda p, i=i: [66 + 8 * max(0.0, s(2 * p - i * 0.4)) ** 2, 0, 0])}),
         **both("thumb", (0, [40, 0, 10])),
         **both("thigh", (0, [-4, 0, -5])), **both("shin", (0, [8, 0, 0])), **both("foot", (0, [-4, 0, 5])),
