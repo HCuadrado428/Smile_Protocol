@@ -1469,13 +1469,63 @@ def rastreador_animations():
         "jaw_r": {"rotation": kf(wave(L, [10, 0, -8], 6, 0, 8))}, "jaw_l": {"rotation": kf(wave(L, [10, 0, 8], 6, 0, 8))},
         **{f"finger{i}_r": {"rotation": kf(wave(L, [10, 0, 0], 14, i))} for i in range(3)},
     }))
-    L = 1.2
+    # WALK: a cuatro patas, al paso (pata trasera, delantera del mismo lado, la otra trasera...),
+    # bajo y con la cabeza casi rozando el suelo
+    L = 1.4
+    W = 72
     A["walk"] = loop_anim(L, base({
-        "thigh_r": {"rotation": kf(wave(L, [-22, 0, 3], 24))}, "thigh_l": {"rotation": kf(wave(L, [-22, 0, -3], 24, math.pi))},
-        "shin_r": {"rotation": kf(wave(L, [38, 0, 0], 20, -1.2))}, "shin_l": {"rotation": kf(wave(L, [38, 0, 0], 20, math.pi - 1.2))},
-        "arm_r": {"rotation": kf(wave(L, [-22, 0, -4], 12, math.pi))}, "arm_l": {"rotation": kf(wave(L, [-22, 0, 4], 12))},
-        "head": {"rotation": kf(multi(L, [-10, 0, 0], [3, 10, 4], [0, 0.7, 1.4]))},
-        "hips": {"position": kf(wave(L, [0, -1.5, 0], 0.6, 0, 8, 1))},
+        "torso": {"rotation": kf(wave(L, [W, 0, 0], 2.5, 0, 16, 0))},
+        "neck": {"rotation": kf([(0, [-50, 0, 0])])},
+        "head": {"rotation": kf(multi(L, [-16, 0, 0], [3, 9, 4], [0, 0.7, 1.4], 16))},
+        "jaw_r": {"rotation": kf(wave(L, [12, 0, -8], 5, 0, 16))}, "jaw_l": {"rotation": kf(wave(L, [12, 0, 8], 5, 0, 16))},
+        "arm_r": {"rotation": kf(wave(L, [-W + 4, 0, -5], 22, math.pi * 1.5, 16))},
+        "arm_l": {"rotation": kf(wave(L, [-W + 4, 0, 5], 22, math.pi * 0.5, 16))},
+        "forearm_r": {"rotation": kf(wave(L, [-8, 0, 0], 14, math.pi * 1.5 - 1.1, 16))},
+        "forearm_l": {"rotation": kf(wave(L, [-8, 0, 0], 14, math.pi * 0.5 - 1.1, 16))},
+        "hand_r": {"rotation": kf(wave(L, [10, 0, 0], 16, math.pi * 1.5 - 1.8, 16))},
+        "hand_l": {"rotation": kf(wave(L, [10, 0, 0], 16, math.pi * 0.5 - 1.8, 16))},
+        "thigh_r": {"rotation": kf(wave(L, [-34, 0, 4], 26, math.pi, 16))},
+        "thigh_l": {"rotation": kf(wave(L, [-34, 0, -4], 26, 0, 16))},
+        "shin_r": {"rotation": kf(wave(L, [56, 0, 0], 22, math.pi - 1.1, 16))},
+        "shin_l": {"rotation": kf(wave(L, [56, 0, 0], 22, -1.1, 16))},
+        "foot_r": {"rotation": kf(wave(L, [-20, 0, 0], 12, math.pi - 1.8, 16))},
+        "foot_l": {"rotation": kf(wave(L, [-20, 0, 0], 12, -1.8, 16))},
+        "hips": {"position": kf(wave(L, [0, -4.5, 0], 0.5, 0, 16, 1))},
+    }))
+    # SNIFF: parado a cuatro patas, el hocico pegado al suelo, olfatea a golpes rapidos
+    L = 1.6
+    A["sniff"] = loop_anim(L, base({
+        "torso": {"rotation": kf(wave(L, [W + 4, 0, 0], 2, 0, 16))},
+        "neck": {"rotation": kf([(0, [-34, 0, 0])])},
+        "head": {"rotation": kf([(0, [6, -8, 0]), (0.15, [14, -6, 0]), (0.25, [6, -4, 0]), (0.4, [14, -2, 0]), (0.5, [6, 0, 0]),
+                                 (0.9, [6, 10, 4]), (1.05, [14, 12, 4]), (1.15, [6, 12, 4]), (1.3, [14, 8, 2]), (L, [6, -8, 0])])},
+        "jaw_r": {"rotation": kf(wave(L, [8, 0, -5], 4, 0, 16))}, "jaw_l": {"rotation": kf(wave(L, [8, 0, 5], 4, 0, 16))},
+        "arm_r": {"rotation": kf([(0, [-W + 2, 0, -8])])}, "arm_l": {"rotation": kf([(0, [-W + 2, 0, 8])])},
+        "forearm_r": {"rotation": kf([(0, [-14, 0, 0])])}, "forearm_l": {"rotation": kf([(0, [-14, 0, 0])])},
+        **{f"finger{i}_{sd}": {"rotation": kf(wave(L, [20, 0, 0], 10, i * 1.3 + (0 if sd == "r" else 2), 16))}
+           for i in range(3) for sd in "rl"},
+        "thigh_r": {"rotation": kf([(0, [-40, 0, 6])])}, "thigh_l": {"rotation": kf([(0, [-40, 0, -6])])},
+        "shin_r": {"rotation": kf([(0, [66, 0, 0])])}, "shin_l": {"rotation": kf([(0, [66, 0, 0])])},
+        "foot_r": {"rotation": kf([(0, [-24, 0, 0])])}, "foot_l": {"rotation": kf([(0, [-24, 0, 0])])},
+        "hips": {"position": kf([(0, [0, -5, 0])])},
+    }))
+    # PEEK_DOOR: pegado al suelo delante de una puerta; mete la mano por debajo con la palma (el ojo)
+    # hacia arriba y la mueve despacio de un lado a otro, mirando lo que hay detras
+    L = 2.4
+    A["peek_door"] = loop_anim(L, base({
+        "torso": {"rotation": kf([(0, [86, 0, 0])])},
+        "neck": {"rotation": kf([(0, [-62, 0, 0])])},
+        "head": {"rotation": kf(multi(L, [-8, 0, 0], [2, 8, 3], [0, 0.6, 1.2], 16))},
+        "jaw_r": {"rotation": kf([(0, [6, 0, -4])])}, "jaw_l": {"rotation": kf([(0, [6, 0, 4])])},
+        "arm_r": {"rotation": kf(wave(L, [-170, 0, 0], 12, 0, 16, 1))},                # estirado por el suelo
+        "forearm_r": {"rotation": kf([(0, [4, 0, 0])])},
+        "hand_r": {"rotation": kf(wave(L, [0, 0, 90], 6, 1, 16))},                      # palma arriba: el ojo mira
+        **{f"finger{i}_r": {"rotation": kf(wave(L, [-10, 0, 0], 12, i * 1.4, 16))} for i in range(3)},
+        "arm_l": {"rotation": kf([(0, [-92, 0, 14])])}, "forearm_l": {"rotation": kf([(0, [-30, 0, 0])])},
+        "thigh_r": {"rotation": kf([(0, [-70, 0, 10])])}, "thigh_l": {"rotation": kf([(0, [-70, 0, -10])])},
+        "shin_r": {"rotation": kf([(0, [110, 0, 0])])}, "shin_l": {"rotation": kf([(0, [110, 0, 0])])},
+        "foot_r": {"rotation": kf([(0, [-36, 0, 0])])}, "foot_l": {"rotation": kf([(0, [-36, 0, 0])])},
+        "hips": {"position": kf([(0, [0, -8, 0])])},
     }))
     # RUN: a cuatro patas, galope (brazos como patas delanteras)
     L = 0.5

@@ -45,15 +45,18 @@ import java.util.Comparator;
 import java.util.List;
 
 /**
- * El Rastreador (docs/SMILERS.md): cazador metodico sin piel, con el ojo en la palma.
- * PATROL (de pie) → oye un ruido: INVESTIGATE → te ve (cono de 20 bloques): CHASE a cuatro patas,
- * mas rapido que tu, pero a los 8 s se cansa (TIRED) → te pierde: SEARCH donde te vio, alzando la
- * palma, y revisa los escondites cercanos (empezando por el que te vio usar) y saca a quien este
- * dentro. Al alcanzarte, agarre con QTE MASH; si fallas quedas derribado y vuelve a rematarte.
+ * El Rastreador (docs/SMILERS.md): cazador metodico sin piel, con el ojo en la palma. Va a cuatro
+ * patas y solo se levanta para buscar con la mano en alto.
+ * PATROL → oye un ruido: INVESTIGATE → te ve (cono de 20 bloques): CHASE, mas rapido que tu, pero
+ * a los 8 s se cansa (TIRED) → te pierde: SEARCH donde te vio, alzando la palma; si encuentra tu
+ * rastro fresco lo sigue olfateando ({@link State#TRACK}, mas deprisa si sangras, {@link ScentTrail});
+ * si no, revisa los escondites cercanos y saca a quien este dentro. Antes de cruzar una puerta
+ * cerrada mete la mano por debajo para mirar ({@link State#PEEK}). Deja arañazos en las paredes.
+ * Al alcanzarte, agarre con QTE MASH; si fallas quedas derribado y vuelve a rematarte.
  */
 public class Rastreador extends SmilerBase implements QTEManager.Grabber {
 
-    public enum State { PATROL, INVESTIGATE, CHASE, TIRED, SEARCH, CHECK, GRAB, STUNNED, VENT }
+    public enum State { PATROL, INVESTIGATE, CHASE, TIRED, SEARCH, CHECK, GRAB, STUNNED, VENT, TRACK, PEEK }
 
     private static final EntityDataAccessor<Byte> STATE = SynchedEntityData.defineId(Rastreador.class, EntityDataSerializers.BYTE);
 
@@ -64,6 +67,8 @@ public class Rastreador extends SmilerBase implements QTEManager.Grabber {
     private static final RawAnimation TIRED_A = RawAnimation.begin().thenLoop("tired");
     private static final RawAnimation GRAB_A = RawAnimation.begin().thenLoop("grab");
     private static final RawAnimation STUN_A = RawAnimation.begin().thenLoop("stunned");
+    private static final RawAnimation SNIFF_A = RawAnimation.begin().thenLoop("sniff");
+    private static final RawAnimation PEEK_A = RawAnimation.begin().thenLoop("peek_door");
 
     private int timer;
     private int chaseTicks;
@@ -80,6 +85,14 @@ public class Rastreador extends SmilerBase implements QTEManager.Grabber {
     private final List<BlockPos> toCheck = new ArrayList<>();
     @Nullable private BlockPos checking;
     private boolean forced;
+    /** Siguiendo un rastro: el punto al que va. */
+    @Nullable private ScentTrail.Crumb crumb;
+    /** Puerta por debajo de la que esta mirando, y el estado al que vuelve. */
+    @Nullable private BlockPos peekDoor;
+    private State afterPeek = State.PATROL;
+    private int scratchCd = 60;
+    /** El ultimo punto de rastro que ya siguio hasta el final (no vuelve a seguir ese rastro). */
+    private long trailDone = -1;
 
     public Rastreador(EntityType<? extends PathfinderMob> type, Level level) {
         super(type, level);
@@ -97,6 +110,14 @@ public class Rastreador extends SmilerBase implements QTEManager.Grabber {
     @Override
     public String defId() {
         return "rastreador";
+    }
+
+    @Override
+    protected net.minecraft.world.entity.ai.navigation.PathNavigation createNavigation(Level level) {
+        var nav = new net.minecraft.world.entity.ai.navigation.GroundPathNavigation(this, level);
+        nav.setCanOpenDoors(true);
+        nav.setCanPassDoors(true);
+        return nav;
     }
 
     @Override
@@ -165,8 +186,15 @@ public class Rastreador extends SmilerBase implements QTEManager.Grabber {
                 s = State.CHASE;
             }
         }
+        ScentTrail.record(level);
+        claws(level, s);
+        if (s != State.CHASE && s != State.VENT && s != State.PEEK && s != State.GRAB && s != State.STUNNED && doorAhead(level, s)) return;
         switch (s) {
+            case PEEK -> peek(level);
+            case TRACK -> track(level, def);
             case PATROL -> {
+                // un rastro fresco a sus pies: lo sigue
+                if (timer % 20 == 0 && startTrack(level, 3, 900)) return;
                 if (goal == null || getNavigation().isDone() || timer > 200) {
                     Vec3 p = DefaultRandomPos.getPos(this, 10, 4);
                     goal = p;
@@ -202,6 +230,7 @@ public class Rastreador extends SmilerBase implements QTEManager.Grabber {
                 // con la palma en alto, barriendo la sala; despues revisa los escondites
                 if (timer < 15 && lastSeen != null) getNavigation().moveTo(lastSeen.x, lastSeen.y, lastSeen.z, def.walkSpeed());
                 if (timer > 15) getNavigation().stop();
+                if (timer == 40 && startTrack(level, 7, 1200)) return;
                 if (timer >= 70) nextCheck(level, def);
             }
             case CHECK -> check(level, def);
@@ -254,6 +283,7 @@ public class Rastreador extends SmilerBase implements QTEManager.Grabber {
             return;
         }
         getLookControl().setLookAt(target, 40f, 40f);
+        openDoorAhead(level, true);
         boolean downed = DownedManager.isDowned(target);
         if (timer % 4 == 1) getNavigation().moveTo(target, downed ? def.walkSpeed() : def.runSpeed());
         if (chaseTicks >= com.smileprotocol.config.SPConfig.get().rastreador_stamina) {
@@ -448,6 +478,176 @@ public class Rastreador extends SmilerBase implements QTEManager.Grabber {
         return inDuct;
     }
 
+    // Rastro --------------------------------------------------------------------------------------------
+
+    /** Si hay un rastro fresco cerca, se pone a seguirlo. */
+    private boolean startTrack(ServerLevel level, double radius, int maxAge) {
+        ScentTrail.Crumb c = ScentTrail.freshNear(level, position(), radius, maxAge);
+        if (c == null || c.tick() <= trailDone) return false;
+        // el mas antiguo de los cercanos no: el mas reciente, para ir hacia donde se fue
+        crumb = c;
+        level.playSound(null, blockPosition(), ModSounds.BERSERKER_SNIFF.get(), SoundSource.HOSTILE, 0.9f, 1.3f);
+        SPDebug.log("rastreador encuentra un rastro" + (c.blood() ? " de sangre" : ""));
+        setState(State.TRACK);
+        return true;
+    }
+
+    /** Olfatea punto a punto hacia donde fue (si sangra, mas deprisa). */
+    private void track(ServerLevel level, MobDef def) {
+        if (crumb == null || timer > 900) {
+            crumb = null;
+            setState(State.PATROL);
+            return;
+        }
+        Vec3 at = crumb.pos();
+        double speed = def.walkSpeed() * (crumb.blood() ? 1.6 : 1.15);
+        if (position().distanceToSqr(at) < 1.6 * 1.6) {
+            // olfatea un momento cada pocos puntos y sigue
+            ScentTrail.Crumb n = ScentTrail.next(crumb);
+            if (n == null) {
+                trailDone = crumb.tick();
+                lastSeen = at;
+                crumb = null;
+                startSearch(level);
+                return;
+            }
+            crumb = n;
+            if (random.nextInt(6) == 0) {
+                level.playSound(null, blockPosition(), ModSounds.BERSERKER_SNIFF.get(), SoundSource.HOSTILE, 0.8f, 1.35f);
+            }
+        }
+        if (timer % 6 == 0) getNavigation().moveTo(crumb.pos().x, crumb.pos().y, crumb.pos().z, speed);
+    }
+
+    /** Pruebas: sigue el rastro mas reciente cerca de el. */
+    public boolean debugTrack(double radius) {
+        forced = false;
+        return level() instanceof ServerLevel sl && startTrack(sl, radius, ScentTrail.LIFE);
+    }
+
+    /** Siguiendo un rastro ahora (pruebas). */
+    public boolean tracking() {
+        return state() == State.TRACK && crumb != null;
+    }
+
+    // Puertas ---------------------------------------------------------------------------------------
+
+    /** Puerta cerrada del laboratorio justo delante, que se puede abrir. */
+    @Nullable
+    private BlockPos closedDoorAhead(ServerLevel level) {
+        Vec3 dir = getDeltaMovement().multiply(1, 0, 1);
+        if (dir.lengthSqr() < 1.0E-4) dir = getLookAngle().multiply(1, 0, 1);
+        if (dir.lengthSqr() < 1.0E-4 || getNavigation().isDone()) return null;
+        dir = dir.normalize();
+        for (double k : new double[]{0.7, 1.4}) {
+            BlockPos p = BlockPos.containing(getX() + dir.x * k, getY() + 0.5, getZ() + dir.z * k);
+            var st = level.getBlockState(p);
+            if (st.getBlock() instanceof net.minecraft.world.level.block.DoorBlock && !st.getValue(net.minecraft.world.level.block.DoorBlock.OPEN)) {
+                var be = com.smileprotocol.block.LabDoorBlock.config(level, p, st);
+                boolean free = be == null ? st.getBlock() instanceof net.minecraft.world.level.block.DoorBlock d && d.type().canOpenByHand()
+                        : be.type() == com.smileprotocol.mechanism.DoorType.NORMAL || be.unlocked();
+                return free ? p : null;
+            }
+        }
+        return null;
+    }
+
+    /** Persiguiendo: abre la puerta y sigue. */
+    private void openDoorAhead(ServerLevel level, boolean noisy) {
+        if (tickCount % 4 != 0) return;
+        BlockPos d = closedDoorAhead(level);
+        if (d == null) return;
+        com.smileprotocol.block.LabDoorBlock.setOpenAt(level, d, true);
+        if (noisy) com.smileprotocol.noise.NoiseSystem.emit(level, Vec3.atCenterOf(d), 8f, NoiseType.DOOR, this);
+    }
+
+    /** Sin prisa, ante una puerta cerrada: se agacha a mirar por debajo antes de abrirla. */
+    private boolean doorAhead(ServerLevel level, State s) {
+        if (tickCount % 4 != 0) return false;
+        BlockPos d = closedDoorAhead(level);
+        if (d == null) return false;
+        peekDoor = d;
+        afterPeek = s;
+        getNavigation().stop();
+        setState(State.PEEK);
+        return true;
+    }
+
+    /** Mira por debajo de la puerta con el ojo de la mano; si ve a alguien al otro lado, va a por el. */
+    private void peek(ServerLevel level) {
+        getNavigation().stop();
+        setDeltaMovement(Vec3.ZERO);
+        if (peekDoor == null) {
+            setState(State.PATROL);
+            return;
+        }
+        getLookControl().setLookAt(Vec3.atCenterOf(peekDoor));
+        if (timer == 4) level.playSound(null, peekDoor, ModSounds.RASTREADOR_SCRATCH.get(), SoundSource.HOSTILE, 0.5f, 1.4f);
+        if (timer % 10 == 5) {
+            // el ojo mira desde el suelo, al otro lado de la puerta
+            Vec3 door = Vec3.atBottomCenterOf(peekDoor);
+            Vec3 across = door.subtract(position()).multiply(1, 0, 1).normalize();
+            Vec3 eye = door.add(across.scale(0.7)).add(0, 0.15, 0);
+            for (ServerPlayer p : level.getEntitiesOfClass(ServerPlayer.class, getBoundingBox().inflate(12), this::valid)) {
+                if (p.position().subtract(door).dot(across) < 0.3) continue;
+                if (level.clip(new ClipContext(eye, p.getEyePosition(), ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, this))
+                        .getType() != HitResult.Type.MISS) continue;
+                com.smileprotocol.block.LabDoorBlock.setOpenAt(level, peekDoor, true);
+                target = p;
+                chaseTicks = 0;
+                lostTicks = 0;
+                level.playSound(null, blockPosition(), ModSounds.RASTREADOR_SCREECH.get(), SoundSource.HOSTILE, 1.4f, 1f);
+                peekDoor = null;
+                setState(State.CHASE);
+                return;
+            }
+        }
+        if (timer >= 50) {
+            com.smileprotocol.block.LabDoorBlock.setOpenAt(level, peekDoor, true);
+            peekDoor = null;
+            State back = afterPeek == State.PEEK || afterPeek == State.CHASE ? State.PATROL : afterPeek;
+            entityData.set(STATE, (byte) back.ordinal());
+            timer = 0;
+        }
+    }
+
+    /** Pruebas: esta mirando por debajo de una puerta. */
+    public boolean peeking() {
+        return state() == State.PEEK;
+    }
+
+    // Arañazos --------------------------------------------------------------------------------------
+
+    /** Al pasar pegado a una pared, a veces la araña: se queda la marca. */
+    private void claws(ServerLevel level, State s) {
+        if (scratchCd > 0) {
+            scratchCd--;
+            return;
+        }
+        if (s != State.CHASE && s != State.TRACK && s != State.PATROL && s != State.SEARCH) return;
+        if (getDeltaMovement().horizontalDistanceSqr() < 1.0E-3 || random.nextInt(4) != 0) return;
+        if (scratchWall(level)) scratchCd = 120 + random.nextInt(160);
+    }
+
+    /** Deja un arañazo en la pared mas cercana a su lado, si hay sitio. Devuelve si lo ha hecho. */
+    public boolean scratchWall(ServerLevel level) {
+        BlockPos base = blockPosition().above(random.nextInt(2));
+        for (net.minecraft.core.Direction d : net.minecraft.core.Direction.Plane.HORIZONTAL) {
+            BlockPos wall = base.relative(d);
+            if (!level.getBlockState(base).isAir() || !level.getBlockState(wall).isFaceSturdy(level, wall, d.getOpposite())) continue;
+            // no repetir pegado a otro
+            for (BlockPos q : BlockPos.betweenClosed(base.offset(-2, -1, -2), base.offset(2, 1, 2))) {
+                if (level.getBlockState(q).is(com.smileprotocol.registry.ModBlocks.WALL_DECAL.get())) return false;
+            }
+            level.setBlock(base, com.smileprotocol.registry.ModBlocks.WALL_DECAL.get().defaultBlockState()
+                    .setValue(com.smileprotocol.block.WallDecalBlock.FACING, d.getOpposite())
+                    .setValue(com.smileprotocol.block.WallDecalBlock.VARIANT, random.nextBoolean() ? 3 : 6), 3);
+            level.playSound(null, base, ModSounds.RASTREADOR_SCRATCH.get(), SoundSource.HOSTILE, 0.7f, 1.2f);
+            return true;
+        }
+        return false;
+    }
+
     private void catchTarget(ServerPlayer p, MobDef def, boolean downed) {
         if (downed) {
             if (!DownedManager.execute(p, this, def.executionSequence())) cooldown = 20;
@@ -614,6 +814,8 @@ public class Rastreador extends SmilerBase implements QTEManager.Grabber {
                 case CHASE, VENT -> st.isMoving() ? st.setAndContinue(RUN) : st.setAndContinue(IDLE);
                 case TIRED -> st.setAndContinue(TIRED_A);
                 case SEARCH, CHECK -> st.isMoving() ? st.setAndContinue(WALK) : st.setAndContinue(SEARCH_A);
+                case TRACK -> st.isMoving() ? st.setAndContinue(WALK) : st.setAndContinue(SNIFF_A);
+                case PEEK -> st.setAndContinue(PEEK_A);
                 case GRAB -> st.setAndContinue(GRAB_A);
                 case STUNNED -> st.setAndContinue(STUN_A);
                 default -> st.isMoving() ? st.setAndContinue(WALK) : st.setAndContinue(IDLE);

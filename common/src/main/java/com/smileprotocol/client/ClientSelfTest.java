@@ -610,6 +610,28 @@ public final class ClientSelfTest {
         }));
         SHOTS.add(() -> wait = 25);
         SHOTS.add(() -> grab(mc, "38_rastreador_cerca"));
+        // mirando por debajo de una puerta, con la palma del ojo en el suelo
+        SHOTS.add(() -> server.execute(() -> {
+            if (ras[0] != null) ras[0].debugForce(com.smileprotocol.entity.Rastreador.State.PEEK);
+        }));
+        SHOTS.add(() -> wait = 20);
+        SHOTS.add(() -> grab(mc, "38b_rastreador_puerta"));
+        // sigue el rastro: el jugador anda unos pasos y el Rastreador, junto al principio, lo huele
+        for (int k = 0; k < 5; k++) {
+            final int step = k;
+            SHOTS.add(() -> server.execute(() -> SPSessionManager.teleport(sp, level, cam.add(2 + step * 2, 0, 0), 90f, 0f)));
+            SHOTS.add(() -> wait = 6);
+        }
+        SHOTS.add(() -> server.execute(() -> {
+            int n = com.smileprotocol.entity.ScentTrail.size(sp.getUUID());
+            log((n >= 3 ? "OK" : "FALLO") + " el jugador deja rastro al andar (" + n + " puntos)");
+            if (ras[0] != null) {
+                ras[0].moveTo(cam.x + 2, cam.y, cam.z + 1, 0f, 0f);
+                boolean ok = ras[0].debugTrack(4) && ras[0].tracking();
+                log((ok ? "OK" : "FALLO") + " rastreador encuentra el rastro y lo sigue (" + ras[0].state() + ")");
+                log("INFO rastreador araña la pared: " + ras[0].scratchWall(level));
+            }
+        }));
         SHOTS.add(() -> server.execute(() -> { if (ras[0] != null) ras[0].discard(); }));
         // 8i. Fase 21: el Ahorcado cae sobre quien pasa debajo, salvo si le apuntan con la linterna
         com.smileprotocol.entity.Ahorcado[] ah = {null};

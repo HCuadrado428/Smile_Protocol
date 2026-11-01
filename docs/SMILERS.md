@@ -23,9 +23,12 @@ Inspirado en los ángeles llorones de Doctor Who. *Implementado (fase 21):* mode
 ## El Rastreador (acechador de pasillo)
 *Implementado (fase 21):* modelo `rastreador`, IA en `entity/Rastreador.java`, aparece en `rastreador_zones` (oficinas y almacén).
 - **Aspecto:** 2,2 bloques, delgado y ágil, espalda arqueada y cabeza adelantada. **Ojo en la palma de la mano**, que levanta para buscar. Garras que arañan las paredes y dejan marcas.
-- **Movimiento:** de pie al patrullar, a cuatro patas al perseguir. Más rápido que el jugador corriendo, pero se cansa a los 8 s.
+- **Movimiento:** siempre a cuatro patas, bajo y con el hocico casi en el suelo; solo se levanta para buscar con la mano del ojo en alto. Persiguiendo, al galope: más rápido que el jugador corriendo, pero se cansa a los 8 s.
 - **Actitud:** cazador metódico: patrulla, oye, mira, persigue y revisa.
 - **Sentidos:** vista en cono de 20 bloques y oído normal. Revisa escondites y saca a quien esté dentro.
+- **Sigue tu rastro:** por donde pasas queda un rastro durante minuto y medio (`entity/ScentTrail.java`). Si encuentra uno fresco, patrullando o al perderte, lo sigue olfateando hasta donde acaba; si estás herido dejas manchas de sangre en el suelo y lo sigue más deprisa. Donde se acaba el rastro, revisa los escondites.
+- **El ojo bajo la puerta:** sin prisa, antes de cruzar una puerta cerrada se pega al suelo y mete la mano por debajo con la palma hacia arriba; si el ojo ve a alguien al otro lado, abre y va a por él. Persiguiendo, la abre sin más.
+- **Arañazos:** al pasar pegado a las paredes las araña; las marcas se quedan, así sabes por dónde ha pasado.
 - **Mecánica:** busca donde te perdió de vista y revisa los escondites cercanos. Agarre con **QTE MASH**; **remata**. **Te sigue por los conductos:** si te metes en uno mientras te persigue, va a la rejilla, la arranca y entra. Dentro no se le ve, solo se le oye arañar la chapa cada vez más cerca; va **más lento que tú gateando** (`rastreador_vent_speed`). Si te alcanza dentro te derriba; si sales por otra rejilla, sale detrás; tras 30 s (`rastreador_vent_seconds`) sale y te busca. Sin interferencias.
 - **Sonido:** chasquidos de garras y respiración agitada al correr.
 - **Cómo se le gana:** romper la línea de visión, dive bajo huecos, esconderse cuando no te ve.
