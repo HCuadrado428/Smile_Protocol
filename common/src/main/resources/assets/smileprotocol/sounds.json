@@ -228,6 +228,24 @@
       "smileprotocol:smiley/laugh"
     ]
   },
+  "smiley.breath": {
+    "subtitle": "subtitles.smileprotocol.smiley.breath",
+    "sounds": [
+      {"name": "smileprotocol:smiley/breath", "attenuation_distance": 20}
+    ]
+  },
+  "smiley.giggle": {
+    "subtitle": "subtitles.smileprotocol.smiley.giggle",
+    "sounds": [
+      "smileprotocol:smiley/giggle"
+    ]
+  },
+  "smiley.tap": {
+    "subtitle": "subtitles.smileprotocol.smiley.tap",
+    "sounds": [
+      "smileprotocol:smiley/tap"
+    ]
+  },
   "smiley.smear": {
     "subtitle": "subtitles.smileprotocol.smiley.smear",
     "sounds": [

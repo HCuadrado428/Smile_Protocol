@@ -48,15 +48,20 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * Smiley, el jefe (docs/SMILERS.md). Silueta negra de 4 bloques con el ojo derecho y la sonrisa
- * rojos. Se le ve un instante en cada planta ({@link State#CAMEO}) y espera en el Laboratorio Cero:
+ * Smiley, el jefe (docs/SMILERS.md). Una sombra muy alta y encorvada con un ojo rojo hundido y la
+ * sonrisa tallada en la cabeza. Paciente: nunca corre. Se le ve un instante en cada planta
+ * ({@link State#CAMEO}) y espera en el Laboratorio Cero:
  * <ul>
- *   <li>Fases: una mas por cada generador encendido ({@link SmileyFight#phase}). 1: lento y
- *   teatral, agarre largo. 2: mas rapido, invoca smilers y apaga luces. 3: a oscuras y furioso,
- *   mata al instante.</li>
+ *   <li>Fases: una mas por cada generador encendido ({@link SmileyFight#phase}). 1: observa de lejos
+ *   y ataca de vez en cuando. 2: acecha: apaga las luces una a una y aparece donde se apago la
+ *   ultima, invoca smilers, se adelanta y te espera. 3: se acerca sin parar y mata al instante.</li>
+ *   <li>Anda despacio, pero cada vez que nadie le mira aparece unos bloques mas cerca.</li>
+ *   <li>Va a por el que se queda solo. Gira la cabeza del todo para seguirte con la mirada.</li>
+ *   <li>Respira (se oye a traves de las paredes), se rie bajito al verte y tamborilea con las unas.</li>
  *   <li>Grito que aturde a los que tiene cerca; susurros con el nombre de los jugadores.</li>
  *   <li>Si se cansa de perseguir a alguien, se funde en una mancha de la pared y sale junto a otro.</li>
- *   <li>Retrocede si dos linternas o mas le dan a la vez (o una, si solo queda uno).</li>
+ *   <li>La linterna le congela ({@link State#RETREAT}: se tapa la cara y tiembla) si le dan dos o mas
+ *   a la vez (o una, si solo queda uno); en cuanto la apagan, ha avanzado.</li>
  *   <li>Agarre con un minijuego distinto cada vez; si se falla, remate. Al ultimo en pie se lo
  *   lleva a rastras ({@link SequenceKind#SMILEY_DRAG}).</li>
  *   <li>Al llegar el ascensor queda encerrado en su celda ({@link State#SEALED}).</li>
@@ -64,14 +69,15 @@ import java.util.UUID;
  */
 public class Smiley extends SmilerBase implements QTEManager.Grabber {
 
-    public enum State { STALK, CAMEO, INTRO, SCREAM, SUMMON, SMEAR_IN, HIDDEN, SMEAR_OUT, RETREAT, GRAB, STUNNED, SEALED }
+    public enum State { STALK, CAMEO, INTRO, SCREAM, SUMMON, SMEAR_IN, HIDDEN, SMEAR_OUT, RETREAT, GRAB, STUNNED, SEALED, WAIT, LIGHTS }
 
     private static final EntityDataAccessor<Byte> STATE = SynchedEntityData.defineId(Smiley.class, EntityDataSerializers.BYTE);
     private static final EntityDataAccessor<Byte> PHASE = SynchedEntityData.defineId(Smiley.class, EntityDataSerializers.BYTE);
+    /** Esperando pegado a una pared: se asoma (animacion "peek"). */
+    private static final EntityDataAccessor<Boolean> PEEK = SynchedEntityData.defineId(Smiley.class, EntityDataSerializers.BOOLEAN);
 
     private static final RawAnimation IDLE_A = RawAnimation.begin().thenLoop("idle");
     private static final RawAnimation WALK_A = RawAnimation.begin().thenLoop("walk");
-    private static final RawAnimation RUN_A = RawAnimation.begin().thenLoop("run");
     private static final RawAnimation INTRO_A = RawAnimation.begin().thenPlayAndHold("intro");
     private static final RawAnimation SCREAM_A = RawAnimation.begin().thenPlayAndHold("scream");
     private static final RawAnimation SUMMON_A = RawAnimation.begin().thenPlayAndHold("summon");
@@ -80,6 +86,7 @@ public class Smiley extends SmilerBase implements QTEManager.Grabber {
     private static final RawAnimation SMEAR_OUT_A = RawAnimation.begin().thenPlayAndHold("smear_out");
     private static final RawAnimation GRAB_A = RawAnimation.begin().thenLoop("grab");
     private static final RawAnimation SEALED_A = RawAnimation.begin().thenPlayAndHold("sealed");
+    private static final RawAnimation PEEK_A = RawAnimation.begin().thenLoop("peek");
 
     /** Minijuegos del agarre, uno distinto cada vez. */
     private static final QTEType[] QTES = {QTEType.MASH, QTEType.SEQUENCE, QTEType.TIMING, QTEType.HOLD};
@@ -101,6 +108,12 @@ public class Smiley extends SmilerBase implements QTEManager.Grabber {
     private int dragTicks;
     private boolean vanish;
     private boolean forced;
+    private int blinkCd = 100, attackCd = 200, attackLeft, waitCd = 500;
+    private boolean waitMode;
+    @Nullable private Vec3 presetEmerge;
+    private final List<BlockPos> lightQueue = new ArrayList<>();
+    @Nullable private BlockPos lastLight;
+    @Nullable private UUID giggledAt;
     private final List<UUID> summoned = new ArrayList<>();
 
     public Smiley(EntityType<? extends PathfinderMob> type, Level level) {
@@ -131,6 +144,7 @@ public class Smiley extends SmilerBase implements QTEManager.Grabber {
         super.defineSynchedData(b);
         b.define(STATE, (byte) 0);
         b.define(PHASE, (byte) 1);
+        b.define(PEEK, false);
     }
 
     public State state() {
@@ -144,7 +158,18 @@ public class Smiley extends SmilerBase implements QTEManager.Grabber {
     private void setState(State s) {
         if (s != state()) SPDebug.log("smiley " + state() + " -> " + s);
         entityData.set(STATE, (byte) s.ordinal());
+        if (s != State.WAIT) entityData.set(PEEK, false);
         timer = 0;
+    }
+
+    public boolean peeking() {
+        return entityData.get(PEEK);
+    }
+
+    /** Gira la cabeza casi del todo para seguirte mientras el cuerpo va a otro lado. */
+    @Override
+    public int getMaxHeadYRot() {
+        return 170;
     }
 
     /** Pruebas y grabaciones: fija el estado y la fase sin IA. */
@@ -205,22 +230,20 @@ public class Smiley extends SmilerBase implements QTEManager.Grabber {
         if (tickCount % 20 == 0 && s != State.INTRO) updatePhase(level);
         int phase = phase();
 
-        // Luz: si le dan bastantes linternas a la vez, retrocede
-        if (s != State.INTRO && s != State.GRAB && s != State.HIDDEN && s != State.SMEAR_IN && s != State.SMEAR_OUT) {
+        // Luz: si le dan bastantes linternas a la vez, se queda congelado tapandose la cara
+        if (s != State.INTRO && s != State.GRAB && s != State.HIDDEN && s != State.SMEAR_IN && s != State.SMEAR_OUT
+                && s != State.LIGHTS) {
             List<ServerPlayer> lit = lighters(level);
             if (!lit.isEmpty() && lit.size() >= neededLights(level)) {
                 unlit = 0;
                 if (s != State.RETREAT) {
-                    level.playSound(null, blockPosition(), ModSounds.SMILEY_SCREAM.get(), SoundSource.HOSTILE, 0.8f, 1.6f);
+                    level.playSound(null, blockPosition(), ModSounds.SMILEY_SCREAM.get(), SoundSource.HOSTILE, 0.6f, 1.7f);
                     setState(State.RETREAT);
                     s = State.RETREAT;
                 }
-                Vec3 away = Vec3.ZERO;
-                for (ServerPlayer p : lit) away = away.add(position().subtract(p.position()).multiply(1, 0, 1).normalize());
-                Vec3 to = position().add(away.normalize().scale(4));
-                if (timer % 10 == 0) getNavigation().moveTo(to.x, to.y, to.z, 1.0);
             }
         }
+        ambient(level, s);
 
         switch (s) {
             case INTRO -> {
@@ -253,8 +276,10 @@ public class Smiley extends SmilerBase implements QTEManager.Grabber {
                         discard();
                         return;
                     }
-                    emergeAt = pickEmerge(level);
+                    emergeAt = presetEmerge != null ? presetEmerge : pickEmerge(level);
+                    presetEmerge = null;
                     if (emergeAt == null) {
+                        waitMode = false;
                         setState(State.STALK);
                         return;
                     }
@@ -283,16 +308,46 @@ public class Smiley extends SmilerBase implements QTEManager.Grabber {
             }
             case SMEAR_OUT -> {
                 getNavigation().stop();
-                if (timer >= 20) setState(State.STALK);
-            }
-            case RETREAT -> {
-                if (lighters(level).size() < neededLights(level)) unlit++;
-                if (unlit > 20) {
-                    unlit = 0;
-                    // harto de la luz: se va por la pared, o vuelve a por ellos
-                    setState(random.nextBoolean() ? State.SMEAR_IN : State.STALK);
+                if (timer >= 20) {
+                    if (waitMode) {
+                        waitMode = false;
+                        setState(State.WAIT);
+                        entityData.set(PEEK, besideWall(level));
+                    } else {
+                        setState(State.STALK);
+                    }
                 }
             }
+            case RETREAT -> {
+                // congelado: no se mueve mientras le den; en cuanto la luz se aparta, ya esta mas cerca
+                getNavigation().stop();
+                setDeltaMovement(Vec3.ZERO);
+                if (lighters(level).size() < neededLights(level)) unlit++;
+                else unlit = 0;
+                if (unlit >= 3) {
+                    unlit = 0;
+                    ServerPlayer t = target != null && valid(target) ? target : nearest(level, 48);
+                    if (t != null) blinkToward(level, t, SPConfig.get().smiley_blink_step * 1.3, false);
+                    setState(State.STALK);
+                } else if (timer > 400) {
+                    // harto de la luz: se va por la pared y sale por otro lado
+                    setState(State.SMEAR_IN);
+                }
+            }
+            case WAIT -> {
+                // se ha adelantado: te espera quieto al final del pasillo, asomado y tamborileando
+                getNavigation().stop();
+                setDeltaMovement(Vec3.ZERO);
+                ServerPlayer t = target != null && valid(target) ? target : nearest(level, 48);
+                if (t != null) getLookControl().setLookAt(t, 10, 10);
+                if (timer % 50 == 10) level.playSound(null, blockPosition(), ModSounds.SMILEY_TAP.get(), SoundSource.HOSTILE, 0.9f,
+                        0.9f + random.nextFloat() * 0.15f);
+                if (t == null || distanceTo(t) < 5 || timer > 320) {
+                    attackLeft = Math.max(attackLeft, 60);
+                    setState(State.STALK);
+                }
+            }
+            case LIGHTS -> lights(level);
             case GRAB -> {
                 getNavigation().stop();
                 setDeltaMovement(Vec3.ZERO);
@@ -336,7 +391,7 @@ public class Smiley extends SmilerBase implements QTEManager.Grabber {
             return;
         }
         if (target == null || !valid(target) || timer % 40 == 0) {
-            ServerPlayer t = nearest(level, 64);
+            ServerPlayer t = choose(level);
             if (t != target) {
                 chase = 0;
                 bestDist = Double.MAX_VALUE;
@@ -353,22 +408,64 @@ public class Smiley extends SmilerBase implements QTEManager.Grabber {
         }
         double dist = distanceTo(target);
         getLookControl().setLookAt(target, 30, 30);
-        if (phase >= 2 && lightsCd == 0) {
-            SmileyFight.darken(level, target.blockPosition(), 12, cfg.smiley_dark_ticks);
-            level.playSound(null, target.blockPosition(), ModSounds.EVENT_SURGE.get(), SoundSource.BLOCKS, 0.8f, 0.5f);
+        // risita ahogada la primera vez que ve a cada uno
+        if (!target.getUUID().equals(giggledAt) && hasLineOfSight(target)) {
+            giggledAt = target.getUUID();
+            level.playSound(null, blockPosition(), ModSounds.SMILEY_GIGGLE.get(), SoundSource.HOSTILE, 1.0f, 0.9f);
+        }
+        // Ataques: en la fase 3 siempre; antes, de vez en cuando (entre uno y otro observa y acecha)
+        int every = attackEvery(phase);
+        if (attackLeft > 0) {
+            attackLeft--;
+        } else if (every <= 0) {
+            attackLeft = 1;
+        } else if (--attackCd <= 0) {
+            attackLeft = cfg.smiley_attack_window;
+            attackCd = every + random.nextInt(every / 2 + 1);
+            SPDebug.log("smiley ataca (fase " + phase + ")");
+        }
+        boolean hunting = attackLeft > 0;
+        if (waitCd > 0) waitCd--;
+        if (phase >= 2 && lightsCd == 0 && dist > 6) {
             lightsCd = cfg.smiley_lights_cooldown;
+            setState(State.LIGHTS);
+            return;
         }
         if (phase >= 2 && summonCd == 0 && dist > 6) {
             summonCd = cfg.smiley_summon_cooldown;
             setState(State.SUMMON);
             return;
         }
-        if (screamCd == 0 && dist < 10 && hasLineOfSight(target)) {
+        if (hunting && screamCd == 0 && dist < 10 && hasLineOfSight(target)) {
             screamCd = phase == 1 ? cfg.smiley_scream_cooldown : cfg.smiley_scream_cooldown * 2 / 3;
             setState(State.SCREAM);
             return;
         }
-        if (timer % 8 == 0) getNavigation().moveTo(target, speed(phase));
+        // Se adelanta: aparece mas alla, en el pasillo al que vas, y te espera
+        if (!hunting && waitCd == 0 && dist > 10) {
+            waitCd = cfg.smiley_wait_cooldown;
+            Vec3 ahead = aheadOf(level, target);
+            if (ahead != null) {
+                presetEmerge = ahead;
+                waitMode = true;
+                setState(State.SMEAR_IN);
+                return;
+            }
+        }
+        // Anda despacio; si no ataca, se queda a distancia mirandote
+        if (!hunting && dist < cfg.smiley_keep_away) {
+            getNavigation().stop();
+        } else if (timer % 8 == 0) {
+            getNavigation().moveTo(target, speed(phase));
+        }
+        // Cuando nadie le mira, aparece mas cerca
+        if (blinkCd > 0) blinkCd--;
+        if (blinkCd == 0 && dist > 4 && (hunting || dist > cfg.smiley_keep_away + 3) && !watched(level)) {
+            blinkToward(level, target, cfg.smiley_blink_step, true);
+            int bt = blinkTicks(phase);
+            blinkCd = bt + random.nextInt(bt / 2 + 1);
+        }
+        if (!hunting) return;
         // Se cansa si no le gana terreno: se va por la pared y sale junto a otro
         if (dist < bestDist - 0.5) {
             bestDist = dist;
@@ -379,6 +476,170 @@ public class Smiley extends SmilerBase implements QTEManager.Grabber {
             return;
         }
         if (cooldown == 0 && dist < 2.4 && Math.abs(target.getY() - getY()) < 1.6) catchPlayer(target, phase);
+    }
+
+    private int attackEvery(int phase) {
+        List<Integer> l = SPConfig.get().smiley_attack_every;
+        return l.isEmpty() ? 0 : l.get(Mth.clamp(phase - 1, 0, l.size() - 1));
+    }
+
+    private int blinkTicks(int phase) {
+        List<Integer> l = SPConfig.get().smiley_blink_ticks;
+        return Math.max(10, l.isEmpty() ? 100 : l.get(Mth.clamp(phase - 1, 0, l.size() - 1)));
+    }
+
+    /** Respira (se oye a traves de las paredes) y, quieto, tamborilea con las unas. */
+    private void ambient(ServerLevel level, State s) {
+        if (s == State.SEALED || s == State.HIDDEN || s == State.CAMEO) return;
+        if (tickCount % 70 == 0) {
+            level.playSound(null, blockPosition(), ModSounds.SMILEY_BREATH.get(), SoundSource.HOSTILE, 1.1f, 0.85f + random.nextFloat() * 0.1f);
+        }
+        if (s == State.STALK && getNavigation().isDone() && tickCount % 90 == 45) {
+            level.playSound(null, blockPosition(), ModSounds.SMILEY_TAP.get(), SoundSource.HOSTILE, 0.7f, 0.9f);
+        }
+    }
+
+    /** A por el que se ha quedado solo; si van juntos, a por el mas cercano. */
+    @Nullable
+    private ServerPlayer choose(ServerLevel level) {
+        List<ServerPlayer> all = level.getEntitiesOfClass(ServerPlayer.class, getBoundingBox().inflate(64), this::valid);
+        if (all.isEmpty()) return null;
+        ServerPlayer best = null;
+        double bestAlone = 10;
+        for (ServerPlayer p : all) {
+            double alone = 99;
+            for (ServerPlayer o : all) if (o != p) alone = Math.min(alone, o.distanceTo(p));
+            if (all.size() > 1 && alone > bestAlone) {
+                bestAlone = alone;
+                best = p;
+            }
+        }
+        return best != null ? best : all.stream().min(Comparator.comparingDouble(this::distanceToSqr)).orElse(null);
+    }
+
+    /** Alguien le esta mirando (le tiene delante y le ve). */
+    public boolean watched(ServerLevel level) {
+        Vec3 c = getBoundingBox().getCenter();
+        double cos = Math.cos(Math.toRadians(35));
+        for (ServerPlayer p : level.getEntitiesOfClass(ServerPlayer.class, getBoundingBox().inflate(48), this::valid)) {
+            Vec3 v = c.subtract(p.getEyePosition());
+            if (v.normalize().dot(p.getViewVector(1f)) >= cos && p.hasLineOfSight(this)) return true;
+        }
+        return false;
+    }
+
+    /** Un punto que nadie ve. */
+    private boolean unseen(ServerLevel level, Vec3 at) {
+        Vec3 head = at.add(0, 2.4, 0);
+        for (ServerPlayer p : level.getEntitiesOfClass(ServerPlayer.class, getBoundingBox().inflate(64), this::valid)) {
+            if (head.subtract(p.getEyePosition()).normalize().dot(p.getViewVector(1f)) > 0.5
+                    && clearPath(level, p.getEyePosition(), head)) return false;
+        }
+        return true;
+    }
+
+    /**
+     * Aparece unos bloques mas cerca de {@code p}, sin atravesar paredes y (si {@code hidden}) en un
+     * sitio que nadie este mirando. Devuelve si se ha movido.
+     */
+    public boolean blinkToward(ServerLevel level, ServerPlayer p, double step, boolean hidden) {
+        Vec3 to = p.position().subtract(position()).multiply(1, 0, 1);
+        double d = to.length();
+        if (d < 3.5) return false;
+        Vec3 dir = to.normalize();
+        for (double k : new double[]{1.0, 0.75, 0.5}) {
+            for (float ang : new float[]{0f, 0.35f, -0.35f}) {
+                double len = Math.min(step * k, d - 2.5);
+                Vec3 at = position().add(dir.yRot(ang).scale(len));
+                at = new Vec3(at.x, Math.floor(at.y + 0.5), at.z);
+                for (int dy : new int[]{0, 1, -1}) {
+                    Vec3 c = at.add(0, dy, 0);
+                    if (!standable(level, c) || !clearPath(level, position().add(0, 1.5, 0), c.add(0, 1.5, 0))) continue;
+                    if (hidden && !unseen(level, c)) continue;
+                    getNavigation().stop();
+                    moveTo(c.x, c.y, c.z, getYRot(), 0f);
+                    faceTowards(p.position());
+                    SPDebug.log("smiley avanza sin que le vean: " + String.format("%.1f", len) + " bloques");
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /** Un sitio delante de {@code p}, en el pasillo al que va, a 9-15 bloques y que vea desde alli. */
+    @Nullable
+    private Vec3 aheadOf(ServerLevel level, ServerPlayer p) {
+        Vec3 look = p.getViewVector(1f).multiply(1, 0, 1);
+        Vec3 move = p.getDeltaMovement().multiply(1, 0, 1);
+        Vec3 dir = (move.lengthSqr() > 1e-3 ? move : look).normalize();
+        if (dir.lengthSqr() < 1e-3) return null;
+        for (int i = 0; i < 24; i++) {
+            double r = 9 + random.nextDouble() * 6;
+            float ang = (random.nextFloat() - 0.5f) * (i < 12 ? 0.5f : 1.2f);
+            Vec3 at = p.position().add(dir.yRot(ang).scale(r));
+            at = new Vec3(Math.floor(at.x) + 0.5, Math.floor(p.getY()), Math.floor(at.z) + 0.5);
+            for (int dy : new int[]{0, 1, -1}) {
+                Vec3 c = at.add(0, dy, 0);
+                if (standable(level, c) && clearPath(level, c.add(0, 2.4, 0), p.getEyePosition())) return c;
+            }
+        }
+        return null;
+    }
+
+    /** Hay pared a un lado (a la altura de la cabeza): se asoma desde ella. */
+    private boolean besideWall(ServerLevel level) {
+        Vec3 side = Vec3.directionFromRotation(0, getYRot() + 90);
+        for (double sgn : new double[]{1, -1}) {
+            BlockPos b = BlockPos.containing(position().add(side.scale(sgn)).add(0, 2.5, 0));
+            if (!level.getBlockState(b).getCollisionShape(level, b).isEmpty()) return true;
+        }
+        return false;
+    }
+
+    /** Las lamparas de alrededor de su presa se apagan una a una y aparece debajo de la ultima. */
+    private void lights(ServerLevel level) {
+        getNavigation().stop();
+        setDeltaMovement(Vec3.ZERO);
+        if (timer == 1) {
+            lightQueue.clear();
+            lastLight = null;
+            if (target != null && valid(target)) {
+                Vec3 tp = target.position();
+                lightQueue.addAll(SmileyFight.litAround(level, target.blockPosition(), 12));
+                lightQueue.sort(Comparator.comparingDouble(b -> -Vec3.atCenterOf(b).distanceToSqr(tp)));
+            }
+            if (lightQueue.isEmpty()) {
+                setState(State.STALK);
+                return;
+            }
+        }
+        if (timer % 7 == 0 && !lightQueue.isEmpty()) {
+            BlockPos b = lightQueue.remove(0);
+            SmileyFight.darkenOne(level, b, SPConfig.get().smiley_dark_ticks);
+            level.playSound(null, b, ModSounds.EVENT_SURGE.get(), SoundSource.BLOCKS, 0.35f, 1.6f);
+            lastLight = b;
+        }
+        if (lightQueue.isEmpty() && timer > 8) {
+            Vec3 at = lastLight != null && target != null ? underLight(level, lastLight, target) : null;
+            if (at != null) {
+                presetEmerge = at;
+                setState(State.SMEAR_IN);
+            } else {
+                setState(State.STALK);
+            }
+        }
+    }
+
+    /** Suelo bajo una lampara, a 3 bloques o mas de la presa. */
+    @Nullable
+    private Vec3 underLight(ServerLevel level, BlockPos light, ServerPlayer p) {
+        for (int dy = 1; dy <= 8; dy++) {
+            BlockPos b = light.below(dy);
+            Vec3 c = Vec3.atBottomCenterOf(b);
+            if (c.distanceTo(p.position()) >= 3 && standable(level, c)) return c;
+        }
+        return null;
     }
 
     private double speed(int phase) {
@@ -654,8 +915,9 @@ public class Smiley extends SmilerBase implements QTEManager.Grabber {
                 case SMEAR_OUT -> st.setAndContinue(SMEAR_OUT_A);
                 case GRAB, STUNNED -> st.setAndContinue(GRAB_A);
                 case SEALED -> st.setAndContinue(SEALED_A);
-                case CAMEO -> st.setAndContinue(IDLE_A);
-                default -> st.setAndContinue(st.isMoving() ? (phase() >= 3 ? RUN_A : WALK_A) : IDLE_A);
+                case CAMEO, LIGHTS -> st.setAndContinue(IDLE_A);
+                case WAIT -> st.setAndContinue(peeking() ? PEEK_A : IDLE_A);
+                default -> st.setAndContinue(st.isMoving() ? WALK_A : IDLE_A);
             };
         }));
     }

@@ -614,6 +614,63 @@ def smiley_smear():
     return (goo * 2 + pop + crack) * np.sin(np.clip(tt / 1.2, 0, 1) * np.pi)
 
 
+def smiley_breath():
+    """Smiley respira: inspiracion larga y ronca, pausa, espiracion con un gorgoteo; se oye a traves
+    de las paredes (muy grave)."""
+    r = np.random.default_rng(441)
+    n = int(SR * 3.4)
+    tt = np.arange(n) / SR
+    inh = np.clip(tt / 1.3, 0, 1) * (tt < 1.4)
+    exh = np.where((tt > 1.7) & (tt < 3.3), np.sin(np.clip((tt - 1.7) / 1.6, 0, 1) * np.pi), 0)
+    air = bandpass(noise(n, r), 380, 1.6) * inh * 0.9 + bandpass(noise(n, r), 260, 1.4) * exh
+    rattle = np.sin(2 * np.pi * 38 * tt) * (0.5 + 0.5 * np.sin(2 * np.pi * 11 * tt)) ** 4 * exh * 0.35
+    x = lowpass(air + rattle, 1400)
+    d = int(SR * 0.09)
+    x[d:] += x[:-d] * 0.3
+    return x
+
+
+def smiley_giggle():
+    """Risita ahogada, con la boca cerrada: tres o cuatro soplidos por la nariz y un temblor."""
+    r = np.random.default_rng(451)
+    n = int(SR * 1.5)
+    x = np.zeros(n)
+    for k, t0 in enumerate((0.05, 0.24, 0.40, 0.58, 0.83)):
+        a = int(t0 * SR)
+        m = int(SR * 0.14)
+        tm = np.arange(m) / SR
+        f = (230 - k * 14) * (1 + 0.15 * np.exp(-tm / 0.03))
+        hum = np.tanh(1.8 * np.sin(2 * np.pi * np.cumsum(f) / SR)) * 0.35
+        nose = bandpass(noise(m, r), 1500, 2.5)
+        x[a:a + m] += ((hum + nose) * env(m, 0.006, 0.09))[:max(0, min(m, n - a))]
+    return lowpass(x, 3200)
+
+
+def smiley_tap():
+    """Tamborileo: cuatro unas largas que golpean la pared una tras otra, dos veces."""
+    r = np.random.default_rng(461)
+    n = int(SR * 1.3)
+    x = np.zeros(n)
+    for rep in range(2):
+        for k in range(4):
+            a = int((0.05 + rep * 0.62 + k * 0.085) * SR)
+            m = int(SR * 0.06)
+            tm = np.arange(m) / SR
+            click = highpass(noise(m, r), 2200) * env(m, 0.0005, 0.012)
+            knock = np.sin(2 * np.pi * (170 + 25 * k) * tm) * env(m, 0.001, 0.03) * 0.6
+            x[a:a + m] += (click + knock)[:max(0, min(m, n - a))]
+    d = int(SR * 0.05)
+    x[d:] += x[:-d] * 0.25
+    return x
+
+
+def save_smiley2():
+    save("smiley/breath", smiley_breath())
+    save("smiley/giggle", smiley_giggle())
+    save("smiley/tap", smiley_tap())
+    print("respiracion, risita y tamborileo de Smiley escritos")
+
+
 def main():
     for i in range(3):
         save(f"berserker/step{i + 1}", step(10 + i))
@@ -674,4 +731,8 @@ def save_f18_f21():
 
 
 if __name__ == "__main__":
-    main()
+    import sys
+    if sys.argv[1:] == ["smiley2"]:
+        save_smiley2()
+    else:
+        main()

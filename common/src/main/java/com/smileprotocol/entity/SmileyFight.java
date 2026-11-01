@@ -247,6 +247,25 @@ public final class SmileyFight {
         }
     }
 
+    /** Lamparas encendidas alrededor de un punto. */
+    static List<BlockPos> litAround(ServerLevel level, BlockPos center, int radius) {
+        List<BlockPos> out = new ArrayList<>();
+        CircuitManager.forEachBlockEntity(level, new BoundingBox(center).inflatedBy(radius), be -> {
+            if (be instanceof FluorescentLightBlockEntity fl && lit(fl.getBlockState())) out.add(fl.getBlockPos().immutable());
+        });
+        return out;
+    }
+
+    /** Apaga una lampara durante un rato (vuelve con las demas). */
+    static void darkenOne(ServerLevel level, BlockPos pos, int ticks) {
+        setLights(level, List.of(pos), false);
+        St st = state(level, pos);
+        if (st != null) {
+            st.darkened.add(pos);
+            st.relightAt = Math.max(st.relightAt, level.getServer().getTickCount() + ticks);
+        }
+    }
+
     private static boolean lit(BlockState st) {
         return st.hasProperty(FluorescentLightBlock.LIT) && st.getValue(FluorescentLightBlock.LIT);
     }

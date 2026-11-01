@@ -62,19 +62,22 @@ Inspirado en los ángeles llorones de Doctor Who. *Implementado (fase 21):* mode
 ## Smiley (jefe final)
 *Implementado (fase 21):* modelo `tools/smiley_model.py` (silueta negra de 4 bloques; ojo y sonrisa en placas propias que la intro enciende y abre), IA en `entity/Smiley.java`, combate y apariciones en `entity/SmileyFight.java`, sala `tools/arena.py` (zona final `smiley_lab`, «Laboratorio Cero»: suelo, anillo de pasarelas con puente y pasarelas altas, escaleras que él puede subir y escaleras de mano que no; tres generadores `gen1`-`gen3`, uno por nivel, que encienden las luces de su nivel), misión `missions/smiley_lab.json`, remate `SMILEY_KILL` y arrastre del último `SMILEY_DRAG`, sonidos de grito, susurro, risa y mancha. La música (`tools/music.py`, tres bucles: nana de caja de música, coro, tensión que sube por fase y latidos) suena mientras pelea, con fundido entre fases (`boss_music_volume`); se calla al encerrarlo. Ajustes `smiley_*` en la configuración. `final_room` pasa a ser una planta intermedia más.
 
-Inspirado en Slenderman y en SCP-096 («el tímido»). Aspecto canónico de 20.1: 4 bloques, delgado, se agacha en las puertas; un ojo rojo a la derecha y la sonrisa roja.
+Inspirado en Slenderman y en SCP-096 («el tímido»). **Aspecto (rehecho):** una sombra negra pura, muy alta pero siempre encorvada (más de 4 bloques si se estirara), con los brazos rozando el suelo y el pelo largo y mojado que le tapa media cara. Solo brillan un **ojo rojo hundido en su cuenca** (la otra cuenca, vacía) y la **sonrisa tallada en la cabeza**, de lado a lado: se abre de verdad con la mandíbula y dentro hay filas de dientes desiguales y una garganta que es un pozo negro con un resplandor al fondo. **Paciente: nunca corre.**
 
 - **Antes de la batalla:** se le ve un instante de lejos en cada planta, sin atacar.
 - **Inicio:** cinemática: se apagan las luces, se enciende su ojo y la sonrisa se abre.
 - **Sala:** laboratorio de varias alturas con pasarelas.
 - **Cómo se gana:** no se le puede herir. Hay que encender los generadores, poner fusibles y demás mecanismos, y **esperar al ascensor**.
 - **Fases (3, una más con cada generador encendido):**
-  1. Lento y teatral: camina, observa y tantea al grupo; agarre con QTE largo.
-  2. Más rápido; invoca a 1 o 2 smilers y apaga luces.
-  3. Furioso y a oscuras: solo se ven su ojo y la sonrisa; muerte instantánea; encender el último generador y correr al ascensor.
+  1. **Observa:** te sigue de lejos y se queda mirándote a unos bloques; de vez en cuando ataca (`smiley_attack_every`); agarre con QTE largo.
+  2. **Acecha:** las lámparas de la sala parpadean y se apagan una a una alrededor de su presa y aparece debajo de la última; invoca a 1 o 2 smilers; se adelanta y **te espera al final del pasillo**, asomado a una esquina y tamborileando en la pared; ataca más a menudo.
+  3. **Cerca:** se acerca sin parar, a saltos cada vez más seguidos; a oscuras solo se ven su ojo y la sonrisa; muerte instantánea; encender el último generador y correr al ascensor.
+- **Se acerca sin que le veas:** anda despacio, pero cada vez que **nadie** le mira aparece unos bloques más cerca (`smiley_blink_ticks`, `smiley_blink_step`). Si le miras no se para (eso es el Paciente): sigue andando despacio.
+- **Va a por el que se queda solo.** Gira la cabeza casi del todo para seguirte con la mirada mientras el cuerpo va hacia otro lado.
+- **Sonidos:** respira (se oye a través de las paredes), una risita ahogada la primera vez que te ve y uñas que tamborilean cuando espera.
 - **Habilidades:** apaga las luces de la sala; invoca a otros smilers; grito que aturde y atrae a todos los mobs; **teletransporte por manchas**: en las paredes hay manchas con su forma, y sale de una cercana a otro jugador cuando se cansa de perseguir al actual.
-- **Al alcanzarte:** te levanta hasta dejarte de puntillas, colgando de sus manos, y te agarra con un QTE que cambia de tipo cada vez; si fallas, remate: sigue subiéndote hasta su cara.
-- **Luz:** retrocede si lo apuntan dos linternas o más a la vez.
+- **Al alcanzarte:** te levanta hasta dejarte de puntillas, colgando de sus manos, y te agarra con un QTE que cambia de tipo cada vez; si fallas, remate: sigue subiéndote hasta su cara, echa la cabeza atrás, la boca se le abre hasta partirle la cara y te traga.
+- **Luz:** dos linternas o más a la vez (o una si solo queda uno) **le congelan**: se tapa la cara y tiembla sin moverse. En cuanto la luz se aparta, ya está más cerca. Si le tienen así mucho rato se funde en la pared y sale por otro lado.
 - **Escalado:** más generadores y más smilers invocados cuanto más grande es el grupo.
 - **Voz:** frases cortas en voz baja y distorsionada, llamando a los jugadores por su nombre.
 - **Música:** mezcla de todo: canción infantil distorsionada, música tensa que sube con cada fase y latidos que se aceleran; el ambiente se rompe en la última fase.

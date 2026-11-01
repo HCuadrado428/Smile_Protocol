@@ -1694,7 +1694,7 @@ def sample(channel, t):
     return keys[-1][1]
 
 
-def render_pose(anim, t, size=420, yaw=200, pitch=-12, name="berserker", height=60, bright=2.2, lift=18):
+def render_pose(anim, t, size=420, yaw=200, pitch=-12, name="berserker", height=60, bright=2.2, lift=18, focus=0.0):
     geo = json.loads((ROOT / f"geo/entity/{name}.geo.json").read_text())["minecraft:geometry"][0]
     tex = np.asarray(Image.open(ROOT / f"textures/entity/{name}.png").convert("RGBA"))
     bones = {b["name"]: b for b in geo["bones"]}
@@ -1755,7 +1755,7 @@ def render_pose(anim, t, size=420, yaw=200, pitch=-12, name="berserker", height=
     d = ImageDraw.Draw(img)
     k = size / height
     for z, pts, col in quads:
-        d.polygon([(x * k + size / 2, y * k + size * 0.93) for x, y in pts], fill=col, outline=col)
+        d.polygon([(x * k + size / 2, (y + focus) * k + size * 0.93) for x, y in pts], fill=col, outline=col)
     # suelo y escala (bloques)
     for yb in (0, 16, 32):
         d.line([(0, size * 0.93 - yb * k), (12, size * 0.93 - yb * k)], fill=(200, 200, 200))

@@ -19,29 +19,30 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import mob_models as mm  # noqa: E402  (pone gm.SCALE = 4 y registra los materiales de los smilers)
 from mob_models import Geo, MAT, ART, kf, wave, multi, loop_anim, split, finger_tips, enrich, render_pose, ROOT  # noqa: E402
 
-# Sonrisa: muy ancha, torcida (la comisura derecha sube mas), dos filas de dientes desiguales con
-# colmillos largos, encias rojas y huecos negros
-SMILE = [
-    "RR..................RR",
-    ".RR................RR.",
-    "..RRR............RRR..",
-    "...RRRRRRRRRRRRRRRR...",
-    "...RTTKTVTTKTTVTKTTR..",
-    "...RKVKKKTKKKKTKVKKR..",
-    "....RKTKKKKKKKKKTKR...",
-    ".....RTKTVTKTTKVTR....",
-    "......RRRRRRRRRRR.....",
+# Sonrisa tallada en la cabeza, de lado a lado de la cara: la mitad de arriba va en la cabeza
+# (hueso smile) y la de abajo en la mandibula (smile_low), asi que se abre de verdad con la boca.
+# Las comisuras suben por las mejillas; dientes desiguales con colmillos.
+SMILE_UP = [
+    "R..........R",
+    "RR........RR",
+    ".RRRRRRRRRR.",
+    ".T.TV.T.VT.T",
 ]
-# Ojo: rojo encendido con la pupila rasgada en vertical
+SMILE_LOW = [
+    "..T.T.TT.T..",
+    ".RRRRRRRRRR.",
+    "...RRRRRR...",
+]
+# Ojo: hundido en la cuenca, todo rojo salvo la pupila negra
 EYE = [
-    "..RRR..",
-    ".RYWYR.",
-    "RYWKWYR",
-    ".RYWYR.",
-    "..RRR..",
+    ".RRR.",
+    "RYWYR",
+    "RWKWR",
+    "RYWYR",
+    ".RRR.",
 ]
 COLORS = {"R": (196, 12, 18), "T": (236, 210, 200), "V": (200, 170, 150), "K": (3, 0, 1), "Y": (226, 14, 16),
-          "W": (255, 34, 26)}             # el ojo, todo rojo (mas vivo en el centro) salvo la pupila negra
+          "W": (255, 34, 26), "M": (92, 4, 8), "N": (150, 10, 14)}
 
 
 def art(rows, glowing):
@@ -186,13 +187,67 @@ def nail():
     return m
 
 
+def flesh():
+    """Encia y lengua: carne roja muy oscura, humeda, con un brillo tenue para que la boca abierta
+    se lea en la oscuridad sin parecer una placa plana."""
+    from mob_models import sstep as ss, noise3 as n3
+
+    def m(f):
+        c = np.zeros((f.h, f.w, 3)) + (62, 6, 10)
+        c *= (0.55 + 0.6 * f.n(0.9, 3, 801))[..., None]
+        ridge = 0.5 + 0.5 * np.sin((f.X + f.Z) * 5.0 + n3(f.X, f.Y, f.Z, 0.8, 802) * 3)
+        c *= (0.75 + 0.35 * ridge)[..., None]
+        wet = ss(0.72, 0.9, f.n(1.6, 2, 803))
+        c = c + wet[..., None] * np.array([70, 30, 32])
+        return np.clip(c, 0, 255), np.ones((f.h, f.w))
+
+    m.glowmask = lambda f: 0.35 + 0.25 * f.n(0.9, 2, 804)
+    return m
+
+
+def throat():
+    """Garganta: un pozo negro con un resplandor rojo en el fondo."""
+    def m(f):
+        w, h = f.w / mm.gm.SCALE, f.h / mm.gm.SCALE
+        r = np.hypot((f.U - w / 2) / max(w / 2, 1e-3), (f.V - h * 0.45) / max(h / 2, 1e-3))
+        k = np.clip(1 - r, 0, 1) ** 1.6
+        c = np.zeros((f.h, f.w, 3)) + (8, 0, 2)
+        c = c + k[..., None] * np.array([150, 8, 14])
+        return np.clip(c, 0, 255), np.ones((f.h, f.w))
+
+    def g(f):
+        w, h = f.w / mm.gm.SCALE, f.h / mm.gm.SCALE
+        r = np.hypot((f.U - w / 2) / max(w / 2, 1e-3), (f.V - h * 0.45) / max(h / 2, 1e-3))
+        return np.clip(1 - r, 0, 1) ** 1.2
+
+    m.glowmask = g
+    return m
+
+
+def tooth():
+    """Dientes: amarillentos y sucios, mas oscuros en la raiz; brillan un poco (se ven en la oscuridad)."""
+    def m(f):
+        lo, hi = (f.Y.min(), f.Y.max()) if f.Y.size else (0, 1)
+        t = (f.Y - lo) / max(hi - lo, 1e-3)
+        c = np.zeros((f.h, f.w, 3)) + (214, 198, 168)
+        c *= (0.6 + 0.4 * f.n(2.0, 2, 811))[..., None]
+        return np.clip(c, 0, 255), np.ones((f.h, f.w))
+
+    m.glowmask = lambda f: np.zeros((f.h, f.w)) + 0.55
+    return m
+
+
 MAT.update({
+    "smiley_flesh": flesh(),
+    "smiley_throat": throat(),
+    "smiley_tooth": tooth(),
     "void": void(),            # mas negro que los demas: es un hueco en la luz
     "void_hi": void((15, 14, 16)),
     "void_face": void_face(),
     "nail": nail(),
     "void_hair": void_hair(),
-    "smiley_smile": art(SMILE, "RTVW"),
+    "smiley_smile": art(SMILE_UP, "RTVW"),
+    "smiley_smile_low": art(SMILE_LOW, "RTVW"),
     "smiley_eye": art(EYE, "RYW"),
     "smiley_drip": art(["R"], "R"),
     "smiley_pin": art(["Y"], "Y"),
@@ -200,105 +255,124 @@ MAT.update({
 })
 
 
+H = 3          # mas alto que antes: piernas mas largas (y todo lo de arriba sube)
+
+
 def smiley():
     """Esqueleto: cadera > cintura > pecho > (hombros > brazo > antebrazo > mano > dedos/pulgar)
-    y (cuello > cuello2 > cabeza > mandibula/sonrisa/ojo/pelo); piernas: muslo > espinilla > pie > dedos."""
-    g = Geo("smiley", 99, folder="entity", glow=("smiley_smile", "smiley_eye", "void_crack", "smiley_drip", "smiley_pin"),
-            ao=False)
+    y (cuello > cuello2 > cabeza > mandibula/sonrisa/ojo/pelo); piernas: muslo > espinilla > pie > dedos.
+    Sombra pura: solo brillan el ojo (hundido en su cuenca) y la sonrisa, tallada en la cabeza."""
+    g = Geo("smiley", 99, folder="entity", glow=("smiley_smile", "smiley_smile_low", "smiley_flesh", "smiley_throat", "smiley_tooth", "smiley_eye",
+                                                 "smiley_drip", "smiley_pin"), ao=False)
     g.bone("root")
-    g.bone("hips", "root", (0, 28, 0))
-    g.cube("hips", (-2.6, 26, -1.5), (5.2, 4, 3), "void")
-    # columna en tres tramos que se doblan por separado
-    g.bone("torso", "hips", (0, 30, 0))
-    g.cube("torso", (-1.7, 30, -1.2), (3.4, 8.5, 2.4), "void")                      # cintura imposible
-    g.cube("torso", (-2.4, 33.5, -1.45), (4.8, 1.2, 0.3), "void_hi")               # vientre hundido, con un pliegue
-    for i in range(3):
-        g.cube("torso", (-0.6, 31 + i * 2.5, 1.2), (1.2, 1.2, 0.8), "void_hi")      # espinazo
-    g.bone("chest", "torso", (0, 38, 0))
-    g.cube("chest", (-3.2, 38, -1.8), (6.4, 8, 3.6), "void_crack")                  # pecho estrecho, agrietado
-    for i in range(5):
-        g.cube("chest", (-3.5 + i * 0.1, 38.6 + i * 1.5, -2.15), (7.0 - i * 0.2, 0.75, 0.5), "void_hi")   # costillas
-    for i in range(3, 6):
-        g.cube("chest", (-0.6, 31 + i * 2.5, 1.2), (1.2, 1.2, 0.8), "void_hi")
-    for x, ln in ((-2.2, 7), (-0.6, 9.5), (1.2, 6), (2.6, 8.5)):
-        g.cube("chest", (x, 44 - ln, 1.6), (0.35, ln, 0.3), "void")                 # jirones de la espalda
-    g.cube("chest", (-1.6, 45, -1.5), (3.2, 2.3, 3), "void_crack")                  # centro de la percha
-    # hombros: huesos propios para encogerlos, dejarlos caer o tirar hacia atras
+    g.bone("hips", "root", (0, 28 + H, 0))
+    g.cube("hips", (-2.6, 26 + H, -1.5), (5.2, 4, 3), "void")
+    g.bone("torso", "hips", (0, 30 + H, 0))
+    g.cube("torso", (-1.7, 30 + H, -1.2), (3.4, 8.5, 2.4), "void")                  # cintura imposible
+    g.bone("chest", "torso", (0, 38 + H, 0))
+    g.cube("chest", (-3.0, 38 + H, -1.7), (6.0, 8, 3.4), "void")                    # pecho estrecho
+    g.cube("chest", (-1.6, 45 + H, -1.5), (3.2, 2.3, 3), "void")
+    for x, ln in ((-1.6, 6), (0.9, 8)):
+        g.cube("chest", (x, 44 + H - ln, 1.5), (0.4, ln, 0.3), "void")              # jirones de sombra en la espalda
     for side, sx in (("r", 1), ("l", -1)):
-        g.bone(f"shoulder_{side}", "chest", (sx * 1.6, 45.8, 0))
-        g.cube(f"shoulder_{side}", (1.4 if sx > 0 else -4.6, 45, -1.5), (3.2, 2.3, 3), "void_crack")  # hombros como perchas
-    g.cube("shoulder_l", (-5.1, 46.4, -0.6), (1.6, 0.6, 0.6), "nail")                 # clavicula rota que asoma
-    # cuello en dos tramos: se curva en S y la cabeza puede quedarse quieta mientras el cuerpo se mueve
-    g.bone("neck", "chest", (0, 46.5, -0.2))
-    g.cube("neck", (-0.9, 46.5, -1.1), (1.8, 3.2, 1.8), "void")
-    g.bone("neck2", "neck", (0, 49.5, -0.3))
-    g.cube("neck2", (-0.85, 49.4, -1.15), (1.7, 3.4, 1.7), "void")
-    g.bone("head", "neck2", (0, 52.3, -0.4))
-    g.cube("head", (-3.4, 53, -4), (6.8, 9.5, 7), "void_face")                      # cabeza alargada
-    g.cube("head", (-3, 51.5, -3.7), (6, 1.8, 6), "void")                           # mandibula
-    g.bone("smile", "head", (0, 55.6, -4.1))
-    g.cube("smile", (-5.5, 53.5, -4.25), (11, 4.5, 0.2), "smiley_smile")          # mas ancha que la cara
-    for x, ln in ((-4.6, 2.6), (-3.1, 1.4), (4.2, 3.4), (1.5, 1.0)):
-        g.cube("smile", (x, 53.6 - ln, -4.24), (0.35, ln, 0.15), "smiley_drip")   # gotas de las comisuras
-    g.bone("eye", "head", (2.35, 59.55, -4.1))
-    g.cube("eye", (0.6, 58.3, -4.2), (3.5, 2.5, 0.2), "smiley_eye")               # ojo derecho
-    g.cube("eye", (2.0, 56.0, -4.19), (0.3, 2.3, 0.15), "smiley_drip")            # lagrima roja
-    g.cube("head", (-2.6, 59.2, -4.12), (0.35, 0.35, 0.1), "smiley_pin")         # chispa en la cuenca vacia
-    # melena lacia por los hombros, en mechones desiguales que se afinan en la punta; el flequillo
-    # cae sobre el lado izquierdo (el del ojo que no tiene) y deja ver el ojo
-    g.bone("hair", "head", (0, 62.5, -0.5))
-    g.cube("hair", (-3.8, 62, -4.4), (7.6, 1.4, 7.8), "void_hair")
-    g.cube("hair", (-3.2, 63.2, -3.4), (6.4, 0.6, 6.0), "void_hair")                  # coronilla
+        g.bone(f"shoulder_{side}", "chest", (sx * 1.6, 45.8 + H, 0))
+        g.cube(f"shoulder_{side}", (1.4 if sx > 0 else -4.6, 45 + H, -1.5), (3.2, 2.3, 3), "void")   # hombros como perchas
+    g.bone("neck", "chest", (0, 46.5 + H, -0.2))
+    g.cube("neck", (-0.9, 46.5 + H, -1.1), (1.8, 3.2, 1.8), "void")
+    g.bone("neck2", "neck", (0, 49.5 + H, -0.3))
+    g.cube("neck2", (-0.85, 49.4 + H, -1.15), (1.7, 3.4, 1.7), "void")
+    # Cabeza estrecha y alargada. La cara es de piezas para dejar hueca la cuenca del ojo y la boca:
+    # craneo (de la boca para arriba) + mandibula con bisagra atras.
+    y0 = 52.3 + H                       # base de la cabeza
+    g.bone("head", "neck2", (0, y0, -0.4))
+    M = y0 + 3.9                        # linea de la boca
+    g.cube("head", (-3, M, -2.6), (6, y0 + 11 - M, 5.8), "void_face")             # craneo
+    g.cube("head", (-3, y0 + 8.7, -4), (6, 2.3, 1.4), "void")                       # frente
+    g.cube("head", (-3, y0 + 6.2, -4), (2.6, 2.5, 1.4), "void")                     # mejilla izquierda (cuenca vacia)
+    g.cube("head", (-0.4, y0 + 6.2, -4), (0.6, 2.5, 1.4), "void")                   # puente
+    g.cube("head", (2.7, y0 + 6.2, -4), (0.3, 2.5, 1.4), "void")                    # borde de la cuenca
+    g.cube("head", (-3, M, -4), (6, y0 + 6.2 - M, 1.4), "void")                     # mejillas y nariz
+    # Por dentro (solo se ve con la boca abierta): paladar de carne, garganta que es un pozo negro con
+    # un resplandor al fondo, y filas de dientes de verdad, desiguales, por delante y por los lados.
+    g.cube("head", (-2.7, M - 0.05, -3.9), (5.4, 0.1, 5.2), "smiley_flesh")         # paladar
+    g.cube("head", (-2.3, y0 + 0.4, 1.05), (4.6, M - y0 - 0.4, 0.3), "smiley_throat")  # garganta
+    for i, ln in enumerate((0.9, 0.55, 1.5, 0.7, 0.85, 0.5, 0.75, 0.65, 0.5, 1.6, 0.6, 0.95)):
+        g.cube("head", (-2.72 + i * 0.455, M - ln, -3.95), (0.3, ln, 0.3), "smiley_tooth")    # dientes de arriba
+    for sx in (1, -1):
+        for j, (z, ln) in enumerate(((-3.3, 0.8), (-2.7, 1.1), (-2.1, 0.6), (-1.5, 0.9), (-0.9, 0.5))):
+            g.cube("head", (sx * 2.62 - 0.15, M - ln, z), (0.3, ln, 0.3), "smiley_tooth")
+    g.cube("head", (-2.2, y0 + 7.2, -4.08), (0.35, 0.35, 0.1), "smiley_pin")        # chispa en la cuenca vacia
+    g.bone("smile", "head", (0, M, -4))
+    g.cube("smile", (-3, M, -4.06), (6, 2.0, 0.1), "smiley_smile")                  # labio de arriba y dientes
+    g.bone("eye", "head", (1.45, y0 + 7.45, -3.0))
+    g.cube("eye", (0.2, y0 + 6.2, -3.05), (2.5, 2.5, 0.2), "smiley_eye")            # el ojo, hundido un bloque en la cuenca
+    g.cube("eye", (1.3, y0 + 4.3, -4.07), (0.3, 1.9, 0.1), "smiley_drip")           # lagrima que asoma de la cuenca
+    # mandibula: bisagra atras, junto al cuello; al abrirse deja ver la garganta roja
+    g.bone("jaw", "head", (0, M - 0.2, 1.6))
+    g.cube("jaw", (-3, y0 - 0.3, -4), (6, M - y0 + 0.3, 1.4), "void")             # barbilla
+    g.cube("jaw", (-2.8, y0 - 0.3, -2.6), (5.6, M - y0 + 0.1, 4.6), "void")
+    g.cube("jaw", (-2.6, M - 0.75, -3.6), (5.2, 0.5, 4.6), "smiley_flesh")          # lengua y encia de abajo
+    for i, ln in enumerate((0.6, 0.9, 0.5, 1.2, 0.6, 0.7, 0.55, 1.3, 0.5, 0.8, 0.6, 0.7)):
+        g.cube("jaw", (-2.7 + i * 0.455, M - 0.3, -3.9), (0.3, ln, 0.3), "smiley_tooth")       # dientes de abajo
+    for sx in (1, -1):
+        for z, ln in ((-3.2, 0.7), (-2.5, 0.9), (-1.8, 0.5), (-1.1, 0.8)):
+            g.cube("jaw", (sx * 2.55 - 0.15, M - 0.3, z), (0.3, ln, 0.3), "smiley_tooth")
+    g.bone("smile_low", "jaw", (0, M, -4))
+    g.cube("smile_low", (-3, M - 1.5, -4.06), (6, 1.5, 0.1), "smiley_smile_low")    # labio de abajo y dientes
+    for x, ln in ((-2.3, 1.6), (2.0, 2.4)):
+        g.cube("smile_low", (x, M - 1.5 - ln, -4.07), (0.3, ln, 0.1), "smiley_drip")   # babea por las comisuras
+    # Pelo largo, lacio y mojado. Por delante cae sobre la mitad izquierda de la cara (la cuenca
+    # vacia) hasta la barbilla; el ojo asoma entre los mechones.
+    T = y0 + 11                         # coronilla
+    g.bone("hair", "head", (0, T, -0.5))
+    g.cube("hair", (-3.3, T - 0.6, -4.3), (6.6, 1.3, 7.4), "void_hair")
+    g.cube("hair", (-2.8, T + 0.6, -3.4), (5.6, 0.6, 6.0), "void_hair")
 
     def strand(x, z, ln, w, d, back=0.0):
         top = ln * 0.62
-        g.cube("hair", (x, 62.5 - top, z), (w, top, d), "void_hair")
-        g.cube("hair", (x + w * 0.2, 62.5 - ln, z + back), (w * 0.6, ln - top + 0.2, d * 0.7), "void_hair")
+        g.cube("hair", (x, T - top, z), (w, top, d), "void_hair")
+        g.cube("hair", (x + w * 0.2, T - ln, z + back), (w * 0.6, ln - top + 0.2, d * 0.7), "void_hair")
 
-    for k, ln in enumerate((11, 13.5, 12, 14, 12.5, 10)):
-        strand(-3.9 + k * 1.3, 2.8 + (k % 2) * 0.25, ln, 1.3, 1.0, 0.25)               # espalda
-    for k, (z, ln) in enumerate(((-4.2, 9), (-1.8, 11.5), (0.6, 10.5))):
-        strand(-4.1, z, ln, 0.8, 2.4, 0.3)                                              # lado izquierdo
-    for k, (z, ln) in enumerate(((-4.2, 5.5), (-1.8, 8), (0.6, 9))):
-        strand(3.3, z, ln, 0.8, 2.4, 0.3)                                               # lado derecho, corto delante del ojo
-    for x, ln in ((-3.6, 6), (-2.4, 4.5), (-1.3, 2.8)):
-        g.cube("hair", (x, 62.5 - ln, -4.75), (1.2, ln, 0.4), "void_hair")              # flequillo
-        g.cube("hair", (x + 0.3, 62.5 - ln - 1.2, -4.7), (0.6, 1.3, 0.3), "void_hair")
+    for k, ln in enumerate((15, 18, 16.5, 19, 17, 14)):
+        strand(-3.4 + k * 1.13, 3.0 + (k % 2) * 0.25, ln, 1.15, 1.0, 0.3)            # espalda: hasta media espalda
+    for z, ln in ((-4.0, 13), (-1.6, 15.5), (0.8, 14.5)):
+        strand(-3.75, z, ln, 0.8, 2.4, 0.3)                                         # lado izquierdo
+    for z, ln in ((-1.6, 13), (0.8, 14)):
+        strand(3.0, z, ln, 0.8, 2.4, 0.3)                                           # lado derecho (deja libre el ojo)
+    for x, ln, w in ((-3.4, 12, 0.8), (-2.4, 10.5, 0.6), (-1.5, 8.0, 0.5), (2.95, 7, 0.4)):
+        g.cube("hair", (x, T - ln, -4.75), (w, ln, 0.45), "void_hair")              # mechones delante de la cara
+        g.cube("hair", (x + w * 0.25, T - ln - 1.5, -4.7), (w * 0.5, 1.6, 0.3), "void_hair")
 
     for side, sx in (("r", 1), ("l", -1)):
-        g.bone(f"arm_{side}", f"shoulder_{side}", (sx * 4.6, 46, 0))
-        g.cube(f"arm_{side}", (sx * 4.6 - 0.9, 28, -0.9), (1.8, 18.5, 1.8), "void")
-        g.bone(f"forearm_{side}", f"arm_{side}", (sx * 4.6, 28.5, 0))
-        g.cube(f"forearm_{side}", (sx * 4.6 - 0.75, 11.5, -0.75), (1.5, 17.5, 1.5), "void")
-        g.cube(f"forearm_{side}", (sx * 4.6 - 1, 27, -1), (2, 2, 2), "void_hi")          # codo
-        for dz, ln in ((-0.6, 4.5), (0.4, 6.5)):
-            g.cube(f"forearm_{side}", (sx * 4.6 + sx * 0.75 - (0.3 if sx > 0 else 0), 24 - ln, dz), (0.3, ln, 0.3), "void")  # jirones
-        g.bone(f"hand_{side}", f"forearm_{side}", (sx * 4.6, 12, 0))
-        g.cube(f"hand_{side}", (sx * 4.6 - 1.1, 8.5, -1.9), (2.2, 3.5, 3.6), "void")
-        g.cube(f"hand_{side}", (sx * 4.6 - 1.25, 8.6, -1.8), (2.5, 0.8, 3.4), "void_hi")      # nudillos
+        g.bone(f"arm_{side}", f"shoulder_{side}", (sx * 4.6, 46 + H, 0))
+        g.cube(f"arm_{side}", (sx * 4.6 - 0.85, 28 + H, -0.85), (1.7, 18.5, 1.7), "void")
+        g.bone(f"forearm_{side}", f"arm_{side}", (sx * 4.6, 28.5 + H, 0))
+        g.cube(f"forearm_{side}", (sx * 4.6 - 0.7, 11.5 + H, -0.7), (1.4, 17.5, 1.4), "void")
+        g.cube(f"forearm_{side}", (sx * 4.6 - 0.95, 27 + H, -0.95), (1.9, 1.9, 1.9), "void")         # codo
+        g.bone(f"hand_{side}", f"forearm_{side}", (sx * 4.6, 12 + H, 0))
+        g.cube(f"hand_{side}", (sx * 4.6 - 1.0, 8.5 + H, -1.8), (2.0, 3.5, 3.4), "void")
         for i, z in enumerate((-1.7, -0.6, 0.5, 1.5)):
-            ln = (10, 11.5, 11, 9)[i]
-            g.bone(f"finger{i}_{side}", f"hand_{side}", (sx * 4.6, 8.8, z + 0.25))
-            g.cube(f"finger{i}_{side}", (sx * 4.6 - 0.3, 8.8 - ln * 0.55, z), (0.6, ln * 0.55, 0.55), "void")
-            g.cube(f"finger{i}_{side}", (sx * 4.6 - 0.22, 8.8 - ln, z + 0.04), (0.44, ln * 0.45 + 0.1, 0.47), "nail")
-        g.bone(f"thumb_{side}", f"hand_{side}", (sx * 3.1, 10, -2.0))
-        g.cube(f"thumb_{side}", (sx * 3.1 - 0.3, 6, -2.2), (0.6, 4, 0.6), "nail")           # pulgar
+            ln = (11, 12.5, 12, 10)[i]
+            g.bone(f"finger{i}_{side}", f"hand_{side}", (sx * 4.6, 8.8 + H, z + 0.25))
+            g.cube(f"finger{i}_{side}", (sx * 4.6 - 0.28, 8.8 + H - ln * 0.55, z), (0.56, ln * 0.55, 0.5), "void")
+            g.cube(f"finger{i}_{side}", (sx * 4.6 - 0.2, 8.8 + H - ln, z + 0.04), (0.4, ln * 0.45 + 0.1, 0.42), "nail")
+        g.bone(f"thumb_{side}", f"hand_{side}", (sx * 3.1, 10 + H, -2.0))
+        g.cube(f"thumb_{side}", (sx * 3.1 - 0.3, 5.5 + H, -2.2), (0.55, 4.5, 0.55), "nail")
     for side, sx in (("r", 1), ("l", -1)):
-        g.bone(f"thigh_{side}", "hips", (sx * 1.8, 27, 0))
-        g.cube(f"thigh_{side}", (sx * 1.8 - 1, 14, -1), (2, 13.5, 2), "void")
-        g.bone(f"shin_{side}", f"thigh_{side}", (sx * 1.8, 14.5, 0))
-        g.cube(f"shin_{side}", (sx * 1.8 - 0.85, 1.2, -0.85), (1.7, 13.5, 1.7), "void")
-        g.cube(f"shin_{side}", (sx * 1.8 - 1.1, 13.4, -1.1), (2.2, 2, 2.2), "void_hi")  # rodilla
+        g.bone(f"thigh_{side}", "hips", (sx * 1.8, 27 + H, 0))
+        g.cube(f"thigh_{side}", (sx * 1.8 - 0.95, 15.5, -0.95), (1.9, 14.5 + H - 3 + 0.5, 1.9), "void")
+        g.bone(f"shin_{side}", f"thigh_{side}", (sx * 1.8, 16, 0))
+        g.cube(f"shin_{side}", (sx * 1.8 - 0.8, 1.2, -0.8), (1.6, 15, 1.6), "void")
+        g.cube(f"shin_{side}", (sx * 1.8 - 1.0, 15, -1.0), (2.0, 1.9, 2.0), "void")              # rodilla
         g.bone(f"foot_{side}", f"shin_{side}", (sx * 1.8, 1.2, 0))
-        g.cube(f"foot_{side}", (sx * 1.8 - 0.9, 0, -1.8), (1.8, 1.3, 2.8), "void")     # talon
+        g.cube(f"foot_{side}", (sx * 1.8 - 0.85, 0, -1.8), (1.7, 1.3, 2.8), "void")     # talon
         g.bone(f"toe_{side}", f"foot_{side}", (sx * 1.8, 0.6, -1.8))
-        g.cube(f"toe_{side}", (sx * 1.8 - 0.85, 0, -4.6), (1.7, 1.0, 2.85), "void")     # dedos largos
-        g.cube(f"toe_{side}", (sx * 1.8 - 0.5, 0, -5.05), (1.0, 0.55, 0.5), "nail")
-    split(g, "head", "jaw", (0, 53, 0.5), lambda c: abs(c["origin"][1] - 51.5) < 0.01)
-    split(g, "hair", "hair_back", (0, 62.5, 2.8), lambda c: c["origin"][2] > 2.7)
-    split(g, "hair", "hair_l", (-3.8, 62.5, -1), lambda c: c["origin"][0] < -3.85 and c["origin"][1] < 62)
-    split(g, "hair", "hair_r", (3.8, 62.5, -1), lambda c: c["origin"][0] > 3.25 and c["origin"][1] < 62)
-    split(g, "hair", "hair_front", (-1, 62.5, -4.6), lambda c: c["origin"][2] < -4.6)
+        g.cube(f"toe_{side}", (sx * 1.8 - 0.8, 0, -4.8), (1.6, 0.9, 3.05), "void")      # dedos largos
+        g.cube(f"toe_{side}", (sx * 1.8 - 0.45, 0, -5.25), (0.9, 0.5, 0.5), "nail")
+    split(g, "hair", "hair_back", (0, T, 2.8), lambda c: c["origin"][2] > 2.7)
+    split(g, "hair", "hair_l", (-3.6, T, -1), lambda c: c["origin"][0] < -3.6 and c["origin"][1] < T - 1)
+    split(g, "hair", "hair_r", (3.4, T, -1), lambda c: c["origin"][0] > 2.95 and c["origin"][2] > -4.6 and c["origin"][1] < T - 1)
+    split(g, "hair", "hair_front", (-1, T, -4.6), lambda c: c["origin"][2] < -4.6)
     finger_tips(g, tip_mat="nail")
     return g.save()
 
@@ -401,6 +475,31 @@ def gait(L, stride, knee, lift=0.0, lean=0.0, sides="rl"):
         out[f"toe_{s}"] = {"rotation": cyc(L, lambda p, o=off: [-1.3 * stride * max(0.0, -math.sin(p + o + 0.3)) ** 2 +
                                                                 0.4 * stride * max(0.0, math.cos(p + o)), 0, 0])}
     return out
+
+
+# Siempre encorvado: el peso de la postura sobre cada animacion (1 = del todo). Se estira para gritar,
+# invocar y rematar.
+HUNCH = {"idle": 1, "walk": 1, "run": 1, "intro": 1, "drag": 1, "scream": 0.4, "summon": 0.3, "execute_smiley": 0.25,
+         "sealed": 0.5, "smear_in": 0.6, "smear_out": 0.6, "grab": 0.6, "retreat": 0.6, "peek": 0.5}
+HUNCH_POSE = {"torso": [10, 0, 0], "chest": [22, 0, 0], "neck": [16, 0, 0], "neck2": [8, 0, 0], "head": [-46, 0, 0],
+              "arm_r": [-32, 0, 0], "arm_l": [-32, 0, 0], "thigh_r": [-6, 0, 0], "thigh_l": [-6, 0, 0],
+              "shin_r": [10, 0, 0], "shin_l": [10, 0, 0], "foot_r": [-4, 0, 0], "foot_l": [-4, 0, 0]}
+
+
+def hunch(A):
+    """Suma la postura encorvada a cada animacion; la sonrisa de abajo sigue a la de arriba."""
+    for name, an in A.items():
+        k = HUNCH.get(name, 1)
+        bb = an["bones"]
+        for b, off in HUNCH_POSE.items():
+            ch = bb.setdefault(b, {})
+            rot = ch.get("rotation") or {"0": [0, 0, 0]}
+            ch["rotation"] = {t: [round(v[j] + off[j] * k, 2) for j in range(3)] for t, v in rot.items()}
+        root = bb.setdefault("root", {})
+        pos = root.get("position") or {"0": [0, 0, 0]}
+        root["position"] = {t: [v[0], round(v[1] - 0.7 * k, 2), v[2]] for t, v in pos.items()}
+        if "scale" in bb.get("smile", {}):
+            bb["smile_low"] = {"scale": dict(bb["smile"]["scale"])}
 
 
 SIDE_BONES = ("shoulder", "arm", "forearm", "hand", "thumb", "finger0", "finger1", "finger2", "finger3", "thigh", "shin", "foot", "toe")
@@ -565,9 +664,7 @@ def animations():
         "neck": R((0, [0, 0, 0]), (0.22, [10, 0, 0]), (0.4, [-12, 0, 0]), (1.6, [-10, 0, 0]), (L, [0, 0, 0])),
         "neck2": R((0, [0, 0, 0]), (0.22, [8, 0, 0]), (0.4, [-10, 0, 0]), (1.6, [-8, 0, 0]), (L, [0, 0, 0])),
         "head": R((0, [0, 0, 0]), (0.22, [14, 0, 0]), (0.4, [-14, 0, 0]), *shake, (1.6, [-12, 0, 0]), (L, [0, 0, 0])),
-        "jaw": R((0, [0, 0, 0]), (0.22, [0, 0, 0]), (0.35, [50, 0, 0]), (1.0, [44, 0, 0]), (1.6, [48, 0, 0]), (L, [0, 0, 0])),
-        "smile": {"scale": smooth([(0, [1, 1, 1]), (0.22, [0.9, 0.7, 1]), (0.35, [1.25, 1.9, 1]), (1.6, [1.2, 1.8, 1]),
-                                   (L, [1, 1, 1])])},
+        "jaw": R((0, [0, 0, 0]), (0.22, [0, 0, 0]), (0.35, [56, 0, 0]), (1.0, [48, 0, 0]), (1.6, [54, 0, 0]), (L, [0, 0, 0])),
         "eye": {"scale": smooth([(0, [1, 1, 1]), (0.22, [1, 0.5, 1]), (0.35, [1.25, 1.25, 1]), (1.6, [1.2, 1.2, 1]),
                                  (L, [1, 1, 1])])},
         **both("shoulder", (0, [0, 0, 0]), (0.22, [0, 0, 3]), (0.4, [0, 0, -8]), (1.6, [0, 0, -7]), (L, [0, 0, 0])),
@@ -666,42 +763,42 @@ def animations():
         "neck2": {"rotation": cyc(L, lambda p: [-4, 4 * s(p + 1), 6 * s(p)])},
         "head": {"rotation": cyc(L, lambda p: [8 + 3 * s(2 * p), 8 * s(p + 1), 16 * s(p)])},
         "jaw": {"rotation": cyc(L, lambda p: [14 + 9 * s(4 * p), 0, 0], 32)},
-        "smile": {"scale": cyc(L, lambda p: [1.05 + 0.05 * s(2 * p), 1.1 + 0.1 * s(2 * p), 1])},
         **both("shoulder", (0, [0, 0, -4])),
         # las dos manos a la vez: tira de ella hacia su cara y afloja, a pulsos
-        **{f"arm_{sd}": {"rotation": cyc(L, lambda p, k=k: [-70 - 3 * max(0.0, s(p)) ** 2, -8 * k, -4 * k])} for sd, k in (("r", 1), ("l", -1))},
-        **{f"forearm_{sd}": {"rotation": cyc(L, lambda p: [-50 - 6 * max(0.0, s(p - 0.4)) ** 2, 0, 0])} for sd in "rl"},
+        **{f"arm_{sd}": {"rotation": cyc(L, lambda p, k=k: [-26 - 3 * max(0.0, s(p)) ** 2, -8 * k, -4 * k])} for sd, k in (("r", 1), ("l", -1))},
+        **{f"forearm_{sd}": {"rotation": cyc(L, lambda p: [-102 - 6 * max(0.0, s(p - 0.4)) ** 2, 0, 0])} for sd in "rl"},
         **{f"hand_{sd}": {"rotation": cyc(L, lambda p: [8 + 3 * s(p - 0.9), 0, 0])} for sd in "rl"},
         **fingers(lambda i, sd: {"rotation": cyc(L, lambda p, i=i: [66 + 8 * max(0.0, s(2 * p - i * 0.4)) ** 2, 0, 0])}),
         **both("thumb", (0, [40, 0, 10])),
         **both("thigh", (0, [-4, 0, -5])), **both("shin", (0, [8, 0, 0])), **both("foot", (0, [-4, 0, 5])),
     })
 
-    # remate: la levanta del cuello hasta su cara, de puntillas (0-1,2); abre la sonrisa enorme
-    # (1,2-1,9), echa la cabeza atras para coger impulso (1,9-2,1) y la parte (2,25)
+    # remate: la levanta del cuello hasta su cara, de puntillas (0-1,2); echa la cabeza atras y la
+    # boca se abre hasta partirle la cara (1,2-2,1); se lanza y la traga (2,25), mastica y la suelta (2,5)
     L = 3.5
     A["execute_smiley"] = loop_anim(L, {
         "root": {"position": smooth([(0, [0, -0.6, 0]), (1.2, [0, 1.0, 0]), (2.1, [0, 1.0, 0]), (2.25, [0, -0.8, 0]),
                                      (L, [0, -0.5, 0])])},
         "hips": R((0, [4, 0, 0]), (1.2, [0, 0, 0]), (2.1, [0, 0, 0]), (2.25, [4, 0, 0])),
         "torso": R((0, [7, 0, 0]), (1.2, [0, 0, 0]), (2.1, [-4, 0, 0]), (2.25, [10, 0, 0]), (L, [8, 0, 0])),
-        "chest": R((0, [15, 0, 0]), (1.2, [6, 0, 0]), (2.1, [6, 0, 0]), (2.25, [24, 0, 0]), (L, [18, 0, 0])),
-        "neck": R((0, [16, 0, 0]), (1.2, [0, 0, 0]), (2.0, [-6, 0, 0]), (2.25, [22, 0, 0]), (L, [16, 0, 0])),
+        "chest": R((0, [15, 0, 0]), (1.2, [6, 0, 0]), (2.1, [6, 0, 0]), (2.25, [14, 0, 0]), (L, [12, 0, 0])),
+        "neck": R((0, [16, 0, 0]), (1.2, [0, 0, 0]), (2.0, [-6, 0, 0]), (2.25, [10, 0, 0]), (L, [8, 0, 0])),
         "neck2": R((0, [-4, 0, 0]), (1.2, [-6, 0, 0]), (1.9, [-10, 0, 6]), (2.25, [14, 0, 0]), (L, [10, 0, 0])),
-        "head": R((0, [8, 0, 0]), (1.2, [0, 0, 20]), (1.9, [-6, 0, 30]), (2.08, [-12, 0, 26]), (2.25, [16, 0, 4]),
-                  (L, [12, 0, 10])),
-        "jaw": R((0, [10, 0, 0]), (1.2, [6, 0, 0]), (1.9, [50, 0, 0]), (2.15, [58, 0, 0]), (2.27, [6, 0, 0]), (L, [12, 0, 0])),
-        "smile": {"scale": smooth([(0, [1, 1, 1]), (1.2, [1, 1, 1]), (1.9, [1.4, 2.4, 1]), (2.2, [1.45, 2.5, 1]),
-                                   (2.3, [1.05, 1, 1]), (L, [1.1, 1.1, 1])])},
-        "eye": {"scale": smooth([(0, [1, 1, 1]), (1.9, [1.2, 1.2, 1]), (2.25, [1.35, 0.6, 1]), (2.5, [1.1, 1.1, 1]),
+        "head": R((0, [8, 0, 0]), (1.2, [0, 0, 14]), (1.9, [-28, 0, 6]), (2.08, [-32, 0, 4]), (2.25, [10, 0, 0]),
+                  (2.6, [16, 0, 6]), (L, [12, 0, 8])),
+        "jaw": R((0, [6, 0, 0]), (1.2, [6, 0, 0]), (1.6, [34, 0, 0]), (1.95, [60, 0, 0]), (2.22, [66, 0, 0]), (2.3, [4, 0, 0]),
+                 (2.48, [22, 0, 0]), (2.62, [3, 0, 0]), (2.8, [18, 0, 0]), (2.95, [3, 0, 0]), (L, [6, 0, 0])),
+        "eye": {"scale": smooth([(0, [1, 1, 1]), (1.9, [1.3, 1.3, 1]), (2.25, [1.3, 0.4, 1]), (2.5, [1.1, 1.1, 1]),
                                  (L, [1, 1, 1])])},
         **both("shoulder", (0, [0, 0, -4]), (1.2, [0, 0, -7]), (2.1, [0, 0, -8]), (2.25, [0, 0, 4]), (L, [0, 0, 2])),
-        **both("arm", (0, [-70, -8, -4]), (1.2, [-110, -18, -4]), (2.1, [-104, -18, -4]), (2.25, [-60, -40, -30]),
-               (L, [-40, -30, -30])),
-        **both("forearm", (0, [-50, 0, 0]), (1.2, [-20, 0, 0]), (2.1, [-22, 0, 0]), (2.25, [-10, 0, 0]), (L, [-10, 0, 0])),
-        **both("hand", (0, [8, 0, 0]), (1.2, [20, 0, 0]), (2.1, [24, 0, 0]), (2.25, [-30, 0, 0]), (L, [0, 0, 0])),
-        **fingers(lambda i, sd: R((0, [65, 0, 0]), (2.1, [72, 0, 0]), (2.25 + i * 0.02, [-24, 0, 0]), (L, [10, 0, 0]))),
-        **both("thumb", (0, [40, 0, 10]), (2.1, [45, 0, 10]), (2.25, [-20, 0, -20]), (L, [0, 0, 0])),
+        **both("arm", (0, [-26, -8, -4]), (1.2, [-50, -18, -4]), (2.1, [-46, -18, -4]), (2.25, [-66, -12, -4]),
+               (2.5, [-62, -12, -4]), (2.85, [-20, -8, -10]), (L, [-10, -6, -8])),
+        **both("forearm", (0, [-102, 0, 0]), (1.2, [-100, 0, 0]), (2.1, [-102, 0, 0]), (2.25, [-108, 0, 0]), (2.5, [-104, 0, 0]),
+               (2.85, [-8, 0, 0]), (L, [-8, 0, 0])),
+        **both("hand", (0, [8, 0, 0]), (1.2, [20, 0, 0]), (2.1, [24, 0, 0]), (2.5, [24, 0, 0]), (2.85, [-10, 0, 0]), (L, [4, 0, 0])),
+        **fingers(lambda i, sd: R((0, [65, 0, 0]), (2.1, [72, 0, 0]), (2.5, [74, 0, 0]), (2.6 + i * 0.03, [-10, 0, 0]),
+                                  (L, [12, 0, 0]))),
+        **both("thumb", (0, [40, 0, 10]), (2.5, [45, 0, 10]), (2.65, [-10, 0, -10]), (L, [0, 0, 0])),
         **both("thigh", (0, [-4, 0, -5]), (1.2, [0, 0, -4]), (2.1, [0, 0, -4]), (2.25, [-10, 0, -6]), (L, [-6, 0, -5])),
         **both("shin", (0, [8, 0, 0]), (1.2, [0, 0, 0]), (2.1, [0, 0, 0]), (2.25, [16, 0, 0]), (L, [10, 0, 0])),
         **both("foot", (0, [-4, 0, 5]), (1.2, [16, 0, 4]), (2.1, [16, 0, 4]), (2.25, [-6, 0, 6]), (L, [-4, 0, 5])),
@@ -755,7 +852,30 @@ def animations():
         **fingers(lambda i, sd: {"rotation": cyc(L, lambda p, i=i: [8 - 8 * s(p - 2.3 - i * 0.25), 0, 0])}, "l"),
         **gait(L, 18, 38, 6, -4),
     })
+    # peek: asomado por una esquina o un marco: se inclina de lado desde la cadera, la cabeza casi
+    # tumbada, y con una mano se agarra al borde y tamborilea en el
+    L = 4.0
+    A["peek"] = loop_anim(L, {
+        "hips": {"rotation": cyc(L, lambda p: [4, 0, 16 + 1.5 * s(p)])},
+        "torso": {"rotation": cyc(L, lambda p: [4, 0, 12 + 1.5 * s(p + 0.5)])},
+        "chest": {"rotation": cyc(L, lambda p: [6 + 1.5 * s(2 * p), 0, 8])},
+        "neck2": R((0, [0, 0, 18]), (1.4, [0, 0, 18]), (1.7, [0, 0, 28]), (3.0, [0, 0, 28]), (3.4, [0, 0, 18]), (L, [0, 0, 18]),
+                   loop=True),
+        "head": R((0, [0, 0, 30]), (1.4, [0, 0, 32]), (1.65, [-6, 6, 52]), (3.0, [-6, 6, 54]), (3.35, [0, 0, 30]), (L, [0, 0, 30]),
+                  loop=True),
+        "eye": {"scale": kf([(0, [1, 1, 1]), (2.2, [1, 1, 1]), (2.25, [1, 0.1, 1]), (2.32, [1, 1, 1]), (L, [1, 1, 1])])},
+        "jaw": {"rotation": cyc(L, lambda p: [2 + 2 * s(p), 0, 0])},
+        "shoulder_r": {"rotation": kf([(0, [0, 0, -6])])},
+        "arm_r": {"rotation": cyc(L, lambda p: [-100 + 2 * s(p), 0, 34])},        # agarrado al borde, a la altura de la cabeza
+        "forearm_r": {"rotation": kf([(0, [-62, 0, 0])])},
+        "hand_r": {"rotation": kf([(0, [-10, 0, 0])])},
+        **fingers(lambda i, sd: {"rotation": cyc(L, lambda p, i=i: [
+            30 + 34 * max(0.0, s(4 * p - i * 0.9)) ** 6, 0, 0], 48)}, "r"),     # tamborilea en la pared
+        "arm_l": {"rotation": cyc(L, lambda p: [ARM + 2 * s(p), 0, 6])},
+        **both("thigh", (0, [-4, 0, -6])), **both("shin", (0, [8, 0, 0])), **both("foot", (0, [-4, 0, 6])),
+    })
     outward(A)
+    hunch(A)
     hang_hair(A)
     enrich(A, mm.bones_of("smiley"))
     out = {"format_version": "1.8.0", "animations": A}
@@ -768,10 +888,10 @@ def main():
     A = animations()
     print(f"smiley textura {tw * mm.gm.SCALE}x{th * mm.gm.SCALE} caras={nf} animaciones={list(A)}")
     if len(sys.argv) > 1:
-        frames = [("idle", 0.0, 0), ("idle", 2.5, 25), ("walk", 0.6, 60), ("run", 0.2, 50),
+        frames = [("idle", 0.0, 0), ("idle", 2.5, 25), ("walk", 0.6, 60), ("peek", 2.0, 30),
                   ("intro", 1.0, 0), ("intro", 4.3, 15), ("scream", 1.0, 20), ("summon", 1.0, 340),
                   ("retreat", 0.2, 20), ("sealed", 3.0, 30), ("grab", 0.3, 40), ("execute_smiley", 2.0, 30)]
-        ims = [render_pose(A[n], t, yaw=y, name="smiley", height=72, bright=3.0, lift=26) for n, t, y in frames]
+        ims = [render_pose(A[n], t, yaw=y, name="smiley", height=80, bright=3.0, lift=26) for n, t, y in frames]
         sheet = Image.new("RGB", (4 * 420, 3 * 420))
         for i, im in enumerate(ims):
             sheet.paste(im, ((i % 4) * 420, (i // 4) * 420))

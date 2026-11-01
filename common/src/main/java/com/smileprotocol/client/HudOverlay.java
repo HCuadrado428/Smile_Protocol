@@ -447,6 +447,27 @@ public final class HudOverlay {
         if (kind.decap >= 0) black = Math.max(black, Mth.clamp((ClientSequence.age(pt) - kind.decap) / 5f, 0f, 1f));
         int a = Mth.clamp((int) (black * 255) + (int) (hit * 70), 0, 255);
         if (a > 0) g.fill(0, 0, w, h, a << 24 | (black < 0.5f ? 0x200000 : 0));
+        if (kind == com.smileprotocol.sequence.SequenceKind.SMILEY_KILL) swallow(g, w, h, ClientSequence.age(pt));
+    }
+
+    /** El remate de Smiley: la boca se cierra sobre la pantalla, filas de dientes y negro. */
+    private static void swallow(GuiGraphics g, int w, int h, float age) {
+        float k = Mth.clamp((age - 40f) / 5f, 0f, 1f);
+        if (k <= 0) return;
+        k = k * k * (3 - 2 * k);
+        int half = (int) (h * 0.5f * k);
+        g.fill(0, 0, w, half, 0xFF050102);
+        g.fill(0, h - half, w, h, 0xFF050102);
+        // dientes desiguales en el borde de cada mandibula (los colmillos, mas largos)
+        int n = 14;
+        for (int i = 0; i < n; i++) {
+            int x0 = i * w / n, x1 = (i + 1) * w / n - 3;
+            int ln = (int) (h * (0.05f + 0.06f * ((i * 7 + 3) % 5) / 4f + (i == 3 || i == 10 ? 0.07f : 0f)));
+            g.fill(x0 + 2, half, x1, half + ln, 0xFFCDBF9F);
+            g.fill(x0 + 2 + (w / n) / 3, h - half - ln + (i % 3) * 3, x1, h - half, 0xFFBFAF90);
+        }
+        g.fill(0, half - 2, w, half, 0xFF3A0508);
+        g.fill(0, h - half, w, h - half + 2, 0xFF3A0508);
     }
 
     /**

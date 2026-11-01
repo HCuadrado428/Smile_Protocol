@@ -236,10 +236,22 @@ public final class SPConfig {
         public boolean smiley_cameos = true;
         public int smiley_cameo_min = 60;
         public int smiley_cameo_max = 200;
-        /** Linternas a la vez que le hacen retroceder (o tantas como jugadores queden). */
+        /** Linternas a la vez que le congelan (o tantas como jugadores queden). */
         public int smiley_retreat_lights = 2;
-        /** Velocidad en cada fase (multiplica la base). */
-        public java.util.List<Double> smiley_speed = new java.util.ArrayList<>(java.util.List.of(0.55, 0.8, 1.15));
+        /** Velocidad al andar en cada fase (multiplica la base). Nunca corre. */
+        public java.util.List<Double> smiley_speed = new java.util.ArrayList<>(java.util.List.of(0.42, 0.5, 0.6));
+        /** Cada cuantos ticks, en cada fase, aparece mas cerca si nadie le esta mirando. */
+        public java.util.List<Integer> smiley_blink_ticks = new java.util.ArrayList<>(java.util.List.of(160, 90, 50));
+        /** Bloques que avanza en cada uno de esos saltos. */
+        public double smiley_blink_step = 4.5;
+        /** Ticks entre sus ataques en cada fase (0: siempre ataca). Entre uno y otro observa y acecha. */
+        public java.util.List<Integer> smiley_attack_every = new java.util.ArrayList<>(java.util.List.of(800, 450, 0));
+        /** Ticks que dura cada ataque (va a por ti hasta cogerte o hasta que se acaba). */
+        public int smiley_attack_window = 200;
+        /** Distancia a la que se queda mirandote cuando no ataca. */
+        public double smiley_keep_away = 8;
+        /** Ticks entre las veces que se adelanta y te espera al final del pasillo. */
+        public int smiley_wait_cooldown = 900;
         /** Ticks persiguiendo sin ganar terreno antes de irse por la pared a por otro. */
         public int smiley_chase_ticks = 300;
         public int smiley_scream_cooldown = 700;
@@ -303,7 +315,14 @@ public final class SPConfig {
             if (key_accessibility == null) key_accessibility = "key.keyboard.f7";
             // la sala final era final_room hasta que llego el Laboratorio Cero (ahora es intermedia)
             if (final_zone.equals("smileprotocol:final_room")) final_zone = "smileprotocol:smiley_lab";
-            if (smiley_speed == null || smiley_speed.isEmpty()) smiley_speed = new java.util.ArrayList<>(java.util.List.of(0.55, 0.8, 1.15));
+            // ya no corre: las velocidades antiguas (0.55, 0.8, 1.15) pasan a las nuevas
+            if (smiley_speed == null || smiley_speed.isEmpty() || smiley_speed.equals(java.util.List.of(0.55, 0.8, 1.15))) {
+                smiley_speed = new java.util.ArrayList<>(java.util.List.of(0.42, 0.5, 0.6));
+            }
+            if (smiley_blink_ticks == null || smiley_blink_ticks.isEmpty()) smiley_blink_ticks = new java.util.ArrayList<>(java.util.List.of(160, 90, 50));
+            if (smiley_attack_every == null || smiley_attack_every.isEmpty()) smiley_attack_every = new java.util.ArrayList<>(java.util.List.of(800, 450, 0));
+            smiley_blink_step = Math.max(1, Math.min(10, smiley_blink_step));
+            smiley_attack_window = Math.max(40, smiley_attack_window);
             if (smiley_qte_ticks == null || smiley_qte_ticks.isEmpty()) smiley_qte_ticks = new java.util.ArrayList<>(java.util.List.of(140, 100));
             smiley_chase_ticks = Math.max(40, smiley_chase_ticks);
             zone_clear_blocks_per_tick = Math.max(1024, zone_clear_blocks_per_tick);

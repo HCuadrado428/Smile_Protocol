@@ -723,7 +723,7 @@ public final class ClientSelfTest {
                 var k = sm[0].killSequenceFor(sp);
                 log((k == com.smileprotocol.sequence.SequenceKind.SMILEY_DRAG ? "OK" : "FALLO")
                         + " smiley: al ultimo en pie se lo lleva a rastras (" + k + ")");
-                log((sm[0].neededLights(level) == 1 ? "OK" : "FALLO") + " smiley: solo, basta una linterna para hacerle retroceder");
+                log((sm[0].neededLights(level) == 1 ? "OK" : "FALLO") + " smiley: solo, basta una linterna para congelarle");
             }
             boolean zone = com.smileprotocol.config.SPConfig.get().final_zone.equals("smileprotocol:smiley_lab");
             var tpl = server.getStructureManager().get(SmileProtocol.id("zones/smiley_lab"));
@@ -740,7 +740,7 @@ public final class ClientSelfTest {
             });
             boolean ok = zone && gens[0] == 3 && marks.containsAll(java.util.List.of("sp:smiley", "sp:cell", "sp:summon", "sp:exit_cabin", "sp:entry"));
             log((ok ? "OK" : "FALLO") + " laboratorio cero: sala final con 3 generadores y sus marcadores (" + gens[0] + " " + marks + ")");
-            // linterna: le apunta y retrocede
+            // linterna: le apunta y se queda congelado
             if (sm[0] != null) {
                 sm[0].debugForce(com.smileprotocol.entity.Smiley.State.STALK, 1);
                 sm[0].debugRelease();
@@ -750,11 +750,30 @@ public final class ClientSelfTest {
             com.smileprotocol.motion.Flashlights.set(sp, true);
         }));
         SHOTS.add(() -> wait = 10);
+        double[] frozenAt = {0, 0};
         SHOTS.add(() -> server.execute(() -> {
             boolean ok = sm[0] != null && sm[0].state() == com.smileprotocol.entity.Smiley.State.RETREAT;
-            log((ok ? "OK" : "FALLO") + " smiley retrocede ante la linterna (" + (sm[0] == null ? "-" : sm[0].state()) + ")");
+            log((ok ? "OK" : "FALLO") + " la linterna congela a smiley (" + (sm[0] == null ? "-" : sm[0].state()) + ")");
+            if (sm[0] != null) frozenAt[0] = sm[0].distanceTo(sp);
         }));
         SHOTS.add(() -> grab(mc, "45_smiley_linterna"));
+        SHOTS.add(() -> wait = 10);
+        // congelado no se mueve; al apagar la linterna ya esta mas cerca
+        SHOTS.add(() -> server.execute(() -> {
+            if (sm[0] == null) return;
+            frozenAt[1] = sm[0].distanceTo(sp);
+            log((Math.abs(frozenAt[1] - frozenAt[0]) < 0.3 ? "OK" : "FALLO") + " smiley no se mueve con la luz encima ("
+                    + String.format("%.1f -> %.1f", frozenAt[0], frozenAt[1]) + ")");
+            com.smileprotocol.motion.Flashlights.set(sp, false);
+        }));
+        SHOTS.add(() -> wait = 8);
+        SHOTS.add(() -> server.execute(() -> {
+            if (sm[0] == null) return;
+            double d = sm[0].distanceTo(sp);
+            boolean ok = d < frozenAt[1] - 1.5 && sm[0].state() != com.smileprotocol.entity.Smiley.State.RETREAT;
+            log((ok ? "OK" : "FALLO") + " smiley: al apagar la linterna ya esta mas cerca ("
+                    + String.format("%.1f -> %.1f", frozenAt[1], d) + ", " + sm[0].state() + ")");
+        }));
         // remate (fase 1 y 2) y arrastre del ultimo, sin morir
         SHOTS.add(() -> server.execute(() -> {
             com.smileprotocol.motion.Flashlights.set(sp, false);
