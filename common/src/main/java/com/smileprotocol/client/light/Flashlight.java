@@ -74,6 +74,21 @@ public final class Flashlight {
             long t = net.minecraft.Util.getMillis() / 60 + id * 13L;
             if ((t % 37) < 3 || (t % 53) < 2) k *= 0.1f;
         }
+        // el Apagon cerca se come la luz: parpadea mas cuanto mas cerca esta
+        var mc = net.minecraft.client.Minecraft.getInstance();
+        var e = mc.level == null ? null : mc.level.getEntity(id);
+        if (e != null) {
+            double best = 99;
+            for (var a : mc.level.getEntitiesOfClass(com.smileprotocol.entity.Apagon.class, e.getBoundingBox().inflate(8))) {
+                best = Math.min(best, a.distanceTo(e));
+            }
+            if (best < 8) {
+                float near = (float) (1 - best / 8);
+                long t = net.minecraft.Util.getMillis() / 45 + id * 7L;
+                if ((t % 11) < 1 + (int) (near * 4) || (t % 29) < (int) (near * 5)) k *= 0.08f;
+                else k *= 1f - 0.35f * near;
+            }
+        }
         return k;
     }
 

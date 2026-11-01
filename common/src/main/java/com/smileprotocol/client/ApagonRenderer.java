@@ -9,7 +9,7 @@ import software.bernie.geckolib.model.DefaultedEntityGeoModel;
 import software.bernie.geckolib.renderer.GeoEntityRenderer;
 import software.bernie.geckolib.renderer.layer.AutoGlowingGeoLayer;
 
-/** Apagon (docs/SMILERS.md): crece a oscuras y se encoge a la luz (tamano sincronizado). */
+/** Apagon (docs/SMILERS.md): crece a oscuras y se encoge a la luz (tamano sincronizado); bajo la linterna no se ve. */
 public class ApagonRenderer extends GeoEntityRenderer<Apagon> {
 
     public ApagonRenderer(EntityRendererProvider.Context ctx) {
@@ -20,6 +20,7 @@ public class ApagonRenderer extends GeoEntityRenderer<Apagon> {
 
     @Override
     public void render(Apagon mob, float yaw, float pt, PoseStack pose, MultiBufferSource buffers, int light) {
+        if (mob.isInvisible()) return;     // bajo la linterna no hay nada
         float s = mob.size(pt);
         this.scaleWidth = s;
         this.scaleHeight = s;

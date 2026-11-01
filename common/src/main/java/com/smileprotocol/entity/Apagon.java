@@ -45,7 +45,9 @@ import java.util.List;
  * Apagon (docs/SMILERS.md): humo y ceniza con muchos ojos rojos. Siente a quien esta a oscuras
  * (sin linterna ni luces cerca) y va a por el que mas se ha separado del grupo. Flota y atraviesa
  * las puertas: si no hay camino, cruza como humo. A oscuras es enorme y rapida; a la luz, pequena
- * y lenta. La linterna la hace retroceder, pero le come la bateria a quien le apunta. Apaga los
+ * y lenta. Solo existe a oscuras: con la linterna encima no hay nada ({@link State#RECOIL}: se
+ * deshace); en cuanto la apartan o se apaga, esta ahi, a un paso. Se come la bateria: a quien le
+ * apunta, mucho; a quien esta cerca con la linterna encendida, poco (y su haz parpadea). Apaga los
  * fluorescentes por donde pasa. Agarre HOLD; no remata, respeta los escondites, no entra en
  * los conductos y mete interferencias en los walkies.
  */
@@ -143,7 +145,11 @@ public class Apagon extends SmilerBase implements QTEManager.Grabber {
         if (Math.abs(size - want) > 0.01f) entityData.set(SIZE, size + (want - size) * 0.08f);
         if (tickCount % 10 == 0) killLights(level);
 
-        // La linterna de alguien le da: retrocede y se come esa bateria
+        // Se come la bateria de las linternas encendidas que tiene cerca (su haz parpadea en el cliente)
+        for (ServerPlayer p : level.getEntitiesOfClass(ServerPlayer.class, getBoundingBox().inflate(8))) {
+            if (p.isAlive() && SPPlayerData.inSP(p) && Flashlights.isOn(p)) Flashlights.drain(p, SPConfig.get().apagon_battery_drain * 0.25f);
+        }
+        // La linterna de alguien le da: se deshace (no hay nada) y se come esa bateria
         ServerPlayer lit = litBy(level);
         State s = state();
         if (lit != null && s != State.GRAB && s != State.STUNNED) {
@@ -151,6 +157,8 @@ public class Apagon extends SmilerBase implements QTEManager.Grabber {
             Flashlights.drain(lit, SPConfig.get().apagon_battery_drain);
             if (s != State.RECOIL) {
                 level.playSound(null, blockPosition(), ModSounds.APAGON_HISS.get(), SoundSource.HOSTILE, 1.2f, 1f);
+                level.sendParticles(net.minecraft.core.particles.ParticleTypes.LARGE_SMOKE, getX(), getY() + 1, getZ(), 30, 0.5, 0.8, 0.5, 0.01);
+                setInvisible(true);
                 setState(State.RECOIL);
                 s = State.RECOIL;
             }
@@ -192,13 +200,14 @@ public class Apagon extends SmilerBase implements QTEManager.Grabber {
                 }
             }
             case RECOIL -> {
+                // deshecha bajo la luz: no se mueve ni se ve; cuando la luz se va, aparece a un paso
                 getNavigation().stop();
                 noPhysics = false;
-                if (lighter != null) {
-                    Vec3 away = position().subtract(lighter.position()).multiply(1, 0, 1).normalize().scale(0.12);
-                    move(net.minecraft.world.entity.MoverType.SELF, away);
+                setDeltaMovement(Vec3.ZERO);
+                if (lit == null && timer > 4) {
+                    reappear(level);
+                    setState(target != null ? State.STALK : State.DRIFT);
                 }
-                if (lit == null && timer > 20) setState(target != null ? State.STALK : State.DRIFT);
             }
             case GRAB -> {
                 getNavigation().stop();
@@ -213,6 +222,28 @@ public class Apagon extends SmilerBase implements QTEManager.Grabber {
                 }
             }
         }
+    }
+
+    /** Vuelve a estar ahi, a un paso del que la ilumino (entre el y donde estaba), si cabe. */
+    private void reappear(ServerLevel level) {
+        setInvisible(false);
+        ServerPlayer p = lighter != null && lighter.isAlive() ? lighter : target;
+        if (p != null && p.level() == level && p.distanceTo(this) < 16) {
+            Vec3 dir = position().subtract(p.position()).multiply(1, 0, 1);
+            if (dir.lengthSqr() > 1e-3) {
+                Vec3 at = p.position().add(dir.normalize().scale(1.8));
+                if (level.noCollision(this, getType().getDimensions().makeBoundingBox(at))) moveTo(at.x, at.y, at.z, getYRot(), 0f);
+            }
+            target = p;
+            cooldown = Math.max(cooldown, 10);
+        }
+        level.playSound(null, blockPosition(), ModSounds.APAGON_WHISPER.get(), SoundSource.HOSTILE, 1.4f, 0.7f);
+        lighter = null;
+    }
+
+    /** Pruebas: deshecha bajo la luz. */
+    public boolean gone() {
+        return isInvisible();
     }
 
     /** Por el camino si lo hay; si no (una puerta cerrada, una pared fina), cruza como humo. */
@@ -284,6 +315,7 @@ public class Apagon extends SmilerBase implements QTEManager.Grabber {
     @Override
     public void onGrabEnd(ServerPlayer p, boolean escaped) {
         target = null;
+        setInvisible(false);
         setState(escaped ? State.STUNNED : State.DRIFT);
         if (!escaped) cooldown = 100;
     }

@@ -691,13 +691,21 @@ public final class ClientSelfTest {
         }));
         SHOTS.add(() -> wait = 15);
         SHOTS.add(() -> server.execute(() -> {
-            boolean recoil = apg[0] != null && apg[0].state() == com.smileprotocol.entity.Apagon.State.RECOIL;
+            boolean recoil = apg[0] != null && apg[0].state() == com.smileprotocol.entity.Apagon.State.RECOIL && apg[0].gone();
             float now = com.smileprotocol.motion.Flashlights.battery(sp);
-            log((recoil ? "OK" : "FALLO") + " apagon retrocede ante la linterna (" + (apg[0] == null ? "-" : apg[0].state()) + ")");
+            log((recoil ? "OK" : "FALLO") + " apagon se deshace bajo la linterna (" + (apg[0] == null ? "-" : apg[0].state()) + ")");
             log((now < bat[0] - 0.02f ? "OK" : "FALLO") + " apagon se come la bateria ("
                     + String.format(java.util.Locale.ROOT, "%.2f -> %.2f", bat[0], now) + ")");
         }));
         SHOTS.add(() -> grab(mc, "42_apagon_linterna"));
+        SHOTS.add(() -> server.execute(() -> com.smileprotocol.motion.Flashlights.set(sp, false)));
+        SHOTS.add(() -> wait = 8);
+        SHOTS.add(() -> server.execute(() -> {
+            boolean back = apg[0] != null && !apg[0].gone() && apg[0].distanceTo(sp) < 3.2;
+            log((back ? "OK" : "FALLO") + " apagon: al apagar la linterna esta ahi, a un paso ("
+                    + (apg[0] == null ? "-" : String.format(java.util.Locale.ROOT, "%.1f", apg[0].distanceTo(sp))) + ")");
+        }));
+        SHOTS.add(() -> grab(mc, "42b_apagon_a_un_paso"));
         SHOTS.add(() -> server.execute(() -> {
             com.smileprotocol.motion.Flashlights.set(sp, false);
             com.smileprotocol.qte.QTEManager.clear(sp);

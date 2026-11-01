@@ -49,7 +49,9 @@ Inspirado en los ángeles llorones de Doctor Who. *Implementado (fase 21):* mode
 - **Aspecto:** pequeña en la luz y enorme (4 bloques) a oscuras; humo negro con forma de Smiley que se deshace por los bordes. El ojo y la sonrisa flotan; el cuerpo apenas se ve. Apaga las luces por donde pasa.
 - **Movimiento:** flota y atraviesa puertas cerradas. Lenta a la luz, muy rápida a oscuras.
 - **Actitud:** hambrienta y persistente, va a por el que se separa. Siente a quien está a oscuras. **Respeta los escondites.**
-- **Mecánica:** la linterna la hace retroceder, pero gasta batería más rápido al apuntarla. Agarre **HOLD**: mantener la linterna encendida apuntándole. No remata. **No entra en los conductos.** Interferencia fuerte en los walkies.
+- **Solo existe a oscuras:** con la linterna encima no hay nada: se deshace en humo y no se mueve. En cuanto la apartas o se apaga, está ahí, a un paso de ti.
+- **Se come la batería:** al que le apunta, mucha; al que está cerca (8 bloques) con la linterna encendida, un poco, y su haz parpadea cada vez más cuanto más cerca está.
+- **Mecánica:** la linterna la deshace, pero gasta batería más rápido al apuntarla. Agarre **HOLD**: mantener la linterna encendida apuntándole. No remata. **No entra en los conductos.** Interferencia fuerte en los walkies.
 - **Sonido:** susurros desde todas partes y un zumbido que se hace grave.
 - **Cómo se le gana:** luces encendidas, baterías, bengalas y no separarse.
 - **Dónde:** plantas con apagones, generadores y la final.
