@@ -14,5 +14,8 @@ public class ImitadorRenderer extends GeoEntityRenderer<Imitador> {
         super(ctx, new DefaultedEntityGeoModel<>(SmileProtocol.id("imitador"), true));
         addRenderLayer(new AutoGlowingGeoLayer<>(this));
         this.shadowRadius = 0.4f;
+        // mas alto y mas delgado que el modelo
+        this.scaleHeight = 1.12f;
+        this.scaleWidth = 0.9f;
     }
 }

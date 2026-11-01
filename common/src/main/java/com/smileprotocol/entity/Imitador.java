@@ -11,6 +11,7 @@ import com.smileprotocol.run.Group;
 import com.smileprotocol.run.RunManager;
 import com.smileprotocol.sequence.SequenceManager;
 import com.smileprotocol.voice.VoiceManager;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -40,7 +41,8 @@ import java.util.UUID;
  * El Imitador: no se deja ver. Se queda a unos 14 bloques, detras de una pared, y habla con la voz de
  * otro del grupo (frases que ha oido por la voz de proximidad, algo mas graves y con un tartamudeo).
  * Si quien va a mirar llega solo, se le echa encima y lo derriba; si va acompanado o le pillan mirando,
- * se escabulle. Sin Simple Voice Chat, susurra y llama con golpes.
+ * se escabulle. Ademas de voces imita ruidos: una puerta, pasos, el timbre del ascensor, el walkie.
+ * Mientras espera se queda con la oreja pegada a la pared; cuando oye algo, se despega y se gira.
  */
 public class Imitador extends SmilerBase {
 
@@ -52,6 +54,9 @@ public class Imitador extends SmilerBase {
     private static final RawAnimation RUN = RawAnimation.begin().thenLoop("run");
     private static final RawAnimation MIMIC_A = RawAnimation.begin().thenLoop("mimic");
     private static final RawAnimation GRAB = RawAnimation.begin().thenPlay("grab");
+    private static final RawAnimation LISTEN_A = RawAnimation.begin().thenLoop("listen");
+    /** Con la oreja pegada a la pared (animacion "listen"). */
+    private static final EntityDataAccessor<Boolean> LISTEN = SynchedEntityData.defineId(Imitador.class, EntityDataSerializers.BOOLEAN);
 
     @Nullable private ServerPlayer target;
     private int timer;
@@ -60,6 +65,8 @@ public class Imitador extends SmilerBase {
     private int mimics;
     @Nullable private List<ServerPlayer> cached;
     private boolean cachedSeen;
+    /** Pasos imitados que quedan por sonar. */
+    private int stepsLeft;
 
     public Imitador(EntityType<? extends PathfinderMob> type, Level level) {
         super(type, level);
@@ -77,6 +84,7 @@ public class Imitador extends SmilerBase {
     protected void defineSynchedData(SynchedEntityData.Builder b) {
         super.defineSynchedData(b);
         b.define(STATE, (byte) 0);
+        b.define(LISTEN, false);
     }
 
     @Override
@@ -88,8 +96,13 @@ public class Imitador extends SmilerBase {
         return State.values()[Math.floorMod(entityData.get(STATE), State.values().length)];
     }
 
+    public boolean listening() {
+        return entityData.get(LISTEN);
+    }
+
     private void setState(State s) {
         if (s != state()) SPDebug.log("imitador: " + s);
+        if (s != State.LURK) entityData.set(LISTEN, false);
         entityData.set(STATE, (byte) s.ordinal());
         timer = 0;
     }
@@ -131,10 +144,20 @@ public class Imitador extends SmilerBase {
                 if (d > 16) getNavigation().moveTo(target, 0.8);
                 else if (d < 10) away(target.position(), 8, 0.8);
                 else getNavigation().stop();
+                // quieto: la oreja contra la pared
+                if (getNavigation().isDone()) {
+                    if (!listening()) leanOnWall(level);
+                } else {
+                    entityData.set(LISTEN, false);
+                }
             }
             case MIMIC -> {
                 getNavigation().stop();
                 getLookControl().setLookAt(target, 30, 30);
+                if (stepsLeft > 0 && timer % 6 == 0) {
+                    stepsLeft--;
+                    level.playSound(null, blockPosition(), net.minecraft.sounds.SoundEvents.STONE_STEP, SoundSource.PLAYERS, 0.9f, 0.95f);
+                }
                 // quien viene a ver llega solo y cerca: a por el
                 if (d < 5 && alone(target, players)) {
                     setState(State.HUNT);
@@ -174,14 +197,65 @@ public class Imitador extends SmilerBase {
         List<UUID> sources = new ArrayList<>();
         Group g = RunManager.groupOf(target);
         if (g != null) for (UUID id : g.members().keySet()) if (!id.equals(target.getUUID())) sources.add(id);
-        boolean voice = VoiceManager.mimic(level, getEyePosition(), sources, 28f)
-                || VoiceManager.mimic(level, getEyePosition(), List.of(target.getUUID()), 28f);
+        // la mitad de las veces imita un ruido en vez de una voz
+        boolean voice = getRandom().nextBoolean() && (VoiceManager.mimic(level, getEyePosition(), sources, 28f)
+                || VoiceManager.mimic(level, getEyePosition(), List.of(target.getUUID()), 28f));
         if (!voice) {
-            level.playSound(null, blockPosition(), ModSounds.SMILEY_WHISPER.get(), SoundSource.HOSTILE, 1.2f, 1.25f);
-            level.playSound(null, blockPosition(), net.minecraft.sounds.SoundEvents.WOODEN_DOOR_CLOSE, SoundSource.HOSTILE, 0.9f, 0.6f);
+            String what = mimicNoise(level, getRandom().nextInt(4));
+            SPDebug.log("imitador imita " + what);
         }
         com.smileprotocol.noise.NoiseSystem.emit(level, position(), 4, com.smileprotocol.noise.NoiseType.VOICE, this);
         SPDebug.log("imitador imita" + (voice ? " una voz" : " (sin voz: susurro)") + " cerca de " + target.getGameProfile().getName());
+    }
+
+    /** Imita un ruido del laboratorio: 0 puerta, 1 pasos, 2 timbre del ascensor, 3 walkie. */
+    public String mimicNoise(ServerLevel level, int kind) {
+        BlockPos at = blockPosition();
+        switch (kind) {
+            case 0 -> {
+                level.playSound(null, at, net.minecraft.sounds.SoundEvents.IRON_TRAPDOOR_OPEN, SoundSource.BLOCKS, 0.8f, 1.8f);
+                return "una puerta";
+            }
+            case 1 -> {
+                stepsLeft = 5;
+                return "pasos";
+            }
+            case 2 -> {
+                level.playSound(null, at, net.minecraft.sounds.SoundEvents.NOTE_BLOCK_BELL.value(), SoundSource.BLOCKS, 1.0f, 0.9f);
+                return "el timbre del ascensor";
+            }
+            default -> {
+                level.playSound(null, at, ModSounds.WALKIE_CLICK.get(), SoundSource.PLAYERS, 1.0f, 1f);
+                level.playSound(null, at, ModSounds.WALKIE_CRACKLE.get(), SoundSource.PLAYERS, 0.9f, 0.95f);
+                return "el walkie";
+            }
+        }
+    }
+
+    /** Se pega a una pared que tenga al lado (la deja a su derecha) y escucha. */
+    private void leanOnWall(ServerLevel level) {
+        for (net.minecraft.core.Direction d : net.minecraft.core.Direction.Plane.HORIZONTAL) {
+            BlockPos w = blockPosition().above().relative(d);
+            if (level.getBlockState(w).isFaceSturdy(level, w, d.getOpposite())) {
+                // el lado derecho del modelo mira a (cos yaw, sin yaw)
+                float yaw = (float) Math.toDegrees(Math.atan2(d.getStepZ(), d.getStepX()));
+                setYRot(yaw);
+                setYBodyRot(yaw);
+                setYHeadRot(yaw);
+                entityData.set(LISTEN, true);
+                return;
+            }
+        }
+    }
+
+    /** Lo oye todo: se despega de la pared y se gira hacia el ruido; imita antes. */
+    @Override
+    public void hear(ServerLevel level, com.smileprotocol.noise.NoiseEvent e) {
+        if (!isAlive() || getUUID().equals(e.source()) || state() != State.LURK) return;
+        if (e.pos().distanceTo(position()) > 18) return;
+        entityData.set(LISTEN, false);
+        getLookControl().setLookAt(e.pos().x, e.pos().y + 1, e.pos().z);
+        nextMimic = Math.min(nextMimic, 40);
     }
 
     /** Pruebas: imitar ya. */
@@ -232,7 +306,7 @@ public class Imitador extends SmilerBase {
                 case MIMIC -> st.setAndContinue(MIMIC_A);
                 case HUNT -> st.setAndContinue(getDeltaMovement().horizontalDistanceSqr() < 1e-4 ? GRAB : RUN);
                 case FLEE -> st.setAndContinue(RUN);
-                default -> st.setAndContinue(st.isMoving() ? WALK : IDLE);
+                default -> st.setAndContinue(st.isMoving() ? WALK : listening() ? LISTEN_A : IDLE);
             };
         }));
     }

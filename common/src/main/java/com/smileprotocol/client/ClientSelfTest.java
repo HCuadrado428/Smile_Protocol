@@ -1006,6 +1006,11 @@ public final class ClientSelfTest {
             boolean ok = m != null && m.mimics() == 1 && m.state() == com.smileprotocol.entity.Imitador.State.MIMIC;
             log((ok ? "OK" : "FALLO") + " imitador: imita (voz " + (com.smileprotocol.voice.VoiceManager.available() ? "disponible" : "no disponible")
                     + ", frases de " + sp.getGameProfile().getName() + ": " + com.smileprotocol.voice.VoiceManager.clipCount(sp.getUUID()) + ")");
+            if (m != null) {
+                java.util.List<String> heard = new java.util.ArrayList<>();
+                for (int k = 0; k < 4; k++) heard.add(m.mimicNoise(level, k));
+                log((heard.size() == 4 && new java.util.HashSet<>(heard).size() == 4 ? "OK" : "FALLO") + " imitador imita ruidos " + heard);
+            }
         }));
         SHOTS.add(() -> grab(mc, "62_imitador"));
         SHOTS.add(() -> server.execute(() -> {

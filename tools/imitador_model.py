@@ -160,6 +160,23 @@ def animations():
         "forearm_r": {"rotation": kf([(0, [-100, 0, 0])])}, "forearm_l": {"rotation": kf([(0, [-100, 0, 0])])},
         "ear_r": {"rotation": kf([(0, [0, -25, 0])])}, "ear_l": {"rotation": kf([(0, [0, 25, 0])])},
     }))
+    # LISTEN: pegado a la pared (a su derecha), con la oreja contra ella y la mano abierta en la
+    # pared; las orejas tiemblan y de vez en cuando contiene la respiracion (se queda quieto)
+    L = 4.0
+    A["listen"] = loop_anim(L, base({
+        "hips": {"position": kf([(0, [-1.2, -1.2, 0])])},
+        "torso": {"rotation": kf(wave(L, [16, 0, -20], 1.5, 0, 8))},
+        "neck": {"rotation": kf([(0, [-20, 0, -8])])},
+        "head": {"rotation": kf([(0, [4, -10, -34]), (1.4, [4, -10, -34]), (1.6, [6, -16, -38]), (2.8, [6, -16, -38]),
+                                 (3.1, [4, -10, -34]), (L, [4, -10, -34])])},
+        "ear_r": {"rotation": kf([(0, [0, -30, 0])])},
+        "ear_l": {"rotation": kf(wave(L, [0, 14, 0], 16, 0, 16, 1))},
+        "arm_r": {"rotation": kf([(0, [-115, 0, 30])])},                    # la mano abierta en la pared, junto a la cara
+        "forearm_r": {"rotation": kf([(0, [-145, 0, 0])])},
+        "arm_l": {"rotation": kf(wave(L, [-H + 6, 0, 6], 3, 1))},
+        "jaw": {"rotation": kf(wave(L, [3, 0, 0], 2, 0, 8))},
+        "thigh_r": {"rotation": kf([(0, [-8, 0, 8])])}, "thigh_l": {"rotation": kf([(0, [-12, 0, -2])])},
+    }))
     L = 0.6
     A["grab"] = {"loop": "hold_on_last_frame", "animation_length": L, "bones": base({
         "torso": {"rotation": kf([(0, [H, 0, 0]), (0.25, [40, 0, 0]), (L, [36, 0, 0])])},
@@ -180,8 +197,8 @@ def main():
     print(f"imitador textura {tw * gm.SCALE}x{th * gm.SCALE} caras={nf} animaciones={list(A)}")
     if len(sys.argv) > 1:
         from PIL import Image
-        frames = [("idle", 0.0, 200), ("idle", 1.5, 150), ("walk", 0.4, 120), ("run", 0.2, 120),
-                  ("mimic", 0.4, 180), ("grab", 0.6, 150)]
+        frames = [("idle", 0.0, 200), ("listen", 1.0, 180), ("walk", 0.4, 120), ("run", 0.2, 120),
+                  ("mimic", 0.4, 180), ("listen", 1.0, 0)]
         ims = [render_pose(A[n], t, yaw=y, name="imitador", height=52) for n, t, y in frames]
         sheet = Image.new("RGB", (3 * 420, 2 * 420))
         for i, im in enumerate(ims):
