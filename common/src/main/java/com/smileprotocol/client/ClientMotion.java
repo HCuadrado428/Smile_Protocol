@@ -64,6 +64,9 @@ public final class ClientMotion {
     private static Vec3 vaultStart = Vec3.ZERO, vaultEnd = Vec3.ZERO;
     private static double vaultHeight;
     private static boolean vaultWasSprinting;
+    /** Trepando a un bordillo de dos: duracion de la accion en curso (vault o trepar). */
+    private static int vaultLen = MotionManager.VAULT_TICKS;
+    private static boolean climbing;
 
     // Camara
     private static float leanOffset, prevLeanOffset;
@@ -186,6 +189,9 @@ public final class ClientMotion {
         boolean jump = mc.options.keyJump.isDown();
         if (jump && !wasJump && !busy && player.onGround() && !player.isCrouching() && player.input.forwardImpulse > 0.1f) {
             tryVault(player);
+        } else if (jump && !wasJump && !busy && !player.onGround() && vaultTicks < 0 && player.input.forwardImpulse > 0.1f) {
+            // Espacio otra vez en el aire contra un muro de dos: se agarra al borde y sube
+            tryClimb(player);
         }
         wasJump = jump;
         wasSprinting = player.isSprinting();
@@ -251,10 +257,50 @@ public final class ClientMotion {
         double tz = facing.getAxis() == Direction.Axis.Z ? landing.getZ() + 0.5 : player.getZ();
         vaultEnd = new Vec3(tx + n.x * 0.1, obstacle.getY(), tz + n.z * 0.1);
         vaultTicks = 0;
+        vaultLen = MotionManager.VAULT_TICKS;
+        climbing = false;
         vaultWasSprinting = player.isSprinting();
         MotionView own = MotionStates.view(player);
         MotionStates.CLIENT.put(player.getId(), new MotionView(Action.VAULT, 0, own.lookBack(), 0, false, player.tickCount));
         SPNetwork.sendToServer(new Payloads.MotionInput(Payloads.MotionInput.VAULT, 0, sentLook, obstacle));
+    }
+
+    private static void tryClimb(LocalPlayer player) {
+        Level level = player.level();
+        float yaw = player.getYRot() * Mth.DEG_TO_RAD;
+        Direction facing = Direction.getNearest(-Mth.sin(yaw), 0f, Mth.cos(yaw));
+        BlockPos feet = BlockPos.containing(player.getX(), player.getY() + 0.05, player.getZ());
+        BlockPos wall = feet.relative(facing);
+        double dist = Math.abs(facing.getAxis().choose(wall.getX() + 0.5 - player.getX(), 0, wall.getZ() + 0.5 - player.getZ())) - 0.5;
+        if (dist > 0.75) return;
+        // el borde: el bloque mas alto del muro (hasta dos por encima de los pies) con hueco encima
+        BlockPos ledge = null;
+        for (int h = 2; h >= 0; h--) {
+            BlockPos b = wall.above(h);
+            if (MotionManager.canClimb(level, b)) {
+                ledge = b;
+                break;
+            }
+        }
+        if (ledge == null) return;
+        double rise = ledge.getY() + 1 - player.getY();
+        if (rise > 2.6 || rise <= 0.4) return;
+        // sitio para subir pegado al muro
+        for (int k = 1; k <= Math.ceil(rise) + 1; k++) if (!free(level, feet.above(k))) return;
+        vaultStart = player.position();
+        Vec3 n = Vec3.atLowerCornerOf(facing.getNormal());
+        double tx = facing.getAxis() == Direction.Axis.X ? ledge.getX() + 0.5 - n.x * 0.15 : player.getX();
+        double tz = facing.getAxis() == Direction.Axis.Z ? ledge.getZ() + 0.5 - n.z * 0.15 : player.getZ();
+        vaultEnd = new Vec3(tx, ledge.getY() + 1, tz);
+        vaultHeight = 0;
+        vaultTicks = 0;
+        vaultLen = MotionManager.CLIMB_TICKS;
+        climbing = true;
+        vaultWasSprinting = false;
+        MotionView own = MotionStates.view(player);
+        MotionStates.CLIENT.put(player.getId(), new MotionView(Action.VAULT, 0, own.lookBack(), 0, false, player.tickCount));
+        SPNetwork.sendToServer(new Payloads.MotionInput(Payloads.MotionInput.CLIMB, 0, sentLook, ledge));
+        player.playSound(net.minecraft.sounds.SoundEvents.ARMOR_EQUIP_LEATHER.value(), 0.6f, 0.7f);
     }
 
     private static boolean free(Level level, BlockPos pos) {
@@ -274,15 +320,27 @@ public final class ClientMotion {
     private static void tickVault(LocalPlayer player) {
         if (vaultTicks < 0) return;
         vaultTicks++;
-        float t = Math.min(1f, vaultTicks / (float) MotionManager.VAULT_TICKS);
-        float e = t * t * (3 - 2 * t);
-        double y = Mth.lerp(e, vaultStart.y, vaultEnd.y) + (vaultHeight + 0.45) * Math.sin(Math.PI * Math.min(1, t * 1.1));
-        double x = Mth.lerp(e, vaultStart.x, vaultEnd.x);
-        double z = Mth.lerp(e, vaultStart.z, vaultEnd.z);
-        player.setPos(x, Math.max(y, vaultEnd.y), z);
+        float t = Math.min(1f, vaultTicks / (float) vaultLen);
+        if (climbing) {
+            // agarrado al borde: primero sube pegado al muro y luego pasa por encima
+            float up = Mth.clamp(t / 0.6f, 0f, 1f), over = Mth.clamp((t - 0.55f) / 0.45f, 0f, 1f);
+            up = up * up * (3 - 2 * up);
+            over = over * over * (3 - 2 * over);
+            double y = Mth.lerp(up, vaultStart.y, vaultEnd.y + 0.05);
+            double x = Mth.lerp(over, vaultStart.x, vaultEnd.x);
+            double z = Mth.lerp(over, vaultStart.z, vaultEnd.z);
+            player.setPos(x, y, z);
+        } else {
+            float e = t * t * (3 - 2 * t);
+            double y = Mth.lerp(e, vaultStart.y, vaultEnd.y) + (vaultHeight + 0.45) * Math.sin(Math.PI * Math.min(1, t * 1.1));
+            double x = Mth.lerp(e, vaultStart.x, vaultEnd.x);
+            double z = Mth.lerp(e, vaultStart.z, vaultEnd.z);
+            player.setPos(x, Math.max(y, vaultEnd.y), z);
+        }
         player.setDeltaMovement(Vec3.ZERO);
         player.fallDistance = 0;
-        if (vaultTicks >= MotionManager.VAULT_TICKS) {
+        if (vaultTicks >= vaultLen) {
+            climbing = false;
             vaultTicks = -1;
             Vec3 dir = vaultEnd.subtract(vaultStart).multiply(1, 0, 1).normalize();
             double speed = vaultWasSprinting ? 0.32 : 0.16;

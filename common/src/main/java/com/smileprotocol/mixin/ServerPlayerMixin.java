@@ -12,6 +12,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(ServerPlayer.class)
 public abstract class ServerPlayerMixin {
 
+    /** La tecla de soltar de vanilla no hace nada dentro (el inventario de la partida va aparte: duplicaba). */
+    @Inject(method = "drop(Z)Z", at = @At("HEAD"), cancellable = true)
+    private void smileprotocol$drop(boolean fullStack, org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable<Boolean> cir) {
+        if (com.smileprotocol.player.SPPlayerData.inSP((ServerPlayer) (Object) this)) cir.setReturnValue(false);
+    }
+
     @Inject(method = "die", at = @At("HEAD"), cancellable = true)
     private void smileprotocol$die(DamageSource source, CallbackInfo ci) {
         if (SPEvents.interceptDeath((ServerPlayer) (Object) this, source)) ci.cancel();

@@ -39,6 +39,19 @@ public abstract class MinecraftMixin {
         if (ClientState.inSmileProtocol()) ci.cancel();
     }
 
+    /**
+     * Antes de que vanilla procese las teclas: Q (soltar) y F (cambiar de mano) no hacen nada dentro.
+     * Q es asomarse a la izquierda y F la linterna; si llegaban a vanilla, el objeto se soltaba (y se
+     * duplicaba, porque el inventario de la partida es aparte) o se iba a la mano secundaria.
+     */
+    @Inject(method = "handleKeybinds", at = @At("HEAD"))
+    private void smileprotocol$handleKeybinds(CallbackInfo ci) {
+        if (!ClientState.inSmileProtocol()) return;
+        Minecraft mc = (Minecraft) (Object) this;
+        while (mc.options.keyDrop.consumeClick()) { /* nada */ }
+        while (mc.options.keySwapOffhand.consumeClick()) { /* nada */ }
+    }
+
     @Inject(method = "pickBlock", at = @At("HEAD"), cancellable = true)
     private void smileprotocol$pickBlock(CallbackInfo ci) {
         if (ClientState.inSmileProtocol()) ci.cancel();

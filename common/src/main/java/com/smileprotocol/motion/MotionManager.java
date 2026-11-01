@@ -32,6 +32,8 @@ public final class MotionManager {
     public static final int DIVE_SLIDE = 16;
     public static final int DIVE_TOTAL = 24;
     public static final int VAULT_TICKS = 10;
+    /** Trepar a un bordillo de dos bloques (Espacio en el aire contra la pared): se agarra y sube. */
+    public static final int CLIMB_TICKS = 16;
     /** Lo que tarda en levantarse tras la reanimacion (README 9.3). */
     public static final int GETUP_TICKS = 26;
 
@@ -45,6 +47,8 @@ public final class MotionManager {
         boolean lookBack;
         int diveCooldown;
         int vaultCooldown;
+        /** Lo que dura la accion VAULT en curso (saltar o trepar). */
+        int vaultLen = VAULT_TICKS;
         int lastSprintTick = -100;
         Vec3 lastPos;
         boolean wasOnGround = true;
@@ -112,6 +116,7 @@ public final class MotionManager {
         switch (in.kind()) {
             case Payloads.MotionInput.DIVE -> tryDive(p, s);
             case Payloads.MotionInput.VAULT -> tryVault(p, s, in.obstacle());
+            case Payloads.MotionInput.CLIMB -> tryClimb(p, s, in.obstacle());
             default -> {
                 int lean = Integer.signum(in.lean());
                 // Asomarse: de pie, agachado o andando despacio, nunca corriendo ni en otra accion (README 12.6)
@@ -153,9 +158,38 @@ public final class MotionManager {
         s.actionTicks = 0;
         s.lowPose = false;
         s.lean = 0;
+        s.vaultLen = VAULT_TICKS;
         s.vaultCooldown = VAULT_TICKS + 6;
         NoiseSystem.emit(p.serverLevel(), p.position(), SPConfig.get().noise_vault, NoiseType.VAULT, p);
         sync(p, s, true);
+    }
+
+    /** Se agarra al borde de un muro de hasta dos bloques y sube (la animacion es la del vault). */
+    private static void tryClimb(ServerPlayer p, State s, BlockPos ledge) {
+        ServerLevel level = p.serverLevel();
+        boolean ok = s.action == Action.NONE && s.vaultCooldown <= 0 && !p.isVisuallyCrawling()
+                && ledge.distToCenterSqr(p.position().add(0, 1, 0)) < 2.6 * 2.6
+                && ledge.getY() + 1 - p.getY() <= 2.6 && ledge.getY() + 1 - p.getY() > 0.4
+                && canClimb(level, ledge);
+        if (!ok) {
+            sync(p, s, true);
+            return;
+        }
+        s.action = Action.VAULT;
+        s.actionTicks = 0;
+        s.lowPose = false;
+        s.lean = 0;
+        s.vaultLen = CLIMB_TICKS;
+        s.vaultCooldown = CLIMB_TICKS + 6;
+        NoiseSystem.emit(level, p.position(), SPConfig.get().noise_vault, NoiseType.VAULT, p);
+        sync(p, s, true);
+    }
+
+    /** Borde al que se puede trepar: bloque solido con dos libres encima. */
+    public static boolean canClimb(net.minecraft.world.level.Level level, BlockPos ledge) {
+        return !level.getBlockState(ledge).getCollisionShape(level, ledge).isEmpty()
+                && level.getBlockState(ledge.above()).getCollisionShape(level, ledge.above()).isEmpty()
+                && level.getBlockState(ledge.above(2)).getCollisionShape(level, ledge.above(2)).isEmpty();
     }
 
     /**
@@ -196,7 +230,7 @@ public final class MotionManager {
             s.action = Action.NONE;
             s.lowPose = false;
             sync(p, s, true);
-        } else if (s.action == Action.VAULT && s.actionTicks >= VAULT_TICKS + 2) {
+        } else if (s.action == Action.VAULT && s.actionTicks >= s.vaultLen + 2) {
             s.action = Action.NONE;
             sync(p, s, true);
         } else if (s.action == Action.GETUP && s.actionTicks >= GETUP_TICKS) {

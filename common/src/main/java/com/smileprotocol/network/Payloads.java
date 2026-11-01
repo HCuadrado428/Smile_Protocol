@@ -132,7 +132,7 @@ public final class Payloads {
      * 1 dive, 2 vault (con el bloque que se salta).
      */
     public record MotionInput(int kind, int lean, boolean lookBack, BlockPos obstacle) implements CustomPacketPayload {
-        public static final int STATE = 0, DIVE = 1, VAULT = 2, SPECTATE = 3;
+        public static final int STATE = 0, DIVE = 1, VAULT = 2, SPECTATE = 3, CLIMB = 4;
         public static final Type<MotionInput> TYPE = typeOf("motion_input");
         public static final StreamCodec<ByteBuf, MotionInput> CODEC = StreamCodec.composite(
                 ByteBufCodecs.VAR_INT, MotionInput::kind,
