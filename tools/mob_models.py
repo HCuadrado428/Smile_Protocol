@@ -372,7 +372,46 @@ def face_plaster():
     return mat
 
 
-MAT.update({"plaster": plaster(), "plaster_hi": plaster((142, 137, 128)), "bandage": bandage(),
+def gown():
+    """Bata de hospital: tela fina verde agua con un estampado de rombos pequenos, lavada mil veces,
+    manchada de oxido y de sangre seca, con el bajo deshilachado."""
+    def m(f):
+        c = np.zeros((f.h, f.w, 3)) + (96, 114, 108)
+        c *= (0.8 + 0.25 * f.n(0.6, 3, 1201))[..., None]
+        u, v = f.U * ART, f.V * ART
+        dot = ((np.floor(u) + np.floor(v)) % 4 == 0) & ((np.floor(u) % 2) == 0)
+        c = np.where(dot[..., None], c * 0.82, c)
+        fold = 0.85 + 0.15 * np.sin((f.X + f.Z) * 2.2 + f.n(0.4, 2, 1202) * 3)
+        c *= fold[..., None]
+        stain = sstep(0.62, 0.85, f.n(0.35, 3, 1203))
+        c = c * (1 - stain[..., None] * 0.55) + np.array([120, 92, 52]) * stain[..., None] * 0.55
+        blood = sstep(0.74, 0.86, f.n(0.5, 2, 1204))
+        c = c * (1 - blood[..., None] * 0.8) + np.array([80, 18, 16]) * blood[..., None] * 0.8
+        c = grime_bottom(f, c, 0.45, 5)
+        a = np.ones((f.h, f.w))
+        if f.side:
+            low = f.Y - f.Y.min()
+            a = np.where(low < 0.25 + 0.9 * f.n(3.0, 1, 1205), 0, a)                 # bajo deshilachado
+        c += (f.white()[..., None] - 0.5) * 8
+        return np.clip(c, 0, 255), a
+    return m
+
+
+def crack_plate():
+    """Grietas nuevas del Paciente: lineas negras quebradas con el borde de escayola levantado; el resto
+    es transparente (se pegan encima del cuerpo y se enseñan una a una)."""
+    def m(f):
+        cr = np.abs(noise3(f.X * 1.4, f.Y * 0.9, f.Z * 1.4, 1.0, 1211) - 0.5)
+        br = np.abs(noise3(f.X * 2.6, f.Y * 2.0, f.Z * 2.6, 1.0, 1212) - 0.5)
+        line = (cr < 0.045) | ((br < 0.03) & (cr < 0.12))
+        rim = (cr < 0.075) & ~line
+        c = np.zeros((f.h, f.w, 3)) + (22, 18, 16)
+        c = np.where(rim[..., None], np.array([176, 170, 160]), c)
+        return c, (line | rim).astype(float)
+    return m
+
+
+MAT.update({"plaster": plaster(), "gown": gown(), "crack_plate": crack_plate(), "plaster_hi": plaster((142, 137, 128)), "bandage": bandage(),
             "wristband": wristband(), "tube": tube(), "face_plaster": face_plaster(), "autopsy": autopsy()})
 
 
@@ -899,8 +938,27 @@ def paciente():
         g.bone(f"foot_{side}", f"shin_{side}", (sx * 1.6, 1, 0))
         g.cube(f"foot_{side}", (sx * 1.6 - 0.9, 0, -2.2), (1.8, 1, 3.4), "plaster")
         g.cube(f"foot_{side}", (sx * 1.6 - 0.6, 0, -4.4), (1.2, 0.7, 2.3), "plaster")          # pie largo y puntiagudo
+    # Bata de hospital: abierta por delante (se ve la autopsia), atada a la espalda, hasta las rodillas
+    g.cube("hips", (-3.3, 19.5, -2.2), (6.6, 10, 4.4), "gown")                               # falda de la bata
+    g.cube("torso", (-3.7, 30.5, 1.75), (7.4, 4.5, 0.45), "gown")                             # espalda (cintura)
+    g.cube("torso", (-3.9, 35, 1.95), (7.8, 8.6, 0.45), "gown")                               # espalda (pecho)
+    for sx in (1, -1):
+        g.cube("torso", (sx * 3.1 - (0.5 if sx > 0 else 0.1), 35, -2.15), (0.6, 8.4, 4.2), "gown")   # costados
+        g.cube("torso", (sx * 2.4 - 0.55, 35.5, -2.25), (1.1, 7.8, 0.3), "gown")              # bordes abiertos
+        g.cube(f"arm_{'r' if sx > 0 else 'l'}", (sx * 4.2 - 1.15, 38.5, -1.15), (2.3, 4.6, 2.3), "gown")   # mangas cortas
+    # Grietas nuevas, escondidas: se ensenan una cada vez que se mueve (crack0 ... crack4)
+    g.bone("crack0", "head", (0, 59, -3.6))
+    g.cube("crack0", (-2.6, 58.4, -3.66), (4.4, 1.6, 0.04), "crack_plate")                   # frente
+    g.bone("crack1", "torso", (0, 38, -2))
+    g.cube("crack1", (-1.6, 36.2, -2.36), (3.4, 6.2, 0.04), "crack_plate")                   # pecho
+    g.bone("crack2", "neck", (0, 48, -1))
+    g.cube("crack2", (-0.75, 45.2, -1.16), (1.5, 5.6, 0.04), "crack_plate")                  # cuello
+    g.bone("crack3", "arm_r", (4.2, 36, 0))
+    g.cube("crack3", (5.07, 31.5, -0.7), (0.04, 6.5, 1.4), "crack_plate")                    # brazo
+    g.bone("crack4", "thigh_l", (-1.6, 22, 0))
+    g.cube("crack4", (-2.76, 16.5, -0.9), (0.04, 9.5, 1.8), "crack_plate")                   # muslo
     split(g, "torso", "chest", (0, 35, 0), lambda c: c["origin"][1] >= 35)
-    for bn in ("neck", "arm_r", "arm_l"):
+    for bn in ("neck", "arm_r", "arm_l", "crack1"):
         reparent(g, bn, "chest")
     split(g, "head", "jaw", (0, 52.2, 0.6), lambda c: abs(c["origin"][1] - 50.6) < 0.01)
     split(g, "hair", "hair_back", (0, 61, 2.5), lambda c: c["origin"][2] > 2)

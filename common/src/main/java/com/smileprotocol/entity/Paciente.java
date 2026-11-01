@@ -41,12 +41,17 @@ import java.util.Comparator;
  * que nadie lo vea, la mata al instante. No salta a un sitio que alguien este mirando, no entra en
  * las salas (no cabe por las puertas) ni en los conductos, y cambia de victima si la suya se aleja
  * mucho y hay otra mas cerca. La linterna no le afecta: solo cuenta que lo miren.
+ * <p>
+ * Es una estatua de escayola con bata de hospital: cada vez que se mueve cruje, se le abre una grieta
+ * nueva ({@link #cracks()}, hasta {@link #MAX_CRACKS}) y se le caen trozos.
  */
 public class Paciente extends SmilerBase {
 
     public static final int POSES = 6;
     private static final EntityDataAccessor<Byte> POSE_ID = SynchedEntityData.defineId(Paciente.class, EntityDataSerializers.BYTE);
     private static final EntityDataAccessor<Boolean> WATCHED = SynchedEntityData.defineId(Paciente.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Byte> CRACKS = SynchedEntityData.defineId(Paciente.class, EntityDataSerializers.BYTE);
+    public static final int MAX_CRACKS = 5;
 
     @Nullable private ServerPlayer target;
     private int cooldown;
@@ -76,10 +81,16 @@ public class Paciente extends SmilerBase {
         super.defineSynchedData(b);
         b.define(POSE_ID, (byte) 0);
         b.define(WATCHED, false);
+        b.define(CRACKS, (byte) 0);
     }
 
     public int poseId() {
         return entityData.get(POSE_ID);
+    }
+
+    /** Grietas que se le han abierto (una por salto, hasta {@link #MAX_CRACKS}). */
+    public int cracks() {
+        return entityData.get(CRACKS);
     }
 
     public boolean watched() {
@@ -140,10 +151,13 @@ public class Paciente extends SmilerBase {
             while (pose == poseId()) pose = getRandom().nextInt(POSES);
             entityData.set(POSE_ID, (byte) pose);
             jumps++;
-            // un crujido de huesos donde aparece: lo unico que se oye de el
-            if (getRandom().nextInt(3) == 0 || from.distanceTo(to) > 2.5) {
-                level.playSound(null, n, ModSounds.PACIENTE_CRACK.get(), SoundSource.HOSTILE, 0.7f, 0.85f + getRandom().nextFloat() * 0.3f);
-            }
+            if (cracks() < MAX_CRACKS) entityData.set(CRACKS, (byte) (cracks() + 1));
+            // un crujido de yeso y huesos donde aparece (lo unico que se oye de el) y trozos que caen
+            level.playSound(null, n, ModSounds.PACIENTE_CRACK.get(), SoundSource.HOSTILE, 0.8f, 0.85f + getRandom().nextFloat() * 0.3f);
+            var chips = new net.minecraft.core.particles.BlockParticleOption(net.minecraft.core.particles.ParticleTypes.BLOCK,
+                    net.minecraft.world.level.block.Blocks.CALCITE.defaultBlockState());
+            level.sendParticles(chips, from.x, from.y + 2.2, from.z, 10, 0.3, 0.9, 0.3, 0.05);
+            level.sendParticles(chips, to.x, to.y + 2.2, to.z, 6, 0.3, 0.9, 0.3, 0.05);
             cooldown = SPConfig.get().paciente_jump_ticks;
             return;
         }

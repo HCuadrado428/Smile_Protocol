@@ -11,12 +11,12 @@ Elegidas en el cuestionario «Fichas de los smilers».
 
 ## El Paciente
 Inspirado en los ángeles llorones de Doctor Who. *Implementado (fase 21):* modelo `tools/mob_models.py` (`paciente`), IA en `entity/Paciente.java`, muerte `PACIENTE_KILL`, aparece en `paciente_zones` (morgue y sala final).
-- **Aspecto:** muy alto y delgado (3,5 bloques), recto y rígido, brazos pegados al cuerpo. **Sin ojo**: solo la sonrisa, que se ensancha cuanto más cerca está.
-- **Movimiento:** salta de posición en posición cuando nadie lo mira (sin animación de andar); instantáneo si nadie mira, quieto del todo si alguien mira.
+- **Aspecto:** estatua de escayola de hospital, muy alta y delgada (3,5 bloques), con los ojos vendados y una **bata de paciente** manchada, abierta por delante (se ve la incisión de la autopsia). **Sin ojo**: solo la sonrisa, que se ensancha cuanto más cerca está. **Cada vez que se mueve se le abre una grieta nueva** (frente, pecho, cuello, brazo, muslo) y se le caen trozos de yeso.
+- **Movimiento:** salta de posición en posición cuando nadie lo mira (sin animación de andar); instantáneo si nadie mira, quieto del todo si alguien mira. **Cada vez que lo vuelves a ver está en una postura distinta** (la cabeza girada, un brazo hacia ti...).
 - **Actitud:** paciente y acosador, te sigue por la planta sin prisa. **Cambia de objetivo si su víctima se aleja mucho.**
 - **Mecánica:** se congela mientras **cualquier** jugador lo mire (hay que turnarse). Al tocarte, **muerte instantánea**. No remata.
 - **Escondites:** no los revisa; espera fuera. **Conductos:** no entra, espera en la salida. **Por su tamaño no entra en las salas** (se queda en los pasillos).
-- **Walkies:** estática que sube cuanto más cerca está. **Sonido:** silencio; crujido de huesos al cambiar de sitio.
+- **Walkies:** estática que sube cuanto más cerca está. **Sonido:** silencio; solo cuando nadie le mira, un crujido de yeso y huesos cada vez que cambia de sitio.
 - **Cómo se le gana:** moverse en grupo vigilándolo, encerrarlo cerrando puertas, llegar al ascensor (no sale de la planta). La linterna **no** lo congela.
 - **Dónde:** pasillos largos y morgue.
 

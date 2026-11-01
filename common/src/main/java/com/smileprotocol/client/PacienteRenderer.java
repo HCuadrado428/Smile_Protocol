@@ -21,6 +21,11 @@ public class PacienteRenderer extends GeoEntityRenderer<Paciente> {
             @Override
             public void setCustomAnimations(Paciente mob, long instanceId, AnimationState<Paciente> state) {
                 super.setCustomAnimations(mob, instanceId, state);
+                // las grietas que ya se le han abierto
+                for (int i = 0; i < Paciente.MAX_CRACKS; i++) {
+                    var c = getAnimationProcessor().getBone("crack" + i);
+                    if (c != null) c.setHidden(i >= mob.cracks());
+                }
                 var bone = getAnimationProcessor().getBone("grin");
                 if (bone == null) return;
                 var player = Minecraft.getInstance().player;
