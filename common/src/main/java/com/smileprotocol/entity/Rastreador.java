@@ -186,7 +186,6 @@ public class Rastreador extends SmilerBase implements QTEManager.Grabber {
                 s = State.CHASE;
             }
         }
-        ScentTrail.record(level);
         claws(level, s);
         if (s != State.CHASE && s != State.VENT && s != State.PEEK && s != State.GRAB && s != State.STUNNED && doorAhead(level, s)) return;
         switch (s) {

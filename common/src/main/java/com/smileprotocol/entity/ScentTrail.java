@@ -34,18 +34,18 @@ public final class ScentTrail {
     private static final int MAX = 240;
 
     private static final Map<UUID, ArrayDeque<Crumb>> TRAILS = new HashMap<>();
-    private static long lastRecorded = -1;
+    private static final Map<net.minecraft.resources.ResourceKey<net.minecraft.world.level.Level>, Long> LAST = new HashMap<>();
 
     private ScentTrail() {
     }
 
-    /** Apunta por donde va cada jugador (una vez por tick del mundo, lo llame quien lo llame). */
+    /** Apunta por donde va cada jugador (cada 5 ticks de cada mundo; lo llama el tick del servidor). */
     public static void record(ServerLevel level) {
         long now = level.getGameTime();
-        if (now == lastRecorded || now % 5 != 0) return;
-        lastRecorded = now;
+        if (now % 5 != 0 || Long.valueOf(now).equals(LAST.get(level.dimension()))) return;
+        LAST.put(level.dimension(), now);
         for (ServerPlayer p : level.players()) {
-            if (!p.isAlive() || p.isSpectator() || !SPPlayerData.inSP(p) || DeathManager.isDead(p) || !p.onGround()) continue;
+            if (!p.isAlive() || p.isSpectator() || !SPPlayerData.inSP(p) || DeathManager.isDead(p)) continue;
             ArrayDeque<Crumb> t = TRAILS.computeIfAbsent(p.getUUID(), k -> new ArrayDeque<>());
             Crumb last = t.peekLast();
             if (last != null && last.pos().distanceToSqr(p.position()) < SPACING * SPACING) continue;
