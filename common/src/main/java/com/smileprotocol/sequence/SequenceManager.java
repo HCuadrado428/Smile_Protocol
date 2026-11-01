@@ -100,7 +100,9 @@ public final class SequenceManager {
         mob.setYBodyRot(yaw);
         mob.setYHeadRot(yaw);
         Vec3 dir = Vec3.directionFromRotation(0, yaw);
-        Vec3 anchor = new Vec3(mob.getX() + dir.x * kind.distance, p.getY(), mob.getZ() + dir.z * kind.distance);
+        // el remate de Smiley la coge ya levantada del agarre: se mide desde el suelo (el del mob)
+        double baseY = kind == SequenceKind.SMILEY_KILL ? mob.getY() : p.getY();
+        Vec3 anchor = new Vec3(mob.getX() + dir.x * kind.distance, baseY, mob.getZ() + dir.z * kind.distance);
         float victimYaw = kind.facesMob ? yaw + 180f : yaw;
 
         Session s = new Session(mob.getUUID(), kind, anchor, mob.position(), yaw, victimYaw);

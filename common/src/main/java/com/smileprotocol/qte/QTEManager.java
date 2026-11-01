@@ -44,6 +44,11 @@ public final class QTEManager {
         void onGrabStart(ServerPlayer p);
 
         void onGrabEnd(ServerPlayer p, boolean escaped);
+
+        /** Cuanto levanta a la victima del suelo mientras la tiene cogida (bloques). */
+        default double grabLift() {
+            return 0;
+        }
     }
 
     private static final class Session {
@@ -129,6 +134,8 @@ public final class QTEManager {
         // Las manos del mob sujetan a la victima por los hombros a ~1,5 bloques delante del pecho
         // (animacion "grab"): el jugador es arrastrado hasta ahi en los primeros ticks.
         s.anchor = mob.position().add(look.scale(GRAB_DISTANCE));
+        // Smiley la alza un poco: se queda de puntillas, colgando de sus manos
+        if (mob instanceof Grabber gr0 && gr0.grabLift() > 0) s.anchor = s.anchor.add(0, gr0.grabLift(), 0);
         s.start = p.position();
         s.yaw = mob.getYRot() + 180f;
         SESSIONS.put(p.getUUID(), s);
@@ -210,9 +217,11 @@ public final class QTEManager {
                 float k = s.elapsed / (float) PULL_TICKS;
                 k = 1f - (1f - k) * (1f - k);
                 SPSessionManager.teleport(p, p.serverLevel(), s.start.lerp(s.anchor, k), s.yaw, -28f);
-            } else if (p.position().distanceToSqr(s.anchor) > 0.01) {
+            } else if (p.position().distanceToSqr(s.anchor) > (s.anchor.y > s.start.y + 0.05 ? 0.0004 : 0.01)) {
                 SPSessionManager.teleport(p, p.serverLevel(), s.anchor, p.getYRot(), p.getXRot());
             }
+            p.setDeltaMovement(Vec3.ZERO);
+            p.fallDistance = 0;
             if (s.elapsed % 14 == 0) {
                 p.serverLevel().playSound(null, p.blockPosition(), ModSounds.PLAYER_HEARTBEAT.get(), SoundSource.PLAYERS, 0.8f, 1.2f);
             }

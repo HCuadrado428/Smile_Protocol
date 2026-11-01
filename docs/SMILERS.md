@@ -73,7 +73,7 @@ Inspirado en Slenderman y en SCP-096 («el tímido»). Aspecto canónico de 20.1
   2. Más rápido; invoca a 1 o 2 smilers y apaga luces.
   3. Furioso y a oscuras: solo se ven su ojo y la sonrisa; muerte instantánea; encender el último generador y correr al ascensor.
 - **Habilidades:** apaga las luces de la sala; invoca a otros smilers; grito que aturde y atrae a todos los mobs; **teletransporte por manchas**: en las paredes hay manchas con su forma, y sale de una cercana a otro jugador cuando se cansa de perseguir al actual.
-- **Al alcanzarte:** agarre con un QTE que cambia de tipo cada vez; si fallas, remate.
+- **Al alcanzarte:** te levanta hasta dejarte de puntillas, colgando de sus manos, y te agarra con un QTE que cambia de tipo cada vez; si fallas, remate: sigue subiéndote hasta su cara.
 - **Luz:** retrocede si lo apuntan dos linternas o más a la vez.
 - **Escalado:** más generadores y más smilers invocados cuanto más grande es el grupo.
 - **Voz:** frases cortas en voz baja y distorsionada, llamando a los jugadores por su nombre.

@@ -119,7 +119,9 @@ public enum SequenceKind {
             float up = Mth.clamp((age - 4) / 18f, 0f, 1f);
             float down = Mth.clamp((age - 50) / 5f, 0f, 1f);
             up = up * up * (3 - 2 * up);
-            return 1.5 * up * (1 - down);
+            // ya la tenia de puntillas desde el agarre: sigue subiendo desde ahi
+            double held = com.smileprotocol.entity.Smiley.GRAB_LIFT;
+            return (held + (1.5 - held) * up) * (1 - down);
         }
         if (this != SMILER_KILL) return 0;
         float up = Mth.clamp((age - 6) / 12f, 0f, 1f);

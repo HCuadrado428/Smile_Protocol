@@ -615,6 +615,14 @@ public class Smiley extends SmilerBase implements QTEManager.Grabber {
         setState(State.GRAB);
     }
 
+    /** La alza hasta dejarla de puntillas mientras la tiene cogida (animacion "grab"). */
+    public static final double GRAB_LIFT = 0.35;
+
+    @Override
+    public double grabLift() {
+        return GRAB_LIFT;
+    }
+
     @Override
     public void onGrabEnd(ServerPlayer p, boolean escaped) {
         target = null;
