@@ -79,6 +79,11 @@ public abstract class SPMonster extends PathfinderMob implements GeoEntity {
 
     @Override
     public void aiStep() {
+        // las luces fallan cuando pasa cerca (no los munecos de adorno ni los encerrados)
+        if (!level().isClientSide && tickCount % 20 == (getId() % 20) && !isInvisible() && level() instanceof net.minecraft.server.level.ServerLevel sl0
+                && !(this instanceof Ahorcado a && a.isDecoy())) {
+            com.smileprotocol.mechanism.MonsterLights.near(sl0, blockPosition().above());
+        }
         if (stunTicks > 0 && !level().isClientSide) {
             stunTicks--;
             getNavigation().stop();

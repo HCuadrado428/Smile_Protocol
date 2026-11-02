@@ -135,6 +135,7 @@ public final class SPEvents {
         com.smileprotocol.entity.SmileyFight.tick(server);
         com.smileprotocol.labevent.LabEventManager.tick(server);
         com.smileprotocol.motion.Flashlights.tick(server);
+        com.smileprotocol.mechanism.MonsterLights.tick(server);
         for (net.minecraft.server.level.ServerLevel l : server.getAllLevels()) com.smileprotocol.entity.ScentTrail.record(l);
         LobbyManager.tick(server);
         if (server.getTickCount() % 20 == 0) SPDebug.tick(server);

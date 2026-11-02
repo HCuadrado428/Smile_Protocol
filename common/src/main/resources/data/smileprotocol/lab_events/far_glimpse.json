@@ -1,0 +1,17 @@
+{
+  "id": "far_glimpse",
+  "trigger": {
+    "type": "timer"
+  },
+  "conditions": {
+    "cooldown": 2400,
+    "chance": 0.05
+  },
+  "scope": "players_in_zone",
+  "actions": [
+    {
+      "type": "jumpscare",
+      "kind": "glimpse"
+    }
+  ]
+}

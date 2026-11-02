@@ -101,6 +101,7 @@ public final class LabActions {
             }
             case "flash" -> scare(who, SCARE_FLASH, f(a, "strength", 1f));
             case "peek" -> peek(c, who);
+            case "glimpse" -> glimpse(c, who);
             case "environment" -> {
                 slam(c);
                 setLights(c, false, "", 0.5f);
@@ -112,6 +113,34 @@ public final class LabActions {
 
     public static void scare(List<ServerPlayer> who, int kind, float strength) {
         for (ServerPlayer p : who) SPNetwork.sendTo(p, new Payloads.PlayJumpscare(kind, strength));
+    }
+
+    /**
+     * Algo al fondo: una silueta quieta al final de lo que mira el jugador, lejos y sin ruido, que
+     * desaparece enseguida. Si no hay sitio libre tan lejos, no pasa nada.
+     */
+    private static void glimpse(Ctx c, List<ServerPlayer> who) {
+        ServerPlayer p = who.get(c.level().random.nextInt(who.size()));
+        Vec3 look = p.getLookAngle().multiply(1, 0, 1).normalize();
+        for (int d = 26; d >= 16; d -= 2) {
+            BlockPos bp = BlockPos.containing(p.position().add(look.scale(d)));
+            if (!c.level().getBlockState(bp).isAir() || !c.level().getBlockState(bp.above()).isAir()
+                    || c.level().getBlockState(bp.below()).isAir() || !c.zone().box().isInside(bp)) continue;
+            if (c.level().clip(new net.minecraft.world.level.ClipContext(p.getEyePosition(), Vec3.atCenterOf(bp.above()),
+                    net.minecraft.world.level.ClipContext.Block.COLLIDER, net.minecraft.world.level.ClipContext.Fluid.NONE, p))
+                    .getType() != net.minecraft.world.phys.HitResult.Type.MISS) continue;
+            var mob = com.smileprotocol.registry.ModEntities.SMILER_TEST.get().create(c.level());
+            if (mob == null) return;
+            float yaw = (float) Math.toDegrees(Math.atan2(-(p.getX() - bp.getX()), p.getZ() - bp.getZ()));
+            mob.moveTo(bp.getX() + 0.5, bp.getY(), bp.getZ() + 0.5, yaw, 0);
+            mob.setYHeadRot(yaw);
+            mob.setYBodyRot(yaw);
+            mob.setNoAi(true);
+            mob.setSilent(true);
+            c.level().addFreshEntity(mob);
+            LabEventManager.despawnLater(mob, 14);
+            return;
+        }
     }
 
     /** Un smiler se asoma un instante a cierta distancia, delante del jugador, y desaparece. No ataca. */
