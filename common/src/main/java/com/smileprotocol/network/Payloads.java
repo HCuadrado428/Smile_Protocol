@@ -484,6 +484,14 @@ public final class Payloads {
     }
 
     /** C -> S: tecla del walkie pulsada o soltada (README 17.3). */
+    /** Reglas de la partida del jugador (para la HUD: «sin HUD»). */
+    public record SyncRules(String rules) implements CustomPacketPayload {
+        public static final Type<SyncRules> TYPE = typeOf("sync_rules");
+        public static final StreamCodec<ByteBuf, SyncRules> CODEC = ByteBufCodecs.STRING_UTF8.map(SyncRules::new, SyncRules::rules);
+
+        @Override public Type<SyncRules> type() { return TYPE; }
+    }
+
     /** Reanimando: una compresion (Espacio) al ritmo del pulso. */
     public record RevivePulse(boolean pressed) implements CustomPacketPayload {
         public static final Type<RevivePulse> TYPE = typeOf("revive_pulse");

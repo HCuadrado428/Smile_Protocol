@@ -99,8 +99,12 @@ public final class ClientState {
         return Math.max(0f, 1f - (t - fadeIn - fadeHold) / fadeOut);
     }
 
+    /** Reglas de la partida en curso, codificadas ({@code RunRules.encode}). */
+    public static String runRules = "";
+
     public static void reset() {
         inSP = false;
+        runRules = "";
         for (int i = 0; i < SPInventory.SIZE; i++) slots[i] = ItemStack.EMPTY;
         selected = 0;
         ready = null;

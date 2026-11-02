@@ -71,7 +71,8 @@ public final class SPNetwork {
             new Def<>(Payloads.SyncMarkers.TYPE, Payloads.SyncMarkers.CODEC, true, null),
             new Def<>(Payloads.WalkieInput.TYPE, Payloads.WalkieInput.CODEC, false, com.smileprotocol.voice.WalkieManager::onInput),
             new Def<>(Payloads.RevivePulse.TYPE, Payloads.RevivePulse.CODEC, false, com.smileprotocol.interact.InteractionManager::onPulse),
-            new Def<>(Payloads.SyncWalkie.TYPE, Payloads.SyncWalkie.CODEC, true, null)
+            new Def<>(Payloads.SyncWalkie.TYPE, Payloads.SyncWalkie.CODEC, true, null),
+            new Def<>(Payloads.SyncRules.TYPE, Payloads.SyncRules.CODEC, true, null)
     );
 
     private static final Map<CustomPacketPayload.Type<?>, Consumer<CustomPacketPayload>> CLIENT_HANDLERS = new HashMap<>();

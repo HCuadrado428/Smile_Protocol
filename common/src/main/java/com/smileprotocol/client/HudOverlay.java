@@ -134,11 +134,14 @@ public final class HudOverlay {
                     renderInteraction(g, font, w, h);
                 }
                 ClientMarkers.render(g, font, w, h, partialTick);
-                renderMission(g, font, w);
+                boolean showHud = hudVisible(mc.player);
+                if (showHud) renderMission(g, font, w);
                 ClientWalkie.render(g, font, w, h);
-                renderVitals(g, font, mc.player, h);
-                renderBattery(g, font, mc.player, h);
-                renderSlots(g, font, w, h);
+                if (showHud) {
+                    renderVitals(g, font, mc.player, h);
+                    renderBattery(g, font, mc.player, h);
+                    renderSlots(g, font, w, h);
+                }
             }
             renderResults(g, font, w, h);
             Payloads.SyncReady ready = ClientState.ready;
@@ -152,6 +155,33 @@ public final class HudOverlay {
         if (inGame) renderScare(g, w, h, partialTick);
         float fade = ClientState.fadeAlpha(partialTick);
         if (fade > 0f) g.fill(0, 0, w, h, Mth.clamp((int) (fade * 255), 0, 255) << 24);
+    }
+
+    // HUD que se esconde -------------------------------------------------------------------------
+
+    private static long hudActive;
+    private static int lastSelected = -1;
+    private static float lastHealth = -1;
+
+    /**
+     * Modo inmersivo ({@code hud_auto_hide}): la HUD desaparece cuando no hace falta y vuelve unos
+     * segundos cuando cambia algo (hueco, vida, objetivo, bateria baja) o al abrir la rueda. Con el
+     * modificador «sin HUD» no sale nunca.
+     */
+    private static boolean hudVisible(Player p) {
+        if (ClientState.runRules.contains(com.smileprotocol.difficulty.RunRules.NO_HUD)) return false;
+        if (!com.smileprotocol.config.SPConfig.get().hud_auto_hide) return true;
+        long now = Util.getMillis();
+        float hp = p.getHealth();
+        boolean busy = ClientWheel.open() || ClientInteraction.state().active() || hp < p.getMaxHealth() * 0.6f
+                || com.smileprotocol.client.light.Flashlight.battery(p.getId()) < 0.25f;
+        if (ClientState.selected() != lastSelected || Math.abs(hp - lastHealth) > 0.01f
+                || now - ClientState.missionChanged < 200 || busy) {
+            hudActive = now;
+        }
+        lastSelected = ClientState.selected();
+        lastHealth = hp;
+        return now - hudActive < 6000;
     }
 
     // Vineta y grano -----------------------------------------------------------------------

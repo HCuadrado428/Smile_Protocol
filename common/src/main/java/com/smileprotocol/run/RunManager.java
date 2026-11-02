@@ -245,7 +245,10 @@ public final class RunManager {
             DifficultyProfile difficulty = rules.apply(DifficultyScaler.forGroup(server, members.size()));
             Group g = new Group(UUID.randomUUID(), runId, number, seq, difficulty, slot);
             g.setRules(rules);
-            for (ServerPlayer p : members) g.addMember(p.getUUID(), p.getGameProfile().getName());
+            for (ServerPlayer p : members) {
+                g.addMember(p.getUUID(), p.getGameProfile().getName());
+                com.smileprotocol.network.SPNetwork.sendTo(p, new com.smileprotocol.network.Payloads.SyncRules(rules.encode()));
+            }
             run.groups().add(g);
         }
 

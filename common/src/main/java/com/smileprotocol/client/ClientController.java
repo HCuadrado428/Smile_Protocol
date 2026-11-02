@@ -52,6 +52,7 @@ public final class ClientController {
         });
         SPNetwork.setClientHandler(Payloads.SyncMarkers.TYPE, ClientMarkers::onSync);
         SPNetwork.setClientHandler(Payloads.SyncWalkie.TYPE, ClientWalkie::onSync);
+        SPNetwork.setClientHandler(Payloads.SyncRules.TYPE, p -> ClientState.runRules = p.rules());
         SPNetwork.setClientHandler(Payloads.SyncFlashlight.TYPE, p -> com.smileprotocol.client.light.Flashlight.sync(p.entityId(), p.on(), p.battery()));
         com.smileprotocol.interact.ClientInventoryView.setProvider(ClientState::slot);
     }

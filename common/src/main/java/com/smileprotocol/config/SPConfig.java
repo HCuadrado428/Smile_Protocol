@@ -131,6 +131,8 @@ public final class SPConfig {
         public String key_flashlight = "key.keyboard.f";
         /** Mantener para abrir la rueda de objetos (el raton elige el hueco). */
         public String key_wheel = "key.keyboard.left.alt";
+        /** HUD que se esconde sola cuando no hace falta (vuelve al cambiar algo). */
+        public boolean hud_auto_hide = true;
         /** Barra de progreso al interactuar (puertas, valvulas...). */
         public boolean show_interact_bar = true;
         /** Segundos de linterna encendida con la bateria llena (README 10). */

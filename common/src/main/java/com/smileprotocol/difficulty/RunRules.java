@@ -42,8 +42,11 @@ public record RunRules(Level level, Set<String> modifiers) {
     /** Los muebles casi nunca tienen nada y no hay objetos sueltos por el suelo. */
     public static final String SCARCE_LOOT = "scarce_loot";
 
+    /** Sin HUD: ni pulso, ni bateria, ni huecos, ni objetivo en pantalla. */
+    public static final String NO_HUD = "no_hud";
+
     /** Todos los modificadores, en el orden en que salen en la pantalla. */
-    public static final List<String> ALL = List.of(FAST_MOBS, MORE_MOBS, WEAK_BATTERY, NO_REVIVE, SCARCE_LOOT);
+    public static final List<String> ALL = List.of(FAST_MOBS, MORE_MOBS, WEAK_BATTERY, NO_REVIVE, SCARCE_LOOT, NO_HUD);
 
     public static final RunRules DEFAULT = new RunRules(Level.NORMAL, Set.of());
 
