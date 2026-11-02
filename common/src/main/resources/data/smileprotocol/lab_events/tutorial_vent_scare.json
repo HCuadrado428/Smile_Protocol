@@ -1,0 +1,30 @@
+{
+  "id": "tutorial_vent_scare",
+  "trigger": {
+    "type": "vent_entered"
+  },
+  "conditions": {
+    "once": true,
+    "zone": "tutorial"
+  },
+  "delay_ticks": 50,
+  "scope": "trigger_player",
+  "actions": [
+    {
+      "type": "light_flicker",
+      "ticks": 70
+    },
+    {
+      "type": "sound",
+      "id": "smileprotocol:rastreador.scratch"
+    },
+    {
+      "type": "camera_effect",
+      "strength": 0.5
+    },
+    {
+      "type": "jumpscare",
+      "kind": "peek"
+    }
+  ]
+}

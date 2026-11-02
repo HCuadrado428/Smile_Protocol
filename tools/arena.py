@@ -167,16 +167,19 @@ def build():
 
     # Escondites, cajas y escombros
     for (x, z, f) in ((-X, 4, "west"), (-X, 5, "west"), (X, 16, "east"), (X, 17, "east"), (-12, Z1, "north"),
-                      (12, Z1, "north")):
+                      (12, Z1, "north"), (-X, 22, "west"), (X, 28, "east"), (-X, 33, "west"), (X, 9, "east"),
+                      (-6, Z1, "north"), (6, Z1, "north")):
         if not t.solid(x, 1, z):
             t.set(x, 1, z, lab("locker"), facing=f, half="lower", open=False)
             t.set(x, 2, z, lab("locker"), facing=f, half="upper", open=False)
-    for (x, z, f) in ((-X + 1, 2, "west"), (X, 35, "east"), (-X, 10, "west")):
+    for (x, z, f) in ((-X + 1, 2, "west"), (X, 35, "east"), (-X, 10, "west"), (X, 21, "east"), (-X, 30, "west")):
         y = L1
         if not t.solid(x, y + 1, z):
             t.set(x, y + 1, z, lab("locker"), facing=f, half="lower", open=False)
             t.set(x, y + 2, z, lab("locker"), facing=f, half="upper", open=False)
-    for (x, z) in ((-6, 6), (-5, 6), (7, 15), (-9, 26), (-8, 26), (9, 35), (4, 24), (-12, 16)):
+    # cajas que cortan la vista: dan rutas para despistarle por la planta baja
+    for (x, z) in ((-6, 6), (-5, 6), (7, 15), (-9, 26), (-8, 26), (9, 35), (4, 24), (-12, 16), (-2, 20), (-2, 21),
+                   (13, 30), (13, 31), (-14, 9), (2, 29), (15, 12)):
         t.set(x, 1, z, lab("lab_crate"))
     for (x, z) in ((-3, 15), (3, 36), (11, 25)):
         t.set(x, 1, z, lab("lab_debris"))

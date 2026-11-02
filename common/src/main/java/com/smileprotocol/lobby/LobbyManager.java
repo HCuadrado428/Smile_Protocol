@@ -106,7 +106,24 @@ public final class LobbyManager {
 
         if (t % 10 == 0) syncBoards(server, false);
         if (t % 20 == 0) LobbyProtection.tickPlayers(server, data);
+        if (t % 1800 == 900) radio(server, data);
     }
+
+    /** La radio de recepcion: cada minuto y medio, entre estatica, un aviso del laboratorio (cada vez otro). */
+    private static int radioLine;
+
+    private static void radio(MinecraftServer server, LobbyData data) {
+        if (data.getRegion() == null) return;
+        int n = radioLine++ % RADIO_LINES;
+        for (ServerPlayer p : server.overworld().players()) {
+            if (SPPlayerData.inSP(p) || !data.inRegion(p.position())) continue;
+            p.playNotifySound(com.smileprotocol.registry.ModSounds.WALKIE_CRACKLE.get(), net.minecraft.sounds.SoundSource.AMBIENT, 0.5f, 0.9f);
+            p.displayClientMessage(net.minecraft.network.chat.Component.translatable("smileprotocol.lobby.radio." + n)
+                    .withStyle(net.minecraft.ChatFormatting.GRAY, net.minecraft.ChatFormatting.ITALIC), true);
+        }
+    }
+
+    private static final int RADIO_LINES = 8;
 
     private static void update(MinecraftServer server, LobbyData data, ElevatorDef def, Runtime rt, Set<UUID> hud) {
         ServerLevel overworld = server.overworld();

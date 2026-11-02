@@ -243,6 +243,8 @@ public final class SPConfig {
         /** Linternas a la vez que le congelan (o tantas como jugadores queden). */
         public int smiley_retreat_lights = 2;
         /** Velocidad al andar en cada fase (multiplica la base). Nunca corre. */
+        /** Probabilidad de que el ascensor se pare a medio viaje (a oscuras, golpes en el techo). */
+        public float elevator_stall_chance = 0.4f;
         public java.util.List<Double> smiley_speed = new java.util.ArrayList<>(java.util.List.of(0.42, 0.5, 0.6));
         /** Cada cuantos ticks, en cada fase, aparece mas cerca si nadie le esta mirando. */
         public java.util.List<Integer> smiley_blink_ticks = new java.util.ArrayList<>(java.util.List.of(160, 90, 50));

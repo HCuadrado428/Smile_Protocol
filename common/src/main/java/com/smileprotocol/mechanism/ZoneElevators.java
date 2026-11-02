@@ -56,6 +56,8 @@ public final class ZoneElevators {
         boolean doorsOpen;
         int countdown = -1;
         int ride = -1;
+        /** El viaje se para a medias (a oscuras, golpes en el techo) en este tick, o -1. */
+        int stallAt = -1;
         boolean moved;
         final Set<UUID> insideAtDeparture = new HashSet<>();
         final Set<UUID> hurtAtDeparture = new HashSet<>();
@@ -205,6 +207,7 @@ public final class ZoneElevators {
         }
         for (ServerPlayer p : players) if (p.getHealth() < p.getMaxHealth()) s.hurtAtDeparture.add(p.getUUID());
         s.ride = 0;
+        s.stallAt = level.random.nextFloat() < SPConfig.get().elevator_stall_chance ? Math.max(40, Math.max(2, SPConfig.get().elevator_ride_time) * 9) : -1;
         s.moved = false;
         s.arriveAt = -1;
         s.countdown = -1;
@@ -237,6 +240,18 @@ public final class ZoneElevators {
                 + (s.job != null ? " (construyendo la zona " + next + ")" : ""));
     }
 
+    /** Enciende o apaga las luces de la cabina. */
+    private static void cabinLights(ServerLevel level, ZonePlacement z, boolean on) {
+        BoundingBox cab = z.exitCabin();
+        if (cab == null) return;
+        for (BlockPos lp : BlockPos.betweenClosed(cab.minX() - 1, cab.maxY(), cab.minZ() - 1, cab.maxX() + 1, cab.maxY() + 2, cab.maxZ() + 1)) {
+            var st = level.getBlockState(lp);
+            if (st.getBlock() instanceof com.smileprotocol.block.FluorescentLightBlock && st.getValue(com.smileprotocol.block.FluorescentLightBlock.LIT) != on) {
+                level.setBlock(lp, st.setValue(com.smileprotocol.block.FluorescentLightBlock.LIT, on), 3);
+            }
+        }
+    }
+
     /** El viaje: la cabina baja, se construye la planta y, cuando esta y ha pasado el tiempo minimo, se llega. */
     private static void tickRide(MinecraftServer server, ServerLevel level, Group g, State s) {
         s.ride++;
@@ -251,6 +266,27 @@ public final class ZoneElevators {
         }
         ZonePlacement z = g.current();
         BlockPos center = BlockPos.containing(cabinCenter(z));
+        int stall = s.stallAt < 0 ? 0 : 70;
+        if (s.arriveAt < 0 && s.stallAt >= 0 && s.ride >= s.stallAt && s.ride < s.stallAt + stall) {
+            // se para entre plantas: frenazo, se apaga la luz y algo golpea el techo de la cabina
+            int k = s.ride - s.stallAt;
+            if (k == 0) {
+                level.playSound(null, center, SoundEvents.ANVIL_LAND, SoundSource.BLOCKS, 0.5f, 0.4f);
+                com.smileprotocol.labevent.LabActions.scare(riders, com.smileprotocol.labevent.LabActions.SCARE_SHAKE, 0.7f);
+                cabinLights(level, z, false);
+            }
+            if (k == 18 || k == 30 || k == 38) {
+                level.playSound(null, center.above(3), SoundEvents.ZOMBIE_ATTACK_IRON_DOOR, SoundSource.HOSTILE, 1.1f, 0.5f);
+                com.smileprotocol.labevent.LabActions.scare(riders, com.smileprotocol.labevent.LabActions.SCARE_SHAKE, 0.35f);
+            }
+            if (k == 55) level.playSound(null, center.above(3), SoundEvents.CHAIN_BREAK, SoundSource.HOSTILE, 0.8f, 0.4f);
+            if (k == stall - 1) {
+                cabinLights(level, z, true);
+                level.playSound(null, center, SoundEvents.PISTON_EXTEND, SoundSource.BLOCKS, 0.8f, 0.5f);
+            }
+            return;
+        }
+        if (s.ride > s.stallAt && s.stallAt >= 0) total += stall;
         if (s.arriveAt < 0) {
             // zumbido del motor, traqueteo y algun golpe de los cables
             if (s.ride % 40 == 1) level.playSound(null, center, SoundEvents.MINECART_INSIDE, SoundSource.BLOCKS, 0.35f, 0.45f);

@@ -42,6 +42,7 @@ public final class SelfTest {
     public static void run(MinecraftServer server) {
         int failures = 0;
         log("inicio");
+        com.smileprotocol.config.SPConfig.get().elevator_stall_chance = 0f;
         try {
             for (int n : new int[]{4, 7, 9, 11, 19, 23}) log("grupos " + n + " -> " + GroupManager.groupSizes(n, 4));
             for (int n = 2; n <= 6; n++) log("dificultad " + DifficultyScaler.forGroup(server, n).describe());

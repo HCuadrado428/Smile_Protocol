@@ -51,6 +51,7 @@ public final class ZoneSetup {
         List<BlockPos> doors = new ArrayList<>();
         List<BlockPos> labDoors = new ArrayList<>();
         List<FluorescentLightBlockEntity> lights = new ArrayList<>();
+        List<BlockPos> freeLights = new ArrayList<>();
 
         CircuitManager.forEachBlockEntity(level, box, be -> {
             if (be instanceof FuseBoxBlockEntity fb) {
@@ -69,8 +70,28 @@ public final class ZoneSetup {
                 labDoors.add(be.getBlockPos().immutable());
             } else if (be instanceof FluorescentLightBlockEntity fl && !fl.circuitId().isEmpty()) {
                 lights.add(fl);
+            } else if (be instanceof FluorescentLightBlockEntity fl) {
+                freeLights.add(fl.getBlockPos().immutable());
             }
         });
+
+        // Cada partida la planta es un poco distinta: algunas lamparas fundidas, otras que parpadean,
+        // y las puertas normales abiertas o cerradas al azar (cambia lo que se ve desde los pasillos)
+        BoundingBox cabins = exitCabin(markers);
+        for (BlockPos lp : freeLights) {
+            if (cabins != null && cabins.inflatedBy(3).isInside(lp)) continue;
+            BlockState st = level.getBlockState(lp);
+            if (!st.hasProperty(com.smileprotocol.block.FluorescentLightBlock.LIT)) continue;
+            float r = rnd.nextFloat();
+            if (r < 0.12f) level.setBlock(lp, st.setValue(com.smileprotocol.block.FluorescentLightBlock.LIT, false), 2);
+            else if (r < 0.24f) level.setBlock(lp, st.setValue(com.smileprotocol.block.FluorescentLightBlock.FLICKERS, true), 2);
+        }
+        for (BlockPos d : labDoors) {
+            if (level.getBlockEntity(d) instanceof LabDoorBlockEntity be && be.type() == com.smileprotocol.mechanism.DoorType.NORMAL
+                    && rnd.nextFloat() < 0.35f) {
+                LabDoorBlock.setOpenAt(level, d, rnd.nextBoolean());
+            }
+        }
 
         // Lo ligado a un circuito empieza sin corriente
         for (FluorescentLightBlockEntity fl : lights) fl.onCircuit(level, false);
