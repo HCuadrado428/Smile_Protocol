@@ -125,6 +125,17 @@ public class Ahorcado extends SmilerBase implements QTEManager.Grabber {
         super.remove(reason);
     }
 
+    private void swapWithDecoy(ServerLevel level) {
+        java.util.UUID id = decoys.get(getRandom().nextInt(decoys.size()));
+        if (!(level.getEntity(id) instanceof Ahorcado d) || anchor == null || d.anchor == null) return;
+        if (Paciente.observed(level, getBoundingBox()) || Paciente.observed(level, d.getBoundingBox())) return;
+        Vec3 mine = anchor, theirs = d.anchor;
+        d.hangAt(mine);
+        hangAt(theirs);
+        level.playSound(null, BlockPos.containing(theirs), ModSounds.AHORCADO_CREAK.get(), SoundSource.HOSTILE, 0.5f, 0.8f);
+        SPDebug.log("ahorcado cambia de sitio con un muneco");
+    }
+
     /** Cuelga dos o tres muñecos iguales cerca, a la misma altura, donde quepan. */
     private void placeDecoys(ServerLevel level) {
         decoysPlaced = true;
@@ -218,6 +229,8 @@ public class Ahorcado extends SmilerBase implements QTEManager.Grabber {
                     }
                 }
                 if (lit > 0 || timer < 20) return;
+                // cuando nadie mira, cambia de sitio con uno de los munecos: el que creias falso es el
+                if (timer % 500 == 499 && !decoys.isEmpty()) swapWithDecoy(level);
                 ServerPlayer below = level.getEntitiesOfClass(ServerPlayer.class, getBoundingBox().inflate(1.2, 3.5, 1.2), this::valid)
                         .stream().filter(p -> p.getY() < getY() && horizontal(p) < 0.95)
                         .min(Comparator.comparingDouble(this::horizontal)).orElse(null);

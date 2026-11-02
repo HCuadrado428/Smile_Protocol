@@ -151,7 +151,15 @@ public class Paciente extends SmilerBase {
             while (pose == poseId()) pose = getRandom().nextInt(POSES);
             entityData.set(POSE_ID, (byte) pose);
             jumps++;
-            if (cracks() < MAX_CRACKS) entityData.set(CRACKS, (byte) (cracks() + 1));
+            if (cracks() < MAX_CRACKS) {
+                entityData.set(CRACKS, (byte) (cracks() + 1));
+                if (cracks() == MAX_CRACKS) {
+                    // se le cae el antebrazo: un golpe seco y un monton de yeso en el suelo
+                    level.playSound(null, BlockPos.containing(from), ModSounds.PACIENTE_CRACK.get(), SoundSource.HOSTILE, 1.2f, 0.6f);
+                    level.sendParticles(new net.minecraft.core.particles.BlockParticleOption(net.minecraft.core.particles.ParticleTypes.BLOCK,
+                            net.minecraft.world.level.block.Blocks.CALCITE.defaultBlockState()), from.x, from.y + 1.2, from.z, 40, 0.4, 0.6, 0.4, 0.1);
+                }
+            }
             // un crujido de yeso y huesos donde aparece (lo unico que se oye de el) y trozos que caen
             level.playSound(null, n, ModSounds.PACIENTE_CRACK.get(), SoundSource.HOSTILE, 0.8f, 0.85f + getRandom().nextFloat() * 0.3f);
             var chips = new net.minecraft.core.particles.BlockParticleOption(net.minecraft.core.particles.ParticleTypes.BLOCK,

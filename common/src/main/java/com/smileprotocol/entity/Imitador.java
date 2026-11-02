@@ -67,6 +67,10 @@ public class Imitador extends SmilerBase {
     private boolean cachedSeen;
     /** Pasos imitados que quedan por sonar. */
     private int stepsLeft;
+    /** Imitando los pasos de su presa justo detras de ella (ticks que quedan). */
+    private int shadowing;
+    private int shadowCd = 600;
+    @Nullable private Vec3 shadowFrom;
 
     public Imitador(EntityType<? extends PathfinderMob> type, Level level) {
         super(type, level);
@@ -138,6 +142,21 @@ public class Imitador extends SmilerBase {
                 if (--nextMimic <= 0 && d < 26) {
                     mimic(level, players);
                     return;
+                }
+                // a veces sus pasos suenan justo detras de ti, al compas de los tuyos, y paran cuando paras
+                if (--shadowCd <= 0 && alone(target, players)) {
+                    shadowCd = 900 + getRandom().nextInt(600);
+                    shadowing = 80;
+                }
+                if (shadowing > 0) {
+                    shadowing--;
+                    double v = shadowFrom == null ? 0 : target.position().subtract(shadowFrom).horizontalDistance();
+                    shadowFrom = target.position();
+                    if (v > 0.03 && target.tickCount % 9 == 0) {
+                        Vec3 back = target.position().subtract(target.getLookAngle().multiply(1, 0, 1).normalize().scale(3.5));
+                        level.playSound(null, BlockPos.containing(back), net.minecraft.sounds.SoundEvents.STONE_STEP,
+                                SoundSource.PLAYERS, 0.7f, 0.92f);
+                    }
                 }
                 if (--repath > 0) return;
                 repath = 20;

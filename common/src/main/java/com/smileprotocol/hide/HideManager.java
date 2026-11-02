@@ -118,11 +118,19 @@ public final class HideManager {
         else SEARCHING.remove(spot);
     }
 
+    /** Veces que alguien se ha metido en cada escondite (el Rastreador aprende los favoritos). */
+    private static final java.util.Map<BlockPos, Integer> USES = new java.util.HashMap<>();
+
+    public static int uses(BlockPos spot) {
+        return USES.getOrDefault(spot, 0);
+    }
+
     // Entrar y salir -----------------------------------------------------------------------------
 
     public static void enter(ServerPlayer p, BlockPos spot, HideType type, HideBlock block) {
         if (HIDDEN.containsKey(p.getUUID()) || occupants(spot) >= type.capacity()) return;
         com.smileprotocol.score.ScoreManager.onHide(p);
+        USES.merge(spot.immutable(), 1, Integer::sum);
         ServerLevel level = p.serverLevel();
         BlockState st = level.getBlockState(spot);
         Direction facing = st.hasProperty(HideBlock.FACING) ? st.getValue(HideBlock.FACING) : Direction.NORTH;

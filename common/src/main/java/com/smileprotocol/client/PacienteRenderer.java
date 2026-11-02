@@ -26,6 +26,9 @@ public class PacienteRenderer extends GeoEntityRenderer<Paciente> {
                     var c = getAnimationProcessor().getBone("crack" + i);
                     if (c != null) c.setHidden(i >= mob.cracks());
                 }
+                // tan agrietado que se le ha caido el antebrazo izquierdo
+                var arm = getAnimationProcessor().getBone("forearm_l");
+                if (arm != null) arm.setHidden(mob.cracks() >= Paciente.MAX_CRACKS);
                 var bone = getAnimationProcessor().getBone("grin");
                 if (bone == null) return;
                 var player = Minecraft.getInstance().player;

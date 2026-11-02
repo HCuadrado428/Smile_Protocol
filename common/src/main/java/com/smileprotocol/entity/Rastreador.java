@@ -664,11 +664,15 @@ public class Rastreador extends SmilerBase implements QTEManager.Grabber {
         toCheck.clear();
         Vec3 c = lastSeen != null ? lastSeen : position();
         List<BlockPos> spots = new ArrayList<>();
-        BoundingBox box = new BoundingBox(BlockPos.containing(c)).inflatedBy(7);
+        BoundingBox box = new BoundingBox(BlockPos.containing(c)).inflatedBy(10);
         CircuitManager.forEachBlockEntity(level, box, be -> {
-            if (be instanceof HideBlockEntity) spots.add(be.getBlockPos().immutable());
+            if (!(be instanceof HideBlockEntity)) return;
+            BlockPos p = be.getBlockPos().immutable();
+            // los cercanos, y los que ya sabe que usais aunque esten algo mas lejos
+            if (p.distToCenterSqr(c) <= 7.5 * 7.5 || HideManager.uses(p) > 0) spots.add(p);
         });
-        spots.sort(Comparator.comparingDouble(p -> p.distToCenterSqr(c)));
+        // aprende: primero los escondites que mas habeis usado esta partida, luego los cercanos
+        spots.sort(Comparator.comparingDouble(p -> p.distToCenterSqr(c) - HideManager.uses(p) * 40.0));
         if (seenHiding != null) {
             spots.remove(seenHiding);
             spots.add(0, seenHiding);

@@ -294,6 +294,9 @@ public class Berserker extends SmilerBase {
     }
 
     /** Abre las puertas normales del laboratorio que tiene delante; las cerradas con llave le cortan el paso. */
+    @javax.annotation.Nullable private BlockPos bashDoor;
+    private int bashes;
+
     private void openDoorsAhead(ServerLevel level, MobDef def) {
         if (!def.opensDoors() || getNavigation().isDone() || tickCount % 4 != 0) return;
         Vec3 dir = getDeltaMovement().multiply(1, 0, 1);
@@ -308,8 +311,23 @@ public class Berserker extends SmilerBase {
                 boolean free = be == null ? st.getBlock() instanceof DoorBlock d && d.type().canOpenByHand()
                         : be.type() == DoorType.NORMAL || be.unlocked();
                 if (free) {
-                    LabDoorBlock.setOpenAt(level, p, true);
-                    NoiseSystem.emit(level, Vec3.atCenterOf(p), 8f, NoiseType.DOOR, this);
+                    // no la abre: la revienta. Dos golpes que retumban y la puerta cede de golpe
+                    if (!p.equals(bashDoor)) {
+                        bashDoor = p;
+                        bashes = 0;
+                    }
+                    if (tickCount % 12 == 0) {
+                        bashes++;
+                        level.playSound(null, p, net.minecraft.sounds.SoundEvents.ZOMBIE_ATTACK_IRON_DOOR, net.minecraft.sounds.SoundSource.HOSTILE, 1.3f, 0.6f);
+                        level.sendParticles(new net.minecraft.core.particles.BlockParticleOption(net.minecraft.core.particles.ParticleTypes.BLOCK, st),
+                                p.getX() + 0.5, p.getY() + 1, p.getZ() + 0.5, 12, 0.3, 0.5, 0.3, 0.1);
+                        NoiseSystem.emit(level, Vec3.atCenterOf(p), 14f, NoiseType.DOOR, this);
+                        if (bashes >= 2) {
+                            LabDoorBlock.setOpenAt(level, p, true);
+                            bashDoor = null;
+                        }
+                    }
+                    getNavigation().stop();
                 }
                 return;
             }
