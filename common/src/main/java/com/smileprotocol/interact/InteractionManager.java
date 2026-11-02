@@ -53,6 +53,7 @@ public final class InteractionManager {
         float progress;
         final Vec3 start;
         int age;
+        int lastPulse = -100;
 
         Session(boolean entity, BlockPos pos, int entityId, InteractionSpec spec, Vec3 start) {
             this.entity = entity;
@@ -110,6 +111,28 @@ public final class InteractionManager {
         MotionManager.setAction(p, Action.INTERACT, spec.anim(), false);
         if (spec.ticks() <= 0) finish(p, s);
         else if (!entity) onProgressBlock(p, s, true);
+    }
+
+    /** Ritmo de la reanimacion: una compresion cada segundo; la ventana buena son los ultimos 8 ticks. */
+    public static final int PULSE_TICKS = 20, PULSE_WINDOW = 8;
+
+    /**
+     * Reanimando a un derribado: Espacio al ritmo del pulso le da un empujon (un 7 % mas); a
+     * destiempo se pierde un poco. Sin pulsar, se reanima igual, solo que mas despacio.
+     */
+    public static void onPulse(Payloads.RevivePulse in, ServerPlayer p) {
+        Session s = SESSIONS.get(p.getUUID());
+        if (s == null || !s.entity || s.spec == null || s.age - s.lastPulse < 6) return;
+        if (!(p.level().getEntity(s.entityId) instanceof ServerPlayer other) || !com.smileprotocol.downed.DownedManager.isDowned(other)) return;
+        s.lastPulse = s.age;
+        boolean onBeat = s.age % PULSE_TICKS >= PULSE_TICKS - PULSE_WINDOW;
+        if (onBeat) {
+            s.progress = Math.min(s.spec.ticks(), s.progress + s.spec.ticks() * 0.07f);
+            p.serverLevel().playSound(null, other.blockPosition(), com.smileprotocol.registry.ModSounds.PLAYER_HEARTBEAT.get(),
+                    net.minecraft.sounds.SoundSource.PLAYERS, 0.6f, 1.3f);
+        } else {
+            s.progress = Math.max(0, s.progress - 4);
+        }
     }
 
     public static void onDrop(Payloads.DropItem in, ServerPlayer p) {

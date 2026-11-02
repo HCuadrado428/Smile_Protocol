@@ -44,6 +44,21 @@ public final class ClientInteraction {
 
     private ClientInteraction() {}
 
+    private static boolean prevPulse;
+    private static int activeTicks;
+
+    /** Esta reanimando: mira a un compañero tumbado. */
+    public static boolean reviving(net.minecraft.client.Minecraft mc) {
+        return mc.crosshairPickEntity instanceof net.minecraft.world.entity.player.Player o && o != mc.player
+                && com.smileprotocol.motion.MotionStates.view(o).action() == com.smileprotocol.motion.Action.DOWNED;
+    }
+
+    /** Fase del pulso de la reanimacion (0..1; la ventana buena es el final). */
+    public static float pulsePhase(float pt) {
+        float t = (activeTicks + pt) % com.smileprotocol.interact.InteractionManager.PULSE_TICKS;
+        return t / com.smileprotocol.interact.InteractionManager.PULSE_TICKS;
+    }
+
     @Nullable public static InteractionSpec spec() { return spec; }
     public static Payloads.InteractState state() { return state; }
 
@@ -83,6 +98,13 @@ public final class ClientInteraction {
         prevRawUse = rawUse;
         if (!rawUse && !SPConfig.get().hold_toggle) needRelease = false;
         if (!rawUse && SPConfig.get().hold_toggle && !useToggled) needRelease = false;
+
+        // Reanimando: Espacio al ritmo del pulso (el servidor decide si era a tiempo)
+        boolean pulse = mc.options.keyJump.isDown();
+        if (pulse && !prevPulse && state.active() && reviving(mc)) SPNetwork.sendToServer(new Payloads.RevivePulse(true));
+        prevPulse = pulse;
+        if (state.active()) activeTicks++;
+        else activeTicks = 0;
 
         // Soltar el objeto activo (G)
         boolean drop = ClientMotion.isDown(SPConfig.get().key_drop);

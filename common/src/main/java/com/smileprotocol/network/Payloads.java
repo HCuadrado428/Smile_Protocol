@@ -484,6 +484,14 @@ public final class Payloads {
     }
 
     /** C -> S: tecla del walkie pulsada o soltada (README 17.3). */
+    /** Reanimando: una compresion (Espacio) al ritmo del pulso. */
+    public record RevivePulse(boolean pressed) implements CustomPacketPayload {
+        public static final Type<RevivePulse> TYPE = typeOf("revive_pulse");
+        public static final StreamCodec<ByteBuf, RevivePulse> CODEC = ByteBufCodecs.BOOL.map(RevivePulse::new, RevivePulse::pressed);
+
+        @Override public Type<RevivePulse> type() { return TYPE; }
+    }
+
     public record WalkieInput(boolean talk) implements CustomPacketPayload {
         public static final Type<WalkieInput> TYPE = typeOf("walkie_input");
         public static final StreamCodec<ByteBuf, WalkieInput> CODEC = ByteBufCodecs.BOOL.map(WalkieInput::new, WalkieInput::talk);

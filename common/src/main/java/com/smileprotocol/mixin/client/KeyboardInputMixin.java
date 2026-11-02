@@ -14,8 +14,11 @@ public abstract class KeyboardInputMixin {
 
     @Inject(method = "tick", at = @At("TAIL"))
     private void smileprotocol$lock(boolean slow, float sneakMultiplier, CallbackInfo ci) {
-        if (!ClientMotion.inputLocked()) return;
         Input self = (Input) (Object) this;
+        // reanimando, Espacio es la compresion: no salta (se cortaria la reanimacion)
+        if (com.smileprotocol.client.ClientInteraction.state().active()
+                && com.smileprotocol.client.ClientInteraction.reviving(net.minecraft.client.Minecraft.getInstance())) self.jumping = false;
+        if (!ClientMotion.inputLocked()) return;
         self.forwardImpulse = 0;
         self.leftImpulse = 0;
         self.up = self.down = self.left = self.right = false;

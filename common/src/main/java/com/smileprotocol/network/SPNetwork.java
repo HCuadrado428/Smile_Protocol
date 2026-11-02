@@ -70,6 +70,7 @@ public final class SPNetwork {
             new Def<>(Payloads.PlaceMarker.TYPE, Payloads.PlaceMarker.CODEC, false, com.smileprotocol.marker.MarkerManager::onInput),
             new Def<>(Payloads.SyncMarkers.TYPE, Payloads.SyncMarkers.CODEC, true, null),
             new Def<>(Payloads.WalkieInput.TYPE, Payloads.WalkieInput.CODEC, false, com.smileprotocol.voice.WalkieManager::onInput),
+            new Def<>(Payloads.RevivePulse.TYPE, Payloads.RevivePulse.CODEC, false, com.smileprotocol.interact.InteractionManager::onPulse),
             new Def<>(Payloads.SyncWalkie.TYPE, Payloads.SyncWalkie.CODEC, true, null)
     );
 

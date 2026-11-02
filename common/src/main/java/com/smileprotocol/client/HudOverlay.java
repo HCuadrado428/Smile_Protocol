@@ -122,6 +122,7 @@ public final class HudOverlay {
             } else if (inGame) {
                 if (ClientQTE.active()) {
                     if (grabbedByAhorcado()) renderSack(g, w, h);
+                    else renderGrabber(g, w, h);
                     renderQTE(g, font, w, h);
                 } else if (ClientState.downed) {
                     renderDowned(g, font, w, h);
@@ -198,6 +199,16 @@ public final class HudOverlay {
         if (st.active()) {
             Component prompt = hud(st.prompt());
             g.drawString(font, prompt, cx - font.width(prompt) / 2, y, BONE, true);
+            if (ClientInteraction.reviving(Minecraft.getInstance())) {
+                // el pulso: un corazon que crece; Espacio cuando esta en rojo
+                float ph = ClientInteraction.pulsePhase(0f);
+                boolean beat = ph >= 1f - com.smileprotocol.interact.InteractionManager.PULSE_WINDOW
+                        / (float) com.smileprotocol.interact.InteractionManager.PULSE_TICKS;
+                int r = 4 + (int) (ph * 6);
+                g.fill(cx - r, y - 24 - r, cx + r, y - 24 + r, beat ? 0xE0E0282C : 0x80A09080);
+                Component k = hud(Component.translatable("smileprotocol.hud.revive_pulse"));
+                g.drawString(font, k, cx + 16, y - 28, beat ? 0xFFE0282C : BONE_DIM, true);
+            }
             if (!com.smileprotocol.config.SPConfig.get().show_interact_bar && !st.waiting()) return;   // solo las manos
             int bw = 96, bx = cx - bw / 2, by = y + 12;
             float k = st.total() <= 0 ? 1f : Mth.clamp(st.progress() / (float) st.total(), 0f, 1f);
@@ -234,37 +245,41 @@ public final class HudOverlay {
         Payloads.SyncHide st = ClientHide.state();
         switch (st.overlay()) {
             case "crack" -> {
-                int gap = Math.max(10, w / 9), cx = w / 2;
-                g.fill(0, 0, cx - gap / 2, h, 0xF4040303);
-                g.fill(cx + gap / 2, 0, w, h, 0xF4040303);
-                g.fillGradient(cx - gap / 2, 0, cx + gap / 2, h / 4, 0xE0040303, 0x00040303);
-                g.fillGradient(cx - gap / 2, h * 3 / 4, cx + gap / 2, h, 0x00040303, 0xE0040303);
+                // rendija mas ancha y bordes que dejan pasar algo de luz: se ve lo que pasa fuera
+                int gap = Math.max(16, w / 5), cx = w / 2;
+                g.fill(0, 0, cx - gap / 2 - 24, h, 0xEC040303);
+                g.fill(cx + gap / 2 + 24, 0, w, h, 0xEC040303);
+                g.fillGradient(cx - gap / 2 - 24, 0, cx - gap / 2, h, 0xB0040303, 0xB0040303);
+                g.fillGradient(cx + gap / 2, 0, cx + gap / 2 + 24, h, 0xB0040303, 0xB0040303);
+                g.fillGradient(cx - gap / 2, 0, cx + gap / 2, h / 5, 0xA0040303, 0x00040303);
+                g.fillGradient(cx - gap / 2, h * 4 / 5, cx + gap / 2, h, 0x00040303, 0xA0040303);
             }
             case "low" -> {
-                g.fill(0, 0, w, h * 2 / 5, 0xF4050404);
-                g.fillGradient(0, h * 2 / 5, w, h * 3 / 5, 0xF4050404, 0x30050404);
+                g.fill(0, 0, w, h * 3 / 10, 0xF0050404);
+                g.fillGradient(0, h * 3 / 10, w, h / 2, 0xF0050404, 0x18050404);
                 g.fillGradient(0, h - h / 8, w, h, 0x00050404, 0xC0050404);
                 // la sabana manchada cuelga por delante
                 g.fillGradient(0, h * 2 / 5 - 4, w, h * 2 / 5 + 10, 0x00000000, 0x40400808);
             }
             case "cloth" -> {
-                g.fill(0, 0, w, h, 0x58586850);
-                g.fillGradient(0, 0, w, h / 3, 0x80201810, 0x00201810);
+                g.fill(0, 0, w, h, 0x40586850);
+                g.fillGradient(0, 0, w, h / 3, 0x70201810, 0x00201810);
             }
             default -> {
-                int slits = 6, sh = Math.max(3, h / 70), gap = Math.max(sh * 2, h / 22);
+                // rejilla de taquilla: ranuras mas altas y laminas finas, con algo de luz por los bordes
+                int slits = 6, sh = Math.max(5, h / 34), gap = Math.max(3, h / 70);
                 int band = slits * sh + (slits - 1) * gap;
                 int top = h / 2 - band / 2;
-                int sx0 = w / 2 - w / 3, sx1 = w / 2 + w / 3;
-                g.fill(0, 0, w, top, 0xF6030303);
-                g.fill(0, top + band, w, h, 0xF6030303);
-                g.fill(0, top, sx0, top + band, 0xF6030303);
-                g.fill(sx1, top, w, top + band, 0xF6030303);
+                int sx0 = w / 2 - w * 2 / 5, sx1 = w / 2 + w * 2 / 5;
+                g.fill(0, 0, w, top, 0xE8030303);
+                g.fill(0, top + band, w, h, 0xE8030303);
+                g.fill(0, top, sx0, top + band, 0xE8030303);
+                g.fill(sx1, top, w, top + band, 0xE8030303);
                 for (int i = 0; i < slits - 1; i++) {
                     int y0 = top + i * (sh + gap) + sh;
-                    g.fill(sx0, y0, sx1, y0 + gap, 0xF6030303);
+                    g.fill(sx0, y0, sx1, y0 + gap, 0xF0030303);
+                    g.fill(sx0, y0 + gap, sx1, y0 + gap + 1, 0x30A09080);     // canto de la lamina con luz
                 }
-                g.fill(sx0, top, sx1, top + band, 0x22000000);
             }
         }
 
@@ -286,6 +301,55 @@ public final class HudOverlay {
     }
 
     /** Minijuego de escape (README 18): titulo garabateado, tiempo en sangre y el control de cada tipo. */
+    /**
+     * Cada monstruo agarra a su manera: el Rastreador araña la pantalla, el Apagon la llena de humo
+     * por los bordes, Smiley te mira con el ojo rojo encima y el Berserker te zarandea.
+     */
+    private static void renderGrabber(GuiGraphics g, int w, int h) {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.player == null || mc.level == null) return;
+        var near = mc.level.getEntitiesOfClass(com.smileprotocol.entity.SPMonster.class, mc.player.getBoundingBox().inflate(3.5));
+        if (near.isEmpty()) return;
+        var m = near.stream().min(java.util.Comparator.comparingDouble(e -> e.distanceToSqr(mc.player))).get();
+        long t = Util.getMillis();
+        if (m instanceof com.smileprotocol.entity.Rastreador) {
+            // tres zarpazos que cruzan la pantalla
+            for (int k = 0; k < 3; k++) {
+                int x0 = w / 5 + k * w / 7, len = h * 2 / 3;
+                for (int i = 0; i < len; i += 2) {
+                    int x = x0 + i / 3 + (int) (Math.sin((i + k * 40) * 0.05) * 3);
+                    int y = h / 6 + i;
+                    int a = 140 - Math.abs(i - len / 2) * 140 / len;
+                    g.fill(x, y, x + 3, y + 2, (Math.max(0, a) << 24) | 0x5A0A0E);
+                }
+            }
+        } else if (m instanceof com.smileprotocol.entity.Apagon) {
+            // el humo se cierra desde los bordes y respira
+            int edge = (int) (Math.min(w, h) * (0.22 + 0.04 * Math.sin(t / 300.0)));
+            g.fillGradient(0, 0, w, edge, 0xF0050506, 0x00050506);
+            g.fillGradient(0, h - edge, w, h, 0x00050506, 0xF0050506);
+            for (int i = 0; i < edge; i += 4) {
+                int a = 0xF0 * (edge - i) / edge;
+                g.fill(i, 0, i + 4, h, a << 24 | 0x050506);
+                g.fill(w - i - 4, 0, w - i, h, a << 24 | 0x050506);
+            }
+        } else if (m instanceof com.smileprotocol.entity.Smiley) {
+            // su ojo, enorme y rojo, encima de ti; bordes negros
+            g.fillGradient(0, 0, w, h / 3, 0xE0000000, 0x00000000);
+            g.fillGradient(0, h * 2 / 3, w, h, 0x00000000, 0xE0000000);
+            int r = Math.min(w, h) / 9, ex = w / 2 + w / 9, ey = h / 4;
+            float pulse = 0.6f + 0.4f * (float) Math.sin(t / 160.0);
+            for (int i = r; i > 0; i -= 2) {
+                int a = (int) (60 * pulse * (r - i) / r) + 10;
+                g.fill(ex - i, ey - i / 2, ex + i, ey + i / 2, a << 24 | 0xC80C10);
+            }
+            g.fill(ex - 3, ey - r / 3, ex + 3, ey + r / 3, 0xF0000000);
+        } else if (m instanceof com.smileprotocol.entity.Berserker) {
+            int a = (int) (60 + 50 * Math.abs(Math.sin(t / 90.0)));
+            g.fill(0, 0, w, h, a << 24 | 0x400406);
+        }
+    }
+
     /** El Ahorcado le ha caido en la cara (esta a menos de 2,5 bloques agarrando). */
     private static boolean grabbedByAhorcado() {
         Minecraft mc = Minecraft.getInstance();

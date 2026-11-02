@@ -87,8 +87,23 @@ public final class WalkieManager {
         OFF.remove(p.getUUID());
     }
 
-    /** Encender o apagar (click derecho mantenido, README 11.1). */
+    /** Canal de cada walkie: 1 (todos) o 2 (privado: solo le oyen los que esten en el 2). */
+    private static final java.util.Map<UUID, Integer> CHANNEL = new java.util.HashMap<>();
+
+    public static int channel(UUID player) {
+        return CHANNEL.getOrDefault(player, 1);
+    }
+
+    /** Encender o apagar (click derecho mantenido, README 11.1); agachado, cambia de canal (1 / 2). */
     public static void toggle(ServerPlayer p) {
+        if (p.isShiftKeyDown() && isOn(p)) {
+            int ch = channel(p.getUUID()) == 1 ? 2 : 1;
+            CHANNEL.put(p.getUUID(), ch);
+            stopTx(p);
+            p.displayClientMessage(net.minecraft.network.chat.Component.translatable("smileprotocol.walkie.channel", ch), true);
+            p.serverLevel().playSound(null, p.blockPosition(), ModSounds.WALKIE_CLICK.get(), SoundSource.PLAYERS, 0.4f, ch == 2 ? 1.3f : 0.9f);
+            return;
+        }
         if (!OFF.remove(p.getUUID())) {
             OFF.add(p.getUUID());
             stopTx(p);
@@ -103,6 +118,7 @@ public final class WalkieManager {
             if (TX.contains(p.getUUID()) || !canTransmit(p)) return;
             TX.add(p.getUUID());
             p.serverLevel().playSound(null, p.blockPosition(), ModSounds.WALKIE_CLICK.get(), SoundSource.PLAYERS, 0.35f, 1f);
+            if (com.smileprotocol.downed.DownedManager.isDowned(p)) cryForHelp(p);
             updateRoutes(p);
             SPDebug.log(p.getGameProfile().getName() + " transmite por el walkie");
         } else {
@@ -119,10 +135,30 @@ public final class WalkieManager {
         if (b != null) b.walkieEnd(p.getUUID());
     }
 
-    /** Con el walkie en el hueco activo y encendido; derribado tambien (para pedir ayuda). */
+    /** Con el walkie en el hueco activo y encendido; derribado, con tenerlo encima basta (para pedir ayuda). */
     public static boolean canTransmit(ServerPlayer p) {
         if (!enabled() || !SPPlayerData.inSP(p) || p.isSpectator() || DeathManager.isDead(p) || !isOn(p)) return false;
+        if (com.smileprotocol.downed.DownedManager.isDowned(p)) return hasWalkie(p);
         return isWalkie(SPPlayerData.of(p).getSPInventory().getSelectedStack());
+    }
+
+    /**
+     * Derribado y apretando el walkie: los demas le oyen gritar pidiendo ayuda por la radio y les
+     * aparece su marca de ayuda.
+     */
+    private static void cryForHelp(ServerPlayer p) {
+        Group g = RunManager.groupOf(p);
+        if (g == null) return;
+        for (UUID id : g.members().keySet()) {
+            if (id.equals(p.getUUID())) continue;
+            ServerPlayer o = p.server.getPlayerList().getPlayer(id);
+            if (o == null || !SPPlayerData.inSP(o) || DeathManager.isDead(o) || !hasWalkie(o) || !isOn(o)) continue;
+            o.playNotifySound(ModSounds.WALKIE_CRACKLE.get(), SoundSource.PLAYERS, 0.8f, 1f);
+            o.playNotifySound(ModSounds.PLAYER_GROAN.get(), SoundSource.PLAYERS, 0.9f, 1.15f);
+            o.displayClientMessage(net.minecraft.network.chat.Component.translatable("smileprotocol.walkie.help",
+                    p.getDisplayName(), (int) o.distanceTo(p)).withStyle(net.minecraft.ChatFormatting.RED), true);
+        }
+        com.smileprotocol.marker.MarkerManager.onInput(new Payloads.PlaceMarker(com.smileprotocol.marker.MarkerManager.HELP), p);
     }
 
     private static void updateRoutes(ServerPlayer sender) {
@@ -136,6 +172,7 @@ public final class WalkieManager {
                 if (o == null || !SPPlayerData.inSP(o)) continue;
                 boolean dead = DeathManager.isDead(o);
                 if (!dead && (!hasWalkie(o) || !isOn(o))) continue;
+                if (!dead && channel(id) != channel(sender.getUUID())) continue;     // otro canal: no le llega
                 out.add(new Rx(id, senderNoise || (!dead && interference(o))));
             }
         }

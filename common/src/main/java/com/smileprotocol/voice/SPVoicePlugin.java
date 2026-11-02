@@ -274,8 +274,11 @@ public class SPVoicePlugin implements VoicechatPlugin, VoiceBridge {
             double y = Math.tanh(hpOut * 2.6) * 0.7;
             y += (rng.nextDouble() - 0.5) * 0.012;
             if (interference) {
+                // la voz se deforma: anillo metalico que ondula, trozos que se cortan y cuantizada
+                double ring = Math.sin(2 * Math.PI * (70 + 40 * Math.sin(i / 6000.0)) * i / 48000.0);
+                y = y * (0.45 + 0.55 * ring);
                 if (i % 240 == 0) drop = rng.nextFloat() < 0.22f;
-                y = drop ? (rng.nextDouble() - 0.5) * 0.25 : Math.round(y * 12) / 12.0 + (rng.nextDouble() - 0.5) * 0.08;
+                y = drop ? (rng.nextDouble() - 0.5) * 0.25 : Math.round(y * 10) / 10.0 + (rng.nextDouble() - 0.5) * 0.08;
             }
             out[i] = (short) Math.max(Short.MIN_VALUE, Math.min(Short.MAX_VALUE, y * 32767));
         }
