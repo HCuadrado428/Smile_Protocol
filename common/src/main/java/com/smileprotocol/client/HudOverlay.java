@@ -160,7 +160,7 @@ public final class HudOverlay {
     // HUD que se esconde -------------------------------------------------------------------------
 
     private static long hudActive;
-    private static int lastSelected = -1;
+    private static int hudSelected = -1;
     private static float lastHealth = -1;
 
     /**
@@ -175,11 +175,11 @@ public final class HudOverlay {
         float hp = p.getHealth();
         boolean busy = ClientWheel.open() || ClientInteraction.state().active() || hp < p.getMaxHealth() * 0.6f
                 || com.smileprotocol.client.light.Flashlight.battery(p.getId()) < 0.25f;
-        if (ClientState.selected() != lastSelected || Math.abs(hp - lastHealth) > 0.01f
+        if (ClientState.selected() != hudSelected || Math.abs(hp - lastHealth) > 0.01f
                 || now - ClientState.missionChanged < 200 || busy) {
             hudActive = now;
         }
-        lastSelected = ClientState.selected();
+        hudSelected = ClientState.selected();
         lastHealth = hp;
         return now - hudActive < 6000;
     }
