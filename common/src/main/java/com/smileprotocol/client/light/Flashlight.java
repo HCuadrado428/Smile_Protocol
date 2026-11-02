@@ -11,7 +11,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
-import org.joml.Quaternionf;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -135,7 +134,7 @@ public final class Flashlight {
                     float walk = p.walkDist * 6.2f;
                     float amp = Math.min(1f, (float) p.getDeltaMovement().horizontalDistance() * 9f);
                     float sy = lagYaw + Mth.sin(walk) * 0.9f * amp, sp = lagPitch + Math.abs(Mth.cos(walk)) * 0.8f * amp;
-                    d.getOrientationMutable().set(new Quaternionf().rotationYXZ(Mth.PI - sy * Mth.DEG_TO_RAD, -sp * Mth.DEG_TO_RAD, 0f));
+                    aim(d, sp, sy);
                     var cp = camera.getPosition();
                     var right = net.minecraft.world.phys.Vec3.directionFromRotation(0, yaw + 90);
                     d.getPositionMutable().set(cp.x + right.x * 0.18, cp.y - 0.12, cp.z + right.z * 0.18);
@@ -150,7 +149,7 @@ public final class Flashlight {
                     }
                 } else {
                     float yaw = p.getViewYRot(pt), pitch = p.getViewXRot(pt);
-                    d.getOrientationMutable().set(new Quaternionf().rotationYXZ(Mth.PI - yaw * Mth.DEG_TO_RAD, -pitch * Mth.DEG_TO_RAD, 0f));
+                    aim(d, pitch, yaw);
                     d.getPositionMutable().set(p.getX(), p.getEyeY() - 0.15, p.getZ());
                     d.markDirty();
                 }
@@ -175,6 +174,19 @@ public final class Flashlight {
             clear();
             SmileProtocol.LOGGER.warn("Veil: no se pudo crear la luz de la linterna (" + failures + ")", t);
         }
+    }
+
+    /**
+     * Orienta el haz hacia donde mira (grados de Minecraft). Veil guarda la rotacion de mundo a local
+     * y el haz sale por +Z local: igual que su propio {@code setTo(camera)}, se usa lookAlong con la
+     * direccion invertida. La rotacion por angulos de antes solo acertaba mirando a algunos lados.
+     */
+    private static void aim(AreaLightData d, float pitch, float yaw) {
+        var look = net.minecraft.world.phys.Vec3.directionFromRotation(pitch, yaw);
+        var up = net.minecraft.world.phys.Vec3.directionFromRotation(pitch - 90f, yaw);
+        d.getOrientationMutable().identity().lookAlong(
+                new org.joml.Vector3f((float) -look.x, (float) -look.y, (float) -look.z),
+                new org.joml.Vector3f((float) up.x, (float) up.y, (float) up.z));
     }
 
     public static void clear() {
