@@ -44,7 +44,13 @@ public final class MotionStates {
             net.minecraft.core.BlockPos feet = net.minecraft.core.BlockPos.containing(
                     player.getX() + dx * reach, player.getY() + 0.1, player.getZ() + dz * reach);
             if (feet.equals(player.blockPosition())) continue;
-            if (free(level, feet) && !free(level, feet.above())) return true;
+            if (!free(level, feet) || free(level, feet.above())) continue;
+            // techo bajo: solo se tumba si ni agachado cabe (una baldosa a bloque y medio no es un conducto)
+            net.minecraft.core.BlockPos top = feet.above();
+            double ceiling = top.getY() + level.getBlockState(top).getCollisionShape(level, top)
+                    .min(net.minecraft.core.Direction.Axis.Y);
+            float crouch = player.getDimensions(net.minecraft.world.entity.Pose.CROUCHING).height();
+            if (ceiling - player.getY() < crouch - 0.01) return true;
         }
         return false;
     }

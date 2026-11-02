@@ -445,6 +445,33 @@ public final class ClientSelfTest {
             log((ventOk ? "OK" : "FALLO") + " gateando dentro del conducto (pose " + sp.getPose() + ")");
         }));
         SHOTS.add(() -> grab(mc, "32_conducto"));
+        // agachado bajo una baldosa a bloque y medio no cuenta como conducto; bajo un bloque entero si
+        BlockPos[] lowAt = {null};
+        Vec3[] lowBack = {null};
+        SHOTS.add(() -> server.execute(() -> {
+            lowBack[0] = sp.position();
+            BlockPos b0 = sp.blockPosition().above(30);
+            lowAt[0] = b0;
+            for (int i = -1; i <= 3; i++) {
+                for (int h = 0; h <= 2; h++) level.setBlockAndUpdate(b0.south(i).above(h), net.minecraft.world.level.block.Blocks.AIR.defaultBlockState());
+                level.setBlockAndUpdate(b0.below().south(i), net.minecraft.world.level.block.Blocks.STONE.defaultBlockState());
+            }
+            level.setBlockAndUpdate(b0.south(1).above(), net.minecraft.world.level.block.Blocks.STONE_SLAB.defaultBlockState()
+                    .setValue(net.minecraft.world.level.block.SlabBlock.TYPE, net.minecraft.world.level.block.state.properties.SlabType.TOP));
+            SPSessionManager.teleport(sp, level, Vec3.atBottomCenterOf(b0).add(0, 0, 0.3), 0f, 0f);
+        }));
+        SHOTS.add(() -> wait = 6);
+        SHOTS.add(() -> server.execute(() -> {
+            if (lowAt[0] == null) return;
+            boolean slab = com.smileprotocol.motion.MotionStates.ventAhead(sp);
+            level.setBlockAndUpdate(lowAt[0].south(1).above(), net.minecraft.world.level.block.Blocks.STONE.defaultBlockState());
+            boolean full = com.smileprotocol.motion.MotionStates.ventAhead(sp);
+            log((!slab && full ? "OK" : "FALLO") + " baldosa a bloque y medio no tumba (baldosa=" + slab + " bloque=" + full + " suelo=" + sp.onGround() + ")");
+            for (int i = -1; i <= 3; i++) level.setBlockAndUpdate(lowAt[0].below().south(i), net.minecraft.world.level.block.Blocks.AIR.defaultBlockState());
+            level.setBlockAndUpdate(lowAt[0].south(1).above(), net.minecraft.world.level.block.Blocks.AIR.defaultBlockState());
+            SPSessionManager.teleport(sp, level, lowBack[0], ductDir[0] == null ? 0f : ductDir[0].toYRot(), 0f);
+        }));
+        SHOTS.add(() -> wait = 10);
         // el Rastreador sigue por los conductos: va a la rejilla, se mete y alcanza al que gatea
         com.smileprotocol.entity.Rastreador[] rv = {null};
         boolean[] rvEntered = {false};
