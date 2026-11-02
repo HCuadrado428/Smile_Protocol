@@ -139,6 +139,7 @@ public final class ClientController {
             while (km.consumeClick()) { /* descartar */ }
         }
         ClientIsolation.tickKeys(mc);
+        ClientWheel.tick(mc);
     }
 
     /** Rueda del raton: +1 / -1 hueco. */
@@ -146,7 +147,7 @@ public final class ClientController {
         select(Math.floorMod(ClientState.selected() + dir, SPInventory.SIZE));
     }
 
-    private static void select(int slot) {
+    static void select(int slot) {
         if (slot == ClientState.selected()) return;
         ClientState.select(slot);
         SPNetwork.sendToServer(new Payloads.SelectSlot(slot));

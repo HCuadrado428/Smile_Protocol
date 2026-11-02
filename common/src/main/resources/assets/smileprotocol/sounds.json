@@ -246,6 +246,24 @@
       "smileprotocol:smiley/tap"
     ]
   },
+  "player.pant": {
+    "subtitle": "subtitles.smileprotocol.player.pant",
+    "sounds": [
+      "smileprotocol:player/pant"
+    ]
+  },
+  "player.effort": {
+    "subtitle": "subtitles.smileprotocol.player.effort",
+    "sounds": [
+      "smileprotocol:player/effort"
+    ]
+  },
+  "player.flashlight_shake": {
+    "subtitle": "subtitles.smileprotocol.player.flashlight_shake",
+    "sounds": [
+      "smileprotocol:player/flashlight_shake"
+    ]
+  },
   "smiley.smear": {
     "subtitle": "subtitles.smileprotocol.smiley.smear",
     "sounds": [

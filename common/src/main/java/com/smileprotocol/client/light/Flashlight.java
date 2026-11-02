@@ -32,7 +32,11 @@ public final class Flashlight {
     private static long lastToggle;
     private static final Map<Integer, LightRenderHandle<AreaLightData>> BEAMS = new HashMap<>();
     private static final Map<Integer, LightRenderHandle<PointLightData>> FILL = new HashMap<>();
+    /** Halo ancho y tenue alrededor del haz: el cono no acaba de golpe. */
+    private static final Map<Integer, LightRenderHandle<AreaLightData>> SPILL = new HashMap<>();
+    private static int dustFrame;
     private static boolean failed;
+    private static int failures;
 
     /** Direccion del haz local con retraso (la mano sigue a la mirada con algo de inercia). */
     private static float lagYaw = Float.NaN, lagPitch;
@@ -111,10 +115,14 @@ public final class Flashlight {
                                 .setColor(R, G, B).setBrightness(2.2f)));
                 LightRenderHandle<PointLightData> fill = FILL.computeIfAbsent(id, k -> VeilRenderSystem.renderer().getLightRenderer()
                         .addLight(new PointLightData().setRadius(3.2f).setColor(R, G, B).setBrightness(0.35f)));
+                LightRenderHandle<AreaLightData> spill = SPILL.computeIfAbsent(id, k -> VeilRenderSystem.renderer().getLightRenderer()
+                        .addLight(new AreaLightData().setSize(0.08, 0.08).setAngle(1.05f).setDistance(11f)
+                                .setColor(R, G * 0.98f, B * 0.95f).setBrightness(0.45f)));
                 AreaLightData d = beam.getLightData();
                 float k = intensity(id);
                 d.setBrightness(2.2f * k);
                 fill.getLightData().setBrightness(0.35f * k);
+                spill.getLightData().setBrightness(0.45f * k);
                 if (p == mc.player && camera.getEntity() == p) {
                     // en la mano: el haz va un poco por detras de la mirada y se balancea al andar
                     float yaw = camera.getYRot(), pitch = camera.getXRot();
@@ -132,12 +140,24 @@ public final class Flashlight {
                     var right = net.minecraft.world.phys.Vec3.directionFromRotation(0, yaw + 90);
                     d.getPositionMutable().set(cp.x + right.x * 0.18, cp.y - 0.12, cp.z + right.z * 0.18);
                     d.markDirty();
+                    // polvo flotando en el haz
+                    if (k > 0.2f && ++dustFrame % 4 == 0) {
+                        var look = net.minecraft.world.phys.Vec3.directionFromRotation(sp, sy);
+                        double dist = 1.2 + mc.level.random.nextDouble() * 5;
+                        var at = cp.add(look.scale(dist)).add((mc.level.random.nextDouble() - 0.5) * dist * 0.35,
+                                (mc.level.random.nextDouble() - 0.5) * dist * 0.35, (mc.level.random.nextDouble() - 0.5) * dist * 0.35);
+                        mc.level.addParticle(net.minecraft.core.particles.ParticleTypes.WHITE_ASH, at.x, at.y, at.z, 0, -0.002, 0);
+                    }
                 } else {
                     float yaw = p.getViewYRot(pt), pitch = p.getViewXRot(pt);
                     d.getOrientationMutable().set(new Quaternionf().rotationYXZ(Mth.PI - yaw * Mth.DEG_TO_RAD, -pitch * Mth.DEG_TO_RAD, 0f));
                     d.getPositionMutable().set(p.getX(), p.getEyeY() - 0.15, p.getZ());
                     d.markDirty();
                 }
+                AreaLightData sd = spill.getLightData();
+                sd.getOrientationMutable().set(d.getOrientationMutable());
+                sd.getPositionMutable().set(d.getPositionMutable());
+                sd.markDirty();
                 fill.getLightData().setPosition(p.getX(), p.getEyeY(), p.getZ());
             }
             for (int id : Set.copyOf(BEAMS.keySet())) {
@@ -145,19 +165,25 @@ public final class Flashlight {
                     BEAMS.remove(id).free();
                     LightRenderHandle<PointLightData> f = FILL.remove(id);
                     if (f != null) f.free();
+                    LightRenderHandle<AreaLightData> sl = SPILL.remove(id);
+                    if (sl != null) sl.free();
                 }
             }
         } catch (Throwable t) {
-            failed = true;
-            SmileProtocol.LOGGER.warn("Veil: no se pudo crear la luz de la linterna", t);
+            // un fallo suelto no apaga la linterna para siempre: se reintenta, y solo se rinde tras varios
+            if (++failures > 20) failed = true;
+            clear();
+            SmileProtocol.LOGGER.warn("Veil: no se pudo crear la luz de la linterna (" + failures + ")", t);
         }
     }
 
     public static void clear() {
         BEAMS.values().forEach(LightRenderHandle::free);
         FILL.values().forEach(LightRenderHandle::free);
+        SPILL.values().forEach(LightRenderHandle::free);
         BEAMS.clear();
         FILL.clear();
+        SPILL.clear();
     }
 
     public static void reset() {

@@ -129,6 +129,10 @@ public final class SPConfig {
         public String key_lean_right = "key.keyboard.e";
         public String key_drop = "key.keyboard.g";
         public String key_flashlight = "key.keyboard.f";
+        /** Mantener para abrir la rueda de objetos (el raton elige el hueco). */
+        public String key_wheel = "key.keyboard.left.alt";
+        /** Barra de progreso al interactuar (puertas, valvulas...). */
+        public boolean show_interact_bar = true;
         /** Segundos de linterna encendida con la bateria llena (README 10). */
         public int flashlight_battery_seconds = 420;
 
@@ -313,6 +317,7 @@ public final class SPConfig {
             hud_scale = Math.max(0.75f, Math.min(1.5f, hud_scale));
             if (colorblind == null) colorblind = "OFF";
             if (key_accessibility == null) key_accessibility = "key.keyboard.f7";
+            if (key_wheel == null) key_wheel = "key.keyboard.left.alt";
             // la sala final era final_room hasta que llego el Laboratorio Cero (ahora es intermedia)
             if (final_zone.equals("smileprotocol:final_room")) final_zone = "smileprotocol:smiley_lab";
             // ya no corre: las velocidades antiguas (0.55, 0.8, 1.15) pasan a las nuevas

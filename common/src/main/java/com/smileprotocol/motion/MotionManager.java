@@ -264,6 +264,7 @@ public final class MotionManager {
                 s.stride = 0;
                 float r = crawl ? cfg.noise_crawl : p.isCrouching() || p.isVisuallyCrawling() ? cfg.noise_crouch_walk : p.isSprinting() ? cfg.noise_sprint : cfg.noise_walk;
                 if (vent) r *= cfg.noise_vent_mult;
+                if (s.lean != 0) r *= 0.5f;          // asomado: pasos cortos y con cuidado
                 NoiseType t = crawl ? NoiseType.CRAWL : p.isSprinting() ? NoiseType.SPRINT : NoiseType.FOOTSTEP;
                 NoiseSystem.emit(p.serverLevel(), pos, r, t, p);
             }

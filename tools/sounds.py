@@ -671,6 +671,57 @@ def save_smiley2():
     print("respiracion, risita y tamborileo de Smiley escritos")
 
 
+def player_pant():
+    """El jugador sin aliento tras correr: tres jadeos cortos por la boca, cada vez mas suaves."""
+    r = np.random.default_rng(471)
+    n = int(SR * 2.2)
+    x = np.zeros(n)
+    for k, t0 in enumerate((0.0, 0.36, 0.72, 1.08, 1.44, 1.8)):
+        a = int(t0 * SR)
+        m = int(SR * (0.16 if k % 2 == 0 else 0.2))
+        f0 = 900 if k % 2 == 0 else 650
+        seg = bandpass(noise(m, r), f0, 2.2) + bandpass(noise(m, r), f0 * 2.3, 3) * 0.4
+        seg *= np.sin(np.pi * np.arange(m) / m) ** 1.4 * (1 - k * 0.1)
+        x[a:a + m] += seg[:max(0, min(m, n - a))]
+    return lowpass(x, 3500)
+
+
+def player_effort():
+    """Esfuerzo al trepar: un gruñido corto con la garganta cerrada y roce de ropa."""
+    r = np.random.default_rng(481)
+    n = int(SR * 0.6)
+    tt = np.arange(n) / SR
+    f = 140 * (1 + 0.15 * np.sin(2 * np.pi * 6 * tt))
+    voice = np.tanh(2.2 * np.sin(2 * np.pi * np.cumsum(f) / SR)) * env(n, 0.03, 0.3)
+    breath = bandpass(noise(n, r), 700, 1.5) * env(n, 0.01, 0.25) * 0.7
+    cloth = highpass(noise(n, r), 2500) * env(n, 0.002, 0.08) * 0.4
+    return lowpass(voice * 0.6 + breath + cloth, 3000)
+
+
+def flashlight_shake():
+    """Agitar la linterna: pilas que traquetean dentro del tubo y un clic."""
+    r = np.random.default_rng(491)
+    n = int(SR * 0.7)
+    x = np.zeros(n)
+    for k in range(7):
+        a = int((0.02 + k * 0.085 + r.uniform(0, 0.02)) * SR)
+        m = int(SR * 0.05)
+        tm = np.arange(m) / SR
+        hit = (np.sin(2 * np.pi * r.uniform(900, 1500) * tm) + highpass(noise(m, r), 3000) * 0.6) * env(m, 0.0005, 0.02)
+        x[a:a + m] += hit[:max(0, min(m, n - a))]
+    a = int(0.62 * SR)
+    m = int(SR * 0.04)
+    x[a:a + m] += highpass(noise(m, r), 4000) * env(m, 0.0005, 0.01) * 1.2
+    return x
+
+
+def save_player2():
+    save("player/pant", player_pant())
+    save("player/effort", player_effort())
+    save("player/flashlight_shake", flashlight_shake())
+    print("jadeo, esfuerzo y linterna agitada escritos")
+
+
 def main():
     for i in range(3):
         save(f"berserker/step{i + 1}", step(10 + i))
@@ -734,5 +785,7 @@ if __name__ == "__main__":
     import sys
     if sys.argv[1:] == ["smiley2"]:
         save_smiley2()
+    elif sys.argv[1:] == ["player2"]:
+        save_player2()
     else:
         main()

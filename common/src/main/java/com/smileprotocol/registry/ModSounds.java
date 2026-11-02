@@ -24,6 +24,9 @@ public final class ModSounds {
     public static final Supplier<SoundEvent> MOB_TEAR = register("mob.tear");
     public static final Supplier<SoundEvent> MOB_SQUELCH = register("mob.squelch");
     public static final Supplier<SoundEvent> PLAYER_REVIVE = register("player.revive");
+    public static final Supplier<SoundEvent> PLAYER_PANT = register("player.pant");
+    public static final Supplier<SoundEvent> PLAYER_EFFORT = register("player.effort");
+    public static final Supplier<SoundEvent> FLASHLIGHT_SHAKE = register("player.flashlight_shake");
     public static final Supplier<SoundEvent> EVENT_SURGE = register("event.surge");
     public static final Supplier<SoundEvent> EVENT_ALARM = register("event.alarm");
     public static final Supplier<SoundEvent> EVENT_STING = register("event.sting");

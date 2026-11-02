@@ -54,6 +54,8 @@ public class AccessibilityScreen extends Screen {
         y += 24;
         addRenderableWidget(toggle(x1, y, bw, "lean_toggle", () -> c.lean_toggle, v -> c.lean_toggle = v));
         addRenderableWidget(toggle(x2, y, bw, "tension_shader", () -> c.tension_shader, v -> c.tension_shader = v));
+        y += 24;
+        addRenderableWidget(toggle(x1, y, bw, "show_interact_bar", () -> c.show_interact_bar, v -> c.show_interact_bar = v));
         y += 34;
         addRenderableWidget(Button.builder(Component.translatable("gui.done"), b -> onClose()).bounds(width / 2 - 100, y, 200, 20).build());
     }

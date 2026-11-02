@@ -27,6 +27,8 @@ public final class Flashlights {
 
     private static final Set<UUID> ON = new HashSet<>();
     private static final Map<UUID, Float> BATTERY = new HashMap<>();
+    /** Ultima vez que agito la linterna sin bateria (tick del servidor). */
+    private static final Map<UUID, Integer> SHAKEN = new HashMap<>();
 
     private Flashlights() {}
 
@@ -53,7 +55,28 @@ public final class Flashlights {
 
     public static void onToggle(Payloads.ToggleFlashlight in, ServerPlayer p) {
         if (!SPPlayerData.inSP(p)) return;
+        if (in.on() && battery(p) <= 0f) {
+            shake(p);
+            return;
+        }
         set(p, in.on() && battery(p) > 0f);
+    }
+
+    /**
+     * Sin bateria, encenderla es agitarla: las pilas traquetean y da luz unos segundos (una vez
+     * cada 15 s como mucho).
+     */
+    private static void shake(ServerPlayer p) {
+        int now = p.server.getTickCount();
+        p.serverLevel().playSound(null, p.blockPosition(), com.smileprotocol.registry.ModSounds.FLASHLIGHT_SHAKE.get(), SoundSource.PLAYERS, 0.7f, 1f);
+        Integer last = SHAKEN.get(p.getUUID());
+        if (last != null && now - last < 300) {
+            broadcast(p, false);
+            return;
+        }
+        SHAKEN.put(p.getUUID(), now);
+        BATTERY.put(p.getUUID(), 0.025f);
+        set(p, true);
     }
 
     public static void set(ServerPlayer p, boolean on) {

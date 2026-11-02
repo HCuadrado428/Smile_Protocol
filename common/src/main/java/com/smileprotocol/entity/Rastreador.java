@@ -735,6 +735,8 @@ public class Rastreador extends SmilerBase implements QTEManager.Grabber {
                 .filter(p -> {
                     Vec3 v = p.getEyePosition().subtract(eye);
                     if (v.length() > range) return false;
+                    // asomado por una esquina solo asoma media cara: de lejos no se le ve
+                    if (com.smileprotocol.motion.MotionManager.lean(p) != 0 && v.length() > 10) return false;
                     Vec3 flat = new Vec3(v.x, 0, v.z).normalize();
                     return (v.length() < 3 || flat.dot(look) > cos) && canSee(p);
                 })

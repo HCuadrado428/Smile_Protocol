@@ -129,6 +129,7 @@ public final class HudOverlay {
                     renderHide(g, font, w, h, partialTick);
                 } else {
                     renderCrosshair(g, w, h);
+                    ClientWheel.render(g, font, w, h);
                     renderInteraction(g, font, w, h);
                 }
                 ClientMarkers.render(g, font, w, h, partialTick);
@@ -197,6 +198,7 @@ public final class HudOverlay {
         if (st.active()) {
             Component prompt = hud(st.prompt());
             g.drawString(font, prompt, cx - font.width(prompt) / 2, y, BONE, true);
+            if (!com.smileprotocol.config.SPConfig.get().show_interact_bar && !st.waiting()) return;   // solo las manos
             int bw = 96, bx = cx - bw / 2, by = y + 12;
             float k = st.total() <= 0 ? 1f : Mth.clamp(st.progress() / (float) st.total(), 0f, 1f);
             g.blitSprite(BAR_EMPTY, bx, by, bw, 6);

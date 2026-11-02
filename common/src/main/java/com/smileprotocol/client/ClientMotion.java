@@ -72,6 +72,9 @@ public final class ClientMotion {
     private static float leanOffset, prevLeanOffset;
     private static float roll, prevRoll;
     private static float dip, prevDip;
+    /** Balanceo al andar y cansancio al correr. */
+    private static double bobPhase;
+    private static int sprintTicks;
 
     private ClientMotion() {}
 
@@ -300,7 +303,7 @@ public final class ClientMotion {
         MotionView own = MotionStates.view(player);
         MotionStates.CLIENT.put(player.getId(), new MotionView(Action.VAULT, 0, own.lookBack(), 0, false, player.tickCount));
         SPNetwork.sendToServer(new Payloads.MotionInput(Payloads.MotionInput.CLIMB, 0, sentLook, ledge));
-        player.playSound(net.minecraft.sounds.SoundEvents.ARMOR_EQUIP_LEATHER.value(), 0.6f, 0.7f);
+        player.playSound(com.smileprotocol.registry.ModSounds.PLAYER_EFFORT.get(), 0.8f, 0.95f + player.getRandom().nextFloat() * 0.1f);
     }
 
     private static boolean free(Level level, BlockPos pos) {
@@ -380,9 +383,27 @@ public final class ClientMotion {
             targetDip -= 0.15f * k;
         }
         if (vaultTicks >= 0) {
-            float t = vaultTicks / (float) MotionManager.VAULT_TICKS;
+            float t = vaultTicks / (float) vaultLen;
             targetDip -= 0.25f * (float) Math.sin(Math.PI * t);
             targetRoll -= 4f * (float) Math.sin(Math.PI * t);
+        }
+        // Pasos con peso: la camara baja con cada pisada y se mece un poco (mas al correr)
+        double speed = player.getDeltaMovement().horizontalDistance();
+        float shake = SPConfig.get().camera_shake;
+        if (player.onGround() && speed > 0.02 && diveTicks < 0 && vaultTicks < 0) {
+            bobPhase += speed * (player.isSprinting() ? 2.9 : 2.4);
+            float k = (float) Math.min(1, speed / 0.22) * shake;
+            float amp = player.isSprinting() ? 0.05f : player.isCrouching() ? 0.012f : 0.026f;
+            targetDip -= amp * k * (float) Math.abs(Math.sin(bobPhase));
+            targetRoll += (player.isSprinting() ? 1.4f : 0.7f) * k * (float) Math.sin(bobPhase);
+        }
+        // Cansancio: tras correr un rato, al parar se oye jadear
+        if (player.isSprinting()) {
+            sprintTicks++;
+        } else {
+            if (sprintTicks > 80) player.playSound(com.smileprotocol.registry.ModSounds.PLAYER_PANT.get(), 0.7f, 0.95f + player.getRandom().nextFloat() * 0.1f);
+            sprintTicks = Math.max(0, sprintTicks - 3);
+            if (sprintTicks > 80) sprintTicks = 0;
         }
         roll += (targetRoll - roll) * 0.3f;
         dip += (targetDip - dip) * 0.35f;

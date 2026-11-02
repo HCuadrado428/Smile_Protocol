@@ -98,8 +98,9 @@ public final class ClientInteraction {
             if (!on || com.smileprotocol.client.light.Flashlight.battery(player.getId()) > 0f) {
                 com.smileprotocol.client.light.Flashlight.sync(player.getId(), on,
                         com.smileprotocol.client.light.Flashlight.battery(player.getId()));
-                SPNetwork.sendToServer(new Payloads.ToggleFlashlight(on));
             }
+            // sin bateria tambien se envia: el servidor la agita (unos segundos de luz)
+            SPNetwork.sendToServer(new Payloads.ToggleFlashlight(on));
         }
         prevLight = light;
 
