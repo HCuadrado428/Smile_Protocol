@@ -40,9 +40,7 @@ public final class ClientSelfTest {
 
     /** Grabacion de animaciones en tercera persona (SMILEPROTOCOL_ANIMTEST=1): fotogramas para hacer GIF. */
     private static final boolean ANIM = "1".equals(System.getenv("SMILEPROTOCOL_ANIMTEST"));
-    /** Fotos de los pasillos de cada planta, sin monstruos ni HUD (SMILEPROTOCOL_HALLTEST=1). */
-    private static final boolean HALLS = "1".equals(System.getenv("SMILEPROTOCOL_HALLTEST"));
-    private static final boolean ENABLED = ANIM || HALLS || "1".equals(System.getenv("SMILEPROTOCOL_CLIENTTEST"));
+    private static final boolean ENABLED = ANIM || "1".equals(System.getenv("SMILEPROTOCOL_CLIENTTEST"));
     private static int ticks;
     private static int step;
     private static int wait;
@@ -200,10 +198,6 @@ public final class ClientSelfTest {
         com.smileprotocol.config.SPConfig.get().hud_auto_hide = false;
         if (ANIM) {
             planAnimations(mc, server, sp, level, e);
-            return;
-        }
-        if (HALLS) {
-            planHalls(mc, server, sp, level, g);
             return;
         }
         // 1. Llegada, mirando hacia el vestibulo
@@ -1205,132 +1199,6 @@ public final class ClientSelfTest {
      * de armaduras invisible: el jugador se ve en tercera persona con sus poses reales (PlayerAnimator)
      * y los mobs con sus animaciones de GeckoLib.
      */
-    // Fotos de pasillos -----------------------------------------------------------------------------
-
-    private static final String[] HALL_ZONES = {"start_corridor", "lab_storage", "lab_offices", "lab_morgue", "lab_generators",
-            "lab_greenhouse", "final_room", "smiley_lab", "tutorial"};
-    private static final int HALL_SHOTS = 5;
-
-    /** Una vista de pasillo: de pie al principio de un tramo recto, mirando a lo largo. */
-    private record HallSpot(Vec3 pos, float yaw, int length) {
-    }
-
-    /**
-     * Cada planta en su propio hueco (con un grupo de mentira), sin un solo mob, y unas vistas a lo largo
-     * de sus pasillos con la linterna encendida y sin HUD.
-     */
-    private static void planHalls(Minecraft mc, MinecraftServer server, ServerPlayer sp, ServerLevel level, Group g) {
-        SHOTS.add(() -> mc.options.hideGui = true);
-        for (int zi = 0; zi < HALL_ZONES.length; zi++) {
-            final int k = zi;
-            final String zone = HALL_ZONES[zi];
-            List<HallSpot> spots = new ArrayList<>();
-            SHOTS.add(() -> server.execute(() -> {
-                Group fake = new Group(java.util.UUID.randomUUID(), "fotos", 90 + k, List.of(SmileProtocol.id(zone)),
-                        g.difficulty(), 40 + k);
-                ZonePlacement zp = com.smileprotocol.instance.InstanceManager.place(level, fake, 0, 0);
-                if (zp == null) {
-                    log("FALLO pasillos: no se pudo colocar " + zone);
-                    return;
-                }
-                clearMobs(level);
-                spots.addAll(hallSpots(level, zp));
-                log("pasillos " + zone + ": " + spots.size() + " vistas " + spots.stream().map(h -> h.length() + "").toList());
-            }));
-            SHOTS.add(() -> wait = 20);
-            for (int si = 0; si < HALL_SHOTS; si++) {
-                final int n = si;
-                SHOTS.add(() -> server.execute(() -> {
-                    if (n >= spots.size()) return;
-                    clearMobs(level);
-                    HallSpot h = spots.get(n);
-                    SPSessionManager.teleport(sp, level, h.pos(), h.yaw(), 3f);
-                    com.smileprotocol.motion.Flashlights.recharge(sp, 1f);
-                    com.smileprotocol.motion.Flashlights.set(sp, true);
-                }));
-                SHOTS.add(() -> wait = n < spots.size() ? (n == 0 ? 80 : 40) : 0);
-                SHOTS.add(() -> server.execute(() -> clearMobs(level)));
-                SHOTS.add(() -> wait = n < spots.size() ? 6 : 0);
-                SHOTS.add(() -> {
-                    if (n < spots.size()) grab(mc, "pasillo_" + String.format("%02d", k + 1) + "_" + zone + "_" + (n + 1));
-                });
-            }
-        }
-        SHOTS.add(() -> mc.options.hideGui = false);
-    }
-
-    /** Fuera todo mob del mundo de las partidas (monstruos, senuelos, siluetas de los sustos). */
-    private static void clearMobs(ServerLevel level) {
-        List<net.minecraft.world.entity.Entity> gone = new ArrayList<>();
-        for (net.minecraft.world.entity.Entity e : level.getAllEntities()) {
-            if (e instanceof net.minecraft.world.entity.Mob) gone.add(e);
-        }
-        gone.forEach(net.minecraft.world.entity.Entity::discard);
-    }
-
-    /**
-     * Tramos rectos de pasillo: lineas de 12 o mas bloques libres a la altura de la cabeza con un
-     * ancho de 1 a 7 alrededor; se queda con el centro de cada uno, los mas largos primero, y como
-     * mucho dos vistas por eje para que salgan pasillos distintos.
-     */
-    private static List<HallSpot> hallSpots(ServerLevel level, ZonePlacement zp) {
-        var box = zp.box();
-        int fy = BlockPos.containing(zp.entry()).getY();
-        java.util.function.BiPredicate<Integer, Integer> open = (x, z) -> {
-            BlockPos p = new BlockPos(x, fy + 1, z);
-            return level.getBlockState(p).getCollisionShape(level, p).isEmpty()
-                    && level.getBlockState(p.above()).getCollisionShape(level, p.above()).isEmpty()
-                    && !level.getBlockState(new BlockPos(x, fy - 1, z)).getCollisionShape(level, new BlockPos(x, fy - 1, z)).isEmpty();
-        };
-        List<int[]> runs = new ArrayList<>();       // eje (0 = z, 1 = x), centro, desde, hasta
-        for (int axis = 0; axis < 2; axis++) {
-            int cMin = axis == 0 ? box.minX() : box.minZ(), cMax = axis == 0 ? box.maxX() : box.maxZ();
-            int aMin = axis == 0 ? box.minZ() : box.minX(), aMax = axis == 0 ? box.maxZ() : box.maxX();
-            for (int c = cMin; c <= cMax; c++) {
-                int start = Integer.MIN_VALUE;
-                for (int a = aMin; a <= aMax + 1; a++) {
-                    boolean o = a <= aMax && (axis == 0 ? open.test(c, a) : open.test(a, c));
-                    if (o && start == Integer.MIN_VALUE) start = a;
-                    if (!o && start != Integer.MIN_VALUE) {
-                        int end = a - 1;
-                        if (end - start + 1 >= 12) {
-                            int mid = (start + end) / 2;
-                            int lo = 0, hi = 0;
-                            while (lo < 8 && (axis == 0 ? open.test(c - lo - 1, mid) : open.test(mid, c - lo - 1))) lo++;
-                            while (hi < 8 && (axis == 0 ? open.test(c + hi + 1, mid) : open.test(mid, c + hi + 1))) hi++;
-                            if (lo + hi + 1 <= 7 && Math.abs(lo - hi) <= 1) runs.add(new int[]{axis, c, start, end});
-                        }
-                        start = Integer.MIN_VALUE;
-                    }
-                }
-            }
-        }
-        runs.sort((r1, r2) -> (r2[3] - r2[2]) - (r1[3] - r1[2]));
-        List<int[]> picked = new ArrayList<>();
-        int[] perAxis = new int[2];
-        for (int[] r : runs) {
-            boolean near = false;
-            for (int[] q : picked) {
-                if (q[0] == r[0] && Math.abs(q[1] - r[1]) <= 8 && r[2] <= q[3] && q[2] <= r[3]) near = true;
-            }
-            if (near || perAxis[r[0]] >= 3) continue;
-            picked.add(r);
-            perAxis[r[0]]++;
-        }
-        List<HallSpot> out = new ArrayList<>();
-        Vec3 e = zp.entry();
-        for (int[] r : picked) {
-            // desde el extremo mas cercano a la llegada, mirando hacia el otro
-            double a0 = r[2] + 1.5, a1 = r[3] - 0.5;
-            boolean fromStart = r[0] == 0 ? Math.abs(a0 - e.z) <= Math.abs(a1 - e.z) : Math.abs(a0 - e.x) <= Math.abs(a1 - e.x);
-            double a = fromStart ? a0 : a1;
-            Vec3 pos = r[0] == 0 ? new Vec3(r[1] + 0.5, fy, a) : new Vec3(a, fy, r[1] + 0.5);
-            float yaw = r[0] == 0 ? (fromStart ? 0f : 180f) : (fromStart ? -90f : 90f);
-            out.add(new HallSpot(pos, yaw, r[3] - r[2] + 1));
-        }
-        return out.subList(0, Math.min(out.size(), HALL_SHOTS));
-    }
-
     private static void planAnimations(Minecraft mc, MinecraftServer server, ServerPlayer sp, ServerLevel level, Vec3 e) {
         BlockPos base = BlockPos.containing(e).offset(0, 30, 0);
         Vec3 P = Vec3.atBottomCenterOf(base.above());
