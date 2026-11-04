@@ -1,0 +1,383 @@
+=== player-animation-lib-fabric*.jar -> /home/runner/.gradle/caches/modules-2/files-2.1/dev.kosmx.player-anim/player-animation-lib-fabric/2.0.4+1.21.1/2985c208766cde078a39c22b5ad989b74b7bc490/player-animation-lib-fabric-2.0.4+1.21.1.jar
+--- dev.kosmx.playerAnim.api.TransformType
+Compiled from "TransformType.java"
+public final class dev.kosmx.playerAnim.api.TransformType extends java.lang.Enum<dev.kosmx.playerAnim.api.TransformType> {
+  public static final dev.kosmx.playerAnim.api.TransformType POSITION;
+  public static final dev.kosmx.playerAnim.api.TransformType ROTATION;
+  public static final dev.kosmx.playerAnim.api.TransformType BEND;
+  public static final dev.kosmx.playerAnim.api.TransformType SCALE;
+  private static final dev.kosmx.playerAnim.api.TransformType[] $VALUES;
+  public static dev.kosmx.playerAnim.api.TransformType[] values();
+  public static dev.kosmx.playerAnim.api.TransformType valueOf(java.lang.String);
+  private dev.kosmx.playerAnim.api.TransformType();
+  private static dev.kosmx.playerAnim.api.TransformType[] $values();
+  static {};
+}
+--- dev.kosmx.playerAnim.core.util.Vec3f
+Compiled from "Vec3f.java"
+public class dev.kosmx.playerAnim.core.util.Vec3f extends dev.kosmx.playerAnim.core.util.Vector3<java.lang.Float> {
+  public static final dev.kosmx.playerAnim.core.util.Vec3f ZERO;
+  public dev.kosmx.playerAnim.core.util.Vec3f(float, float, float);
+  public double squaredDistanceTo(dev.kosmx.playerAnim.core.util.Vec3d);
+  public dev.kosmx.playerAnim.core.util.Vec3f scale(float);
+  public dev.kosmx.playerAnim.core.util.Vec3f add(dev.kosmx.playerAnim.core.util.Vec3f);
+  public float dotProduct(dev.kosmx.playerAnim.core.util.Vec3f);
+  public dev.kosmx.playerAnim.core.util.Vec3f crossProduct(dev.kosmx.playerAnim.core.util.Vec3f);
+  public dev.kosmx.playerAnim.core.util.Vec3f subtract(dev.kosmx.playerAnim.core.util.Vec3f);
+  public double distanceTo(dev.kosmx.playerAnim.core.util.Vec3d);
+  static {};
+}
+--- dev.kosmx.playerAnim.core.util.Vector3
+Compiled from "Vector3.java"
+public class dev.kosmx.playerAnim.core.util.Vector3<N extends java.lang.Number> {
+  N x;
+  N y;
+  N z;
+  public dev.kosmx.playerAnim.core.util.Vector3(N, N, N);
+  public N getX();
+  public N getY();
+  public N getZ();
+  public boolean equals(java.lang.Object);
+  public int hashCode();
+  public java.lang.String toString();
+}
+--- dev.kosmx.playerAnim.api.layered.IAnimation
+Compiled from "IAnimation.java"
+public interface dev.kosmx.playerAnim.api.layered.IAnimation {
+  public default void tick();
+  public abstract boolean isActive();
+  public abstract dev.kosmx.playerAnim.core.util.Vec3f get3DTransform(java.lang.String, dev.kosmx.playerAnim.api.TransformType, float, dev.kosmx.playerAnim.core.util.Vec3f);
+  public abstract void setupAnim(float);
+  public default dev.kosmx.playerAnim.api.firstPerson.FirstPersonMode getFirstPersonMode(float);
+  public default dev.kosmx.playerAnim.api.firstPerson.FirstPersonConfiguration getFirstPersonConfiguration(float);
+}
+--- dev.kosmx.playerAnim.api.layered.AnimationStack
+Compiled from "AnimationStack.java"
+public class dev.kosmx.playerAnim.api.layered.AnimationStack implements dev.kosmx.playerAnim.api.layered.IAnimation {
+  private final java.util.ArrayList<dev.kosmx.playerAnim.core.util.Pair<java.lang.Integer, dev.kosmx.playerAnim.api.layered.IAnimation>> layers;
+  public dev.kosmx.playerAnim.api.layered.AnimationStack();
+  public boolean isActive();
+  public void tick();
+  public dev.kosmx.playerAnim.core.util.Vec3f get3DTransform(java.lang.String, dev.kosmx.playerAnim.api.TransformType, float, dev.kosmx.playerAnim.core.util.Vec3f);
+  public void setupAnim(float);
+  public void addAnimLayer(int, dev.kosmx.playerAnim.api.layered.IAnimation);
+  public boolean removeLayer(dev.kosmx.playerAnim.api.layered.IAnimation);
+  public boolean removeLayer(int);
+  public dev.kosmx.playerAnim.api.firstPerson.FirstPersonMode getFirstPersonMode(float);
+  public dev.kosmx.playerAnim.api.firstPerson.FirstPersonConfiguration getFirstPersonConfiguration(float);
+  private static boolean lambda$removeLayer$1(int, dev.kosmx.playerAnim.core.util.Pair);
+  private static boolean lambda$removeLayer$0(dev.kosmx.playerAnim.api.layered.IAnimation, dev.kosmx.playerAnim.core.util.Pair);
+}
+--- dev.kosmx.playerAnim.impl.IAnimatedPlayer
+Compiled from "IAnimatedPlayer.java"
+public interface dev.kosmx.playerAnim.impl.IAnimatedPlayer extends dev.kosmx.playerAnim.api.IPlayer {
+  public default dev.kosmx.playerAnim.impl.animation.AnimationApplier getAnimation();
+  public abstract dev.kosmx.playerAnim.impl.animation.AnimationApplier playerAnimator_getAnimation();
+  public abstract dev.kosmx.playerAnim.api.layered.IAnimation playerAnimator_getAnimation(net.minecraft.class_2960);
+  public abstract dev.kosmx.playerAnim.api.layered.IAnimation playerAnimator_setAnimation(net.minecraft.class_2960, dev.kosmx.playerAnim.api.layered.IAnimation);
+}
+=== player-animation-lib-fabric*.jar -> /home/runner/.gradle/caches/modules-2/files-2.1/dev.kosmx.player-anim/player-animation-lib-fabric/2.0.4+1.21.1/2985c208766cde078a39c22b5ad989b74b7bc490/player-animation-lib-fabric-2.0.4+1.21.1.jar
+architectury_inject_playerAnimator_common_dfd904282b214c0dbfcb1af10059f1f2_ab57f2790826365c0c1efa35ab50c2ec0633ee9aee38ea237cb7583590064e87playeranimationlib2041211devjar/PlatformMethods
+dev/kosmx/playerAnim/api/AnimUtils
+dev/kosmx/playerAnim/api/IPlayable
+dev/kosmx/playerAnim/api/IPlayer
+dev/kosmx/playerAnim/api/TransformType
+dev/kosmx/playerAnim/api/firstPerson/FirstPersonConfiguration
+dev/kosmx/playerAnim/api/firstPerson/FirstPersonMode
+dev/kosmx/playerAnim/api/layered/AnimationContainer
+dev/kosmx/playerAnim/api/layered/AnimationStack
+dev/kosmx/playerAnim/api/layered/IActualAnimation
+dev/kosmx/playerAnim/api/layered/IAnimation
+dev/kosmx/playerAnim/api/layered/KeyframeAnimationPlayer
+dev/kosmx/playerAnim/api/layered/ModifierLayer
+dev/kosmx/playerAnim/api/layered/PlayerAnimationFrame
+dev/kosmx/playerAnim/api/layered/modifier/AbstractFadeModifier
+dev/kosmx/playerAnim/api/layered/modifier/AbstractModifier
+dev/kosmx/playerAnim/api/layered/modifier/AdjustmentModifier
+dev/kosmx/playerAnim/api/layered/modifier/FirstPersonModifier
+dev/kosmx/playerAnim/api/layered/modifier/MirrorModifier
+dev/kosmx/playerAnim/api/layered/modifier/SpeedModifier
+dev/kosmx/playerAnim/core/data/AnimationBinary
+dev/kosmx/playerAnim/core/data/AnimationFormat
+dev/kosmx/playerAnim/core/data/KeyframeAnimation
+dev/kosmx/playerAnim/core/data/gson/AnimationJson
+dev/kosmx/playerAnim/core/data/gson/AnimationSerializing
+dev/kosmx/playerAnim/core/data/gson/GeckoLibSerializer
+dev/kosmx/playerAnim/core/data/opennbs/NBS
+dev/kosmx/playerAnim/core/data/opennbs/NBSFileUtils
+dev/kosmx/playerAnim/core/data/opennbs/SoundPlayer
+dev/kosmx/playerAnim/core/data/opennbs/format/CustomInstrument
+dev/kosmx/playerAnim/core/data/opennbs/format/Header
+dev/kosmx/playerAnim/core/data/opennbs/format/Layer
+dev/kosmx/playerAnim/core/data/opennbs/network/NBSPacket
+dev/kosmx/playerAnim/core/data/quarktool/InverseEase
+dev/kosmx/playerAnim/core/data/quarktool/Move
+dev/kosmx/playerAnim/core/data/quarktool/PartMap
+dev/kosmx/playerAnim/core/data/quarktool/Pause
+dev/kosmx/playerAnim/core/data/quarktool/Pauseable
+dev/kosmx/playerAnim/core/data/quarktool/Playable
+dev/kosmx/playerAnim/core/data/quarktool/QuarkParsingError
+dev/kosmx/playerAnim/core/data/quarktool/QuarkReader
+dev/kosmx/playerAnim/core/data/quarktool/Repeat
+dev/kosmx/playerAnim/core/data/quarktool/Reset
+dev/kosmx/playerAnim/core/data/quarktool/Section
+dev/kosmx/playerAnim/core/data/quarktool/Yoyo
+dev/kosmx/playerAnim/core/impl/AnimationProcessor
+dev/kosmx/playerAnim/core/impl/event/Event
+dev/kosmx/playerAnim/core/impl/event/EventResult
+dev/kosmx/playerAnim/core/util/Ease
+dev/kosmx/playerAnim/core/util/Easing
+dev/kosmx/playerAnim/core/util/MathHelper
+dev/kosmx/playerAnim/core/util/NetworkHelper
+dev/kosmx/playerAnim/core/util/Pair
+dev/kosmx/playerAnim/core/util/SetableSupplier
+dev/kosmx/playerAnim/core/util/UUIDMap
+dev/kosmx/playerAnim/core/util/Vec3d
+dev/kosmx/playerAnim/core/util/Vec3f
+dev/kosmx/playerAnim/core/util/Vector3
+dev/kosmx/playerAnim/fabric/client/FabricClientInitializer
+dev/kosmx/playerAnim/impl/Helper
+dev/kosmx/playerAnim/impl/IAnimatedPlayer
+dev/kosmx/playerAnim/impl/IMutableModel
+dev/kosmx/playerAnim/impl/IPlayerModel
+dev/kosmx/playerAnim/impl/IUpperPartHelper
+dev/kosmx/playerAnim/impl/animation/AnimationApplier
+dev/kosmx/playerAnim/impl/animation/BendHelper
+dev/kosmx/playerAnim/impl/animation/IBendHelper
+dev/kosmx/playerAnim/impl/compat/skinLayers/SkinLayersTransformer
+dev/kosmx/playerAnim/impl/fabric/HelperImpl
+dev/kosmx/playerAnim/impl/mixin/MixinConfig
+dev/kosmx/playerAnim/minecraftApi/PlayerAnimationAccess
+dev/kosmx/playerAnim/minecraftApi/PlayerAnimationFactory
+dev/kosmx/playerAnim/minecraftApi/PlayerAnimationRegistry
+dev/kosmx/playerAnim/minecraftApi/codec/AbstractGsonCodec
+dev/kosmx/playerAnim/minecraftApi/codec/AnimationCodec
+dev/kosmx/playerAnim/minecraftApi/codec/AnimationCodecs
+dev/kosmx/playerAnim/minecraftApi/codec/AnimationDecoder
+dev/kosmx/playerAnim/minecraftApi/codec/AnimationEncoder
+dev/kosmx/playerAnim/minecraftApi/codec/EmotecraftGsonCodec
+dev/kosmx/playerAnim/minecraftApi/codec/LegacyGeckoJsonCodec
+dev/kosmx/playerAnim/minecraftApi/layers/LeftHandedHelperModifier
+dev/kosmx/playerAnim/mixin/ArmorFeatureRendererMixin
+dev/kosmx/playerAnim/mixin/BipedEntityModelMixin
+dev/kosmx/playerAnim/mixin/CapeLayerMixin
+dev/kosmx/playerAnim/mixin/ElytraLayerMixin
+dev/kosmx/playerAnim/mixin/FeatureRendererMixin
+dev/kosmx/playerAnim/mixin/HeldItemMixin
+dev/kosmx/playerAnim/mixin/LivingEntityRenderRedirect_bendOnly
+dev/kosmx/playerAnim/mixin/ModelPartMixin
+dev/kosmx/playerAnim/mixin/PlayerEntityMixin
+dev/kosmx/playerAnim/mixin/PlayerModelAccessor
+dev/kosmx/playerAnim/mixin/PlayerModelMixin
+dev/kosmx/playerAnim/mixin/PlayerRendererMixin
+dev/kosmx/playerAnim/mixin/firstPerson/CameraAccessor
+dev/kosmx/playerAnim/mixin/firstPerson/EntityRenderDispatcherMixin
+dev/kosmx/playerAnim/mixin/firstPerson/ItemInHandRendererMixin
+dev/kosmx/playerAnim/mixin/firstPerson/LevelRendererMixin
+dev/kosmx/playerAnim/mixin/firstPerson/LivingEntityRendererMixin
+=== geckolib-fabric*.jar -> /home/runner/.gradle/caches/modules-2/files-2.1/software.bernie.geckolib/geckolib-fabric-1.21.1/4.7.2/17c3b96224fe1a8c2e1db63900f8d2e0e28e60ff/geckolib-fabric-1.21.1-4.7.2.jar
+--- software.bernie.geckolib.cache.object.GeoBone
+Compiled from "GeoBone.java"
+public class software.bernie.geckolib.cache.object.GeoBone {
+  private final software.bernie.geckolib.cache.object.GeoBone parent;
+  private final java.lang.String name;
+  private final java.util.List<software.bernie.geckolib.cache.object.GeoBone> children;
+  private final java.util.List<software.bernie.geckolib.cache.object.GeoCube> cubes;
+  private final java.lang.Boolean mirror;
+  private final java.lang.Double inflate;
+  private final java.lang.Boolean dontRender;
+  private final java.lang.Boolean reset;
+  private software.bernie.geckolib.animation.state.BoneSnapshot initialSnapshot;
+  private boolean hidden;
+  private boolean childrenHidden;
+  private float scaleX;
+  private float scaleY;
+  private float scaleZ;
+  private float positionX;
+  private float positionY;
+  private float positionZ;
+  private float pivotX;
+  private float pivotY;
+  private float pivotZ;
+  private float rotX;
+  private float rotY;
+  private float rotZ;
+  private boolean positionChanged;
+  private boolean rotationChanged;
+  private boolean scaleChanged;
+  private final org.joml.Matrix4f modelSpaceMatrix;
+  private final org.joml.Matrix4f localSpaceMatrix;
+  private final org.joml.Matrix4f worldSpaceMatrix;
+  private org.joml.Matrix3f worldSpaceNormal;
+  private boolean trackingMatrices;
+  public software.bernie.geckolib.cache.object.GeoBone(software.bernie.geckolib.cache.object.GeoBone, java.lang.String, java.lang.Boolean, java.lang.Double, java.lang.Boolean, java.lang.Boolean);
+  public java.lang.String getName();
+  public software.bernie.geckolib.cache.object.GeoBone getParent();
+  public float getRotX();
+  public float getRotY();
+  public float getRotZ();
+  public float getPosX();
+  public float getPosY();
+  public float getPosZ();
+  public float getScaleX();
+  public float getScaleY();
+  public float getScaleZ();
+  public void setRotX(float);
+  public void setRotY(float);
+  public void setRotZ(float);
+  public void updateRotation(float, float, float);
+  public void setPosX(float);
+  public void setPosY(float);
+  public void setPosZ(float);
+  public void updatePosition(float, float, float);
+  public void setScaleX(float);
+  public void setScaleY(float);
+  public void setScaleZ(float);
+  public void updateScale(float, float, float);
+  public boolean isHidden();
+  public void setHidden(boolean);
+  public void setChildrenHidden(boolean);
+  public void setPivotX(float);
+  public void setPivotY(float);
+  public void setPivotZ(float);
+  public void updatePivot(float, float, float);
+  public float getPivotX();
+  public float getPivotY();
+  public float getPivotZ();
+  public boolean isHidingChildren();
+  public void markScaleAsChanged();
+  public void markRotationAsChanged();
+  public void markPositionAsChanged();
+  public boolean hasScaleChanged();
+  public boolean hasRotationChanged();
+  public boolean hasPositionChanged();
+  public void resetStateChanges();
+  public software.bernie.geckolib.animation.state.BoneSnapshot getInitialSnapshot();
+  public java.util.List<software.bernie.geckolib.cache.object.GeoBone> getChildBones();
+  public void saveInitialSnapshot();
+  public java.lang.Boolean getMirror();
+  public java.lang.Double getInflate();
+  public java.lang.Boolean shouldNeverRender();
+  public java.lang.Boolean getReset();
+  public java.util.List<software.bernie.geckolib.cache.object.GeoCube> getCubes();
+  public boolean isTrackingMatrices();
+  public void setTrackingMatrices(boolean);
+  public org.joml.Matrix4f getModelSpaceMatrix();
+  public void setModelSpaceMatrix(org.joml.Matrix4f);
+  public org.joml.Matrix4f getLocalSpaceMatrix();
+  public void setLocalSpaceMatrix(org.joml.Matrix4f);
+  public org.joml.Matrix4f getWorldSpaceMatrix();
+  public void setWorldSpaceMatrix(org.joml.Matrix4f);
+  public void setWorldSpaceNormal(org.joml.Matrix3f);
+  public org.joml.Matrix3f getWorldSpaceNormal();
+  public org.joml.Vector3d getLocalPosition();
+  public org.joml.Vector3d getModelPosition();
+  public org.joml.Vector3d getWorldPosition();
+  public void setModelPosition(org.joml.Vector3d);
+  public org.joml.Matrix4f getModelRotationMatrix();
+  public org.joml.Vector3d getPositionVector();
+  public org.joml.Vector3d getRotationVector();
+  public org.joml.Vector3d getScaleVector();
+  public void addRotationOffsetFromBone(software.bernie.geckolib.cache.object.GeoBone);
+  public software.bernie.geckolib.animation.state.BoneSnapshot saveSnapshot();
+  public boolean equals(java.lang.Object);
+  public int hashCode();
+}
+--- software.bernie.geckolib.model.GeoModel
+Compiled from "GeoModel.java"
+public abstract class software.bernie.geckolib.model.GeoModel<T extends software.bernie.geckolib.animatable.GeoAnimatable> {
+  private final software.bernie.geckolib.animation.AnimationProcessor<T> processor;
+  private software.bernie.geckolib.cache.object.BakedGeoModel currentModel;
+  private double animTime;
+  private double lastGameTickTime;
+  private long lastRenderedInstance;
+  public software.bernie.geckolib.model.GeoModel();
+  public abstract net.minecraft.class_2960 getModelResource(T);
+  public abstract net.minecraft.class_2960 getTextureResource(T);
+  public abstract net.minecraft.class_2960 getAnimationResource(T);
+  public net.minecraft.class_2960[] getAnimationResourceFallbacks(T);
+  public boolean crashIfBoneMissing();
+  public net.minecraft.class_1921 getRenderType(T, net.minecraft.class_2960);
+  public software.bernie.geckolib.cache.object.BakedGeoModel getBakedModel(net.minecraft.class_2960);
+  public java.util.Optional<software.bernie.geckolib.cache.object.GeoBone> getBone(java.lang.String);
+  public software.bernie.geckolib.animation.Animation getAnimation(T, java.lang.String);
+  public software.bernie.geckolib.animation.AnimationProcessor<T> getAnimationProcessor();
+  public void addAdditionalStateData(T, long, java.util.function.BiConsumer<software.bernie.geckolib.constant.dataticket.DataTicket<T>, T>);
+  public void handleAnimations(T, long, software.bernie.geckolib.animation.AnimationState<T>, float);
+  public void setCustomAnimations(T, long, software.bernie.geckolib.animation.AnimationState<T>);
+  public void applyMolangQueries(software.bernie.geckolib.animation.AnimationState<T>, double);
+}
+--- software.bernie.geckolib.animation.AnimationController
+Compiled from "AnimationController.java"
+public class software.bernie.geckolib.animation.AnimationController<T extends software.bernie.geckolib.animatable.GeoAnimatable> {
+  protected final T animatable;
+  protected final java.lang.String name;
+  protected final software.bernie.geckolib.animation.AnimationController$AnimationStateHandler<T> stateHandler;
+  protected final java.util.Map<java.lang.String, software.bernie.geckolib.animation.keyframe.BoneAnimationQueue> boneAnimationQueues;
+  protected final java.util.Map<java.lang.String, software.bernie.geckolib.animation.state.BoneSnapshot> boneSnapshots;
+  protected java.util.Queue<software.bernie.geckolib.animation.AnimationProcessor$QueuedAnimation> animationQueue;
+  protected boolean isJustStarting;
+  protected boolean needsAnimationReload;
+  protected boolean shouldResetTick;
+  private boolean justStopped;
+  protected boolean justStartedTransition;
+  protected software.bernie.geckolib.animation.AnimationController$SoundKeyframeHandler<T> soundKeyframeHandler;
+  protected software.bernie.geckolib.animation.AnimationController$ParticleKeyframeHandler<T> particleKeyframeHandler;
+  protected software.bernie.geckolib.animation.AnimationController$CustomKeyframeHandler<T> customKeyframeHandler;
+  protected final java.util.Map<java.lang.String, software.bernie.geckolib.animation.RawAnimation> triggerableAnimations;
+  protected software.bernie.geckolib.animation.RawAnimation triggeredAnimation;
+  protected boolean handlingTriggeredAnimations;
+  protected double transitionLength;
+  protected software.bernie.geckolib.animation.RawAnimation currentRawAnimation;
+  protected software.bernie.geckolib.animation.AnimationProcessor$QueuedAnimation currentAnimation;
+  protected software.bernie.geckolib.animation.AnimationController$State animationState;
+  protected double tickOffset;
+  protected double lastPollTime;
+  protected java.util.function.Function<T, java.lang.Double> animationSpeedModifier;
+  protected java.util.function.Function<T, software.bernie.geckolib.animation.EasingType> overrideEasingTypeFunction;
+  private final java.util.Set<software.bernie.geckolib.animation.keyframe.event.data.KeyFrameData> executedKeyFrames;
+  protected software.bernie.geckolib.model.GeoModel<T> lastModel;
+  public software.bernie.geckolib.animation.AnimationController(T, software.bernie.geckolib.animation.AnimationController$AnimationStateHandler<T>);
+  public software.bernie.geckolib.animation.AnimationController(T, java.lang.String, software.bernie.geckolib.animation.AnimationController$AnimationStateHandler<T>);
+  public software.bernie.geckolib.animation.AnimationController(T, int, software.bernie.geckolib.animation.AnimationController$AnimationStateHandler<T>);
+  public software.bernie.geckolib.animation.AnimationController(T, java.lang.String, int, software.bernie.geckolib.animation.AnimationController$AnimationStateHandler<T>);
+  public software.bernie.geckolib.animation.AnimationController<T> setSoundKeyframeHandler(software.bernie.geckolib.animation.AnimationController$SoundKeyframeHandler<T>);
+  public software.bernie.geckolib.animation.AnimationController<T> setParticleKeyframeHandler(software.bernie.geckolib.animation.AnimationController$ParticleKeyframeHandler<T>);
+  public software.bernie.geckolib.animation.AnimationController<T> setCustomInstructionKeyframeHandler(software.bernie.geckolib.animation.AnimationController$CustomKeyframeHandler<T>);
+  public software.bernie.geckolib.animation.AnimationController<T> setAnimationSpeedHandler(java.util.function.Function<T, java.lang.Double>);
+  public software.bernie.geckolib.animation.AnimationController<T> setAnimationSpeed(double);
+  public software.bernie.geckolib.animation.AnimationController<T> setOverrideEasingType(software.bernie.geckolib.animation.EasingType);
+  public software.bernie.geckolib.animation.AnimationController<T> setOverrideEasingTypeFunction(java.util.function.Function<T, software.bernie.geckolib.animation.EasingType>);
+  public software.bernie.geckolib.animation.AnimationController<T> triggerableAnim(java.lang.String, software.bernie.geckolib.animation.RawAnimation);
+  public software.bernie.geckolib.animation.AnimationController<T> receiveTriggeredAnimations();
+  public java.lang.String getName();
+  public software.bernie.geckolib.animation.AnimationProcessor$QueuedAnimation getCurrentAnimation();
+  public software.bernie.geckolib.animation.RawAnimation getTriggeredAnimation();
+  public software.bernie.geckolib.animation.AnimationController$State getAnimationState();
+  public java.util.Map<java.lang.String, software.bernie.geckolib.animation.keyframe.BoneAnimationQueue> getBoneAnimationQueues();
+  public double getAnimationSpeed();
+  public void forceAnimationReset();
+  public void stop();
+  public software.bernie.geckolib.animation.AnimationController<T> transitionLength(int);
+  public boolean hasAnimationFinished();
+  public software.bernie.geckolib.animation.RawAnimation getCurrentRawAnimation();
+  public boolean isPlayingTriggeredAnimation();
+  public void setAnimation(software.bernie.geckolib.animation.RawAnimation);
+  public boolean tryTriggerAnimation(java.lang.String);
+  protected boolean stopTriggeredAnimation();
+  protected software.bernie.geckolib.animation.PlayState handleAnimationState(software.bernie.geckolib.animation.AnimationState<T>);
+  public void process(software.bernie.geckolib.model.GeoModel<T>, software.bernie.geckolib.animation.AnimationState<T>, java.util.Map<java.lang.String, software.bernie.geckolib.cache.object.GeoBone>, java.util.Map<java.lang.String, software.bernie.geckolib.animation.state.BoneSnapshot>, double, boolean);
+  private void processCurrentAnimation(double, double, boolean);
+  private void createInitialQueues(java.util.Collection<software.bernie.geckolib.cache.object.GeoBone>);
+  private void saveSnapshotsForAnimation(software.bernie.geckolib.animation.AnimationProcessor$QueuedAnimation, java.util.Map<java.lang.String, software.bernie.geckolib.animation.state.BoneSnapshot>);
+  protected double adjustTick(double);
+  private software.bernie.geckolib.animation.keyframe.AnimationPoint getAnimationPointAtTick(java.util.List<software.bernie.geckolib.animation.keyframe.Keyframe<software.bernie.geckolib.loading.math.MathValue>>, double, boolean, net.minecraft.class_2350$class_2351);
+  private software.bernie.geckolib.animation.keyframe.KeyframeLocation<software.bernie.geckolib.animation.keyframe.Keyframe<software.bernie.geckolib.loading.math.MathValue>> getCurrentKeyFrameLocation(java.util.List<software.bernie.geckolib.animation.keyframe.Keyframe<software.bernie.geckolib.loading.math.MathValue>>, double);
+  private void resetEventKeyFrames();
+  private static double lambda$processCurrentAnimation$5(double);
+  private static double lambda$process$4();
+  private static software.bernie.geckolib.animation.EasingType lambda$setOverrideEasingType$3(software.bernie.geckolib.animation.EasingType, software.bernie.geckolib.animatable.GeoAnimatable);
+  private static java.lang.Double lambda$setAnimationSpeed$2(double, software.bernie.geckolib.animatable.GeoAnimatable);
+  private static software.bernie.geckolib.animation.EasingType lambda$new$1(software.bernie.geckolib.animatable.GeoAnimatable);
+  private static java.lang.Double lambda$new$0(software.bernie.geckolib.animatable.GeoAnimatable);
+}
