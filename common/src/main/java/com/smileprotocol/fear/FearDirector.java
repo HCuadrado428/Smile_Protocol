@@ -395,7 +395,8 @@ public final class FearDirector {
         ServerLevel level = p.serverLevel();
         Vec3 look = p.getLookAngle().multiply(1, 0, 1).normalize();
         Vec3 side = new Vec3(-look.z, 0, look.x);
-        for (int d = 22; d >= 12; d -= 2) {
+        // dentro del alcance de la linterna (a 22 bloques no se distinguia en la oscuridad)
+        for (int d = 16; d >= 9; d -= 1) {
             Vec3 mid = p.position().add(look.scale(d));
             BlockPos bp = BlockPos.containing(mid);
             if (!open(level, bp) || !zp.box().isInside(bp)) continue;
