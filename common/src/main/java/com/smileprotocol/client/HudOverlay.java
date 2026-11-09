@@ -164,13 +164,13 @@ public final class HudOverlay {
     private static float lastHealth = -1;
 
     /**
-     * Modo inmersivo ({@code hud_auto_hide}): la HUD desaparece cuando no hace falta y vuelve unos
+     * Modo inmersivo ({@code hud_immersive}): la HUD desaparece cuando no hace falta y vuelve unos
      * segundos cuando cambia algo (hueco, vida, objetivo, bateria baja) o al abrir la rueda. Con el
      * modificador «sin HUD» no sale nunca.
      */
     private static boolean hudVisible(Player p) {
         if (ClientState.runRules.contains(com.smileprotocol.difficulty.RunRules.NO_HUD)) return false;
-        if (!com.smileprotocol.config.SPConfig.get().hud_auto_hide) return true;
+        if (!com.smileprotocol.config.SPConfig.get().hud_immersive) return true;
         long now = Util.getMillis();
         float hp = p.getHealth();
         boolean busy = ClientWheel.open() || ClientInteraction.state().active() || hp < p.getMaxHealth() * 0.6f

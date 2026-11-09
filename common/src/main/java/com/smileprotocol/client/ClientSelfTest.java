@@ -195,7 +195,7 @@ public final class ClientSelfTest {
         // Smiley no se deja ver solo durante las pruebas (su aparicion se fuerza en la 8k)
         com.smileprotocol.config.SPConfig.get().smiley_cameos = false;
         com.smileprotocol.config.SPConfig.get().elevator_stall_chance = 0f;
-        com.smileprotocol.config.SPConfig.get().hud_auto_hide = false;
+        com.smileprotocol.config.SPConfig.get().hud_immersive = false;
         if (ANIM) {
             planAnimations(mc, server, sp, level, e);
             return;

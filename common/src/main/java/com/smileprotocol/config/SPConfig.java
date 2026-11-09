@@ -132,7 +132,8 @@ public final class SPConfig {
         /** Mantener para abrir la rueda de objetos (el raton elige el hueco). */
         public String key_wheel = "key.keyboard.left.alt";
         /** HUD que se esconde sola cuando no hace falta (vuelve al cambiar algo). */
-        public boolean hud_auto_hide = true;
+        // (antes hud_auto_hide, encendida por defecto: la HUD desaparecia sola y parecia un fallo)
+        public boolean hud_immersive = false;
         /** Barra de progreso al interactuar (puertas, valvulas...). */
         public boolean show_interact_bar = true;
         /** Segundos de linterna encendida con la bateria llena (README 10). */
