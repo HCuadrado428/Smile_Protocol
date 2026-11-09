@@ -271,6 +271,15 @@ public final class ClientSelfTest {
         }));
         // la llegada a la planta: se va la luz alrededor del ascensor y vuelve sola
         SHOTS.add(() -> server.execute(() -> {
+            // las luces de la planta salen fundidas al azar: se enciende una de la llegada para la prueba
+            BlockPos ec = BlockPos.containing(z.entry());
+            for (BlockPos bp : BlockPos.betweenClosed(ec.offset(-10, -2, -8), ec.offset(10, 6, 12))) {
+                BlockState st = level.getBlockState(bp);
+                if (st.getBlock() instanceof com.smileprotocol.block.FluorescentLightBlock) {
+                    level.setBlock(bp, st.setValue(com.smileprotocol.block.FluorescentLightBlock.LIT, true), 3);
+                    break;
+                }
+            }
             com.smileprotocol.fear.Arrival.start(level, z, List.of(sp), 60);
             int off = com.smileprotocol.fear.Arrival.darkLights();
             log((off > 0 ? "OK" : "FALLO") + " al llegar se apagan las luces de la llegada (" + off + ")");
