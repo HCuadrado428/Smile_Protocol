@@ -921,4 +921,9 @@ public class Smiley extends SmilerBase implements QTEManager.Grabber {
             };
         }));
     }
+
+    @Override
+    protected float stepVolume() {
+        return 1.0f; // paciente: pasos lentos y blandos
+    }
 }

@@ -338,4 +338,9 @@ public class Apagon extends SmilerBase implements QTEManager.Grabber {
             };
         }));
     }
+
+    @Override
+    protected float stepVolume() {
+        return 0f; // la oscuridad no pisa
+    }
 }

@@ -61,6 +61,7 @@ public final class ClientTension {
         }
         level += (target - level) * (target > level ? 0.25f : 0.05f);
         if (level < 0.003f) level = 0f;
+        ClientFear.tick(mc);
     }
 
     /** Despues del mundo y antes de la HUD. */

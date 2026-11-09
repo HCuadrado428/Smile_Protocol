@@ -248,6 +248,27 @@ public final class ClientSelfTest {
         }));
         // 2. Pasillo principal
         shot(mc, server, "02_pasillo", e.add(0, 0, 30), 0f, 5f, 40);
+        // director del miedo: la fase va contando y los sustos falsos se pueden provocar
+        SHOTS.add(() -> server.execute(() -> {
+            var F = com.smileprotocol.fear.FearDirector.class;
+            log((com.smileprotocol.fear.FearDirector.phase(sp) != null ? "OK" : "FALLO") + " el director del miedo sigue al jugador en la planta (fase "
+                    + com.smileprotocol.fear.FearDirector.phase(sp) + ")");
+            StringBuilder sb = new StringBuilder();
+            for (var b : com.smileprotocol.fear.FearDirector.Beat.values()) {
+                if (b == com.smileprotocol.fear.FearDirector.Beat.SHADOW || b == com.smileprotocol.fear.FearDirector.Beat.DOOR) continue;
+                sb.append(b).append('=').append(com.smileprotocol.fear.FearDirector.debugBeat(sp, b)).append(' ');
+            }
+            log("miedo, sustos sueltos: " + sb);
+            boolean shadow = com.smileprotocol.fear.FearDirector.debugBeat(sp, com.smileprotocol.fear.FearDirector.Beat.SHADOW);
+            log((shadow ? "OK" : "FALLO") + " una silueta cruza al fondo del pasillo");
+        }));
+        SHOTS.add(() -> wait = 14);
+        SHOTS.add(() -> grab(mc, "02b_silueta"));
+        SHOTS.add(() -> wait = 80);
+        SHOTS.add(() -> server.execute(() -> {
+            int left = level.getEntitiesOfClass(com.smileprotocol.entity.SmilerTest.class, sp.getBoundingBox().inflate(40)).size();
+            log((left == 0 ? "OK" : "FALLO") + " la silueta desaparece (quedan " + left + ")");
+        }));
         shot(mc, server, "03_pasillo_transversal", e.add(0, 0, 33), -90f, 5f, 40);
         // 3. Mecanismos y escondites
         lookAt(mc, server, level, z, "04_caja_fusibles", be -> be instanceof FuseBoxBlockEntity);

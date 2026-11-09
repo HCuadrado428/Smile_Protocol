@@ -240,4 +240,9 @@ public class Paciente extends SmilerBase {
             return st.setAndContinue(POSE_ANIMS[Math.floorMod(poseId(), POSES)]);
         }));
     }
+
+    @Override
+    protected float stepVolume() {
+        return 0f; // la estatua no hace ruido al moverse
+    }
 }

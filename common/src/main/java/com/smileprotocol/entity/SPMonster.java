@@ -144,6 +144,20 @@ public abstract class SPMonster extends PathfinderMob implements GeoEntity {
         return def().killSequence();
     }
 
+    /** Pasos que se oyen de lejos y sabiendo por donde vienen (mas que los de un jugador). */
+    @Override
+    protected void playStepSound(net.minecraft.core.BlockPos pos, net.minecraft.world.level.block.state.BlockState state) {
+        float v = stepVolume();
+        if (v <= 0 || isSilent()) return;
+        net.minecraft.world.level.block.SoundType st = state.getSoundType();
+        playSound(st.getStepSound(), st.getVolume() * v, st.getPitch() * 0.7f);
+    }
+
+    /** Volumen de sus pasos (0 = no se oyen: la estatua, la oscuridad). */
+    protected float stepVolume() {
+        return 1.5f;
+    }
+
     /** Un ruido de su instancia (README 17.1). Por defecto, sordo. */
     public void hear(net.minecraft.server.level.ServerLevel level, com.smileprotocol.noise.NoiseEvent e) {}
 
