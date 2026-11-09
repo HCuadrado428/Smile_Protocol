@@ -143,6 +143,7 @@ public final class SPEvents {
         com.smileprotocol.fear.FearDirector.tick(server);
         com.smileprotocol.fear.Arrival.tick(server);
         com.smileprotocol.fear.Price.tick(server);
+        com.smileprotocol.fear.FloorRetry.tick(server);
         for (net.minecraft.server.level.ServerLevel l : server.getAllLevels()) com.smileprotocol.entity.ScentTrail.record(l);
         LobbyManager.tick(server);
         if (server.getTickCount() % 20 == 0) SPDebug.tick(server);

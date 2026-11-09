@@ -18,9 +18,9 @@ import java.util.Map;
 import java.util.UUID;
 
 /**
- * Si te matan, vuelves al principio de la planta (test del miedo): despiertas en el ascensor sin lo
- * que cogiste en ella. Hay {@code death_retries_per_floor} vueltas por planta; despues, la muerte es
- * de verdad (como siempre). En la sala final no hay vuelta.
+ * Vidas por planta (test del miedo): si te matan y te queda alguna, despiertas en el ascensor de la
+ * planta sin lo que cogiste en ella. Con {@code lives_per_floor} = 2, la primera muerte de cada
+ * planta te devuelve y la segunda es de verdad (como siempre). Vale tambien en la sala final.
  */
 public final class FloorRetry {
 
@@ -50,6 +50,18 @@ public final class FloorRetry {
         SNAPS.put(p.getUUID(), s);
     }
 
+    /** Cada segundo: se apunta lo que lleva cada jugador al pisar una planta nueva de su partida. */
+    public static void tick(net.minecraft.server.MinecraftServer server) {
+        if (server.getTickCount() % 20 != 0) return;
+        for (ServerPlayer p : server.getPlayerList().getPlayers()) {
+            if (!com.smileprotocol.player.SPPlayerData.inSP(p) || p.isSpectator()) continue;
+            Group g = RunManager.groupOf(p);
+            ZonePlacement z = g == null ? null : g.current();
+            if (z == null || z.box() == null || !z.box().isInside(p.blockPosition())) continue;
+            onFloor(p, g.id(), z.index());
+        }
+    }
+
     /** Lo llama la muerte: true si en vez de morir vuelve al principio de la planta. */
     public static boolean tryRetry(ServerPlayer p) {
         Snap s = SNAPS.get(p.getUUID());
@@ -57,7 +69,7 @@ public final class FloorRetry {
         if (s == null || g == null || !g.id().equals(s.group)) return false;
         ZonePlacement z = g.current();
         if (z == null || z.index() != s.zone) return false;
-        if (s.deaths >= SPConfig.get().death_retries_per_floor) return false;
+        if (s.deaths >= SPConfig.get().lives_per_floor - 1) return false;
         s.deaths++;
         var inv = p.getInventory();
         for (int i = 0; i < inv.getContainerSize() && i < s.items.size(); i++) inv.setItem(i, s.items.get(i).copy());
@@ -66,7 +78,7 @@ public final class FloorRetry {
         p.fallDistance = 0;
         com.smileprotocol.session.SPSessionManager.teleport(p, p.serverLevel(), z.entry(), z.entryYaw(), 0f);
         SPNetwork.sendTo(p, new Payloads.ScreenFade(0, 40, 30));
-        int left = SPConfig.get().death_retries_per_floor - s.deaths;
+        int left = SPConfig.get().lives_per_floor - 1 - s.deaths;
         p.displayClientMessage(Component.translatable(left > 0 ? "smileprotocol.retry.woke" : "smileprotocol.retry.last")
                 .withStyle(ChatFormatting.DARK_RED), false);
         FearDirector.calm(p, 20 * 30);

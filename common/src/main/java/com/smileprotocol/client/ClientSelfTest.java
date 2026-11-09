@@ -195,7 +195,7 @@ public final class ClientSelfTest {
         // Smiley no se deja ver solo durante las pruebas (su aparicion se fuerza en la 8k)
         com.smileprotocol.config.SPConfig.get().smiley_cameos = false;
         com.smileprotocol.config.SPConfig.get().elevator_stall_chance = 0f;
-        com.smileprotocol.config.SPConfig.get().death_retries_per_floor = 0;
+        com.smileprotocol.config.SPConfig.get().lives_per_floor = 1;
         com.smileprotocol.config.SPConfig.get().hud_immersive = false;
         if (ANIM) {
             planAnimations(mc, server, sp, level, e);
@@ -298,7 +298,7 @@ public final class ClientSelfTest {
         SHOTS.add(() -> server.execute(() -> log((com.smileprotocol.fear.Price.alarms() == 0 ? "OK" : "FALLO") + " la alarma se calla sola")));
         // morir con vueltas por planta: despiertas en la llegada, vivo y sin lo cogido en la planta
         SHOTS.add(() -> server.execute(() -> {
-            com.smileprotocol.config.SPConfig.get().death_retries_per_floor = 1;
+            com.smileprotocol.config.SPConfig.get().lives_per_floor = 2;
             com.smileprotocol.fear.FloorRetry.onFloor(sp, g.id(), z.index());
             sp.getInventory().setItem(8, new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.STICK));
             com.smileprotocol.downed.DeathManager.die(sp, "prueba");
@@ -307,7 +307,7 @@ public final class ClientSelfTest {
             boolean back = sp.position().distanceTo(z.entry()) < 3;
             log((alive && lost && back ? "OK" : "FALLO") + " al morir vuelves al principio de la planta (vivo=" + alive + " sin lo cogido="
                     + lost + " en la llegada=" + back + ")");
-            com.smileprotocol.config.SPConfig.get().death_retries_per_floor = 0;
+            com.smileprotocol.config.SPConfig.get().lives_per_floor = 1;
             com.smileprotocol.fear.FloorRetry.forget(sp.getUUID());
         }));
         SHOTS.add(() -> wait = 70);

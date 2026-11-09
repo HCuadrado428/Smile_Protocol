@@ -137,7 +137,6 @@ public final class FearDirector {
                 }
                 s.calmSet = false;
                 s.trail.clear();
-                FloorRetry.onFloor(p, g.id(), zp.index());
             }
             play(p, s, now);
             moveGhost(s);
