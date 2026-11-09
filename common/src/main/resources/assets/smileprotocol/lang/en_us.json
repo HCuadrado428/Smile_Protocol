@@ -536,5 +536,7 @@
   "smileprotocol.playtest.stopped": "Playtest session over. Log and summary in %s",
   "smileprotocol.playtest.inactive": "No playtest session is running",
   "smileprotocol.playtest.noted": "Note saved. Thanks!",
-  "smileprotocol.zone_elevator.riding": "▼ Going down to floor %s… %s %%"
+  "smileprotocol.zone_elevator.riding": "▼ Going down to floor %s… %s %%",
+  "smileprotocol.retry.woke": "You wake up in the elevator. Whatever you picked up on this floor is gone.",
+  "smileprotocol.retry.last": "You wake up in the elevator. Next time there is no coming back."
 }

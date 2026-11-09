@@ -889,7 +889,7 @@ class Floor:
                 return True
         return False
 
-    def fusebox(self, room, circuit="exit", slots=2, accepts=""):
+    def fusebox(self, room, circuit="exit", slots=1, accepts=""):
         def put(x, z, f):
             nbt = be("fuse_box", Circuit=circuit, Slots=slots, Accepts=accepts)
             self.t.set(x, 2, z, f"{MOD}:fuse_box", nbt=nbt, facing=f, filled=0, powered=False)
@@ -1015,8 +1015,9 @@ class Plan(Floor):
     def __init__(self, name, theme, seed):
         super().__init__(name, theme, seed)
         r = self.rnd
-        self.W = r.randint(110, 150)
-        self.L = r.randint(120, 170)
+        # plantas pequenas y densas (test del miedo): la mitad que antes, menos pasillo repetido
+        self.W = r.randint(66, 86)
+        self.L = r.randint(74, 98)
         self.corr = []          # rectangulos de pasillo (x0, z0, x1, z1, eje)
         self.leaves = []        # rectangulos de sala
         self.entry_x = self.exit_x = 0
@@ -1235,6 +1236,57 @@ class Plan(Floor):
 
     def reception(self):
         pass
+
+    def exit_signs(self):
+        """Carteles de SALIDA con flecha en los cruces de pasillos, hacia el ascensor de salida por el camino corto."""
+        from collections import deque
+        cells = set(self.corridor_cells)
+        src = [c for c in cells if c[1] >= self.L - 2 and abs(c[0] - self.exit_x) <= 3] or [max(cells, key=lambda c: c[1])]
+        dist = {c: 0 for c in src}
+        q = deque(src)
+        while q:
+            x, z = q.popleft()
+            for dx, dz in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+                n = (x + dx, z + dz)
+                if n in cells and n not in dist:
+                    dist[n] = dist[(x, z)] + 1
+                    q.append(n)
+        names = {(1, 0): "east", (-1, 0): "west", (0, 1): "south", (0, -1): "north"}
+        placed = []
+        for i, a in enumerate(self.corr):
+            for b in self.corr[i + 1:]:
+                if a[4] == b[4]:
+                    continue
+                x0, x1 = max(a[0] - 1, b[0] - 1), min(a[2] + 1, b[2] + 1)
+                z0, z1 = max(a[1] - 1, b[1] - 1), min(a[3] + 1, b[3] + 1)
+                if x0 > x1 or z0 > z1:
+                    continue
+                c = ((x0 + x1) // 2, (z0 + z1) // 2)
+                if c not in dist or dist[c] < 8 or any(abs(c[0] - p[0]) + abs(c[1] - p[1]) < 10 for p in placed):
+                    continue
+                # hacia donde se va: el vecino a 3 bloques que mas se acerca a la salida
+                best = None
+                for d in names:
+                    n = (c[0] + 3 * d[0], c[1] + 3 * d[1])
+                    if n in dist and (best is None or dist[n] < best[0]):
+                        best = (dist[n], d)
+                if best is None or best[0] >= dist[c]:
+                    continue
+                d = best[1]
+                for p in ((-d[1], d[0]), (d[1], -d[0])):
+                    s = c
+                    while (s[0] + p[0], s[1] + p[1]) in cells and abs(s[0] - c[0]) + abs(s[1] - c[1]) < 6:
+                        s = (s[0] + p[0], s[1] + p[1])
+                    w = (s[0] + p[0], s[1] + p[1])
+                    if not self.solid(w[0], 3, w[1]) or self.solid(s[0], 3, s[1]):
+                        continue
+                    right = (-p[1], p[0])
+                    arrow = "-->" if d == right else "<--"
+                    self.t.set(s[0], 3, s[1], "minecraft:birch_wall_sign", nbt=sign_nbt("SALIDA", arrow, "ASCENSOR"),
+                               facing=names[(-p[0], -p[1])])
+                    placed.append(c)
+                    break
+        return len(placed)
 
     def by_distance(self):
         ex = self.entry_x
@@ -1498,6 +1550,7 @@ def make_floor(name, theme_name, seed, kinds, apply, extra):
         f.furnish(room)
     apply(f)
     f.lights()
+    f.signs = f.exit_signs()
     f.corridor_dressing(extra["lockers"], extra["debris"], extra["pipes"])
     f.fuse_spots(per_room=1)
     f.mobs(extra["mobs"])
@@ -1581,7 +1634,7 @@ def main():
         path.write_text(json.dumps(zone, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
         if kind == "intermediate":
             pool.append(f"{MOD}:{name}")
-        print(f"{name:16} {size[0]}x{size[1]}x{size[2]}  bloques={nb} marcadores={nm} salas={len(f.rooms)} conductos={grilles // 2}")
+        print(f"{name:16} {size[0]}x{size[1]}x{size[2]}  bloques={nb} marcadores={nm} salas={len(f.rooms)} conductos={grilles // 2} carteles={f.signs}")
     (ROOT / "zone_pool").mkdir(parents=True, exist_ok=True)
     (ROOT / "zone_pool/default.json").write_text(json.dumps({"zones": pool}, indent=2) + "\n", encoding="utf-8")
 

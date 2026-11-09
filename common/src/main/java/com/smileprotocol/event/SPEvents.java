@@ -54,6 +54,9 @@ public final class SPEvents {
     public static void onServerStopped(MinecraftServer server) {
         ServerRef.set(null);
         com.smileprotocol.fear.FearDirector.clearAll();
+        com.smileprotocol.fear.Arrival.clearAll();
+        com.smileprotocol.fear.Price.clearAll();
+        com.smileprotocol.fear.FloorRetry.clearAll();
         firstTick = true;
     }
 
@@ -138,6 +141,8 @@ public final class SPEvents {
         com.smileprotocol.motion.Flashlights.tick(server);
         com.smileprotocol.mechanism.MonsterLights.tick(server);
         com.smileprotocol.fear.FearDirector.tick(server);
+        com.smileprotocol.fear.Arrival.tick(server);
+        com.smileprotocol.fear.Price.tick(server);
         for (net.minecraft.server.level.ServerLevel l : server.getAllLevels()) com.smileprotocol.entity.ScentTrail.record(l);
         LobbyManager.tick(server);
         if (server.getTickCount() % 20 == 0) SPDebug.tick(server);

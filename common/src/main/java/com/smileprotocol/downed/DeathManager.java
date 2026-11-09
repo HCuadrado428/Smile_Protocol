@@ -55,6 +55,8 @@ public final class DeathManager {
         com.smileprotocol.motion.MotionManager.setAction(p, com.smileprotocol.motion.Action.NONE, 0, false);
 
         p.serverLevel().playSound(null, p.blockPosition(), SoundEvents.PLAYER_DEATH, SoundSource.PLAYERS, 1f, 0.8f);
+        // vuelta al principio de la planta (si le quedan en esta)
+        if (com.smileprotocol.fear.FloorRetry.tryRetry(p)) return;
         p.setHealth(p.getMaxHealth());
         p.removeAllEffects();
         p.setDeltaMovement(Vec3.ZERO);

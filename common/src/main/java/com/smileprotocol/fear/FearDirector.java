@@ -100,6 +100,8 @@ public final class FearDirector {
         @Nullable Ghost ghost;
         @Nullable UUID group;
         int zoneIndex = -1;
+        /** La llegada ya fijo la calma de la planta nueva. */
+        boolean calmSet;
     }
 
     private static final Map<UUID, State> STATES = new HashMap<>();
@@ -114,7 +116,10 @@ public final class FearDirector {
             State s = STATES.get(p.getUUID());
             ZonePlacement zp = zoneOf(p);
             if (zp == null) {
-                if (s != null) forget(p.getUUID());
+                if (s != null) {
+                    play(p, s, now);
+                    if (s.pending.isEmpty() && !s.calmSet) forget(p.getUUID());
+                }
                 continue;
             }
             if (s == null) {
@@ -126,9 +131,13 @@ public final class FearDirector {
             if (g != null && (!g.id().equals(s.group) || s.zoneIndex != zp.index())) {
                 s.group = g.id();
                 s.zoneIndex = zp.index();
-                s.phase = Phase.CALM;
-                s.left = 20 * (30 + p.getRandom().nextInt(20));
+                if (!s.calmSet) {
+                    s.phase = Phase.CALM;
+                    s.left = 20 * (30 + p.getRandom().nextInt(20));
+                }
+                s.calmSet = false;
                 s.trail.clear();
+                FloorRetry.onFloor(p, g.id(), zp.index());
             }
             play(p, s, now);
             moveGhost(s);
@@ -459,6 +468,20 @@ public final class FearDirector {
             soundTo(p, pd.sound(), pd.pos(), pd.volume(), pd.pitch());
             it.remove();
         }
+    }
+
+    /** Un sonido solo para este jugador dentro de {@code delay} ticks. */
+    public static void queue(ServerPlayer p, int delay, Vec3 at, SoundEvent sound, float volume, float pitch) {
+        State s = STATES.computeIfAbsent(p.getUUID(), k -> new State());
+        s.pending.add(new Pending(p.server.getTickCount() + delay, at, sound, volume, pitch));
+    }
+
+    /** Calma por delante (tras la llegada a una planta, que ya tiene su momento). */
+    public static void calm(ServerPlayer p, int ticks) {
+        State s = STATES.computeIfAbsent(p.getUUID(), k -> new State());
+        s.phase = Phase.CALM;
+        s.left = ticks;
+        s.calmSet = true;
     }
 
     public static void soundTo(ServerPlayer p, SoundEvent sound, Vec3 at, float volume, float pitch) {

@@ -162,7 +162,11 @@ public class ValveBlock extends HorizontalDirectionalBlock implements EntityBloc
         valve.setTurnedAt(now);
         level.playSound(null, pos, SoundEvents.IRON_TRAPDOOR_CLOSE, SoundSource.BLOCKS, 1f, 0.5f);
         LabEvents.fire(level, pos, player, "valve_turned", group);
-        if (!group.isEmpty()) ValveGroups.onChanged(level, pos, group);
+        com.smileprotocol.fear.Price.valve(level, pos, player);
+        if (!group.isEmpty()) {
+            ValveGroups.onChanged(level, pos, group);
+            if (ValveGroups.isComplete(level, pos, group)) com.smileprotocol.fear.Price.alarm(level, pos, com.smileprotocol.fear.Price.ALARM_TICKS);
+        }
     }
 
     private static void fail(ServerLevel level, BlockPos pos, ServerPlayer player, String group, String msg) {

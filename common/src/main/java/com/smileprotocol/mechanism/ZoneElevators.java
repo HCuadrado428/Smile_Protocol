@@ -367,7 +367,16 @@ public final class ZoneElevators {
         Component result = RunManager.setZone(server, g, next);
         // El rotulo de la planta lo pone InstanceManager al llegar (FloorTitle)
         SPDebug.log(result.getString());
-        if (!g.state().isDone()) placeRiders(server, level, g, s);
+        if (!g.state().isDone()) {
+            placeRiders(server, level, g, s);
+            ZonePlacement z = g.current();
+            List<ServerPlayer> riders = new ArrayList<>();
+            for (UUID id : g.activeMembers()) {
+                ServerPlayer p = server.getPlayerList().getPlayer(id);
+                if (p != null && SPPlayerData.inSP(p)) riders.add(p);
+            }
+            if (z != null) com.smileprotocol.fear.Arrival.start(level, z, riders, com.smileprotocol.fear.Arrival.DARK_TICKS);
+        }
     }
 
     /** Quita curaciones y objetos; se conserva el equipo base (linterna y walkie, README 6.5). */

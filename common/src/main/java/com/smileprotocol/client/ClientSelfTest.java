@@ -195,6 +195,7 @@ public final class ClientSelfTest {
         // Smiley no se deja ver solo durante las pruebas (su aparicion se fuerza en la 8k)
         com.smileprotocol.config.SPConfig.get().smiley_cameos = false;
         com.smileprotocol.config.SPConfig.get().elevator_stall_chance = 0f;
+        com.smileprotocol.config.SPConfig.get().death_retries_per_floor = 0;
         com.smileprotocol.config.SPConfig.get().hud_immersive = false;
         if (ANIM) {
             planAnimations(mc, server, sp, level, e);
@@ -250,7 +251,6 @@ public final class ClientSelfTest {
         shot(mc, server, "02_pasillo", e.add(0, 0, 30), 0f, 5f, 40);
         // director del miedo: la fase va contando y los sustos falsos se pueden provocar
         SHOTS.add(() -> server.execute(() -> {
-            var F = com.smileprotocol.fear.FearDirector.class;
             log((com.smileprotocol.fear.FearDirector.phase(sp) != null ? "OK" : "FALLO") + " el director del miedo sigue al jugador en la planta (fase "
                     + com.smileprotocol.fear.FearDirector.phase(sp) + ")");
             StringBuilder sb = new StringBuilder();
@@ -269,6 +269,39 @@ public final class ClientSelfTest {
             int left = level.getEntitiesOfClass(com.smileprotocol.entity.SmilerTest.class, sp.getBoundingBox().inflate(40)).size();
             log((left == 0 ? "OK" : "FALLO") + " la silueta desaparece (quedan " + left + ")");
         }));
+        // la llegada a la planta: se va la luz alrededor del ascensor y vuelve sola
+        SHOTS.add(() -> server.execute(() -> {
+            com.smileprotocol.fear.Arrival.start(level, z, List.of(sp), 60);
+            int off = com.smileprotocol.fear.Arrival.darkLights();
+            log((off > 0 ? "OK" : "FALLO") + " al llegar se apagan las luces de la llegada (" + off + ")");
+        }));
+        SHOTS.add(() -> wait = 90);
+        SHOTS.add(() -> server.execute(() -> {
+            int off = com.smileprotocol.fear.Arrival.darkLights();
+            log((off == 0 ? "OK" : "FALLO") + " las luces de la llegada vuelven (" + off + " apagadas)");
+        }));
+        // cumplir un objetivo hace saltar una alarma que se oye en toda la planta, y se calla sola
+        SHOTS.add(() -> server.execute(() -> {
+            com.smileprotocol.fear.Price.alarm(level, sp.blockPosition(), 40);
+            log((com.smileprotocol.fear.Price.alarms() == 1 ? "OK" : "FALLO") + " la alarma del objetivo suena");
+        }));
+        SHOTS.add(() -> wait = 60);
+        SHOTS.add(() -> server.execute(() -> log((com.smileprotocol.fear.Price.alarms() == 0 ? "OK" : "FALLO") + " la alarma se calla sola")));
+        // morir con vueltas por planta: despiertas en la llegada, vivo y sin lo cogido en la planta
+        SHOTS.add(() -> server.execute(() -> {
+            com.smileprotocol.config.SPConfig.get().death_retries_per_floor = 1;
+            com.smileprotocol.fear.FloorRetry.onFloor(sp, g.id(), z.index());
+            sp.getInventory().setItem(8, new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.STICK));
+            com.smileprotocol.downed.DeathManager.die(sp, "prueba");
+            boolean alive = !com.smileprotocol.downed.DeathManager.isDead(sp) && !sp.isSpectator();
+            boolean lost = sp.getInventory().getItem(8).isEmpty();
+            boolean back = sp.position().distanceTo(z.entry()) < 3;
+            log((alive && lost && back ? "OK" : "FALLO") + " al morir vuelves al principio de la planta (vivo=" + alive + " sin lo cogido="
+                    + lost + " en la llegada=" + back + ")");
+            com.smileprotocol.config.SPConfig.get().death_retries_per_floor = 0;
+            com.smileprotocol.fear.FloorRetry.forget(sp.getUUID());
+        }));
+        SHOTS.add(() -> wait = 70);
         shot(mc, server, "03_pasillo_transversal", e.add(0, 0, 33), -90f, 5f, 40);
         // 3. Mecanismos y escondites
         lookAt(mc, server, level, z, "04_caja_fusibles", be -> be instanceof FuseBoxBlockEntity);

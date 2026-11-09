@@ -536,5 +536,7 @@
   "smileprotocol.playtest.stopped": "Sesión de prueba terminada. Registro y resumen en %s",
   "smileprotocol.playtest.inactive": "No hay ninguna sesión de prueba en marcha",
   "smileprotocol.playtest.noted": "Nota guardada. ¡Gracias!",
-  "smileprotocol.zone_elevator.riding": "▼ Bajando a la planta %s… %s %%"
+  "smileprotocol.zone_elevator.riding": "▼ Bajando a la planta %s… %s %%",
+  "smileprotocol.retry.woke": "Te despiertas en el ascensor. Lo que cogiste en esta planta ya no está.",
+  "smileprotocol.retry.last": "Te despiertas en el ascensor. La próxima vez no habrá vuelta."
 }

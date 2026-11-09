@@ -83,6 +83,8 @@ public final class SPConfig {
         public int disconnect_grace = 120;
         public boolean replayable = true;
         public int max_plays_per_player = 0;
+        /** Veces por planta que una muerte te devuelve al principio de la planta (sin lo cogido en ella). 0 = muerte de siempre. */
+        public int death_retries_per_floor = 2;
         public int lobby_reset_delay = 30;
         public boolean auto_newrun = true;
 
@@ -339,6 +341,7 @@ public final class SPConfig {
             mini_return_delay = Math.max(0, mini_return_delay);
             disconnect_grace = Math.max(0, disconnect_grace);
             max_plays_per_player = Math.max(0, max_plays_per_player);
+            death_retries_per_floor = Math.max(0, death_retries_per_floor);
             lobby_reset_delay = Math.max(0, lobby_reset_delay);
             if (player_commands == null) player_commands = new ArrayList<>();
             if (allowed_mods == null) allowed_mods = new ArrayList<>();
